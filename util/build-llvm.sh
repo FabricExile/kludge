@@ -6,16 +6,18 @@ if [ -z "$VER" ]; then
   exit 1
 fi
 
-set -e
+set -ev
 
-TAG=RELEASE_$(echo $VER | tr -d '.')/final
-svn co http://llvm.org/svn/llvm-project/llvm/tags/$TAG llvm-$VER
-svn co http://llvm.org/svn/llvm-project/cfe/tags/$TAG llvm-$VER/tools/clang
-svn co http://llvm.org/svn/llvm-project/clang-tools-extra/tags/$TAG llvm-$VER/tools/clang/tools/extra
-svn co http://llvm.org/svn/llvm-project/compiler-rt/tags/$TAG llvm-$VER/projects/compiler-rt
-svn co http://llvm.org/svn/llvm-project/libcxx/tags/$TAG llvm-$VER/projects/libcxx
-svn co http://llvm.org/svn/llvm-project/libcxxabi/tags/$TAG llvm-$VER/projects/libcxxabi
-patch -d llvm-$VER/projects/libcxxabi -p2 <<EOF
+SVN_ROOT=http://llvm.org/svn/llvm-project
+TAG=tags/RELEASE_$(echo $VER | tr -d '.')/final
+svn co $SVN_ROOT/llvm/$TAG llvm-$VER
+svn co $SVN_ROOT/cfe/$TAG llvm-$VER/tools/clang
+svn co $SVN_ROOT/clang-tools-extra/$TAG llvm-$VER/tools/clang/tools/extra
+svn co $SVN_ROOT/compiler-rt/$TAG llvm-$VER/projects/compiler-rt
+svn co $SVN_ROOT/libcxx/$TAG llvm-$VER/projects/libcxx
+svn co $SVN_ROOT/libcxxabi/$TAG llvm-$VER/projects/libcxxabi
+if [ "$VER" = "3.5.2" ]; then
+  patch -d llvm-$VER/projects/libcxxabi -p2 <<EOF
 Index: libcxxabi/trunk/src/cxa_default_handlers.cpp
 ===================================================================
 --- libcxxabi/trunk/src/cxa_default_handlers.cpp
@@ -70,6 +72,7 @@ Index: libcxxabi/trunk/src/cxa_handlers.cpp
  //  return __cxa_new_handler.exchange(handler, memory_order_acq_rel);
  }
 EOF
+fi
 
 GCC_ROOT=/opt/gcc-4.8
 mkdir -p llvm-$VER/build
@@ -80,7 +83,10 @@ cmake .. \
   -DCMAKE_INSTALL_PREFIX=/opt/llvm-$VER \
   -DCMAKE_CXX_LINK_FLAGS="-L$GCC_ROOT/lib64 -Wl,-rpath,$GCC_ROOT/lib64" \
   -DGCC_INSTALL_PREFIX=$GCC_ROOT \
+  -DPYTHON_EXECUTABLE=/opt/python-2.7.10/bin/python2.7 \
   -DCMAKE_BUILD_TYPE="Release" -DLLVM_TARGETS_TO_BUILD="X86"
 make -j$(nproc)
 cd ../..
-echo "Run 'sudo make -C llvm-$VER/build install' to install in /opt/llvm-$VER"
+sudo make -C llvm-$VER/build install
+sudo mkdir /opt/llvm-$VER/lib/python
+sudo cp -r llvm-$VER/tools/clang/bindings/python/clang /opt/llvm-$VER/lib/python/

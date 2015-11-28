@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 VER=$1
 if [ -z "$VER" ]; then
@@ -16,6 +16,7 @@ svn co $SVN_ROOT/clang-tools-extra/$TAG llvm-$VER/tools/clang/tools/extra
 svn co $SVN_ROOT/compiler-rt/$TAG llvm-$VER/projects/compiler-rt
 svn co $SVN_ROOT/libcxx/$TAG llvm-$VER/projects/libcxx
 svn co $SVN_ROOT/libcxxabi/$TAG llvm-$VER/projects/libcxxabi
+svn revert -R llvm-$VER/projects/libcxxabi
 if [ "$VER" = "3.5.2" ]; then
   patch -d llvm-$VER/projects/libcxxabi -p2 <<EOF
 Index: libcxxabi/trunk/src/cxa_default_handlers.cpp
@@ -74,21 +75,32 @@ Index: libcxxabi/trunk/src/cxa_handlers.cpp
 EOF
 fi
 
-GCC_ROOT=/opt/gcc-4.8
+CMAKE_DEFS=
+case $OSTYPE in
+  linux*)
+    GCC_ROOT=/opt/gcc-4.8
+    CMAKE_DEFS="$CMAKE_DEFS -DCMAKE_C_COMPILER=$GCC_ROOT/bin/gcc"
+    CMAKE_DEFS="$CMAKE_DEFS -DCMAKE_CXX_COMPILER=$GCC_ROOT/bin/g++"
+    CMAKE_DEFS="$CMAKE_DEFS -DCMAKE_EXE_LINKER_FLAGS=\"-L$GCC_ROOT/lib64 -Wl,-rpath,$GCC_ROOT/lib64\""
+    CMAKE_DEFS="$CMAKE_DEFS -DCMAKE_SHARED_LINKER_FLAGS=\"-L$GCC_ROOT/lib64 -Wl,-rpath,$GCC_ROOT/lib64\""
+    CMAKE_DEFS="$CMAKE_DEFS -DCMAKE_MODULE_LINKER_FLAGS=\"-L$GCC_ROOT/lib64 -Wl,-rpath,$GCC_ROOT/lib64\""
+    CMAKE_DEFS="$CMAKE_DEFS -DGCC_INSTALL_PREFIX=$GCC_ROOT"
+    CMAKE_DEFS="$CMAKE_DEFS -DPYTHON_EXECUTABLE=/opt/python-2.7.10/bin/python2.7"
+    NPROC=$(nproc)
+    ;;
+  darwin*)
+    NPROC=$(sysctl -n hw.ncpu)
+    ;;
+esac
 rm -rf llvm-$VER/build
 mkdir -p llvm-$VER/build
 cd llvm-$VER/build
 cmake .. \
-  -DCMAKE_C_COMPILER=$GCC_ROOT/bin/gcc \
-  -DCMAKE_CXX_COMPILER=$GCC_ROOT/bin/g++ \
+  $CMAKE_DEFS \
   -DCMAKE_INSTALL_PREFIX=/opt/llvm-$VER \
-  -DCMAKE_EXE_LINKER_FLAGS="-L$GCC_ROOT/lib64 -Wl,-rpath,$GCC_ROOT/lib64" \
-  -DCMAKE_SHARED_LINKER_FLAGS="-L$GCC_ROOT/lib64 -Wl,-rpath,$GCC_ROOT/lib64" \
-  -DCMAKE_MODULE_LINKER_FLAGS="-L$GCC_ROOT/lib64 -Wl,-rpath,$GCC_ROOT/lib64" \
-  -DGCC_INSTALL_PREFIX=$GCC_ROOT \
-  -DPYTHON_EXECUTABLE=/opt/python-2.7.10/bin/python2.7 \
-  -DCMAKE_BUILD_TYPE="Release" -DLLVM_TARGETS_TO_BUILD="X86"
-make -j$(nproc)
+  -DCMAKE_BUILD_TYPE="Release" \
+  -DLLVM_TARGETS_TO_BUILD="X86"
+make -j$NPROC
 cd ../..
 sudo make -C llvm-$VER/build install
 sudo mkdir /opt/llvm-$VER/lib/python

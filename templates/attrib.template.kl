@@ -1,0 +1,8 @@
+require Math;
+
+{% for t in types %}
+Boolean UsdAttribute.GetAs{{ t.kl_type }}VA(io {{ t.kl_type }} value[], UsdTime time) = "USD_UsdAttribute_GetAs{{ t.kl_type }}VA";
+Boolean UsdAttribute.GetAs{{ t.kl_type }}(io {{ t.kl_type }} value, UsdTime time) = "USD_UsdAttribute_GetAs{{ t.kl_type }}";
+Boolean UsdAttribute.SetAs{{ t.kl_type }}VA({{ t.kl_type }} value[], UsdTime time) = "USD_UsdAttribute_SetAs{{ t.kl_type }}VA";
+Boolean UsdAttribute.SetAs{{ t.kl_type }}({{ t.kl_type }} value, UsdTime time) = "USD_UsdAttribute_SetAs{{ t.kl_type }}";
+{% endfor %}

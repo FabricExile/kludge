@@ -695,14 +695,14 @@ class LibParser:
         print "%sFUNCTION_DECL %s" % (indent, cursor.displayname)
 
         param_index = 1
-        cpp_params = []
+        clang_params = []
         for param_cursor in cursor.get_children():
             if param_cursor.kind == CursorKind.PARM_DECL:
                 param_name = param_cursor.spelling
                 if len(param_name) == 0:
-                    param_name = "_param_" % param_index
-                param_cpp_type_name = param_cursor.type.spelling
-                cpp_params.append(CPPParam(param_name, param_cpp_type_name))
+                    param_name = "_param_%u" % param_index
+                param_clang_type = param_cursor.type
+                clang_params.append(ClangParam(param_name, param_clang_type))
             param_index += 1
 
         self.edk_decls.add(
@@ -712,7 +712,7 @@ class LibParser:
                 self.get_location(cursor.location),
                 cursor.displayname,
                 self.get_nested_name(cursor),
-                self.edk_type_mgr.convert_cpp_params(cpp_params),
+                self.edk_type_mgr.convert_clang_params(clang_params),
                 )
             )
 

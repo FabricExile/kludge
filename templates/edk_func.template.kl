@@ -9,7 +9,7 @@
 
 {{ func.gen_kl_name() }}(
     {% for param in func.params %}
-    {{ param.gen_kl_param() }}{% if not loop.last %},{% endif %}
+    {{ param.gen_kl_param(loop.last) }}
     {% endfor %}
     ) = "{{ func.gen_edk_name() }}";
 

@@ -78,17 +78,26 @@ class EDKParam:
     self.cpp_name = name + "__CPP"
     self.edk_type_map = edk_type_map
 
-  def gen_kl_param(self):
-    return self.edk_type_map.gen_kl_param(self.kl_name)
+  def gen_kl_param(self, is_last):
+    result = self.edk_type_map.gen_kl_param(self.kl_name)
+    if not is_last:
+      result += ","
+    return result
 
-  def gen_edk_param(self):
-    return self.edk_type_map.gen_edk_param(self.edk_name)
+  def gen_edk_param(self, is_last):
+    result = self.edk_type_map.gen_edk_param(self.edk_name)
+    if not is_last:
+      result += ","
+    return result
 
   def gen_edk_param_to_cpp_arg(self):
     return self.edk_type_map.gen_edk_param_to_cpp_arg(self.edk_name, self.cpp_name)
 
-  def gen_cpp_arg(self):
-    return self.edk_type_map.gen_cpp_arg(self.edk_name, self.cpp_name)
+  def gen_cpp_arg(self, is_last):
+    result = self.edk_type_map.gen_cpp_arg(self.edk_name, self.cpp_name)
+    if not is_last:
+      result += ","
+    return result
 
   def gen_cpp_arg_to_edk_param(self):
     return self.edk_type_map.gen_cpp_arg_to_edk_param(self.edk_name, self.cpp_name)

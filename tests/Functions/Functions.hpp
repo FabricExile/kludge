@@ -5,6 +5,8 @@ namespace SomeNameSpace { namespace SomeNestedNameSpace {
 
 void FuncTakingBoolVal( bool val );
 
+void FuncTakingBoolAndIntVals( bool val, int valTwo );
+
 } }
 
 #endif

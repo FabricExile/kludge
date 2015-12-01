@@ -13,7 +13,7 @@ namespace Fabric { namespace EDK { namespace KL {
 
 void {{ func.gen_edk_name() }}(
     {% for param in func.params %}
-    {{ param.gen_edk_param() }}{% if not loop.last %},{% endif %}
+    {{ param.gen_edk_param(loop.last) }}
     {% endfor %}
     )
 {
@@ -23,7 +23,7 @@ void {{ func.gen_edk_name() }}(
 
     {{ func.gen_cpp_name() }}(
         {% for param in func.params %}
-        {{ param.gen_cpp_arg() }}{% if not loop.last %},{% endif %}
+        {{ param.gen_cpp_arg(loop.last) }}
         {% endfor %}
         );
 

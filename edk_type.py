@@ -36,60 +36,23 @@ class CPPTypeVar:
     return CPPTypeVar.cpp_type_name_gens[self.mod_index](self.base_name)
 
 class EDKTypeCodec:
-  @staticmethod
-  def raise_unsupported_as_ret(self, cpp_type_name):
-    raise Exception(cpp_type_name + ": unsupported as return")
-
-  @staticmethod
-  def raise_unsupported_as_param(self, cpp_type_name):
-    raise Exception(cpp_type_name + ": unsupported as parameter")
-
   def __init__(self, kl_type_name):
     self.kl_type_name = kl_type_name
 
   def gen_dir_ret_type(self, cpp_type_var):
-    self.raise_unsupported_as_ret(cpp_type_var.name)
+    return "void"
 
-  def gen_ind_ret_param(self, cpp_type_var, name):
-    self.raise_unsupported_as_ret(cpp_type_var.name)
-
-  def gen_kl_param(self, cpp_type_var, kl_name):
-    self.raise_unsupported_as_param(cpp_type_var.name)
-
-  def gen_edk_param(self, cpp_type_var, edk_name):
-    self.raise_unsupported_as_param(cpp_type_var.name)
-
-  def gen_edk_param_to_cpp_arg(self, cpp_type_var, edk_name, cpp_name):
-    self.raise_unsupported_as_param(cpp_type_var.name)
-
-  def gen_cpp_arg(self, cpp_type_var, edk_name, cpp_name):
-    self.raise_unsupported_as_param(cpp_type_var.name)
-
-  def gen_cpp_arg_to_edk_param(self, cpp_type_var, edk_name, cpp_name):
-    self.raise_unsupported_as_param(cpp_type_var.name)
-
-class EDKSimpleTypeMap(EDKTypeCodec):
-  def __init__(self, kl_type_name):
-    EDKTypeCodec.__init__(self, kl_type_name)
-
-  dir_ret_type_gens = {
+  ind_ret_param_gens = {
     CPPTypeModIndex.Value:
-      lambda cpp_type_name: cpp_type_name,
+      lambda edk_name: "Traits<String>::Result "+edk_name,
     CPPTypeModIndex.ConstRef:
-      lambda cpp_type_name: cpp_type_name,
+      lambda edk_name: "Traits<String>::Result "+edk_name,
     CPPTypeModIndex.ConstPtr:
-      lambda cpp_type_name: cpp_type_name,
-    CPPTypeModIndex.MutableRef:
-      lambda cpp_type_name: EDKTypeCodec.raise_unsupported_as_ret(cpp_type_name),
-    CPPTypeModIndex.MutablePtr:
-      lambda cpp_type_name: EDKTypeCodec.raise_unsupported_as_ret(cpp_type_name),
+      lambda edk_name: "Traits<String>::Result "+edk_name,
   }
 
-  def gen_dir_ret_type(self, cpp_type_var):
-    return EDKSimpleTypeMap.dir_ret_type_gens[cpp_type_var.mod_index](cpp_type_var.name)
-
   def gen_ind_ret_param(self, cpp_type_var, edk_name):
-    return ""
+    return EDKStdStringTypeCodec.ind_ret_param_gens[cpp_type_var.mod_index](edk_name)
 
   kl_param_gens = {
     CPPTypeModIndex.Value:
@@ -105,7 +68,7 @@ class EDKSimpleTypeMap(EDKTypeCodec):
   }
 
   def gen_kl_param(self, cpp_type_var, kl_name):
-    return EDKSimpleTypeMap.kl_param_gens[cpp_type_var.mod_index](self.kl_type_name, kl_name)
+    return EDKSimpleTypeCodec.kl_param_gens[cpp_type_var.mod_index](self.kl_type_name, kl_name)
 
   edk_param_gens = {
     CPPTypeModIndex.Value:
@@ -121,9 +84,31 @@ class EDKSimpleTypeMap(EDKTypeCodec):
   }
 
   def gen_edk_param(self, cpp_type_var, edk_name):
-    return EDKSimpleTypeMap.edk_param_gens[cpp_type_var.mod_index](self.kl_type_name, edk_name)
+    return EDKSimpleTypeCodec.edk_param_gens[cpp_type_var.mod_index](self.kl_type_name, edk_name)
 
   def gen_edk_param_to_cpp_arg(self, cpp_type_var, edk_name, cpp_name):
+    return ""
+
+  def gen_cpp_arg_to_edk_param(self, cpp_type_var, edk_name, cpp_name):
+    return ""
+
+class EDKSimpleTypeCodec(EDKTypeCodec):
+  def __init__(self, kl_type_name):
+    EDKTypeCodec.__init__(self, kl_type_name)
+
+  dir_ret_type_gens = {
+    CPPTypeModIndex.Value:
+      lambda cpp_type_name: cpp_type_name,
+    CPPTypeModIndex.ConstRef:
+      lambda cpp_type_name: cpp_type_name,
+    CPPTypeModIndex.ConstPtr:
+      lambda cpp_type_name: cpp_type_name,
+  }
+
+  def gen_dir_ret_type(self, cpp_type_var):
+    return EDKSimpleTypeCodec.dir_ret_type_gens[cpp_type_var.mod_index](cpp_type_var.name)
+
+  def gen_ind_ret_param(self, cpp_type_var, edk_name):
     return ""
 
   cpp_arg_gens = {
@@ -135,65 +120,119 @@ class EDKSimpleTypeMap(EDKTypeCodec):
   }
 
   def gen_cpp_arg(self, cpp_type_var, edk_name, cpp_name):
-    return EDKSimpleTypeMap.cpp_arg_gens[cpp_type_var.mod_index](edk_name)
+    return EDKSimpleTypeCodec.cpp_arg_gens[cpp_type_var.mod_index](edk_name)
+
+class EDKStdStringTypeCodec(EDKTypeCodec):
+  def __init__(self):
+    EDKTypeCodec.__init__(self, "String")
+
+  edk_param_to_cpp_arg_gens = {
+    CPPTypeModIndex.Value:
+      lambda edk_name, cpp_name: "",
+    CPPTypeModIndex.ConstRef:
+      lambda edk_name, cpp_name: "",
+    CPPTypeModIndex.ConstPtr:
+      lambda edk_name, cpp_name:
+        "std::string "+cpp_name+"("+edk_name+".getData(), "+edk_name+".getLength());",
+    CPPTypeModIndex.MutableRef:
+      lambda edk_name, cpp_name:
+        "std::string "+cpp_name+"("+edk_name+".getData(), "+edk_name+".getLength());",
+    CPPTypeModIndex.MutablePtr:
+      lambda edk_name, cpp_name:
+        "std::string "+cpp_name+"("+edk_name+".getData(), "+edk_name+".getLength());",
+  }
+
+  def gen_edk_param_to_cpp_arg(self, cpp_type_var, edk_name, cpp_name):
+    return EDKStdStringTypeCodec.edk_param_to_cpp_arg_gens[cpp_type_var.mod_index](edk_name, cpp_name)
+
+  cpp_arg_gens = {
+    CPPTypeModIndex.Value:
+      lambda edk_name, cpp_name:
+        "std::string("+edk_name+".getData(), "+edk_name+".getLength())",
+    CPPTypeModIndex.ConstRef:
+      lambda edk_name, cpp_name:
+        "std::string("+edk_name+".getData(), "+edk_name+".getLength())",
+    CPPTypeModIndex.ConstPtr:
+      lambda edk_name, cpp_name: "&"+cpp_name,
+    CPPTypeModIndex.MutableRef:
+      lambda edk_name, cpp_name: cpp_name,
+    CPPTypeModIndex.MutablePtr:
+      lambda edk_name, cpp_name: "&"+cpp_name,
+  }
+
+  def gen_cpp_arg(self, cpp_type_var, edk_name, cpp_name):
+    return EDKStdStringTypeCodec.cpp_arg_gens[cpp_type_var.mod_index](edk_name, cpp_name)
+
+  cpp_arg_to_edk_param_gens = {
+    CPPTypeModIndex.Value:
+      lambda edk_name, cpp_name: "",
+    CPPTypeModIndex.ConstRef:
+      lambda edk_name, cpp_name: "",
+    CPPTypeModIndex.ConstPtr:
+      lambda edk_name, cpp_name: "",
+    CPPTypeModIndex.MutableRef:
+      lambda edk_name, cpp_name:
+        edk_name+" = String("+cpp_name+".size(), "+cpp_name+".data());",
+    CPPTypeModIndex.MutablePtr:
+      lambda edk_name, cpp_name:
+        edk_name+" = String("+cpp_name+".size(), "+cpp_name+".data());",
+  }
 
   def gen_cpp_arg_to_edk_param(self, cpp_type_var, edk_name, cpp_name):
-    return ""
-
-# class EDKStdStringTypeMap(EDKTypeCodec):
-#   def __init__(self):
-#     EDKTypeCodec.__init__(self, "String", "std::string")
-
-#   def gen_dir_ret_type(self, cpp_type_mod):
-#     return "void"
-
-#   def gen_ind_ret_param(self, cpp_type_mod, edk_name):
-#     return "Traits<String>::Result " + edk_name
-
-#   def gen_kl_param(self, cpp_type_mod, kl_name):
-#     return "String " + kl_name
-
-#   def gen_edk_param(self, cpp_type_mod, edk_name):
-#     return "Traits<String>::INParam " + edk_name
-
-#   def gen_edk_param_to_cpp_arg(self, cpp_type_mod, edk_name, cpp_name):
-#     return ""
-
-#   def gen_cpp_arg(self, cpp_type_mod, edk_name, cpp_name):
-#     return "std::string(" + edk_name + ".getData(), " + edk_name + ".getLength())"
-
-#   def gen_cpp_arg_to_edk_param(self, cpp_type_mod, edk_name, cpp_name):
-#     return ""
+    return EDKStdStringTypeCodec.cpp_arg_to_edk_param_gens[cpp_type_var.mod_index](edk_name, cpp_name)
 
 class EDKTypeMap:
   def __init__(self, type_codec, cpp_type_var):
     self._type_codec = type_codec
     self._cpp_type_var = cpp_type_var
 
-  @property
-  def cpp_type_name(self):
-    return self._type_codec.get_cpp_type_name(self._cpp_type_var)
+  def raise_unsupported_as_ret(self):
+    raise Exception(self._cpp_type_var.cpp_type_name + ": unsupported as return")
 
   def gen_dir_ret_type(self):
-    return self._type_codec.gen_dir_ret_type(self._cpp_type_var)
+    try:
+      return self._type_codec.gen_dir_ret_type(self._cpp_type_var)
+    except:
+      self.raise_unsupported_as_ret()
 
   def gen_ind_ret_param(self, name):
-    return self._type_codec.gen_ind_ret_param(self._cpp_type_var, name)
+    try:
+      return self._type_codec.gen_ind_ret_param(self._cpp_type_var, name)
+    except:
+      self.raise_unsupported_as_ret()
+
+  def raise_unsupported_as_param(self):
+    raise Exception(self._cpp_type_var.cpp_type_name + ": unsupported as parameter")
 
   def gen_kl_param(self, kl_name):
-    return self._type_codec.gen_kl_param(self._cpp_type_var, kl_name)
+    try:
+      return self._type_codec.gen_kl_param(self._cpp_type_var, kl_name)
+    except:
+      self.raise_unsupported_as_param()
 
   def gen_edk_param(self, edk_name):
-    return self._type_codec.gen_edk_param(self._cpp_type_var, edk_name)
+    try:
+      return self._type_codec.gen_edk_param(self._cpp_type_var, edk_name)
+    except:
+      self.raise_unsupported_as_param()
 
   def gen_edk_param_to_cpp_arg(self, edk_name, cpp_name):
-    return self._type_codec.gen_edk_param_to_cpp_arg(self._cpp_type_var, edk_name, cpp_name)
+    try:
+      return self._type_codec.gen_edk_param_to_cpp_arg(self._cpp_type_var, edk_name, cpp_name)
+    except:
+      self.raise_unsupported_as_param()
 
   def gen_cpp_arg(self, edk_name, cpp_name):
-    return self._type_codec.gen_cpp_arg(self._cpp_type_var, edk_name, cpp_name)
+    try:
+      return self._type_codec.gen_cpp_arg(self._cpp_type_var, edk_name, cpp_name)
+    except:
+      self.raise_unsupported_as_param()
 
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
-    return self._type_codec.gen_cpp_arg_to_edk_param(self._cpp_type_var, edk_name, cpp_name)
+    try:
+      return self._type_codec.gen_cpp_arg_to_edk_param(self._cpp_type_var, edk_name, cpp_name)
+    except:
+      self.raise_unsupported_as_param()
 
 class ClangParam:
   def __init__(self, name, clang_type):
@@ -236,52 +275,55 @@ class EDKTypeMgr:
     self._cpp_type_name_to_type_map = {}
 
     self.add_type_maps(
-      EDKSimpleTypeMap("Boolean"),
+      EDKSimpleTypeCodec("Boolean"),
       ["bool"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("SInt8"),
+      EDKSimpleTypeCodec("SInt8"),
       ["char", "signed char"],
       cpp_type_mod_mask=CPPTypeModBits.Value|CPPTypeModBits.MutableRef|CPPTypeModBits.ConstRef
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("UInt8"),
+      EDKSimpleTypeCodec("UInt8"),
       ["unsigned char"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("SInt16"),
+      EDKSimpleTypeCodec("SInt16"),
       ["short", "signed short"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("UInt16"),
+      EDKSimpleTypeCodec("UInt16"),
       ["unsigned short"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("SInt32"),
+      EDKSimpleTypeCodec("SInt32"),
       ["int", "signed int", "signed"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("UInt32"),
+      EDKSimpleTypeCodec("UInt32"),
       ["unsigned int", "unsigned"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("SInt64"),
+      EDKSimpleTypeCodec("SInt64"),
       ["long long", "signed long long"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("UInt64"),
+      EDKSimpleTypeCodec("UInt64"),
       ["unsigned long long"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("Float32"),
+      EDKSimpleTypeCodec("Float32"),
       ["float"],
-      ),
+      )
     self.add_type_maps(
-      EDKSimpleTypeMap("Float64"),
+      EDKSimpleTypeCodec("Float64"),
       ["double"],
-      ),
+      )
 
-    # self.add_type_maps(EDKStdStringTypeMap())
+    self.add_type_maps(
+      EDKStdStringTypeCodec(),
+      ["std::string"],
+      )
 
   def add_type_maps(
     self,

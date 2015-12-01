@@ -33,7 +33,7 @@ class Require:
         self.bugfix = 0
 
 
-class Type:
+class KLType:
     class CodeGenOpts:
         def __init__(self):
             self.cpp_base_type = None
@@ -42,24 +42,19 @@ class Type:
             self.is_abstract = False
             self.header = None
 
-    def __init__(self, type_name):
-        self.type_name = type_name
+    def __init__(self, kl_type_name, cpp_type_name):
+        self.kl_type_name = kl_type_name
+        self.cpp_type_name = cpp_type_name
         self.members = []
         self.methods = []
-        self.codegen = Type.CodeGenOpts()
+        self.codegen = KLType.CodeGenOpts()
+        self.codegen.cpp_base_type = cpp_type_name
+        self.codegen.cpp_qual_type = cpp_type_name
 
     def hash(self):
         m = hashlib.md5()
         m.update(self.type_name)
         return m.hexdigest()
-
-    @property
-    def type_name_cpp(self):
-        return Type.get_cpp_type_name(self.type_name, None)
-
-    @property
-    def type_name_cpp_full(self):
-        return Type.get_cpp_type_name(self.type_name, None, True)
 
     @staticmethod
     def get_cpp_usage(usage):
@@ -73,32 +68,6 @@ class Type:
             raise Exception('invalid usage: ' + usage)
 
     @staticmethod
-    def get_cpp_type_name(type_name, arraymod=None, full=False):
-        if not type_name:
-            return None
-        prefix = ''
-        if full:
-            prefix = 'Fabric::EDK::KL::'
-        if not arraymod:
-            return prefix + type_name
-        elif arraymod[:2] == '<>':
-            return prefix + 'ExternalArray< ' + Type.get_cpp_type_name(
-                type_name, arraymod[2:], full) + ' >'
-        elif arraymod[:2] == '[]':
-            return prefix + 'VariableArray< ' + Type.get_cpp_type_name(
-                type_name, arraymod[2:], full) + ' >'
-        else:
-            start = arraymod.find('[') + 1
-            end = arraymod.find(']')
-            index = arraymod[start:end]
-            if index.isnumeric():
-                return prefix + 'FixedArray< ' + Type.get_cpp_type_name(
-                    type_name, arraymod[end + 1:], full) + ', ' + index + ' >'
-            else:
-                return 'Dict< ' + prefix + index + ', ' + Type.get_cpp_type_name(
-                    type_name, arraymod[end + 1:], full) + ' >'
-
-    @staticmethod
     def extract_type_name(full_type_name):
         if not full_type_name:
             return None
@@ -109,7 +78,7 @@ class Type:
 
     @staticmethod
     def extract_type_name_arraymod(full_type_name):
-        name = Type.extract_type_name(full_type_name)
+        name = KLType.extract_type_name(full_type_name)
         if not name:
             return None, None
         arraymod = None
@@ -124,27 +93,27 @@ class Type:
         return name, arraymod
 
 
-class BaseType(Type):
+class KLBaseType(KLType):
     def __init__(self, name):
-        Type.__init__(self, name)
+        KLType.__init__(self, name)
 
 
-class Object(Type):
+class Object(KLType):
     def __init__(self, name):
-        Type.__init__(self, name)
+        KLType.__init__(self, name)
         self.parent = None
         self.interfaces = []
 
 
-class Struct(Type):
-    def __init__(self, name):
-        Type.__init__(self, name)
+class KLStruct(KLType):
+    def __init__(self, kl_type_name, cpp_type_name):
+        KLType.__init__(self, kl_type_name, cpp_type_name)
         self.parent = None
 
 
-class Interface(Type):
+class KLInterface(KLType):
     def __init__(self, name):
-        Type.__init__(self, name)
+        KLType.__init__(self, name)
         self.interfaces = []
 
 
@@ -169,19 +138,19 @@ class Member:
         return Type.get_cpp_type_name(self.type_name, self.arraymod, True)
 
 
-class Function:
+class KLFunction:
     class CodeGenOpts:
         def __init__(self):
             self.cpp_function = None
 
     def __init__(self, name, ret_type_name):
         self.name = name
-        self.ret_type_name = Type.extract_type_name(ret_type_name)
-        self.ret_type_name_base, self.rtype_arraymod = Type.extract_type_name_arraymod(
+        self.ret_type_name = KLType.extract_type_name(ret_type_name)
+        self.ret_type_name_base, self.rtype_arraymod = KLType.extract_type_name_arraymod(
             ret_type_name)
         self.params = []
         self.symbol = None
-        self.codegen = Function.CodeGenOpts()
+        self.codegen = KLFunction.CodeGenOpts()
 
     @property
     def ret_type_name_cpp(self):
@@ -194,10 +163,10 @@ class Function:
                                       self.rtype_arraymod, True)
 
 
-class Method(Function):
-    class CodeGenOpts(Function.CodeGenOpts):
+class Method(KLFunction):
+    class CodeGenOpts(KLFunction.CodeGenOpts):
         def __init__(self):
-            Function.CodeGenOpts.__init__(self)
+            KLFunction.CodeGenOpts.__init__(self)
             self.is_static = False
             self.is_constructor = False
             self.cpp_base_ret_type = None
@@ -206,7 +175,7 @@ class Method(Function):
             self.is_operator = False
 
     def __init__(self, name, ret_type_name, usage, access):
-        Function.__init__(self, name, ret_type_name)
+        KLFunction.__init__(self, name, ret_type_name)
         self.usage = usage
         self.access = access
         self.interface = None
@@ -226,25 +195,25 @@ class Method(Function):
         return m.hexdigest()
 
 
-class Param:
+class KLParam:
     class CodeGenOpts:
         def __init__(self):
             self.cpp_base_type = None
             self.cpp_qual_type = None
 
-    def __init__(self, name, type_name, usage):
+    def __init__(self, name, kl_type, usage):
         self.name = name
-        self.type_name, self.arraymod = Type.extract_type_name_arraymod(type_name)
+        self.kl_type = kl_type
         self.usage = usage
-        self.codegen = Param.CodeGenOpts()
+        self.codegen = KLParam.CodeGenOpts()
 
     @property
-    def type_name_cpp(self):
-        return Type.get_cpp_type_name(self.type_name, self.arraymod)
+    def kl_type_name(self):
+        return self.kl_type.kl_type_name
 
     @property
-    def type_name_cpp_full(self):
-        return Type.get_cpp_type_name(self.type_name, self.arraymod, True)
+    def cpp_type_name(self):
+        return self.kl_type.cpp_type_name
 
     @property
     def usage_cpp(self):
@@ -267,7 +236,10 @@ class TypesManager:
     def __init__(self, ext_name):
         self.ext_name = ext_name
         self.base_types = {}
-        self.types = {}
+        self.Float32 = KLType('Float32', 'float')
+        self.types = {
+            'Float32': self.Float32,
+            }
         self.aliases = {}
         self.requires = {}
         self.functions = []
@@ -342,7 +314,7 @@ class TypesManager:
     def add_method(self, node):
         if not node['thisType'] in self.types:
             if not node['thisType'] in self.base_types:
-                t = BaseType(node['thisType'])
+                t = KLBaseType(node['thisType'])
                 self.base_types[node['thisType']] = t
             else:
                 t = self.base_types[node['thisType']]
@@ -444,7 +416,7 @@ class TypesManager:
             for decl in member['memberDecls']:
                 if decl['type'] != 'MemberDecl':
                     raise Exception('bad decl type')
-                m = Member(decl['name'], member['baseType'], member['access'],
+                m = Member(decl['name'], member['KLbaseType'], member['access'],
                            decl['arrayModifier'])
                 totype.members.append(m)
 
@@ -485,7 +457,7 @@ class TypesManager:
         return isinstance(self.types.get(name, None), Struct)
 
     def is_base_type(self, name):
-        return isinstance(self.types.get(name, None), BaseType)
+        return isinstance(self.types.get(name, None), KLBaseType)
 
     def get_type(self, name):
         return self.types.get(name, None)

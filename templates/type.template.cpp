@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// KLUDGE class {{ t.type_name }}
+// KLUDGE class {{ t.kl_type_name }}
 //////////////////////////////////////////////////////////////////////////////
 //
 
@@ -7,37 +7,37 @@
 
 namespace Fabric { namespace EDK { namespace KL {
 
-struct {{ t.type_name }}
+struct {{ t.kl_type_name }}
 {% if t.parent %}
   : {{ t.parent }} {};
 {% else %}
 {
-    friend struct Traits<{{ t.type_name }}>;
+    friend struct Traits<{{ t.kl_type_name }}>;
 
     Data handle;
 
 protected:
 
     static void ConstructEmpty(
-        {{ t.type_name }} *thisPtr
+        {{ t.kl_type_name }} *thisPtr
         )
     {
         thisPtr->handle = NULL;
     }
 
     static void ConstructCopy(
-        {{ t.type_name }} *thisPtr,
-        {{ t.type_name }} const *thatPtr
+        {{ t.kl_type_name }} *thisPtr,
+        {{ t.kl_type_name }} const *thatPtr
         )
     {
       if ( thatPtr->handle )
       {
         // [pzion 20151128] Using reinterpret_case here breaks gcc 4.8
-        ::{{ t.codegen.cpp_base_type }} *handle =
-          (::{{ t.codegen.cpp_base_type }} *)( thatPtr->handle );
+        {{ t.codegen.cpp_base_type }} *handle =
+          ({{ t.codegen.cpp_base_type }} *)( thatPtr->handle );
 
         {{ enter }}
-        ::{{ t.codegen.cpp_base_type }} *handle_copy = new ::{{ t.codegen.cpp_base_type }}();        
+        {{ t.codegen.cpp_base_type }} *handle_copy = new {{ t.codegen.cpp_base_type }}();        
         *handle_copy = *handle;
         {{ leave }}
         thisPtr->handle = reinterpret_cast<Data>( handle_copy );
@@ -46,8 +46,8 @@ protected:
     }
 
     static void AssignCopy(
-        {{ t.type_name }} *thisPtr,
-        {{ t.type_name }} const *thatPtr
+        {{ t.kl_type_name }} *thisPtr,
+        {{ t.kl_type_name }} const *thatPtr
         )
     {
       Destruct( thisPtr );
@@ -55,12 +55,12 @@ protected:
     }
 
     static void Destruct(
-        {{ t.type_name }} *thisPtr
+        {{ t.kl_type_name }} *thisPtr
         )
     {
         // [pzion 20151128] Using reinterpret_case here breaks gcc 4.8
-        ::{{ t.codegen.cpp_base_type }} *handle =
-          (::{{ t.codegen.cpp_base_type }} *)( thisPtr->handle );
+        {{ t.codegen.cpp_base_type }} *handle =
+          ({{ t.codegen.cpp_base_type }} *)( thisPtr->handle );
 
         {{ enter }}
         delete handle;
@@ -73,60 +73,60 @@ protected:
 
       
 template<>
-struct Traits<{{ t.type_name }}>
+struct Traits<{{ t.kl_type_name }}>
 {
-    FABRIC_EDK_COMPLEX_TYPE( {{ t.type_name }} )
+    FABRIC_EDK_COMPLEX_TYPE( {{ t.kl_type_name }} )
 
     static void ConstructEmpty(
-        {{ t.type_name }} &this_
+        {{ t.kl_type_name }} &this_
         )
     {
-      {{ t.type_name }}::ConstructEmpty( &this_ );
+      {{ t.kl_type_name }}::ConstructEmpty( &this_ );
     }
     static void ConstructCopy(
-        {{ t.type_name }} &this_,
-        {{ t.type_name }} const &that_
+        {{ t.kl_type_name }} &this_,
+        {{ t.kl_type_name }} const &that_
         )
     {
-      {{ t.type_name }}::ConstructCopy( &this_, &that_ );
+      {{ t.kl_type_name }}::ConstructCopy( &this_, &that_ );
     }
     static void AssignCopy(
-        {{ t.type_name }} &this_,
-        {{ t.type_name }} const &that_
+        {{ t.kl_type_name }} &this_,
+        {{ t.kl_type_name }} const &that_
         )
     {
-      {{ t.type_name }}::AssignCopy( &this_, &that_ );
+      {{ t.kl_type_name }}::AssignCopy( &this_, &that_ );
     }
     static void Destruct(
-        {{ t.type_name }} &this_
+        {{ t.kl_type_name }} &this_
         )
     {
-      {{ t.type_name }}::Destruct( &this_ );
+      {{ t.kl_type_name }}::Destruct( &this_ );
     }
 };
 
 
 {% if not t.codegen.is_abstract %}
-    FABRIC_EXT_EXPORT void {{ t.type_name }}__basic_constructor(
-      Traits<{{ t.type_name_cpp_full }}>::IOParam this_
+    FABRIC_EXT_EXPORT void {{ t.kl_type_name }}__basic_constructor(
+      Traits<{{ t.kl_type_name }}>::IOParam this_
       )
     {
-      Traits<{{ t.type_name }}>::ConstructEmpty( this_ );
+      Traits<{{ t.kl_type_name }}>::ConstructEmpty( this_ );
     }
 
-    FABRIC_EXT_EXPORT void {{ t.type_name }}__copy_constructor(
-      Traits<{{ t.type_name_cpp_full }}>::IOParam this_,
-      Traits<{{ t.type_name_cpp_full }}>::INParam that_
+    FABRIC_EXT_EXPORT void {{ t.kl_type_name }}__copy_constructor(
+      Traits<{{ t.kl_type_name }}>::IOParam this_,
+      Traits<{{ t.kl_type_name }}>::INParam that_
       )
     {
-      Traits<{{ t.type_name }}>::ConstructCopy( this_, that_ );
+      Traits<{{ t.kl_type_name }}>::ConstructCopy( this_, that_ );
     }
      
-    FABRIC_EXT_EXPORT void {{ t.type_name }}__destructor(
-      Traits< {{ t.type_name_cpp_full }} >::IOParam this_
+    FABRIC_EXT_EXPORT void {{ t.kl_type_name }}__destructor(
+      Traits< {{ t.kl_type_name }} >::IOParam this_
       )
     {
-      Traits<{{ t.type_name }}>::Destruct( this_ );
+      Traits<{{ t.kl_type_name }}>::Destruct( this_ );
     }
 {% endif %}
 
@@ -149,9 +149,9 @@ struct Traits<{{ t.type_name }}>
             ,
         {% endif %}
         {% if method.codegen.is_constructor or method.codegen.is_destructor %}
-            Traits<{{ t.type_name_cpp_full }}>::IOParam {{ "this_" -}}
+            Traits<{{ t.kl_type_name }}>::IOParam {{ "this_" -}}
         {% else %}
-            Traits<{{ t.type_name_cpp_full }}>::{{ method.usage_cpp }} {{ "this_" -}}
+            Traits<{{ t.kl_type_name }}>::{{ method.usage_cpp }} {{ "this_" -}}
         {% endif %}
         {% set needs_comma = True %}
     {% endif %}
@@ -164,7 +164,7 @@ struct Traits<{{ t.type_name }}>
     )
     {
     {% if method.codegen.is_constructor %}
-        {{ t.type_name }}__basic_constructor(this_);
+        {{ t.kl_type_name }}__basic_constructor(this_);
 
         {% for param in method.params %}
             {{ parser.output_param_conversion(param.type_name, param.name, param.type_name_cpp_full, param.codegen.cpp_base_type) }}
@@ -172,7 +172,7 @@ struct Traits<{{ t.type_name }}>
 
         {{ enter }}
 
-        ::{{ t.codegen.cpp_base_type }} *handle = new ::{{ t.codegen.cpp_base_type }}(
+        {{ t.codegen.cpp_base_type }} *handle = new {{ t.codegen.cpp_base_type }}(
         {% for param in method.params %}
             {% if not loop.first %},{% endif %}
             {{ param.name }}_param
@@ -187,11 +187,11 @@ struct Traits<{{ t.type_name }}>
             if (!this_.handle)
                 throwException("handle is null");
 
-            ::{{ t.codegen.cpp_base_type }} &handle =
-                *(::{{ t.codegen.cpp_base_type }} *)(this_.handle);
-            {% if parser.is_pointer_repr(t.type_name) %}
+            {{ t.codegen.cpp_base_type }} &handle =
+                *({{ t.codegen.cpp_base_type }} *)(this_.handle);
+            {% if parser.is_pointer_repr(t.kl_type_name) %}
                 if (!handle)
-                    throwException("{{ t.type_name }} underlying pointer is null");
+                    throwException("{{ t.kl_type_name }} underlying pointer is null");
             {% endif %}
         {% endif %}
 
@@ -202,10 +202,10 @@ struct Traits<{{ t.type_name }}>
         {{ enter }}
 
         {% if method.ret_type_name %}
-            ::{{ method.codegen.cpp_qual_ret_type }} _result_param =
+            {{ method.codegen.cpp_qual_ret_type }} _result_param =
         {% endif %}
         {% if not method.codegen.is_static %}
-            handle{% if parser.is_pointer_repr(t.type_name) %}->{% else %}.{% endif %}
+            handle{% if parser.is_pointer_repr(t.kl_type_name) %}->{% else %}.{% endif %}
         {% endif %}
         {{ method.codegen.cpp_function }}(
         {% for param in method.params %}

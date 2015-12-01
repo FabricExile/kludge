@@ -19,7 +19,7 @@ def parse_main():
             default='',
             dest='basename',
             metavar='BASENAME',
-            help="output to OUTDIR/BASENAME.{kl,cpp} (defaults to EXTNAME)",
+            help="output OUTDIR/BASENAME.{kl,cpp} (defaults to EXTNAME)",
             )
         opt_parser.add_option(
             '-p', '--pass',
@@ -42,12 +42,42 @@ def parse_main():
     else:
         basename = extname
 
-    parser = lib_parser.LibParser(opts.clang_opts)
+    if not opts.clang_opts:
+        opts.clang_opts = []
+
+    parser = lib_parser.LibParser(extname, opts.clang_opts)
     for i in range(1, len(args)):
         parser.parse(args[i])
     parser.output(
         os.path.join(opts.outdir, basename + '.kl'),
         os.path.join(opts.outdir, basename + '.cpp'),
         )
+    with open(os.path.join(opts.outdir, 'SConstruct'), "w") as fh:
+        fh.write("""
+#
+# Copyright 2010-2015 Fabric Software Inc. All rights reserved.
+#
+
+import os, sys
+
+extname = '%s'
+basename = '%s'
+
+try:
+  fabricPath = os.environ['FABRIC_DIR']
+except:
+  print "You must set FABRIC_DIR in your environment."
+  print "Refer to README.txt for more information."
+  sys.exit(1)
+SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
+Import('fabricBuildEnv')
+
+fabricBuildEnv.Append(CPPPATH = ["../.."])
+
+fabricBuildEnv.SharedLibrary(
+  '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),
+  [basename + '.cpp']
+  )
+""" % (extname, basename))
 
 parse_main()

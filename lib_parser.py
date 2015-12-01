@@ -3,8 +3,10 @@ import jinja2, os, sys
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
-from kl2edk import Struct, Method, Param, Type, TypesManager
+from kl2edk import KLStruct, Method, KLParam, TypesManager
 
+from edk_type import *
+from edk_decl import *
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -22,6 +24,11 @@ class CustomMapping:
 
 import abc
 
+
+class KLTypeMapping:
+    def __init__(self, kl_type_name, cpp_type_name):
+        self.kl_type_name = kl_type_name
+        self.cpp_type_name = cpp_type_name
 
 class LibParser:
     __metaclass__ = abc.ABCMeta
@@ -75,20 +82,15 @@ class LibParser:
         TypeKind.INCOMPLETEARRAY: None,
     }
 
-    cpp_type_to_kl_mappings = {
-        "float": "Float32",
-        "double": "Float64",
-        "std::basic_string<char>": "String",
-    }
-
     def __init__(
         self,
         ext_name,
+        clang_opts,
         ):
         self.clang_args = [
             '-x',
             'c++',
-        ]
+        ] + clang_opts
 
         self.classes = {}
         self.symbol_names = set()
@@ -97,18 +99,21 @@ class LibParser:
         self.types_manager = TypesManager(ext_name)
 
         self.wrapper_templates = {}
-        self.cpp_type_to_kl_mappings = {}
-        self.cpp_type_to_kl_mappings.update(LibParser.cpp_type_to_kl_mappings)
-        self.kl_type_mappings = {}
+        self.kl_type_mappings = {
+            'float': KLTypeMapping('Float32', 'float'),
+            }
         self.skip_methods = []
         self.cpp_ext_header_pre = ""
         self.cpp_ext_header_post = ""
-	self.cpp_enter = ""
+    	self.cpp_enter = ""
         self.cpp_leave = ""
 
         self.known_types = set(['Data', 'String'])
         for t in LibParser.basic_type_map:
             self.known_types.add(LibParser.basic_type_map[t])
+
+        self.edk_type_mgr = EDKTypeMgr()
+        self.edk_decls = EDKDeclSet()
 
         self.jinjenv = jinja2.Environment(
             trim_blocks=True,
@@ -116,52 +121,52 @@ class LibParser:
             loader=jinja2.PackageLoader('__main__', 'templates')
             )
 
-    def get_kl_type(self, clang_type):
-        canon_type = clang_type.get_canonical()
-        base_name = canon_type.spelling
-        if canon_type.is_const_qualified():
-            base_name = base_name[len('const '):]
-        kl_type = None
-        is_array = False
+    # def get_kl_type(self, clang_type):
+    #     canon_type = clang_type.get_canonical()
+    #     base_name = canon_type.spelling
+    #     if canon_type.is_const_qualified():
+    #         base_name = base_name[len('const '):]
+    #     kl_type = None
+    #     is_array = False
 
-        if canon_type.kind == TypeKind.LVALUEREFERENCE:
-            kl_type = self.get_kl_type(canon_type.get_pointee())
+    #     if canon_type.kind == TypeKind.LVALUEREFERENCE:
+    #         kl_type = self.get_kl_type(canon_type.get_pointee())
 
-        elif canon_type.kind == TypeKind.POINTER:
-            if canon_type.get_pointee().kind == TypeKind.VOID:
-                return "Data"
-            if canon_type.get_pointee().kind in [TypeKind.CHAR_S,
-                                                 TypeKind.SCHAR]:
-                return "String"
-            kl_type = self.get_kl_type(canon_type.get_pointee())
+    #     elif canon_type.kind == TypeKind.POINTER:
+    #         if canon_type.get_pointee().kind == TypeKind.VOID:
+    #             return "Data"
+    #         if canon_type.get_pointee().kind in [TypeKind.CHAR_S,
+    #                                              TypeKind.SCHAR]:
+    #             return "String"
+    #         kl_type = self.get_kl_type(canon_type.get_pointee())
 
-        elif canon_type.kind == TypeKind.UNEXPOSED or canon_type.kind == TypeKind.RECORD:
-            kl_type = base_name
-            if kl_type.startswith('std::vector<'):
-                is_array = True
-                kl_type = kl_type[len('std::vector<'):kl_type.find(',')]
-            if kl_type in self.cpp_type_to_kl_mappings:
-                kl_type = self.cpp_type_to_kl_mappings[kl_type]
+    #     elif canon_type.kind == TypeKind.UNEXPOSED or canon_type.kind == TypeKind.RECORD:
+    #         kl_type = base_name
+    #         if kl_type.startswith('std::vector<'):
+    #             is_array = True
+    #             kl_type = kl_type[len('std::vector<'):kl_type.find(',')]
+    #         if kl_type in self.cpp_type_to_kl_mappings:
+    #             kl_type = self.cpp_type_to_kl_mappings[kl_type]
 
-        elif canon_type.kind == TypeKind.TYPEDEF:
-            kl_type = self.get_kl_type(canon_type.get_canonical())
+    #     elif canon_type.kind == TypeKind.TYPEDEF:
+    #         kl_type = self.get_kl_type(canon_type.get_canonical())
 
-        elif canon_type.kind == TypeKind.VOID:
-            return None
+    #     elif canon_type.kind == TypeKind.VOID:
+    #         return None
 
-        if not kl_type:
-            kl_type = LibParser.basic_type_map[canon_type.kind]
+    #     if not kl_type:
+    #         kl_type = LibParser.basic_type_map[canon_type.kind]
 
-        if not kl_type:
-            raise Exception('no KL type for ' + str(canon_type.spelling) + ' ('
-                            + str(canon_type.kind) + ')')
+    #     if not kl_type:
+    #         raise Exception('no KL type for ' + str(canon_type.spelling) + ' ('
+    #                         + str(canon_type.kind) + ')')
 
-        kl_type = self.get_kl_class_name(kl_type)
+    #     kl_type = self.get_kl_class_name(kl_type)
 
-        if is_array:
-            kl_type += '[]'
+    #     if is_array:
+    #         kl_type += '[]'
 
-        return kl_type
+    #     return kl_type
 
     def abort_on_type(self, kl_type):
         if not kl_type:
@@ -239,16 +244,35 @@ class LibParser:
         return True
 
     @staticmethod
-    def get_namespace(cursor):
-        namespace = [cursor.spelling]
-        if cursor:
-            parent = cursor.semantic_parent
-            if parent:
-                if parent.kind in [CursorKind.NAMESPACE, CursorKind.CLASS_DECL,
-                                   CursorKind.STRUCT_DECL]:
-                    namespace = LibParser.get_namespace(parent) + namespace
-        return namespace
+    def get_location(clang_location):
+        return "%s:%u" % (clang_location.file.name, clang_location.line)
 
+    @staticmethod
+    def get_nested_name(cursor):
+        semantic_parent = cursor.semantic_parent
+        if semantic_parent and semantic_parent.kind in [
+            CursorKind.NAMESPACE,
+            CursorKind.CLASS_DECL,
+            CursorKind.STRUCT_DECL,
+            ]:
+            result = LibParser.get_nested_name(semantic_parent)
+            result.append(cursor.spelling)
+        else:
+            result = [cursor.spelling]
+        return result;
+
+    @staticmethod
+    def get_qualified_spelling(cursor, separator):
+        semantic_parent = cursor.semantic_parent
+        if semantic_parent:
+            if semantic_parent.kind in [
+                CursorKind.NAMESPACE,
+                CursorKind.CLASS_DECL,
+                CursorKind.STRUCT_DECL,
+                ]:
+                return LibParser.get_qualified_spelling(semantic_parent, separator) + separator + cursor.spelling
+        return cursor.spelling
+            
     def output_class(self, class_name, parent_name, fh):
         fh.write('struct %s' % class_name)
         if parent_name:
@@ -406,90 +430,146 @@ class LibParser:
                        (name, name, )]
         return '\n'.join(output)
 
-    def parse_class(self, cursor, header):
-
-        # class with no children is a forward declaration
+    def parse_type_decl(self, header, indent, cursor, typemap):
+        # no children -> forward declaration
         if len(list(cursor.get_children())) < 1:
+            print "%s-> no children" % indent
             return
 
-        cpp_class_name = cursor.spelling
-        kl_class_repr = self.get_kl_class_repr(cpp_class_name)
-        kl_class_name = self.get_kl_class_name(cpp_class_name)
+        cpp_desired_type_name = self.get_qualified_spelling(cursor, "::")
+        if cpp_desired_type_name in self.kl_type_mappings:
+            kl_type_mapping = self.kl_type_mappings[cpp_desired_type_name]
+        else:
+            kl_type_mapping = KLTypeMapping(
+                self.get_qualified_spelling(cursor, "_"),
+                "::" + cpp_desired_type_name,
+                )
+            self.kl_type_mappings[cpp_desired_type_name] = kl_type_mapping
+            self.known_types.add(kl_type_mapping.kl_type_name)
 
-        self.known_types.add(kl_class_name)
+        kl_type = KLStruct(
+            kl_type_mapping.kl_type_name,
+            kl_type_mapping.cpp_type_name,
+            )
+        kl_type.codegen.cpp_base_type = kl_type_mapping.cpp_type_name
+        kl_type.codegen.header = header
 
-        kl_struct = Struct(kl_class_name)
-        kl_struct.codegen.cpp_base_type = kl_class_repr
-        kl_struct.codegen.header = header
+        self.parse_type_decl_children(
+            " "+indent,
+            cursor,
+            typemap,
+            kl_type,
+            kl_type_mapping.kl_type_name,
+            )
 
-        self.parse_class_children(cursor, kl_struct, kl_class_name)
-
-        self.types_manager.types[kl_class_name] = kl_struct
-
-        return kl_class_name
+        self.types_manager.types[kl_type_mapping.kl_type_name] = kl_type
 
     @staticmethod
     def print_skipping(function, reason):
         print 'skipping function: ' + function
         print '  since: %s' % reason
 
-    def parse_class_children(self, cursor, kl_type, kl_class_name,
-                             include_constructors=True):
+    def parse_clang_type(self, clang_type):
+        clang_type_kind = clang_type.kind
+        if clang_type_kind == TypeKind.VOID:
+            return None
+        elif clang_type_kind == TypeKind.FLOAT:
+            return self.types_manager.Float32, 'in'
+        # elif clang_type_kind == TypeKind.LVALUEREFERENCE:
+        #     nested_kl_type, nested_kl_usage = self.parse_clang_type(clang_type.get_pointee())
+        #     if nested_kl_usage == 'io':
+        #         raise Exception('unparsable type')
+        #     return nested_kl_type, 'io'
+        # elif clang_type_kind == TypeKind.RECORD:
+        #     cpp_type_name = clang_type.spelling
+        #     kl_type_name = self.kl_type_mappings[cpp_type_name].kl_type_name
+        #     kl_type = self.types_manager.types[kl_type_name]
+        #     return kl_type, 'in'
+        else:
+            raise Exception("unhandled type: %s" % str(clang_type.spelling))
+
+    def parse_clang_param(self, clang_param):
+        param_name = clang_param.spelling
+        if not param_name:
+            param_name = 'param' + str(i)
+
+        param_kl_type, param_kl_usage = self.parse_clang_type(clang_param.type)
+        
+        return param_name, param_kl_type, param_kl_usage
+
+    def parse_type_decl_children(
+        self,
+        child_indent,
+        cursor,
+        typemap,
+        kl_type,
+        kl_class_name,
+        include_constructors=True
+        ):
         for child in cursor.get_children():
+            print "%sparse_CLASS_DECL_children %s" % (child_indent, str(child.kind))
+
             if child.access_specifier != AccessSpecifier.PUBLIC:
                 continue
 
             is_method = False
 
             if child.kind == CursorKind.CXX_BASE_SPECIFIER:
-                cpp_class_name = self.parse_class(
+                cpp_class_name = self.parse_CLASS_DECL(
+                    child_indent,
                     child.get_definition(),
-                    child.get_definition().location.file.name)
+                    child.get_definition().location.file.name
+                    )
                 parent_class_name = self.get_kl_class_name(cpp_class_name)
                 kl_type.parent = parent_class_name
 
-            elif child.kind in [CursorKind.CXX_METHOD, CursorKind.CONSTRUCTOR,
-                                CursorKind.DESTRUCTOR,
-                                CursorKind.FUNCTION_TEMPLATE]:
+            elif child.kind in [
+                CursorKind.CXX_METHOD,
+                CursorKind.CONSTRUCTOR,
+                CursorKind.DESTRUCTOR,
+                CursorKind.FUNCTION_TEMPLATE,
+                ]:
                 is_method = True
                 if clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
                     kl_type.codegen.is_abstract = True
 
             if is_method:
                 try:
-                    kl_result_type = self.get_kl_type(child.result_type)
-                except Exception as _e:
+                    result_kl_type = self.parse_clang_type(child.result_type)
+                except Exception as e:
                     self.print_skipping(
                         child.displayname,
-                        "child result type '%s' is not defined" % child.result_type
+                        "child result type '%s' is not defined" % child.result_type.spelling
                         )
                     continue
 
-                if child.spelling in self.skip_methods:
-                    self.print_skipping(
-                        child.displayname,
-                        "method is in skip list"
-                        )
-                    continue
-                if self.abort_on_type(kl_result_type):
-                    self.print_skipping(
-                        child.displayname,
-                        "result type '%s' is in abort list" % kl_result_type
-                        )
-                    continue
+                # if child.spelling in self.skip_methods:
+                #     self.print_skipping(
+                #         child.displayname,
+                #         "method is in skip list"
+                #         )
+                #     continue
+
+                # if self.abort_on_type(result_kl_type):
+                #     self.print_skipping(
+                #         child.displayname,
+                #         "result type '%s' is in abort list" % result_kl_type
+                #         )
+                #     continue
+
                 this_usage = 'in'
                 if not child.is_static_method():
                     if not child.kind == CursorKind.DESTRUCTOR and not child.kind == CursorKind.CONSTRUCTOR:
                         this_usage = 'in' if child.type.spelling.endswith(
                             'const') else 'io'
-                method = Method(child.spelling, kl_result_type, this_usage,
+                method = Method(child.spelling, result_kl_type, this_usage,
                                 'public')
                 method.codegen.cpp_qual_ret_type = self.get_cpp_qual_type_name(
                     child.result_type)
                 method.codegen.cpp_base_ret_type = self.get_cpp_base_type_name(
                     child.result_type)
 
-                if kl_result_type == 'Data':
+                if result_kl_type == 'Data':
                     continue
 
                 operator = None
@@ -537,39 +617,34 @@ class LibParser:
                 skip = False
                 for p in child.get_children():
                     if p.kind == CursorKind.PARM_DECL:
-                        has_default_value = False
-                        invalid_type = False
-                        try:
-                            param_kl_type = self.get_kl_type(p.type)
-                        except Exception as _e:
-                            invalid_type = True
-                        if invalid_type or self.abort_on_type(param_kl_type):
-                            for pc in p.get_children():
-                                # if it has a default value we'll try to go on from here
-                                if pc.kind in [
-                                    CursorKind.UNEXPOSED_EXPR,
-                                    CursorKind.INTEGER_LITERAL,
-                                    CursorKind.FLOATING_LITERAL,
-                                    CursorKind.STRING_LITERAL,
-                                    CursorKind.CXX_BOOL_LITERAL_EXPR,
-                                    CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
-                                    CursorKind.DECL_REF_EXPR
-                                ]:
-                                    has_default_value = True
-                                    break
-                            if has_default_value:
-                                break
-                            skip = True
-                            break
-                        kl_name = p.spelling
-                        if not kl_name:
-                            kl_name = 'param' + str(i)
-                        usage = 'io' if self.is_io_param(p.type) else 'in'
-                        param = Param(kl_name, param_kl_type, usage)
-                        param.codegen.cpp_qual_type = self.get_cpp_qual_type_name(
-                            p.type)
-                        param.codegen.cpp_base_type = self.get_cpp_base_type_name(
-                            p.type)
+                        # has_default_value = False
+                        # invalid_type = False
+                        # try:
+                        #     kl_type = self.get_kl_type(p.type)
+                        # except Exception as _e:
+                        #     invalid_type = True
+                        # if invalid_type or self.abort_on_type(kl_type):
+                        #     for pc in p.get_children():
+                        #         # if it has a default value we'll try to go on from here
+                        #         if pc.kind in [
+                        #             CursorKind.UNEXPOSED_EXPR,
+                        #             CursorKind.INTEGER_LITERAL,
+                        #             CursorKind.FLOATING_LITERAL,
+                        #             CursorKind.STRING_LITERAL,
+                        #             CursorKind.CXX_BOOL_LITERAL_EXPR,
+                        #             CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
+                        #             CursorKind.DECL_REF_EXPR
+                        #         ]:
+                        #             has_default_value = True
+                        #             break
+                        #     if has_default_value:
+                        #         break
+                        #     skip = True
+                        #     break
+                        name, kl_type, kl_usage = self.parse_clang_param(p)
+                        param = KLParam(name, kl_type, kl_usage)
+                        param.codegen.cpp_qual_type = kl_type.cpp_type_name
+                        param.codegen.cpp_base_type = kl_type.cpp_type_name
                         method.params.append(param)
                         i += 1
 
@@ -600,22 +675,62 @@ class LibParser:
             'leave': self.cpp_leave,
             }))
 
-    def parse_unit(self, cursor, header):
-        for child in cursor.get_children():
-            if hasattr(child.location.file,
-                       'name') and child.location.file.name != header:
-                continue
+    # def parse_type_ref(self, indent, cursor):
+    #     if cursor.
 
-            if child.kind == CursorKind.CLASS_DECL:
-                self.parse_class(child, header)
-            elif child.kind == CursorKind.NAMESPACE:
-                self.parse_unit(child, header)
+    def parse_TYPEDEF_DECL(self, header, indent, cursor):
+        print "%sTYPEDEF_DECL %s -> %s" % (indent, cursor.type.spelling, cursor.underlying_typedef_type.spelling)
+        for childCursor in cursor.get_children():
+            self.parse_cursor(header, indent+" ", childCursor)
+
+    def parse_NAMESPACE(self, header, indent, cursor):
+        print "%sNAMESPACE %s" % (indent, cursor.displayname)
+        self.parse_children(header, indent+" ", cursor)
+
+    def parse_CLASS_DECL(self, header, indent, cursor):
+        print "%sCLASS_DECL %s" % (indent, cursor.displayname)
+        self.parse_type_decl(header, indent, cursor, {})
+
+    def parse_FUNCTION_DECL(self, include_filename, indent, cursor):
+        print "%sFUNCTION_DECL %s" % (indent, cursor.displayname)
+
+        param_index = 1
+        cpp_params = []
+        for param_cursor in cursor.get_children():
+            if param_cursor.kind == CursorKind.PARM_DECL:
+                param_name = param_cursor.spelling
+                if len(param_name) == 0:
+                    param_name = "_param_" % param_index
+                param_cpp_type_name = param_cursor.type.spelling
+                cpp_params.append(CPPParam(param_name, param_cpp_type_name))
+            param_index += 1
+
+        self.edk_decls.add(
+            EDKFunc(
+                self.ext_name,
+                include_filename,
+                self.get_location(cursor.location),
+                cursor.displayname,
+                self.get_nested_name(cursor),
+                self.edk_type_mgr.convert_cpp_params(cpp_params),
+                )
+            )
+
+    def parse_cursor(self, include_filename, indent, cursor):
+        if cursor.kind == CursorKind.MACRO_DEFINITION:
+            pass
+        elif cursor.kind == CursorKind.NAMESPACE:
+            self.parse_NAMESPACE(include_filename, indent, cursor)
+        elif cursor.kind == CursorKind.FUNCTION_DECL:
+            self.parse_FUNCTION_DECL(include_filename, indent, cursor)
+        else:
+            print "%sUnhandled %s" % (indent, cursor.kind)
+
+    def parse_children(self, include_filename, childIndent, cursor):
+        for childCursor in cursor.get_children():
+            self.parse_cursor(include_filename, childIndent, childCursor)
 
     def parse(self, unit_filename):
-        # print "arguments:"
-        # for clang_arg in self.clang_args:
-        #     print "  %s" % clang_arg
-
         print "parsing unit: %s" % unit_filename
 
         clang_index = clang.cindex.Index.create()
@@ -633,7 +748,10 @@ class LibParser:
         if skip:
             print 'skipping unit: ' + unit.spelling
         else:
-            self.parse_unit(unit.cursor, unit_filename)
+            for cursor in unit.cursor.get_children():
+                if hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
+                    continue
+                self.parse_cursor(unit_filename, "", cursor)
 
     def output_kl_type(
         self,
@@ -725,7 +843,7 @@ class LibParser:
             for m in kl_struct.methods:
                 remove = False
                 for p in m.params:
-                    if not p.type_name in self.known_types:
+                    if not p.kl_type_name in self.known_types:
                         remove = True
 
                 if m.ret_type_name and not m.ret_type_name.replace(
@@ -746,25 +864,24 @@ class LibParser:
 //////////////////////////////////////////////////////////////////////////////
 
 """
-        snippets = {
-          'kl': [],
-          'cpp': []
-        }
-        with open(output_kl_filename, "w") as fh_kl:
-            fh_kl.write(header)
+        # snippets = {
+        #   'kl': [],
+        #   'cpp': []
+        # }
+        # with open(output_kl_filename, "w") as fh_kl:
+        #     fh_kl.write(header)
 
-            visited_kl_type_names = set()
-            for kl_type_name in self.types_manager.types:
-                self.output_kl_type(
-                    kl_type_name,
-                    visited_kl_type_names,
-                    fh_kl,
-                    snippets,
-                    )
+        #     visited_kl_type_names = set()
+        #     for kl_type_name in self.types_manager.types:
+        #         self.output_kl_type(
+        #             kl_type_name,
+        #             visited_kl_type_names,
+        #             fh_kl,
+        #             snippets,
+        #             )
 
         with open(output_cpp_filename, "w") as fh:
-            fh.write(self.jinjenv.get_template('ext.template.cpp').render({
-                'header_pre': self.cpp_ext_header_pre,
-                'header_post': self.cpp_ext_header_post,
-                'body': ''.join(snippets['cpp']),
-                }))
+            fh.write(self.edk_decls.jinjify('cpp', self.jinjenv)())
+
+        with open(output_kl_filename, "w") as fh:
+            fh.write(self.edk_decls.jinjify('kl', self.jinjenv)())

@@ -1,6 +1,8 @@
 #ifndef COMPLEX_HPP
 #define COMPLEX_HPP
 
+namespace TestNameSpace {
+
 template<typename Ty>
 class Complex
 {
@@ -40,6 +42,8 @@ private:
 };
 
 typedef Complex<float> Complex32;
-typedef Complex<double> Complex64;
+// typedef Complex<double> Complex64;
+
+}
 
 #endif

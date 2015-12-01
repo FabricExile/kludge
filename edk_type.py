@@ -1,11 +1,19 @@
 import clang
 
 class EDKTypeMap:
-  CPP_VARIANT_VAL = 1
-  CPP_VARIANT_CONST_REF = 2
-  CPP_VARIANT_CONST_PTR = 4
-  CPP_VARIANT_MUTABLE_REF = 8
-  CPP_VARIANT_MUTABLE_PTR = 16
+  CPP_VARIANT_VAL = 0
+  CPP_VARIANT_CONST_REF = 1
+  CPP_VARIANT_CONST_PTR = 2
+  CPP_VARIANT_MUTABLE_REF = 3
+  CPP_VARIANT_MUTABLE_PTR = 4
+  NUM_CPP_VARIANTS = 5
+
+  CPP_VARIANT_BIT_VAL = 1 << CPP_VARIANT_VAL
+  CPP_VARIANT_BIT_CONST_REF = 1 << CPP_VARIANT_CONST_REF
+  CPP_VARIANT_BIT_CONST_PTR = 1 << CPP_VARIANT_CONST_PTR
+  CPP_VARIANT_BIT_MUTABLE_REF = 1 << CPP_VARIANT_MUTABLE_REF
+  CPP_VARIANT_BIT_MUTABLE_PTR = 1 << CPP_VARIANT_MUTABLE_PTR
+  ALL_CPP_VARIANT_BITS = (1 << NUM_CPP_VARIANTS) - 1
 
   @staticmethod
   def raise_unsupported_as_ret(self, cpp_type_name):
@@ -123,30 +131,30 @@ class EDKSimpleTypeMap(EDKTypeMap):
   def gen_cpp_arg_to_edk_param(self, cpp_variant, edk_name, cpp_name):
     return ""
 
-class StdStringValEDKTypeMap(EDKTypeMap):
-  def __init__(self):
-    EDKTypeMap.__init__(self, "String", "std::string")
+# class EDKStdStringTypeMap(EDKTypeMap):
+#   def __init__(self):
+#     EDKTypeMap.__init__(self, "String", "std::string")
 
-  def gen_dir_ret_type(self, cpp_variant):
-    return "void"
+#   def gen_dir_ret_type(self, cpp_variant):
+#     return "void"
 
-  def gen_ind_ret_param(self, cpp_variant, edk_name):
-    return "Traits<String>::Result " + edk_name
+#   def gen_ind_ret_param(self, cpp_variant, edk_name):
+#     return "Traits<String>::Result " + edk_name
 
-  def gen_kl_param(self, cpp_variant, kl_name):
-    return "String " + kl_name
+#   def gen_kl_param(self, cpp_variant, kl_name):
+#     return "String " + kl_name
 
-  def gen_edk_param(self, cpp_variant, edk_name):
-    return "Traits<String>::INParam " + edk_name
+#   def gen_edk_param(self, cpp_variant, edk_name):
+#     return "Traits<String>::INParam " + edk_name
 
-  def gen_edk_param_to_cpp_arg(self, cpp_variant, edk_name, cpp_name):
-    return ""
+#   def gen_edk_param_to_cpp_arg(self, cpp_variant, edk_name, cpp_name):
+#     return ""
 
-  def gen_cpp_arg(self, cpp_variant, edk_name, cpp_name):
-    return "std::string(" + edk_name + ".getData(), " + edk_name + ".getLength())"
+#   def gen_cpp_arg(self, cpp_variant, edk_name, cpp_name):
+#     return "std::string(" + edk_name + ".getData(), " + edk_name + ".getLength())"
 
-  def gen_cpp_arg_to_edk_param(self, cpp_variant, edk_name, cpp_name):
-    return ""
+#   def gen_cpp_arg_to_edk_param(self, cpp_variant, edk_name, cpp_name):
+#     return ""
 
 class EDKTypeCodec:
   def __init__(self, type_map, cpp_variant):
@@ -220,29 +228,26 @@ class EDKTypeMgr:
       self,
       kl_type_name,
       cpp_base_type_names,
-      cpp_variants = \
-          EDKTypeMap.CPP_VARIANT_VAL \
-        | EDKTypeMap.CPP_VARIANT_CONST_REF \
-        | EDKTypeMap.CPP_VARIANT_CONST_PTR \
-        | EDKTypeMap.CPP_VARIANT_MUTABLE_REF \
-        | EDKTypeMap.CPP_VARIANT_MUTABLE_PTR
+      cpp_variant_mask = EDKTypeMap.ALL_CPP_VARIANT_BITS
       ):
       self._kl_type_name = kl_type_name
       self._cpp_base_type_names = cpp_base_type_names
-      self._cpp_variants = cpp_variants
+      self._cpp_variant_mask = cpp_variant_mask
 
     def add_type_codecs_to(self, type_mgr):
       for cpp_base_type_name in self._cpp_base_type_names:
         type_mgr.add_type_codecs(
           EDKSimpleTypeMap(self._kl_type_name, cpp_base_type_name),
-          self._cpp_variants
+          self._cpp_variant_mask
           )
 
   simple_types = [
     SimpleType("Boolean", ["bool"]),
     SimpleType(
       "SInt8", ["char", "signed char"],
-      cpp_variants=EDKTypeMap.CPP_VARIANT_VAL|EDKTypeMap.CPP_VARIANT_CONST_REF|EDKTypeMap.CPP_VARIANT_MUTABLE_REF
+      cpp_variant_mask=EDKTypeMap.CPP_VARIANT_BIT_VAL\
+        |EDKTypeMap.CPP_VARIANT_BIT_MUTABLE_REF\
+        |EDKTypeMap.CPP_VARIANT_BIT_CONST_REF
       ),
     SimpleType("UInt8", ["unsigned char"]),
     SimpleType("SInt16", ["short", "signed short"]),
@@ -261,21 +266,11 @@ class EDKTypeMgr:
     for simple_type in EDKTypeMgr.simple_types:
       simple_type.add_type_codecs_to(self)
 
-    # std_string_type_map = EDKStdStringTypeMap()
-    #     type_mgr.add_type_codec(EDKTypeCodec(type_map, EDKTypeMap.CPP_VARIANT_VAL))
-    #     type_mgr.add_type_codec(EDKTypeCodec(type_map, EDKTypeMap.CPP_VARIANT_CONST_REF))
-    #     type_mgr.add_type_codec(EDKTypeCodec(type_map, EDKTypeMap.CPP_VARIANT_MUTABLE_REF))
-    #     type_mgr.add_type_codec(EDKTypeCodec(type_map, EDKTypeMap.CPP_VARIANT_CONST_PTR))
+    # self.add_type_codecs(EDKStdStringTypeMap())
 
-  def add_type_codecs(self, type_map, cpp_variants):
-    for cpp_variant in [
-      EDKTypeMap.CPP_VARIANT_VAL,
-      EDKTypeMap.CPP_VARIANT_CONST_REF,
-      EDKTypeMap.CPP_VARIANT_CONST_PTR,
-      EDKTypeMap.CPP_VARIANT_MUTABLE_REF,
-      EDKTypeMap.CPP_VARIANT_MUTABLE_PTR,
-      ]:
-      if cpp_variant & cpp_variants:
+  def add_type_codecs(self, type_map, cpp_variant_mask):
+    for cpp_variant in range(0, EDKTypeMap.NUM_CPP_VARIANTS):
+      if (1 << cpp_variant) & cpp_variant_mask:
         type_codec = EDKTypeCodec(type_map, cpp_variant)
         self._cpp_type_name_to_type_codec[type_codec.cpp_type_name] = type_codec
 

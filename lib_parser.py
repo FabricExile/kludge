@@ -5,7 +5,8 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-from edk_type import *
+from clang_param import ClangParam
+from edk_type_mgr import EDKTypeMgr
 from edk_decl import *
 
 class CPPType:

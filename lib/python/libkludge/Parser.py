@@ -121,7 +121,8 @@ class Parser:
     def main(self):
         try:
             opt_parser = optparse.OptionParser(
-                usage='Usage: %prog [options] <EXTNAME> <input.h> [<input2.h> ...]'
+                usage="%prog [options] <EXTNAME> <input.h> [<input2.h> ...]",
+                description="KLUDGE: C++-to-KL wrap-o-matic",
                 )
             opt_parser.add_option(
                 '-o', '--outdir',

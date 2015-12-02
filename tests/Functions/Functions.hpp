@@ -64,18 +64,18 @@ void TestSimpleTypes(
   double *
   );
 
-// void TestStdString(
-//   std::string strVal,
-//   std::string const &strConstRef,
-//   std::string &strMutableRef,
-//   std::string const *strConstPtr,
-//   std::string *strMutablePtr
-//   );
+void TestStdString(
+  std::string strVal,
+  std::string const &strConstRef,
+  std::string &strMutableRef,
+  std::string const *strConstPtr,
+  std::string *strMutablePtr
+  );
 
-// void TestCString(
-//   char const *cStringVal/*,
-//   char const * const &CStringConstRef*/
-//   );
+void TestCString(
+  char const *cStringVal,
+  char const * const &CStringConstRef
+  );
 
 } }
 

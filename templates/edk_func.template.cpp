@@ -9,13 +9,10 @@
 
 #include <{{ func.gen_include_filename() }}>
 
-namespace Fabric { namespace EDK { namespace KL {
-
+FABRIC_EXT_EXPORT
 {{ func.gen_edk_dir_result_type() }}
 {{ func.gen_edk_name() }}(
-    {% for param in func.params %}
-    {{ param.gen_edk_param(loop.last) }}
-    {% endfor %}
+    {{ func.gen_edk_params() }}
     )
 {
     {% for param in func.params %}
@@ -24,9 +21,7 @@ namespace Fabric { namespace EDK { namespace KL {
 
     {{ func.gen_edk_store_result_pre() }}
     {{ func.gen_cpp_name() }}(
-        {% for param in func.params %}
-        {{ param.gen_cpp_arg(loop.last) }}
-        {% endfor %}
+        {{ func.gen_cpp_args() }}
         )
     {{ func.gen_edk_store_result_post() }}
     ;
@@ -37,8 +32,6 @@ namespace Fabric { namespace EDK { namespace KL {
 
     {{ func.gen_edk_return_dir_result() }}
 }
-
-} } }
 
 //
 //////////////////////////////////////////////////////////////////////////////

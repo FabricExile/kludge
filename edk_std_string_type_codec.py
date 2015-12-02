@@ -19,7 +19,7 @@ class EDKStdStringValueTypeCodec(EDKStdStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
 
   def gen_edk_store_result_pre(self):
@@ -48,7 +48,7 @@ class EDKStdStringConstRefTypeCodec(EDKStdStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
 
   def gen_edk_store_result_pre(self):
@@ -77,7 +77,7 @@ class EDKStdStringConstPtrTypeCodec(EDKStdStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
 
   def gen_edk_store_result_pre(self):
@@ -106,7 +106,7 @@ class EDKStdStringMutableRefTypeCodec(EDKStdStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
 
   def gen_edk_store_result_pre(self):

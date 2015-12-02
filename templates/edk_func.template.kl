@@ -7,11 +7,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 
-{{ func.gen_kl_ret_type }}
+{{ func.gen_kl_result_type() }}
 {{ func.gen_kl_name() }}(
-    {% for param in func.params %}
-    {{ param.gen_kl_param(loop.last) }}
-    {% endfor %}
+    {{ func.gen_kl_params() }}
     ) = "{{ func.gen_edk_name() }}";
 
 //

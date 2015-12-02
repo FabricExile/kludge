@@ -46,9 +46,9 @@ class EDKFunc(EDKDecl):
     self._ret_type_codec = ret_type_codec
     self.params = params
 
-  def gen_kl_dir_result_type(self):
+  def gen_kl_result_type(self):
     if self._ret_type_codec:
-      return self._ret_type_codec.gen_kl_dir_result_type()
+      return self._ret_type_codec.gen_kl_result_type()
     else:
       return ""
 
@@ -85,6 +85,28 @@ class EDKFunc(EDKDecl):
   def gen_cpp_name(self):
     return "::" + "::".join(self._nested_function_name)
 
+  def gen_kl_params(self):
+    snippets = []
+    for param in self.params:
+      snippets.append(param.gen_kl_param())
+    return ",\n    ".join(snippets)
+
+  def gen_edk_params(self):
+    snippets = []
+    if self._ret_type_codec:
+      edk_ind_ret_param = self._ret_type_codec.gen_edk_ind_ret_param()
+      if edk_ind_ret_param:
+        snippets.append(edk_ind_ret_param)
+    for param in self.params:
+      snippets.append(param.gen_edk_param())
+    return ",\n    ".join(snippets)
+
+  def gen_cpp_args(self):
+    snippets = []
+    for param in self.params:
+      snippets.append(param.gen_cpp_arg())
+    return ",\n        ".join(snippets)
+
   def jinjify(self, target, jinjenv):
     return lambda: jinjenv.get_template('edk_func.template.'+target).render(func = self)
 
@@ -95,8 +117,9 @@ class EDKDeclSet:
   def add(self, decl):
     self._decls.append(decl)
 
-  def jinjify(self, target, jinjenv):
+  def jinjify(self, target, jinjenv, ext_name):
     return lambda: jinjenv.get_template('edk_ext.template.' + target).render(
+      ext_name = ext_name,
       decl_gens = map(
         lambda decl: decl.jinjify(target, jinjenv),
         self._decls

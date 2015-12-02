@@ -867,7 +867,7 @@ class LibParser:
             kl_struct.methods = methods
 
         with open(output_cpp_filename, "w") as fh:
-            fh.write(self.edk_decls.jinjify('cpp', self.jinjenv)())
+            fh.write(self.edk_decls.jinjify('cpp', self.jinjenv, self.ext_name)())
 
         with open(output_kl_filename, "w") as fh:
-            fh.write(self.edk_decls.jinjify('kl', self.jinjenv)())
+            fh.write(self.edk_decls.jinjify('kl', self.jinjenv, self.ext_name)())

@@ -16,17 +16,14 @@ class EDKSimpleValueTypeCodec(EDKSimpleBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKSimpleBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_kl_dir_result_type(self):
+  def gen_edk_dir_result_type(self):
     return self.kl_type_name
 
-  def gen_edk_dir_result_type(self):
-    return self.cpp_type_name
-
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return ""
 
   def gen_edk_store_result_pre(self):
-    return self.cpp_type_name + " " + self.gen_cpp_result_name() + " = ";
+    return self.kl_type_name + " " + self.gen_cpp_result_name() + " = ";
 
   def gen_edk_store_result_post(self):
     return "";
@@ -48,17 +45,14 @@ class EDKSimpleConstRefTypeCodec(EDKSimpleBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKSimpleBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_kl_dir_result_type(self):
+  def gen_edk_dir_result_type(self):
     return self.kl_type_name
 
-  def gen_edk_dir_result_type(self):
-    return self.cpp_type_name
-
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return ""
 
   def gen_edk_store_result_pre(self):
-    return self.cpp_type_name + " " + self.gen_cpp_result_name() + " = ";
+    return self.kl_type_name + " " + self.gen_cpp_result_name() + " = ";
 
   def gen_edk_store_result_post(self):
     return "";
@@ -94,17 +88,14 @@ class EDKSimpleMutableRefTypeCodec(EDKSimpleBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKSimpleBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_kl_dir_result_type(self):
+  def gen_edk_dir_result_type(self):
     return self.kl_type_name
 
-  def gen_edk_dir_result_type(self):
-    return self.cpp_type_name
-
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return ""
 
   def gen_edk_store_result_pre(self):
-    return self.cpp_type_name + " " + self.gen_cpp_result_name() + " = ";
+    return self.kl_type_name + " " + self.gen_cpp_result_name() + " = ";
 
   def gen_edk_store_result_post(self):
     return "";

@@ -6,7 +6,7 @@
 
 namespace SomeNameSpace { namespace SomeNestedNameSpace {
 
-void TestSimpleTypes(
+inline void TestSimpleTypes(
   bool,
   bool const &,
   bool &,
@@ -62,36 +62,36 @@ void TestSimpleTypes(
   double &,
   double const *,
   double *
-  );
+  ) {}
 
-void TestObscureIntegers(
+inline void TestObscureIntegers(
   signed short signedShortVal,
   long longVal
-  );
+  ) {}
 
-void TestStdString(
+inline void TestStdString(
   std::string strVal,
   std::string const &strConstRef,
   std::string &strMutableRef,
   std::string const *strConstPtr,
   std::string *strMutablePtr
-  );
+  ) {}
 
-void TestCString(
+inline void TestCString(
   char const *cStringVal,
   char const * const &CStringConstRef
-  );
+  ) {}
 
-int TestSimpleValueReturn();
-int const &TestSimpleConstRefReturn();
-int &TestSimpleMutableRefReturn();
+inline int TestSimpleValueReturn() { return 42; }
+inline int const &TestSimpleConstRefReturn() { static int foo = 42; return foo; }
+inline int &TestSimpleMutableRefReturn() { static int foo = 42; return foo; }
 
-std::string TestStdStringValueReturn();
-std::string const &TestStdStringConstRefReturn();
-std::string &TestStdStringMutableRefReturn();
+inline std::string TestStdStringValueReturn() { return "hello"; }
+inline std::string const &TestStdStringConstRefReturn() { static std::string foo = "hello"; return foo; }
+inline std::string &TestStdStringMutableRefReturn() { static std::string foo = "hello"; return foo; }
 
-char const * TestCStringValueReturn();
-char const * const &TestCStringConstRefReturn();
+inline char const * TestCStringValueReturn() { return "hello"; }
+inline char const * const &TestCStringConstRefReturn() { static char const *foo = "hello"; return foo; }
 
 } }
 

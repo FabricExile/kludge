@@ -9,6 +9,14 @@
 
 #include <FabricEDK.h>
 
+#define FABRIC_EDK_EXT_{{ ext_name }}_DEPENDENT_EXTS \
+  { \
+    { 0, 0, 0, 0, 0 } \
+  }
+IMPLEMENT_FABRIC_EDK_ENTRIES({{ ext_name }})
+
+using namespace Fabric::EDK::KL;
+
 {% for decl_gen in decl_gens %}
 {{ decl_gen() }}
 {% endfor %}

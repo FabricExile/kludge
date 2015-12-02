@@ -13,13 +13,13 @@ class EDKTypeCodec:
   def raise_unsupported_as_result(self):
     raise Exception(self.cpp_type_name + ": unsupported as result type")
 
-  def gen_kl_dir_result_type(self):
-    self.raise_unsupported_as_result()
+  def gen_kl_result_type(self):
+    return self.kl_type_name
 
   def gen_edk_dir_result_type(self):
     self.raise_unsupported_as_result()
 
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     self.raise_unsupported_as_result()
 
   def gen_edk_store_result_pre(self):
@@ -62,14 +62,17 @@ class EDKTypeCodec:
   def gen_edk_result_name(self):
     return "_KLUDGE_EDK_result";
 
+  def gen_edk_traits(self):
+    return "Traits<" + self.kl_type_name + ">"
+
   def gen_edk_result_param(self):
-    return "Traits<" + self.kl_type_name + ">::Result " + self.gen_edk_result_name()
+    return self.gen_edk_traits() + "::Result " + self.gen_edk_result_name()
 
   def gen_edk_in_param(self, edk_name):
-    return "Traits<" + self.kl_type_name + ">::INParam " + edk_name
+    return self.gen_edk_traits() + "::INParam " + edk_name
 
   def gen_edk_io_param(self, edk_name):
-    return "Traits<" + self.kl_type_name + ">::IOParam " + edk_name
+    return self.gen_edk_traits() + "::IOParam " + edk_name
 
   def gen_edk_ptr_to(self, edk_name):
     return "&" + edk_name
@@ -84,9 +87,6 @@ class EDKIndRetTypeCodec(EDKTypeCodec):
 
   def __init__(self, kl_type_name, cpp_type_name):
     EDKTypeCodec.__init__(self, kl_type_name, cpp_type_name)
-  
-  def gen_kl_dir_result_type(self):
-    return ""
 
   def gen_edk_dir_result_type(self):
     return "void"

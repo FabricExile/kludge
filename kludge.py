@@ -79,5 +79,14 @@ fabricBuildEnv.SharedLibrary(
   [basename + '.cpp']
   )
 """ % (extname, basename))
+    with open(os.path.join(opts.outdir, extname+'.fpm.json'), "w") as fh:
+        fh.write("""
+{
+  "libs": "%s",
+  "code": [
+    "actual.kl"
+  ],
+}
+""" % extname)
 
 parse_main()

@@ -13,7 +13,7 @@ class EDKCStringValueTypeCodec(EDKCStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKCStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
 
   def gen_edk_store_result_pre(self):
@@ -42,7 +42,7 @@ class EDKCStringConstRefTypeCodec(EDKCStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKCStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
-  def gen_ind_ret_param(self):
+  def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
 
   def gen_edk_store_result_pre(self):

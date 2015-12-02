@@ -14,5 +14,7 @@ for d in tests/*; do
     $EXTNAME \
     $INPUTS
 
+  # clang-format --style=Google -i $d/actual.cpp
+
   scons -C "$d"
 done

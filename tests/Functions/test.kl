@@ -1,0 +1,12 @@
+require Functions;
+
+operator entry() {
+  report(SomeNameSpace_SomeNestedNameSpace_TestSimpleValueReturn());
+  report(SomeNameSpace_SomeNestedNameSpace_TestSimpleConstRefReturn());
+  report(SomeNameSpace_SomeNestedNameSpace_TestSimpleMutableRefReturn());
+  report(SomeNameSpace_SomeNestedNameSpace_TestCStringValueReturn());
+  report(SomeNameSpace_SomeNestedNameSpace_TestCStringConstRefReturn());
+  report(SomeNameSpace_SomeNestedNameSpace_TestStdStringValueReturn());
+  report(SomeNameSpace_SomeNestedNameSpace_TestStdStringConstRefReturn());
+  report(SomeNameSpace_SomeNestedNameSpace_TestStdStringMutableRefReturn());
+}

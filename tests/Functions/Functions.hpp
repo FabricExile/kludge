@@ -4,7 +4,9 @@
 #include <string>
 #include <stdint.h>
 
-namespace SomeNameSpace { namespace SomeNestedNameSpace {
+namespace SomeNameSpace {
+
+namespace SomeNestedNameSpace {
 
 inline void TestSimpleTypes(
   bool,
@@ -93,6 +95,10 @@ inline std::string &TestStdStringMutableRefReturn() { static std::string foo = "
 inline char const * TestCStringValueReturn() { return "hello"; }
 inline char const * const &TestCStringConstRefReturn() { static char const *foo = "hello"; return foo; }
 
-} }
+}
+
+inline float Sum( float lhs, float rhs ) { return lhs + rhs; }
+
+}
 
 #endif

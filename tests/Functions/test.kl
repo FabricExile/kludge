@@ -9,4 +9,5 @@ operator entry() {
   report(SomeNameSpace_SomeNestedNameSpace_TestStdStringValueReturn());
   report(SomeNameSpace_SomeNestedNameSpace_TestStdStringConstRefReturn());
   report(SomeNameSpace_SomeNestedNameSpace_TestStdStringMutableRefReturn());
+  report(SomeNameSpace_Sum(4.5, 8.1));
 }

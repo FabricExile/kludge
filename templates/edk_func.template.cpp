@@ -22,9 +22,7 @@ FABRIC_EXT_EXPORT
     {{ func.gen_edk_store_result_pre() }}
     {{ func.gen_cpp_name() }}(
         {{ func.gen_cpp_args() }}
-        )
-    {{ func.gen_edk_store_result_post() }}
-    ;
+        ) {{ func.gen_edk_store_result_post() }};
 
     {% for param in func.params %}
     {{ param.gen_cpp_arg_to_edk_param() }}

@@ -1,13 +1,11 @@
-import jinja2, os, sys
+import jinja2, os, sys, optparse
 
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-from clang_param import ClangParam
-from edk_type_mgr import EDKTypeMgr
-from edk_decl import *
+from libkludge import TypeMgr, clang_wrapper, ast
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -31,7 +29,7 @@ class KLTypeMapping:
         self.kl_type_name = kl_type_name
         self.cpp_type_name = cpp_type_name
 
-class LibParser:
+class Parser:
     __metaclass__ = abc.ABCMeta
 
     basic_type_map = {
@@ -83,21 +81,14 @@ class LibParser:
         TypeKind.INCOMPLETEARRAY: None,
     }
 
-    def __init__(
-        self,
-        ext_name,
-        clang_opts,
-        ):
+    def __init__(self):
         self.clang_args = [
             '-x',
             'c++',
-        ] + clang_opts
+        ]
 
         self.classes = {}
         self.symbol_names = set()
-
-        self.ext_name = ext_name
-        self.types_manager = TypesManager(ext_name)
 
         self.wrapper_templates = {}
         self.kl_type_mappings = {
@@ -110,17 +101,111 @@ class LibParser:
         self.cpp_leave = ""
 
         self.known_types = set(['Data', 'String'])
-        for t in LibParser.basic_type_map:
-            self.known_types.add(LibParser.basic_type_map[t])
+        for t in Parser.basic_type_map:
+            self.known_types.add(Parser.basic_type_map[t])
 
-        self.edk_type_mgr = EDKTypeMgr()
-        self.edk_decls = EDKDeclSet()
+        self.edk_type_mgr = TypeMgr()
+        self.edk_decls = ast.DeclSet()
 
         self.jinjenv = jinja2.Environment(
             trim_blocks=True,
             lstrip_blocks=True,
             loader=jinja2.PackageLoader('__main__', 'templates')
             )
+
+    def init(self, ext_name, clang_opts):
+        self.ext_name = ext_name
+        self.types_manager = TypesManager(ext_name)
+        self.clang_args.extend(clang_opts)
+
+    def main(self):
+        try:
+            opt_parser = optparse.OptionParser(
+                usage='Usage: %prog [options] <EXTNAME> <input.h> [<input2.h> ...]'
+                )
+            opt_parser.add_option(
+                '-o', '--outdir',
+                action='store',
+                default='.',
+                dest='outdir',
+                metavar='OUTDIR',
+                help="output directory",
+                )
+            opt_parser.add_option(
+                '-b', '--basename',
+                action='store',
+                default='',
+                dest='basename',
+                metavar='BASENAME',
+                help="output OUTDIR/BASENAME.{kl,cpp} (defaults to EXTNAME)",
+                )
+            opt_parser.add_option(
+                '-p', '--pass',
+                action='append',
+                dest='clang_opts',
+                metavar='CLANGOPT',
+                help="pass option to clang++ (can be used multiple times)",
+                )
+            (opts, args) = opt_parser.parse_args()
+            if len(args) < 2:
+                raise Exception("At least one input file is required")
+        except Exception as e:
+            print "Error: %s" % str(e)
+            print "Run '%s --help' for usage" % sys.argv[0]
+            sys.exit(1)
+
+        extname = args[0]
+        if len(opts.basename) > 0:
+            basename = opts.basename
+        else:
+            basename = extname
+
+        if not opts.clang_opts:
+            opts.clang_opts = []
+
+        self.init(extname, opts.clang_opts)
+        for i in range(1, len(args)):
+            self.parse(args[i])
+        self.output(
+            os.path.join(opts.outdir, basename + '.kl'),
+            os.path.join(opts.outdir, basename + '.cpp'),
+            )
+        with open(os.path.join(opts.outdir, 'SConstruct'), "w") as fh:
+            fh.write("""
+#
+# Copyright 2010-2015 Fabric Software Inc. All rights reserved.
+#
+
+import os, sys
+
+extname = '%s'
+basename = '%s'
+
+try:
+  fabricPath = os.environ['FABRIC_DIR']
+except:
+  print "You must set FABRIC_DIR in your environment."
+  print "Refer to README.txt for more information."
+  sys.exit(1)
+SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
+Import('fabricBuildEnv')
+
+fabricBuildEnv.Append(CPPPATH = ["../.."])
+
+fabricBuildEnv.SharedLibrary(
+  '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),
+  [basename + '.cpp']
+  )
+""" % (extname, basename))
+        with open(os.path.join(opts.outdir, extname+'.fpm.json'), "w") as fh:
+            fh.write("""
+{
+"libs": "%s",
+"code": [
+"actual.kl"
+],
+}
+""" % extname)
 
     # def get_kl_type(self, clang_type):
     #     canon_type = clang_type.get_canonical()
@@ -156,7 +241,7 @@ class LibParser:
     #         return None
 
     #     if not kl_type:
-    #         kl_type = LibParser.basic_type_map[canon_type.kind]
+    #         kl_type = Parser.basic_type_map[canon_type.kind]
 
     #     if not kl_type:
     #         raise Exception('no KL type for ' + str(canon_type.spelling) + ' ('
@@ -220,7 +305,7 @@ class LibParser:
     def debug_print(cursor, prefix=''):
         print prefix + str(cursor.kind) + ': ' + str(cursor.spelling)
         for c in cursor.get_children():
-            LibParser.debug_print(c, prefix + '  ')
+            Parser.debug_print(c, prefix + '  ')
 
     @staticmethod
     def print_diag(diag):
@@ -256,7 +341,7 @@ class LibParser:
             CursorKind.CLASS_DECL,
             CursorKind.STRUCT_DECL,
             ]:
-            result = LibParser.get_nested_name(semantic_parent)
+            result = Parser.get_nested_name(semantic_parent)
             result.append(cursor.spelling)
         else:
             result = [cursor.spelling]
@@ -271,7 +356,7 @@ class LibParser:
                 CursorKind.CLASS_DECL,
                 CursorKind.STRUCT_DECL,
                 ]:
-                return LibParser.get_qualified_spelling(semantic_parent, separator) + separator + cursor.spelling
+                return Parser.get_qualified_spelling(semantic_parent, separator) + separator + cursor.spelling
         return cursor.spelling
             
     def output_class(self, class_name, parent_name, fh):
@@ -704,11 +789,11 @@ class LibParser:
                     if len(param_name) == 0:
                         param_name = "_param_%u" % param_index
                     param_clang_type = param_cursor.type
-                    clang_params.append(ClangParam(param_name, param_clang_type))
+                    clang_params.append(clang_wrapper.Param(param_name, param_clang_type))
                 param_index += 1
 
             self.edk_decls.add(
-                EDKFunc(
+                ast.Func(
                     self.ext_name,
                     include_filename,
                     self.get_location(cursor.location),
@@ -728,7 +813,7 @@ class LibParser:
 
     def parse_cursor(self, include_filename, indent, cursor):
         cursor_kind = cursor.kind
-        if cursor_kind in LibParser.ignored_cursor_kinds:
+        if cursor_kind in Parser.ignored_cursor_kinds:
             pass
         elif cursor_kind == CursorKind.NAMESPACE:
             self.parse_NAMESPACE(include_filename, indent, cursor)

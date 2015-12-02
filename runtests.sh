@@ -8,7 +8,7 @@ for d in tests/*; do
   EXTNAME=$(basename $d)
   INPUTS=$(ls $d/*.hpp | sort)
 
-  python kludge.py \
+  ./kludge \
     --outdir=$d \
     --basename=actual \
     $EXTNAME \

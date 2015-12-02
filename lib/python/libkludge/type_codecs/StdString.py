@@ -1,9 +1,9 @@
-from edk_type_codec import *
+from libkludge.type_codecs.abstract import IndRet
 
-class EDKStdStringBaseTypeCodec(EDKIndRetTypeCodec):
+class StdStringBase(IndRet):
 
   def __init__(self, kl_type_name, cpp_type_name):
-    EDKIndRetTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+    IndRet.__init__(self, kl_type_name, cpp_type_name)
 
   def gen_decl_std_string(self, edk_name, cpp_name):
     return "std::string " + cpp_name + "(" + edk_name + ".getData(), " + edk_name + ".getLength());"
@@ -14,10 +14,10 @@ class EDKStdStringBaseTypeCodec(EDKIndRetTypeCodec):
   def gen_upd_std_string(self, edk_name, cpp_name):
     return edk_name + " = String(" + cpp_name + ".size(), " + cpp_name + ".data());"
 
-class EDKStdStringValueTypeCodec(EDKStdStringBaseTypeCodec):
+class StdStringValue(StdStringBase):
 
   def __init__(self, kl_type_name, cpp_type_name):
-    EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -43,10 +43,10 @@ class EDKStdStringValueTypeCodec(EDKStdStringBaseTypeCodec):
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
     return ""
 
-class EDKStdStringConstRefTypeCodec(EDKStdStringBaseTypeCodec):
+class StdStringConstRef(StdStringBase):
 
   def __init__(self, kl_type_name, cpp_type_name):
-    EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -72,10 +72,10 @@ class EDKStdStringConstRefTypeCodec(EDKStdStringBaseTypeCodec):
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
     return ""
 
-class EDKStdStringConstPtrTypeCodec(EDKStdStringBaseTypeCodec):
+class StdStringConstPtr(StdStringBase):
 
   def __init__(self, kl_type_name, cpp_type_name):
-    EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -101,10 +101,10 @@ class EDKStdStringConstPtrTypeCodec(EDKStdStringBaseTypeCodec):
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
     return ""
 
-class EDKStdStringMutableRefTypeCodec(EDKStdStringBaseTypeCodec):
+class StdStringMutableRef(StdStringBase):
 
   def __init__(self, kl_type_name, cpp_type_name):
-    EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -130,10 +130,10 @@ class EDKStdStringMutableRefTypeCodec(EDKStdStringBaseTypeCodec):
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
     return self.gen_upd_std_string(edk_name, cpp_name)
 
-class EDKStdStringMutablePtrTypeCodec(EDKStdStringBaseTypeCodec):
+class StdStringMutablePtr(StdStringBase):
 
   def __init__(self, kl_type_name, cpp_type_name):
-    EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
 
   def gen_kl_param(self, kl_name):
     return self.gen_kl_io_param(kl_name)

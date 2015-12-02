@@ -1,4 +1,4 @@
-class EDKTypeCodec:
+class TypeCodec:
 
   def __init__(
     self,
@@ -82,14 +82,3 @@ class EDKTypeCodec:
 
   def gen_cpp_ptr_to(self, cpp_name):
     return "&" + cpp_name
-
-class EDKIndRetTypeCodec(EDKTypeCodec):
-
-  def __init__(self, kl_type_name, cpp_type_name):
-    EDKTypeCodec.__init__(self, kl_type_name, cpp_type_name)
-
-  def gen_edk_dir_result_type(self):
-    return "void"
-
-  def gen_edk_return_dir_result(self):
-    return ""

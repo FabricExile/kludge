@@ -1,4 +1,5 @@
-class EDKParam:
+class Param:
+  
   def __init__(self, name, type_codec):
     self._kl_name = name
     self._edk_name = name + "__EDK"

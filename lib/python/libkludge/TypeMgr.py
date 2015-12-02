@@ -1,4 +1,4 @@
-from libkludge import SimpleTypeName
+from libkludge import TypeName, SimpleTypeName
 from libkludge.type_codecs import *
 from libkludge.ast import Param as ASTParam
 
@@ -96,6 +96,11 @@ class TypeMgr:
     self._cpp_type_name_to_type_codec = {}
 
     self.add_type_codecs(TypeMgr.built_in_type_codecs)
+
+    self.add_type_codecs([
+      StdVectorValue(TypeName("Float32", "[]", "VariableArray<Float32>", "std::vector<float>"), SimpleValue(SimpleTypeName("Float32", "float"))),
+      StdVectorValue(TypeName("Float32", "[]", "VariableArray<Float32>", "const std::vector<float> &"), SimpleValue(SimpleTypeName("Float32", "float"))),
+      ])
 
   def add_type_codecs(self, type_codecs):
     for type_codec in type_codecs:

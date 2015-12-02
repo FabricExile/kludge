@@ -2,6 +2,7 @@
 #define _Functions_hpp
 
 #include <string>
+#include <vector>
 #include <stdint.h>
 
 namespace SomeNameSpace {
@@ -94,6 +95,8 @@ inline std::string &TestStdStringMutableRefReturn() { static std::string foo = "
 
 inline char const * TestCStringValueReturn() { return "hello"; }
 inline char const * const &TestCStringConstRefReturn() { static char const *foo = "hello"; return foo; }
+
+inline float ReturnSecond( std::vector<float> const &vals ) { return vals[1]; }
 
 }
 

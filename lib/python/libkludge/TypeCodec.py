@@ -61,7 +61,7 @@ class TypeCodec:
     return "_KLUDGE_EDK_result";
 
   def gen_edk_traits(self):
-    return "Traits<" + self.type_name.edk + ">"
+    return "Traits< " + self.type_name.edk + " >"
 
   def gen_edk_result_param(self):
     return self.gen_edk_traits() + "::Result " + self.gen_edk_result_name()

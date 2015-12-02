@@ -10,4 +10,9 @@ operator entry() {
   report(SomeNameSpace_SomeNestedNameSpace_TestStdStringConstRefReturn());
   report(SomeNameSpace_SomeNestedNameSpace_TestStdStringMutableRefReturn());
   report(SomeNameSpace_Sum(4.5, 8.1));
+
+  Float32 a[];
+  a.push(3.14);
+  a.push(5.34);
+  report(SomeNameSpace_SomeNestedNameSpace_ReturnSecond(a));
 }

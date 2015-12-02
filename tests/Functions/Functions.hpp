@@ -64,6 +64,11 @@ void TestSimpleTypes(
   double *
   );
 
+void TestObscureIntegers(
+  signed short signedShortVal,
+  long longVal
+  );
+
 void TestStdString(
   std::string strVal,
   std::string const &strConstRef,

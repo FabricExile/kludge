@@ -46,6 +46,18 @@ class EDKTypeMgr:
       EDKSimpleMutableRefTypeCodec("UInt32", "unsigned int &"),
       EDKSimpleMutablePtrTypeCodec("UInt32", "unsigned int *"),
       ###
+      EDKSimpleValueTypeCodec("SInt32", "long"),
+      EDKSimpleConstRefTypeCodec("SInt32", "const long &"),
+      EDKSimpleConstPtrTypeCodec("SInt32", "const long *"),
+      EDKSimpleMutableRefTypeCodec("SInt32", "long &"),
+      EDKSimpleMutablePtrTypeCodec("SInt32", "long *"),
+      ###
+      EDKSimpleValueTypeCodec("UInt32", "unsigned long"),
+      EDKSimpleConstRefTypeCodec("UInt32", "const unsigned long &"),
+      EDKSimpleConstPtrTypeCodec("UInt32", "const unsigned long *"),
+      EDKSimpleMutableRefTypeCodec("UInt32", "unsigned long &"),
+      EDKSimpleMutablePtrTypeCodec("UInt32", "unsigned long *"),
+      ###
       EDKSimpleValueTypeCodec("SInt64", "long long"),
       EDKSimpleConstRefTypeCodec("SInt64", "const long long &"),
       EDKSimpleConstPtrTypeCodec("SInt64", "const long long *"),

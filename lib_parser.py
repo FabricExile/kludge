@@ -719,15 +719,21 @@ class LibParser:
         except Exception as e:
             print "%s Unable to wrap function: %s" % (indent, str(e))
 
+    ignored_cursor_kinds = [
+        CursorKind.MACRO_DEFINITION,
+        CursorKind.INCLUSION_DIRECTIVE,
+        ]
+
     def parse_cursor(self, include_filename, indent, cursor):
-        if cursor.kind == CursorKind.MACRO_DEFINITION:
+        cursor_kind = cursor.kind
+        if cursor_kind in LibParser.ignored_cursor_kinds:
             pass
-        elif cursor.kind == CursorKind.NAMESPACE:
+        elif cursor_kind == CursorKind.NAMESPACE:
             self.parse_NAMESPACE(include_filename, indent, cursor)
-        elif cursor.kind == CursorKind.FUNCTION_DECL:
+        elif cursor_kind == CursorKind.FUNCTION_DECL:
             self.parse_FUNCTION_DECL(include_filename, indent, cursor)
         else:
-            print "%sUnhandled %s" % (indent, cursor.kind)
+            print "%sUnhandled %s" % (indent, cursor_kind)
 
     def parse_children(self, include_filename, childIndent, cursor):
         for childCursor in cursor.get_children():

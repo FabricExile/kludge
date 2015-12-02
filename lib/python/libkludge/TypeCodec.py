@@ -2,19 +2,17 @@ class TypeCodec:
 
   def __init__(
     self,
-    kl_type_name,
-    cpp_type_name,
+    type_name,
     ):
-    self.kl_type_name = kl_type_name
-    self.cpp_type_name = cpp_type_name
+    self.type_name = type_name
 
   # Protocol: return
 
   def raise_unsupported_as_result(self):
-    raise Exception(self.cpp_type_name + ": unsupported as result type")
+    raise Exception(self.type_name.cpp + ": unsupported as result type")
 
   def gen_kl_result_type(self):
-    return self.kl_type_name
+    return self.type_name.kl.base
 
   def gen_edk_dir_result_type(self):
     self.raise_unsupported_as_result()
@@ -34,7 +32,7 @@ class TypeCodec:
   # Protocol: parameters
 
   def raise_unsupported_as_param(self):
-    raise Exception(self.cpp_type_name + ": unsupported as parameter type")
+    raise Exception(self.type_name.cpp + ": unsupported as parameter type")
 
   def gen_kl_param(self, kl_name):
     self.raise_unsupported_as_param()
@@ -54,16 +52,16 @@ class TypeCodec:
   # Helpers
 
   def gen_kl_in_param(self, kl_name):
-    return self.kl_type_name + " " + kl_name
+    return self.type_name.kl.base + " " + kl_name + self.type_name.kl.suffix
 
   def gen_kl_io_param(self, kl_name):
-    return "io " + self.kl_type_name + " " + kl_name
+    return "io " + self.type_name.kl.base + " " + kl_name + self.type_name.kl.suffix
 
   def gen_edk_result_name(self):
     return "_KLUDGE_EDK_result";
 
   def gen_edk_traits(self):
-    return "Traits<" + self.kl_type_name + ">"
+    return "Traits<" + self.type_name.edk + ">"
 
   def gen_edk_result_param(self):
     return self.gen_edk_traits() + "::Result " + self.gen_edk_result_name()

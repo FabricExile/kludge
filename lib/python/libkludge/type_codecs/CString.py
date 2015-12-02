@@ -2,16 +2,16 @@ from libkludge.type_codecs.abstract import IndRet
 
 class CStringBase(IndRet):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    IndRet.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    IndRet.__init__(self, type_name)
 
   def gen_get_cstring(self, edk_name):
     return edk_name + ".getCString()"
 
 class CStringValue(CStringBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    CStringBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    CStringBase.__init__(self, type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()

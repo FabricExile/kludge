@@ -2,8 +2,8 @@ from libkludge import TypeCodec
 
 class SimpleBase(TypeCodec):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    TypeCodec.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    TypeCodec.__init__(self, type_name)
 
   def gen_edk_param_to_cpp_arg(self, edk_name, cpp_name):
     return ""
@@ -13,17 +13,17 @@ class SimpleBase(TypeCodec):
   
 class SimpleValue(SimpleBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    SimpleBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    SimpleBase.__init__(self, type_name)
 
   def gen_edk_dir_result_type(self):
-    return self.kl_type_name
+    return self.type_name.kl.compound
 
   def gen_edk_ind_ret_param(self):
     return ""
 
   def gen_edk_store_result_pre(self):
-    return self.kl_type_name + " " + self.gen_cpp_result_name() + " = ";
+    return self.type_name.kl.base + " " + self.gen_cpp_result_name() + self.type_name.kl.suffix + " = ";
 
   def gen_edk_store_result_post(self):
     return "";
@@ -42,17 +42,17 @@ class SimpleValue(SimpleBase):
   
 class SimpleConstRef(SimpleBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    SimpleBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    SimpleBase.__init__(self, type_name)
 
   def gen_edk_dir_result_type(self):
-    return self.kl_type_name
+    return self.type_name.kl.compound
 
   def gen_edk_ind_ret_param(self):
     return ""
 
   def gen_edk_store_result_pre(self):
-    return self.kl_type_name + " " + self.gen_cpp_result_name() + " = ";
+    return self.type_name.kl.base + " " + self.gen_cpp_result_name() + self.type_name.kl.suffix + " = ";
 
   def gen_edk_store_result_post(self):
     return "";
@@ -71,8 +71,8 @@ class SimpleConstRef(SimpleBase):
   
 class SimpleConstPtr(SimpleBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    SimpleBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    SimpleBase.__init__(self, type_name)
 
   def gen_kl_param(self, kl_name):
     return self.gen_kl_in_param(kl_name)
@@ -85,17 +85,17 @@ class SimpleConstPtr(SimpleBase):
   
 class SimpleMutableRef(SimpleBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    SimpleBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    SimpleBase.__init__(self, type_name)
 
   def gen_edk_dir_result_type(self):
-    return self.kl_type_name
+    return self.type_name.kl.compound
 
   def gen_edk_ind_ret_param(self):
     return ""
 
   def gen_edk_store_result_pre(self):
-    return self.kl_type_name + " " + self.gen_cpp_result_name() + " = ";
+    return self.type_name.kl.base + " " + self.gen_cpp_result_name() + self.type_name.kl.suffix + " = ";
 
   def gen_edk_store_result_post(self):
     return "";
@@ -114,8 +114,8 @@ class SimpleMutableRef(SimpleBase):
   
 class SimpleMutablePtr(SimpleBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    SimpleBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    SimpleBase.__init__(self, type_name)
 
   def gen_kl_param(self, kl_name):
     return self.gen_kl_io_param(kl_name)

@@ -2,8 +2,8 @@ from libkludge.type_codecs.abstract import IndRet
 
 class StdStringBase(IndRet):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    IndRet.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    IndRet.__init__(self, type_name)
 
   def gen_decl_std_string(self, edk_name, cpp_name):
     return "std::string " + cpp_name + "(" + edk_name + ".getData(), " + edk_name + ".getLength());"
@@ -16,8 +16,8 @@ class StdStringBase(IndRet):
 
 class StdStringValue(StdStringBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    StdStringBase.__init__(self, type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -45,8 +45,8 @@ class StdStringValue(StdStringBase):
 
 class StdStringConstRef(StdStringBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    StdStringBase.__init__(self, type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -74,8 +74,8 @@ class StdStringConstRef(StdStringBase):
 
 class StdStringConstPtr(StdStringBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    StdStringBase.__init__(self, type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -103,8 +103,8 @@ class StdStringConstPtr(StdStringBase):
 
 class StdStringMutableRef(StdStringBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    StdStringBase.__init__(self, type_name)
 
   def gen_edk_ind_ret_param(self):
     return self.gen_edk_result_param()
@@ -132,8 +132,8 @@ class StdStringMutableRef(StdStringBase):
 
 class StdStringMutablePtr(StdStringBase):
 
-  def __init__(self, kl_type_name, cpp_type_name):
-    StdStringBase.__init__(self, kl_type_name, cpp_type_name)
+  def __init__(self, type_name):
+    StdStringBase.__init__(self, type_name)
 
   def gen_kl_param(self, kl_name):
     return self.gen_kl_io_param(kl_name)

@@ -1,4 +1,4 @@
-import clang
+import clang, re
 
 class CPPTypeModIndex:
   Value = 0
@@ -19,21 +19,29 @@ class CPPTypeModBits:
   ALL = (1 << CPPTypeModIndex.COUNT) - 1
 
 class CPPTypeVar:
+  cpp_type_name_gens = {
+    CPPTypeModIndex.Value:
+      lambda cpp_base_type_name: cpp_base_type_name,
+    CPPTypeModIndex.ConstRef:
+      lambda cpp_base_type_name:
+        cpp_base_type_name+"const &" \
+          if cpp_base_type_name.endswith(("*", "&")) \
+          else "const "+cpp_base_type_name+" &",
+    CPPTypeModIndex.ConstPtr:
+      lambda cpp_base_type_name:
+        cpp_base_type_name+"const *" \
+          if cpp_base_type_name.endswith(("*", "&")) \
+          else "const "+cpp_base_type_name+" *",
+    CPPTypeModIndex.MutableRef:
+      lambda cpp_base_type_name: cpp_base_type_name+" &",
+    CPPTypeModIndex.MutablePtr:
+      lambda cpp_base_type_name: cpp_base_type_name+" *",
+  }
+
   def __init__(self, base_name, mod_index):
     self.base_name = base_name
     self.mod_index = mod_index
-
-  cpp_type_name_gens = {
-    CPPTypeModIndex.Value: lambda cpp_base_type_name: cpp_base_type_name,
-    CPPTypeModIndex.ConstRef: lambda cpp_base_type_name: "const "+cpp_base_type_name+" &",
-    CPPTypeModIndex.ConstPtr: lambda cpp_base_type_name: "const "+cpp_base_type_name+" *",
-    CPPTypeModIndex.MutableRef: lambda cpp_base_type_name: cpp_base_type_name+" &",
-    CPPTypeModIndex.MutablePtr: lambda cpp_base_type_name: cpp_base_type_name+" *",
-  }
-
-  @property
-  def name(self):
-    return CPPTypeVar.cpp_type_name_gens[self.mod_index](self.base_name)
+    self.name = CPPTypeVar.cpp_type_name_gens[mod_index](base_name)
 
 class EDKTypeCodec:
   def __init__(self, kl_type_name):
@@ -181,56 +189,69 @@ class EDKStdStringTypeCodec(EDKTypeCodec):
   def gen_cpp_arg_to_edk_param(self, cpp_type_var, edk_name, cpp_name):
     return EDKStdStringTypeCodec.cpp_arg_to_edk_param_gens[cpp_type_var.mod_index](edk_name, cpp_name)
 
+class EDKCStringTypeCodec(EDKTypeCodec):
+  def __init__(self):
+    EDKTypeCodec.__init__(self, "String")
+
+  cpp_arg_gens = {
+    CPPTypeModIndex.Value:
+      lambda edk_name, cpp_name:
+        edk_name+".getCString()",
+  }
+
+  def gen_cpp_arg(self, cpp_type_var, edk_name, cpp_name):
+    return EDKCStringTypeCodec.cpp_arg_gens[cpp_type_var.mod_index](edk_name, cpp_name)
+
 class EDKTypeMap:
-  def __init__(self, type_codec, cpp_type_var):
+  def __init__(self, type_codec, type_var):
     self._type_codec = type_codec
-    self._cpp_type_var = cpp_type_var
+    self._type_var = type_var
 
   def raise_unsupported_as_ret(self):
-    raise Exception(self._cpp_type_var.cpp_type_name + ": unsupported as return")
+    raise Exception(self._type_var.name + ": unsupported as return")
 
   def gen_dir_ret_type(self):
     try:
-      return self._type_codec.gen_dir_ret_type(self._cpp_type_var)
+      return self._type_codec.gen_dir_ret_type(self._type_var)
     except:
       self.raise_unsupported_as_ret()
 
   def gen_ind_ret_param(self, name):
     try:
-      return self._type_codec.gen_ind_ret_param(self._cpp_type_var, name)
+      return self._type_codec.gen_ind_ret_param(self._type_var, name)
     except:
       self.raise_unsupported_as_ret()
 
   def raise_unsupported_as_param(self):
-    raise Exception(self._cpp_type_var.cpp_type_name + ": unsupported as parameter")
+    raise Exception(self._type_var.name + ": unsupported as parameter")
 
   def gen_kl_param(self, kl_name):
     try:
-      return self._type_codec.gen_kl_param(self._cpp_type_var, kl_name)
+      return self._type_codec.gen_kl_param(self._type_var, kl_name)
     except:
       self.raise_unsupported_as_param()
 
   def gen_edk_param(self, edk_name):
     try:
-      return self._type_codec.gen_edk_param(self._cpp_type_var, edk_name)
+      return self._type_codec.gen_edk_param(self._type_var, edk_name)
     except:
       self.raise_unsupported_as_param()
 
   def gen_edk_param_to_cpp_arg(self, edk_name, cpp_name):
     try:
-      return self._type_codec.gen_edk_param_to_cpp_arg(self._cpp_type_var, edk_name, cpp_name)
+      return self._type_codec.gen_edk_param_to_cpp_arg(self._type_var, edk_name, cpp_name)
     except:
       self.raise_unsupported_as_param()
 
   def gen_cpp_arg(self, edk_name, cpp_name):
     try:
-      return self._type_codec.gen_cpp_arg(self._cpp_type_var, edk_name, cpp_name)
+      return self._type_codec.gen_cpp_arg(self._type_var, edk_name, cpp_name)
     except:
       self.raise_unsupported_as_param()
 
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
     try:
-      return self._type_codec.gen_cpp_arg_to_edk_param(self._cpp_type_var, edk_name, cpp_name)
+      return self._type_codec.gen_cpp_arg_to_edk_param(self._type_var, edk_name, cpp_name)
     except:
       self.raise_unsupported_as_param()
 
@@ -321,6 +342,12 @@ class EDKTypeMgr:
       )
 
     self.add_type_maps(
+      EDKCStringTypeCodec(),
+      ["const char *"],
+      cpp_type_mod_mask=CPPTypeModBits.Value|CPPTypeModBits.ConstRef
+      )
+
+    self.add_type_maps(
       EDKStdStringTypeCodec(),
       ["std::string"],
       )
@@ -335,6 +362,7 @@ class EDKTypeMgr:
       for cpp_type_mod_index in range(0, CPPTypeModIndex.COUNT):
         if (1 << cpp_type_mod_index) & cpp_type_mod_mask:
           type_var = CPPTypeVar(cpp_base_type_name, cpp_type_mod_index)
+          print "Adding " + type_var.name
           self._cpp_type_name_to_type_map[type_var.name] = EDKTypeMap(type_codec, type_var)
 
   def get_type_map(self, clang_type):

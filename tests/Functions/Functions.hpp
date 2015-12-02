@@ -72,6 +72,11 @@ void TestStdString(
   std::string *strMutablePtr
   );
 
+void TestCString(
+  char const *cStringVal/*,
+  char const * const &CStringConstRef*/
+  );
+
 } }
 
 #endif

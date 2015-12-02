@@ -103,6 +103,9 @@ class EDKTypeMgr:
 
   def get_type_codec(self, clang_type):
     cpp_type_name = clang_type.spelling
+    if cpp_type_name == "void":
+      return None
+
     try:
       result = self._cpp_type_name_to_type_codec[cpp_type_name]
     except:

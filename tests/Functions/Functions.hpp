@@ -82,6 +82,17 @@ void TestCString(
   char const * const &CStringConstRef
   );
 
+int TestSimpleValueReturn();
+int const &TestSimpleConstRefReturn();
+int &TestSimpleMutableRefReturn();
+
+std::string TestStdStringValueReturn();
+std::string const &TestStdStringConstRefReturn();
+std::string &TestStdStringMutableRefReturn();
+
+char const * TestCStringValueReturn();
+char const * const &TestCStringConstRefReturn();
+
 } }
 
 #endif

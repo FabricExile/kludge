@@ -714,6 +714,7 @@ class LibParser:
                     self.get_location(cursor.location),
                     cursor.displayname,
                     self.get_nested_name(cursor),
+                    self.edk_type_mgr.get_type_codec(cursor.result_type),
                     self.edk_type_mgr.convert_clang_params(clang_params),
                     )
                 )

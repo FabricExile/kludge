@@ -19,6 +19,15 @@ class EDKStdStringValueTypeCodec(EDKStdStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
+  def gen_ind_ret_param(self):
+    return self.gen_edk_result_param()
+
+  def gen_edk_store_result_pre(self):
+    return self.gen_edk_result_name() + " = ";
+
+  def gen_edk_store_result_post(self):
+    return ".c_str()";
+
   def gen_kl_param(self, kl_name):
     return self.gen_kl_in_param(kl_name)
 
@@ -38,6 +47,15 @@ class EDKStdStringConstRefTypeCodec(EDKStdStringBaseTypeCodec):
 
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+
+  def gen_ind_ret_param(self):
+    return self.gen_edk_result_param()
+
+  def gen_edk_store_result_pre(self):
+    return self.gen_edk_result_name() + " = ";
+
+  def gen_edk_store_result_post(self):
+    return ".c_str()";
 
   def gen_kl_param(self, kl_name):
     return self.gen_kl_in_param(kl_name)
@@ -59,6 +77,15 @@ class EDKStdStringConstPtrTypeCodec(EDKStdStringBaseTypeCodec):
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
 
+  def gen_ind_ret_param(self):
+    return self.gen_edk_result_param()
+
+  def gen_edk_store_result_pre(self):
+    return self.gen_edk_result_name() + " = ";
+
+  def gen_edk_store_result_post(self):
+    return ".c_str()";
+
   def gen_kl_param(self, kl_name):
     return self.gen_kl_in_param(kl_name)
 
@@ -78,6 +105,15 @@ class EDKStdStringMutableRefTypeCodec(EDKStdStringBaseTypeCodec):
 
   def __init__(self, kl_type_name, cpp_type_name):
     EDKStdStringBaseTypeCodec.__init__(self, kl_type_name, cpp_type_name)
+
+  def gen_ind_ret_param(self):
+    return self.gen_edk_result_param()
+
+  def gen_edk_store_result_pre(self):
+    return self.gen_edk_result_name() + " = ";
+
+  def gen_edk_store_result_post(self):
+    return ".c_str()";
 
   def gen_kl_param(self, kl_name):
     return self.gen_kl_io_param(kl_name)

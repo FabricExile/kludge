@@ -136,6 +136,15 @@ class Double(FloatingPoint):
   def get_unqualified_desc(self):
     return "double"
 
+class Custom(Simple):
+
+  def __init__(self, name):
+    Simple.__init__(self)
+    self.name = name
+
+  def get_unqualified_desc(self):
+    return self.name
+
 class Complex(Type):
 
   def __init__(self):
@@ -146,24 +155,25 @@ class Pointer(Complex):
   def __init__(self, pointee):
     print "Pointer()"
     Complex.__init__(self)
-    self._pointee = pointee
+    self.pointee = pointee
 
   def get_unqualified_desc(self):
-    return self._pointee.get_desc() + " *"
+    return self.pointee.get_desc() + " *"
 
 class Reference(Complex):
 
   def __init__(self, pointee):
     Complex.__init__(self)
-    self._pointee = pointee
+    self.pointee = pointee
 
   def get_unqualified_desc(self):
-    return self._pointee.get_desc() + " &"
+    return self.pointee.get_desc() + " &"
 
 class Parser:
 
   tok_ast = Literal("*")
   tok_amp = Literal("&")
+  tok_colon_colon = Literal("::")
   key_void = Keyword("void")
   key_bool = Keyword("bool")
   key_char = Keyword("char")
@@ -184,6 +194,7 @@ class Parser:
   key_uint32_t = Keyword("uint32_t")
   key_int64_t = Keyword("int64_t")
   key_uint64_t = Keyword("uint64_t")
+  ident = Word(alphas+"_", alphanums+"_").setParseAction(lambda s,l,t: Custom(t[0]))
 
   def __init__(self):
 
@@ -211,7 +222,12 @@ class Parser:
     self.ty_float = self.key_float.setParseAction(lambda s,l,t: Float())
     self.ty_double = self.key_double.setParseAction(lambda s,l,t: Double())
     self.ty_floating_point = self.ty_float | self.ty_double
-    self.ty_builtin = self.ty_void | self.ty_bool | self.ty_integer | self.ty_floating_point
+    self.ty_custom = Forward()
+    self.ty_custom << MatchFirst([
+      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Custom(t[0].name + "::" + t[2].name)),
+      self.ident,
+      ])
+    self.ty_builtin = self.ty_void | self.ty_bool | self.ty_integer | self.ty_floating_point | self.ty_custom
     self.ty_unqualified = self.ty_builtin
 
     self.ty_pre_qualified = Forward()
@@ -263,5 +279,6 @@ if __name__ == "__main__":
     "const bool",
     "volatile const signed unsigned",
     "const uint64_t & const ** volatile &",
+    "std::string const &",
     ]:
     print "%s -> %s" % (e, p.parse(e))

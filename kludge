@@ -2,8 +2,8 @@
 
 import os, sys
 
-sys.path.append(os.path.join('lib', 'python', 'libkludge'))
+sys.path.append(os.path.join('lib', 'python'))
 
-import libkludge.Parser
+import kludge.Parser
 
-libkludge.Parser().main()
+kludge.Parser().main()

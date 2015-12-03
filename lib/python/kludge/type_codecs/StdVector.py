@@ -1,6 +1,6 @@
-from libkludge.type_codecs.abstract import IndRet
-from libkludge import CPPTypeExpr
-from libkludge import TypeName
+from kludge.type_codecs.abstract import IndRet
+from kludge import CPPTypeExpr
+from kludge import TypeName
 
 class StdVectorBase(IndRet):
 

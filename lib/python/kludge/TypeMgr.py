@@ -1,7 +1,7 @@
-from libkludge import TypeName, SimpleTypeName
-from libkludge.type_codecs import *
-from libkludge.ast import Param as ASTParam
-from libkludge import CPPTypeExpr
+from kludge import TypeName, SimpleTypeName
+from kludge.type_codecs import *
+from kludge.ast import Param as ASTParam
+from kludge import CPPTypeExpr
 
 # from edk_param import *
 

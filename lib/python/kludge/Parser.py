@@ -5,7 +5,7 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-from libkludge import TypeMgr, clang_wrapper, ast
+from kludge import TypeMgr, clang_wrapper, ast
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):

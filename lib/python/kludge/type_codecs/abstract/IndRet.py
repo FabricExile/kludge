@@ -1,4 +1,4 @@
-from libkludge import TypeCodec
+from kludge import TypeCodec
 
 class IndRet(TypeCodec):
 

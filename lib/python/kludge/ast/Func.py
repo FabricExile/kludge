@@ -1,4 +1,4 @@
-from libkludge.ast import Decl
+from kludge.ast import Decl
 
 class Func(Decl):
   def __init__(

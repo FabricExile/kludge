@@ -1,6 +1,6 @@
-from libkludge import TypeCodec
-from libkludge import CPPTypeExpr
-from libkludge import SimpleTypeName
+from kludge import TypeCodec
+from kludge import CPPTypeExpr
+from kludge import SimpleTypeName
 
 class SimpleBase(TypeCodec):
 

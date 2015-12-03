@@ -136,9 +136,34 @@ class Double(FloatingPoint):
   def get_unqualified_desc(self):
     return "double"
 
+class Complex(Type):
+
+  def __init__(self):
+    Type.__init__(self)
+
+class Pointer(Complex):
+
+  def __init__(self, pointee):
+    print "Pointer()"
+    Complex.__init__(self)
+    self._pointee = pointee
+
+  def get_unqualified_desc(self):
+    return self._pointee.get_desc() + " *"
+
+class Reference(Complex):
+
+  def __init__(self, pointee):
+    Complex.__init__(self)
+    self._pointee = pointee
+
+  def get_unqualified_desc(self):
+    return self._pointee.get_desc() + " &"
 
 class Parser:
 
+  tok_ast = Literal("*")
+  tok_amp = Literal("&")
   key_void = Keyword("void")
   key_bool = Keyword("bool")
   key_char = Keyword("char")
@@ -188,17 +213,37 @@ class Parser:
     self.ty_floating_point = self.ty_float | self.ty_double
     self.ty_builtin = self.ty_void | self.ty_bool | self.ty_integer | self.ty_floating_point
     self.ty_unqualified = self.ty_builtin
-    self.ty_pre_qualified = Forward()
-    self.ty_pre_qualified << ( self.key_const + self.ty_pre_qualified ).setParseAction(lambda s,l,t: [t[1].make_const()])
-    self.ty_pre_qualified << ( self.key_volatile + self.ty_pre_qualified ).setParseAction(lambda s,l,t: [t[1].make_volatile()])
-    self.ty_pre_qualified << self.ty_unqualified
-    self.ty_post_qualified = Forward()
-    self.ty_post_qualified << ( self.ty_post_qualified + self.key_const).setParseAction(lambda s,l,t: [t[0].make_const()])
-    self.ty_post_qualified << ( self.ty_post_qualified + self.key_volatile).setParseAction(lambda s,l,t: [t[0].make_volatile()])
-    self.ty_post_qualified << self.ty_pre_qualified
 
-    self.grammar = self.ty_post_qualified
+    self.ty_pre_qualified = Forward()
+    self.ty_pre_qualified << MatchFirst([
+        self.ty_unqualified,
+        (self.key_const + self.ty_pre_qualified).setParseAction(lambda s,l,t: [t[1].make_const()]),
+        (self.key_volatile + self.ty_pre_qualified).setParseAction(lambda s,l,t: [t[1].make_volatile()]),
+        ])
+
+    # self.ty_post_qualified = Forward()
+    # self.ty_post_qualified << \
+    #     (self.ty_post_qualified + self.key_const).setParseAction(lambda s,l,t: [t[0].make_const()]) \
+    #   | (self.ty_post_qualified + self.key_volatile).setParseAction(lambda s,l,t: [t[0].make_volatile()]) \
+    #   | (self.ty_post_qualified + self.tok_ast).setParseAction(lambda s,l,t: [Pointer(t[0])]) \
+    #   | (self.ty_post_qualified + self.tok_amp).setParseAction(lambda s,l,t: [Reference(t[0])]) \
+    #   | self.ty_pre_qualified
+
+    self.grammar = self.ty_pre_qualified
+    self.grammar.validate()
 
   def parse(self, cpp_type_name):
     return self.grammar.parseString(cpp_type_name)[0]
 
+if __name__ == "__main__":
+  p = Parser()
+  for e in [
+    "void",
+    "const void",
+    "signed",
+    "unsigned",
+    "bool",
+    "const bool",
+    "volatile const signed unsigned",
+    ]:
+    print "%s -> %s" % (e, p.parse(e))

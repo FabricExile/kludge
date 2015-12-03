@@ -98,7 +98,7 @@ inline char const * const &TestCStringConstRefReturn() { static char const *foo 
 
 inline float ReturnSecond( std::vector<float> const &vals ) { return vals[1]; }
 
-inline float ReturnSecondSecond( std::vector< std::vector<float> > const &vals ) { return vals[1][1]; }
+inline char const * ReturnSecondSecond( std::vector< std::vector<char const *> > const &vals ) { return vals[1][1]; }
 
 }
 

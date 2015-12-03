@@ -93,13 +93,15 @@ class TypeMgr:
     self.add_type_codecs(TypeMgr.built_in_type_codecs)
 
     self.add_type_codec_generators([
+      StdVectorValue,
+      StdVectorConstRef,
       StdStringValue,
       StdStringConstRef,
       StdStringConstPtr,
       StdStringMutableRef,
       StdStringMutablePtr,
-      # CStringValue,
-      # CStringConstRef,
+      CStringValue,
+      CStringConstRef,
       ])
 
   def add_type_codec_generator(self, type_codec_generator):
@@ -116,14 +118,12 @@ class TypeMgr:
     for type_codec in type_codecs:
       self.add_type_codec(type_codec)
 
-  def get_type_codec(self, clang_type):
-    cpp_type_name = clang_type.get_canonical().spelling
+  def maybe_get_type_codec(self, cpp_type_name):
     if cpp_type_name == "void":
       return None
 
-    try:
-      return self._cpp_type_name_to_type_codec[cpp_type_name]
-    except:
+    result = self._cpp_type_name_to_type_codec.get(cpp_type_name)
+    if not result:
       try:
         cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
       except:
@@ -133,22 +133,41 @@ class TypeMgr:
         type_codec = type_codec_generator.maybe_get_type_codec(cpp_type_expr, self)
         if type_codec:
           self.add_type_codec(type_codec)
-          return type_codec
+          result = type_codec
+          break
+    return result
 
-      msg = cpp_type_name
-      orig_type_name = clang_type.spelling
-      if orig_type_name != cpp_type_name:
-        msg += " ("
-        msg += orig_type_name
-        msg += ")"
-      msg += ": no EDK type association found"
-      raise Exception(msg)
+  def get_type_codec(self, cpp_type_name):
+    if cpp_type_name == "void":
+      return None
+
+    type_codec = self.maybe_get_type_codec(cpp_type_name)
+    if type_codec:
+      return type_codec
+
+    raise Exception(cpp_type_name + ": no EDK type association found")
+
+  def get_type_codec_for_clang_type(self, clang_type):
+    cpp_type_name = clang_type.spelling
+    if cpp_type_name == "void":
+      return None
+
+    type_codec = self.maybe_get_type_codec(cpp_type_name)
+    if type_codec:
+      return type_codec
+
+    canonical_cpp_type_name = clang_type.get_canonical().spelling
+    if canonical_cpp_type_name != cpp_type_name:
+      type_codec = self.maybe_get_type_codec(canonical_cpp_type_name)
+      if type_codec:
+        return type_codec
+    raise Exception(cpp_type_name + ": no EDK type association found")
 
   def convert_clang_params(self, clang_params):
     return map(
       lambda clang_param: ASTParam(
         clang_param.name,
-        self.get_type_codec(clang_param.clang_type)
+        self.get_type_codec_for_clang_type(clang_param.clang_type)
         ),
       clang_params
       )

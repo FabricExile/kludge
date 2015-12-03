@@ -1,6 +1,13 @@
 from libkludge.type_codecs.abstract import IndRet
+from libkludge import CPPTypeExpr
+from libkludge import TypeName
 
 class StdVectorBase(IndRet):
+
+  @classmethod
+  def is_std_vector(cls, cpp_type_expr):
+    return isinstance(cpp_type_expr, CPPTypeExpr.Template) \
+      and cpp_type_expr.name == "std::vector"
 
   def __init__(self, type_name, element_type_codec):
     IndRet.__init__(self, type_name)
@@ -27,6 +34,20 @@ for ( uint32_t i = 0; i < %s.size(); ++i )
     raise Exception("Unimplemented")
 
 class StdVectorValue(StdVectorBase):
+
+  @classmethod
+  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+    if cls.is_std_vector(cpp_type_expr):
+      element_type_codec = type_mgr.get_type_codec(str(cpp_type_expr.params[0]))
+      return StdVectorValue(
+        TypeName(
+          element_type_codec.type_name.kl.base,
+          element_type_codec.type_name.kl.suffix + "[]",
+          "VariableArray< " + element_type_codec.type_name.edk + " >",
+          "std::vector< " + element_type_codec.type_name.cpp + " >",
+          ),
+        element_type_codec
+        )
 
   def __init__(self, type_name, element_type_codec):
     StdVectorBase.__init__(self, type_name, element_type_codec)
@@ -55,4 +76,27 @@ class StdVectorValue(StdVectorBase):
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
     return ""
 
-StdVectorConstRef = StdVectorValue
+class StdVectorConstRef(StdVectorValue):
+
+  @classmethod
+  def is_std_vector_const_ref(cls, cpp_type_expr):
+    return isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+      and cpp_type_expr.pointee.is_const \
+      and cls.is_std_vector(cpp_type_expr.pointee)
+
+  @classmethod
+  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+    if cls.is_std_vector_const_ref(cpp_type_expr):
+      element_type_codec = type_mgr.get_type_codec(str(cpp_type_expr.pointee.params[0]))
+      return StdVectorConstRef(
+        TypeName(
+          element_type_codec.type_name.kl.base,
+          element_type_codec.type_name.kl.suffix + "[]",
+          "VariableArray< " + element_type_codec.type_name.edk + " >",
+          "const std::vector< " + element_type_codec.type_name.cpp + " > &",
+          ),
+        element_type_codec
+        )
+
+  def __init__(self, type_name, element_type_codec):
+    StdVectorValue.__init__(self, type_name, element_type_codec)

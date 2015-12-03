@@ -218,14 +218,6 @@ class Parser:
   key_unsigned = Keyword("unsigned")
   key_const = Keyword("const")
   key_volatile = Keyword("volatile")
-  key_int8_t = Keyword("int8_t")
-  key_uint8_t = Keyword("uint8_t")
-  key_int16_t = Keyword("int16_t")
-  key_uint16_t = Keyword("uint16_t")
-  key_int32_t = Keyword("int32_t")
-  key_uint32_t = Keyword("uint32_t")
-  key_int64_t = Keyword("int64_t")
-  key_uint64_t = Keyword("uint64_t")
 
   ident = And([
     NotAny(key_const),
@@ -237,18 +229,10 @@ class Parser:
 
     self.ty_void = self.key_void.setParseAction(lambda s,l,t: Void())
     self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: Bool())
-    self.ty_char = \
-        (self.key_char | self.key_int8_t).setParseAction(lambda s,l,t: Char()) \
-      | self.key_uint8_t.setParseAction(lambda s,l,t: Char().make_unsigned())
-    self.ty_short = \
-        (self.key_short | self.key_int16_t).setParseAction(lambda s,l,t: Short()) \
-      | self.key_uint16_t.setParseAction(lambda s,l,t: Short().make_unsigned())
-    self.ty_int = \
-        (self.key_int | self.key_int32_t).setParseAction(lambda s,l,t: Int()) \
-      | (self.key_uint32_t).setParseAction(lambda s,l,t: Int().make_unsigned())
-    self.ty_long_long = \
-        ((self.key_long + self.key_long) | self.key_int64_t).setParseAction(lambda s,l,t: LongLong()) \
-      | self.key_uint64_t.setParseAction(lambda s,l,t: LongLong().make_unsigned())
+    self.ty_char = self.key_char.setParseAction(lambda s,l,t: Char())
+    self.ty_short = self.key_short.setParseAction(lambda s,l,t: Short())
+    self.ty_int = self.key_int.setParseAction(lambda s,l,t: Int())
+    self.ty_long_long = (self.key_long + self.key_long).setParseAction(lambda s,l,t: LongLong())
     self.ty_unqualified_integer = self.ty_char | self.ty_short | self.ty_int | self.ty_long_long
     self.ty_integer = Forward()
     self.ty_integer << MatchFirst([

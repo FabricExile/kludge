@@ -15,4 +15,14 @@ operator entry() {
   a.push(3.14);
   a.push(5.34);
   report(SomeNameSpace_SomeNestedNameSpace_ReturnSecond(a));
+
+  Float32 b[][];
+  b.resize(2);
+  b[0].resize(2);
+  b[0][0] = 6.32;
+  b[0][1] = 7.32;
+  b[1].resize(2);
+  b[1][0] = -3.28;
+  b[1][1] = 5.31;
+  report(SomeNameSpace_SomeNestedNameSpace_ReturnSecondSecond(b));
 }

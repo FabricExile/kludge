@@ -81,7 +81,7 @@ class StdVectorConstRef(StdVectorValue):
 
   @classmethod
   def is_std_vector_const_ref(cls, cpp_type_expr):
-    return isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+    return isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
       and cpp_type_expr.pointee.is_const \
       and cls.is_std_vector(cpp_type_expr.pointee)
 

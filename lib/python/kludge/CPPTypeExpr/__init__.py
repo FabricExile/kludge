@@ -15,5 +15,6 @@ from CPPTypeExpr import \
     Custom, \
     Template, \
   Indirect, \
-    Pointer, \
-    Reference
+    PointerTo, \
+    ReferenceTo, \
+  Const

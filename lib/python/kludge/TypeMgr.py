@@ -8,8 +8,7 @@ from kludge import CPPTypeExpr
 class TypeMgr:
 
   built_in_type_codec_generators = [
-    CStringValue,       # First so we don't catch in Simple...
-    CStringConstRef,
+    CString, # First so we don't catch in Simple...
     SimpleValue,
     SimpleConstRef,
     SimpleConstPtr,

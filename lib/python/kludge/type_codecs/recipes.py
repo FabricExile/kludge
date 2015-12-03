@@ -1,11 +1,16 @@
 from kludge import CPPTypeExpr
 from kludge import SimpleTypeName
 
-def match_cpp_expr_type(cpp_expr_type_to_match, type_name):
+def match_cpp_expr_type(cpp_expr_types_to_match, type_name):
   def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
-      if cpp_type_expr == cpp_expr_type_to_match:
-        return cls(type_name)          
+      if hasattr(cpp_expr_types_to_match, '__iter__'):
+        for cpp_expr_type_to_match in cpp_expr_types_to_match:
+          if cpp_type_expr == cpp_expr_type_to_match:
+            return cls(type_name)          
+      else:
+        if cpp_type_expr == cpp_expr_type_to_match:
+          return cls(type_name)          
     setattr(cls, 'maybe_get_type_codec', classmethod(impl))
     return cls
   return deco
@@ -24,7 +29,7 @@ def match_value_by_dict(lookup):
 def match_const_ref_by_dict(lookup):
   def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+      if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
         and cpp_type_expr.pointee.is_const \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
@@ -37,7 +42,7 @@ def match_const_ref_by_dict(lookup):
 def match_const_ptr_by_dict(lookup):
   def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
+      if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
         and cpp_type_expr.pointee.is_const \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
@@ -50,7 +55,7 @@ def match_const_ptr_by_dict(lookup):
 def match_mutable_ref_by_dict(lookup):
   def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+      if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
         and cpp_type_expr.pointee.is_mutable \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
@@ -64,7 +69,7 @@ def match_mutable_ref_by_dict(lookup):
 def match_mutable_ptr_by_dict(lookup):
   def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
+      if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
         and cpp_type_expr.pointee.is_mutable \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())

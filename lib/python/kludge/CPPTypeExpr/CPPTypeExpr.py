@@ -205,7 +205,7 @@ class Indirect(Type):
     return Type.__eq__(self, other) \
       and self.pointee == other.pointee
 
-class Pointer(Indirect):
+class PointerTo(Indirect):
 
   def __init__(self, pointee):
     Indirect.__init__(self, pointee)
@@ -213,13 +213,16 @@ class Pointer(Indirect):
   def get_unqualified_desc(self):
     return self.pointee.get_desc() + " *"
 
-class Reference(Indirect):
+class ReferenceTo(Indirect):
 
   def __init__(self, pointee):
     Indirect.__init__(self, pointee)
 
   def get_unqualified_desc(self):
     return self.pointee.get_desc() + " &"
+
+def Const(ty):
+  return ty.make_const()
 
 class Parser:
 
@@ -312,9 +315,9 @@ class Parser:
     def make_volatile(te):
       return te.make_volatile()
     def make_pointer(te):
-      return Pointer(te)
+      return PointerTo(te)
     def make_reference(te):
-      return Reference(te)
+      return ReferenceTo(te)
     self.ty_post_qualified_NO_LEFT_REC << MatchFirst([
       (self.key_const.setParseAction(lambda s,l,t: make_const) + self.ty_post_qualified_NO_LEFT_REC),
       (self.key_volatile.setParseAction(lambda s,l,t: make_volatile) + self.ty_post_qualified_NO_LEFT_REC),

@@ -153,7 +153,6 @@ class Complex(Type):
 class Pointer(Complex):
 
   def __init__(self, pointee):
-    print "Pointer()"
     Complex.__init__(self)
     self.pointee = pointee
 
@@ -169,11 +168,28 @@ class Reference(Complex):
   def get_unqualified_desc(self):
     return self.pointee.get_desc() + " &"
 
+class Template(Complex):
+
+  def __init__(self, name, params):
+    Complex.__init__(self)
+    self.name = name
+    self.params = params
+
+  def get_unqualified_desc(self):
+    return self.name + "<" + ",".join(map(
+      lambda param: param.get_desc(),
+      self.params
+      )) + ">"
+
 class Parser:
 
-  tok_ast = Literal("*")
-  tok_amp = Literal("&")
-  tok_colon_colon = Literal("::")
+  tok_ast = Literal("*").suppress()
+  tok_amp = Literal("&").suppress()
+  tok_colon_colon = Literal("::").suppress()
+  tok_langle = Literal("<").suppress()
+  tok_rangle = Literal(">").suppress()
+  tok_comma = Literal(",").suppress()
+
   key_void = Keyword("void")
   key_bool = Keyword("bool")
   key_char = Keyword("char")
@@ -194,7 +210,12 @@ class Parser:
   key_uint32_t = Keyword("uint32_t")
   key_int64_t = Keyword("int64_t")
   key_uint64_t = Keyword("uint64_t")
-  ident = Word(alphas+"_", alphanums+"_").setParseAction(lambda s,l,t: Custom(t[0]))
+
+  ident = And([
+    NotAny(key_const),
+    NotAny(key_volatile),
+    Word(alphas+"_", alphanums+"_"),
+    ]).setParseAction(lambda s,l,t: Custom(t[0]))
 
   def __init__(self):
 
@@ -213,18 +234,20 @@ class Parser:
         ((self.key_long + self.key_long) | self.key_int64_t).setParseAction(lambda s,l,t: LongLong()) \
       | self.key_uint64_t.setParseAction(lambda s,l,t: LongLong().make_unsigned())
     self.ty_unqualified_integer = self.ty_char | self.ty_short | self.ty_int | self.ty_long_long
-    self.ty_integer = \
-        ( self.key_signed + self.ty_unqualified_integer ).setParseAction(lambda s,l,t: t[1].make_signed()) \
-      | ( self.key_unsigned + self.ty_unqualified_integer ).setParseAction(lambda s,l,t: t[1].make_unsigned()) \
-      | self.ty_unqualified_integer \
-      | self.key_signed.setParseAction(lambda s,l,t: Int()) \
-      | self.key_unsigned.setParseAction(lambda s,l,t: Int().make_unsigned())
+    self.ty_integer = Forward()
+    self.ty_integer << MatchFirst([
+      ( self.key_signed + self.ty_integer ).setParseAction(lambda s,l,t: t[1].make_signed()),
+      ( self.key_unsigned + self.ty_integer ).setParseAction(lambda s,l,t: t[1].make_unsigned()),
+      self.ty_unqualified_integer,
+      self.key_signed.setParseAction(lambda s,l,t: Int()),
+      self.key_unsigned.setParseAction(lambda s,l,t: Int().make_unsigned()),
+      ])
     self.ty_float = self.key_float.setParseAction(lambda s,l,t: Float())
     self.ty_double = self.key_double.setParseAction(lambda s,l,t: Double())
     self.ty_floating_point = self.ty_float | self.ty_double
     self.ty_custom = Forward()
     self.ty_custom << MatchFirst([
-      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Custom(t[0].name + "::" + t[2].name)),
+      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Custom(t[0].name + "::" + t[1].name)),
       self.ident,
       ])
     self.ty_builtin = self.ty_void | self.ty_bool | self.ty_integer | self.ty_floating_point | self.ty_custom
@@ -261,7 +284,24 @@ class Parser:
     self.ty_post_qualified = \
       (self.ty_pre_qualified + self.ty_post_qualified_NO_LEFT_REC).setParseAction(make_post_qualified)
 
-    self.grammar = self.ty_post_qualified
+    self.ty_templated = Forward()
+
+    self.ty_templated_params = Forward()
+    self.ty_templated_params << MatchFirst([
+      self.ty_templated + self.tok_comma + self.ty_templated_params,
+      self.ty_templated,
+      Empty()
+      ])
+
+    def make_template(s,l,t):
+      return Template(t[0].name, t[1:])
+
+    self.ty_templated << MatchFirst([
+      (self.ty_custom + self.tok_langle + self.ty_templated_params + self.tok_rangle).setParseAction(make_template),
+      self.ty_post_qualified
+      ])
+
+    self.grammar = self.ty_templated + StringEnd()
     self.grammar.validate()
 
   def parse(self, cpp_type_name):
@@ -280,5 +320,15 @@ if __name__ == "__main__":
     "volatile const signed unsigned",
     "const uint64_t & const ** volatile &",
     "std::string const &",
+    "std::vector<std::string>",
+    "some::nested<template::expr<int, another>, yet::another<const volatile void *>>",
+    "const",
+    "volatile",
+    "int int",
+    "int * void & const",
     ]:
-    print "%s -> %s" % (e, p.parse(e))
+    try:
+      r = str(p.parse(e))
+    except:
+      r = "ERROR"
+    print "%s -> %s" % (e, r)

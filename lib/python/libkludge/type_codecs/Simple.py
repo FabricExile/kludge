@@ -2,6 +2,25 @@ from libkludge import TypeCodec
 
 class SimpleBase(TypeCodec):
 
+  cpp_type_name_to_kl_type_name = {
+    "char": "SInt8",
+    "int8_t": "SInt8",
+    "unsigned char": "UInt8",
+    "uint8_t": "UInt8",
+    "short": "SInt16",
+    "int16_t": "SInt16",
+    "unsigned short": "UInt16",
+    "uint16_t": "UInt16",
+    "int": "SInt32",
+    "int32_t": "SInt32",
+    "unsigned int": "UInt32",
+    "uint32_t": "UInt32",
+    "long long": "SInt64",
+    "int64_t": "SInt64",
+    "unsigned long long": "UInt64",
+    "uint64_t": "UInt64",
+    }
+  
   def __init__(self, type_name):
     TypeCodec.__init__(self, type_name)
 

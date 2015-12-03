@@ -32,18 +32,26 @@ class Type:
   def __str__(self):
     return self.get_desc()
 
-class Void(Type):
-
-  def __init__(self):
-    Type.__init__(self)
-
-  def get_unqualified_desc(self):
-    return "void"
-
 class Simple(Type):
 
   def __init__(self):
     Type.__init__(self)
+
+  def get_desc(self):
+    result = ""
+    if self.is_const:
+      result += "const "
+    if self.is_volatile:
+      result += "volatile "
+    return result + self.get_unqualified_desc()
+
+class Void(Simple):
+
+  def __init__(self):
+    Simple.__init__(self)
+
+  def get_unqualified_desc(self):
+    return "void"
 
 class Bool(Simple):
 

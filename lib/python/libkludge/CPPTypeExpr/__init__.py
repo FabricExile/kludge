@@ -1,7 +1,7 @@
 from CPPTypeExpr import \
   Parser, \
-  Void, \
   Simple, \
+    Void, \
     Bool, \
     Numeric, \
       Integer, \

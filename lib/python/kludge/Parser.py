@@ -104,14 +104,13 @@ class Parser:
         for t in Parser.basic_type_map:
             self.known_types.add(Parser.basic_type_map[t])
 
-        self.edk_type_mgr = TypeMgr()
-        self.edk_decls = ast.DeclSet()
-
         self.jinjenv = jinja2.Environment(
             trim_blocks=True,
             lstrip_blocks=True,
             loader=jinja2.PackageLoader('__main__', 'templates')
             )
+        self.edk_type_mgr = TypeMgr(self.jinjenv)
+        self.edk_decls = ast.DeclSet()
 
     def init(self, ext_name, clang_opts):
         self.ext_name = ext_name

@@ -9,25 +9,31 @@ class TypeMgr:
 
   built_in_type_codec_generators = [
     CString, # First so we don't catch in Simple...
-    SimpleValue,
-    SimpleConstRef,
-    SimpleConstPtr,
-    SimpleMutableRef,
-    SimpleMutablePtr,
-    StdVectorValue,
-    StdVectorConstRef,
-    StdString,
-    StdStringConstPtr,
-    StdStringMutableRef,
-    StdStringMutablePtr,
+    # SimpleValue,
+    # SimpleConstRef,
+    # SimpleConstPtr,
+    # SimpleMutableRef,
+    # SimpleMutablePtr,
+    # StdVectorValue,
+    # StdVectorConstRef,
+    # StdString,
+    # StdStringConstPtr,
+    # StdStringMutableRef,
+    # StdStringMutablePtr,
     ]
 
-  def __init__(self):
+  def __init__(self, jinjenv):
     self._cpp_type_name_to_type_codec = {}
     self._type_codec_generators = []
     self._cpp_type_expr_parser = CPPTypeExpr.Parser()
 
-    self.add_type_codec_generators(self.built_in_type_codec_generators)
+    # First so we don't catch in Simple...
+    self.add_type_codec_generators(
+      c_string_type_codec_generators(jinjenv, self)
+      )
+    # add_simple_type_codec_generators(jinjenv, self)
+    # add_std_string_type_codec_generators(jinjenv, self)
+    # add_std_vector_type_codec_generators(jinjenv, self)
 
   def add_type_codec_generator(self, type_codec_generator):
     self._type_codec_generators.append(type_codec_generator)

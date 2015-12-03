@@ -26,7 +26,7 @@ class CStringValue(CStringBase):
   def __init__(self, type_name):
     CStringBase.__init__(self, type_name)
 
-  def gen_edk_ind_ret_param(self):
+  def gen_indirect_result_edk_param(self):
     return self.gen_edk_result_param()
 
   def gen_edk_store_result_pre(self):

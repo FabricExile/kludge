@@ -23,9 +23,9 @@ class Func(Decl):
     else:
       return ""
 
-  def gen_edk_dir_result_type(self):
+  def gen_direct_result_edk_type(self):
     if self._ret_type_codec:
-      return self._ret_type_codec.gen_edk_dir_result_type()
+      return self._ret_type_codec.gen_direct_result_edk_type()
     else:
       return "void"
 
@@ -65,7 +65,7 @@ class Func(Decl):
   def gen_edk_params(self):
     snippets = []
     if self._ret_type_codec:
-      edk_ind_ret_param = self._ret_type_codec.gen_edk_ind_ret_param()
+      edk_ind_ret_param = self._ret_type_codec.gen_indirect_result_edk_param()
       if edk_ind_ret_param:
         snippets.append(edk_ind_ret_param)
     for param in self.params:

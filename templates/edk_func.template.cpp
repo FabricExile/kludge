@@ -10,7 +10,7 @@
 #include <{{ func.gen_include_filename() }}>
 
 FABRIC_EXT_EXPORT
-{{ func.gen_edk_dir_result_type() }}
+{{ func.gen_direct_result_edk_type() }}
 {{ func.gen_edk_name() }}(
     {{ func.gen_edk_params() }}
     )

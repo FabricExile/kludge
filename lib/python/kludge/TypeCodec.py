@@ -14,10 +14,10 @@ class TypeCodec:
   def gen_kl_result_type(self):
     return self.type_name.kl.base
 
-  def gen_edk_dir_result_type(self):
+  def gen_direct_result_edk_type(self):
     self.raise_unsupported_as_result()
 
-  def gen_edk_ind_ret_param(self):
+  def gen_indirect_result_edk_param(self):
     self.raise_unsupported_as_result()
 
   def gen_edk_store_result_pre(self):

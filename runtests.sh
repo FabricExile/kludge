@@ -17,4 +17,6 @@ for d in tests/*; do
   # clang-format --style=Google -i $d/actual.cpp
 
   scons -C "$d"
+
+  FABRIC_EXTS_PATH=$d kl $d/test.kl
 done

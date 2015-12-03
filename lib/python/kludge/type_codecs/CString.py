@@ -41,13 +41,13 @@ class CStringValue(CStringBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_in_param(edk_name)
 
-  def gen_edk_param_to_cpp_arg(self, edk_name, cpp_name):
+  def gen_edk_param_to_cpp_arg(self, param_name):
     return ""
 
-  def gen_cpp_arg(self, edk_name, cpp_name):
-    return self.gen_get_cstring(edk_name)
+  def gen_cpp_arg(self, param_name):
+    return self.gen_get_cstring(param_name.edk)
 
-  def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
+  def gen_cpp_arg_to_edk_param(self, param_name):
     return ""
 
 class CStringConstRef(CStringValue):

@@ -31,10 +31,10 @@ class SimpleBase(TypeCodec):
   def __init__(self, type_name):
     TypeCodec.__init__(self, type_name)
 
-  def gen_edk_param_to_cpp_arg(self, edk_name, cpp_name):
+  def gen_edk_param_to_cpp_arg(self, param_name):
     return ""
 
-  def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
+  def gen_cpp_arg_to_edk_param(self, param_name):
     return ""
   
 class SimpleValue(SimpleBase):
@@ -71,8 +71,8 @@ class SimpleValue(SimpleBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_in_param(edk_name)
 
-  def gen_cpp_arg(self, edk_name, cpp_name):
-    return edk_name
+  def gen_cpp_arg(self, param_name):
+    return param_name.edk
   
 class SimpleConstRef(SimpleBase):
 
@@ -110,8 +110,8 @@ class SimpleConstRef(SimpleBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_in_param(edk_name)
 
-  def gen_cpp_arg(self, edk_name, cpp_name):
-    return edk_name
+  def gen_cpp_arg(self, param_name):
+    return param_name.edk
   
 class SimpleConstPtr(SimpleBase):
 
@@ -134,8 +134,8 @@ class SimpleConstPtr(SimpleBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_in_param(edk_name)
 
-  def gen_cpp_arg(self, edk_name, cpp_name):
-    return self.gen_edk_ptr_to(edk_name)
+  def gen_cpp_arg(self, param_name):
+    return self.gen_edk_ptr_to(param_name.edk)
   
 class SimpleMutableRef(SimpleBase):
 
@@ -173,8 +173,8 @@ class SimpleMutableRef(SimpleBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_io_param(edk_name)
 
-  def gen_cpp_arg(self, edk_name, cpp_name):
-    return edk_name
+  def gen_cpp_arg(self, param_name):
+    return param_name.edk
   
 class SimpleMutablePtr(SimpleBase):
 
@@ -197,5 +197,5 @@ class SimpleMutablePtr(SimpleBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_io_param(edk_name)
 
-  def gen_cpp_arg(self, edk_name, cpp_name):
-    return self.gen_edk_ptr_to(edk_name)
+  def gen_cpp_arg(self, param_name):
+    return self.gen_edk_ptr_to(param_name.edk)

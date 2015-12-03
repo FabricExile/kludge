@@ -1,5 +1,6 @@
 from kludge.type_codecs.abstract import IndRet
 from kludge import CPPTypeExpr
+from kludge import ParamName
 from kludge import TypeName
 
 class StdVectorBase(IndRet):
@@ -13,9 +14,9 @@ class StdVectorBase(IndRet):
     IndRet.__init__(self, type_name)
     self._element_type_codec = element_type_codec
 
-  def gen_decl_std_vector(self, edk_name, cpp_name):
-    element_edk_name = edk_name + "[i]"
-    element_cpp_name = "element"
+  def gen_decl_std_vector(self, param_name):
+    element_param = ParamName("element")
+    element_param.edk = param_name.edk + "[i]"
     return """std::vector< %s > %s;
 for ( uint32_t i = 0; i < %s.size(); ++i )
 {
@@ -23,14 +24,14 @@ for ( uint32_t i = 0; i < %s.size(); ++i )
   %s.push_back(%s);
 }""" % (
   self._element_type_codec.type_name.cpp,
-  cpp_name,
-  edk_name,
-  self._element_type_codec.gen_edk_param_to_cpp_arg(element_edk_name, element_cpp_name),
-  cpp_name,
-  self._element_type_codec.gen_cpp_arg(element_edk_name, element_cpp_name),
+  param_name.cpp,
+  param_name.edk,
+  self._element_type_codec.gen_edk_param_to_cpp_arg(element_param),
+  param_name.cpp,
+  self._element_type_codec.gen_cpp_arg(element_param),
   )
 
-  def gen_upd_std_string(self, edk_name, cpp_name):
+  def gen_upd_std_string(self, param_name):
     raise Exception("Unimplemented")
 
 class StdVectorValue(StdVectorBase):
@@ -67,13 +68,13 @@ class StdVectorValue(StdVectorBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_in_param(edk_name)
 
-  def gen_edk_param_to_cpp_arg(self, edk_name, cpp_name):
-    return self.gen_decl_std_vector(edk_name, cpp_name)
+  def gen_edk_param_to_cpp_arg(self, param_name):
+    return self.gen_decl_std_vector(param_name)
 
-  def gen_cpp_arg(self, edk_name, cpp_name):
-    return cpp_name
+  def gen_cpp_arg(self, param_name):
+    return param_name.cpp
 
-  def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
+  def gen_cpp_arg_to_edk_param(self, param_name):
     return ""
 
 class StdVectorConstRef(StdVectorValue):

@@ -221,18 +221,31 @@ class Parser:
         (self.key_volatile + self.ty_pre_qualified).setParseAction(lambda s,l,t: t[1].make_volatile()),
         ])
 
-    # self.ty_post_qualified_NO_LEFT_REC = Forward()
-    # self.ty_post_qualified_NO_LEFT_REC << MatchFirst([
-    #   (self.key_const + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [t[1].make_const()]),
-    #   (self.key_volatile + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [t[1].make_volatile()]),
-    #   (self.tok_ast + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [Pointer(t[1])]),
-    #   (self.tok_amp + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [Reference(t[1])]),
-    #   Empty().setParseAction(lambda s,l,t: lambda ty: ty),
-    #   ])
-    # self.ty_post_qualified = \
-    #   (self.ty_pre_qualified + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [t[1](t[0])])
+    self.ty_post_qualified_NO_LEFT_REC = Forward()
+    def make_const(te):
+      return te.make_const()
+    def make_volatile(te):
+      return te.make_volatile()
+    def make_pointer(te):
+      return Pointer(te)
+    def make_reference(te):
+      return Reference(te)
+    self.ty_post_qualified_NO_LEFT_REC << MatchFirst([
+      (self.key_const.setParseAction(lambda s,l,t: make_const) + self.ty_post_qualified_NO_LEFT_REC),
+      (self.key_volatile.setParseAction(lambda s,l,t: make_volatile) + self.ty_post_qualified_NO_LEFT_REC),
+      (self.tok_ast.setParseAction(lambda s,l,t: make_pointer) + self.ty_post_qualified_NO_LEFT_REC),
+      (self.tok_amp.setParseAction(lambda s,l,t: make_reference) + self.ty_post_qualified_NO_LEFT_REC),
+      Empty(),
+      ])
+    def make_post_qualified(s, l, t):
+      result = t[0]
+      for i in range(1, len(t)):
+        result = t[i](result)
+      return result
+    self.ty_post_qualified = \
+      (self.ty_pre_qualified + self.ty_post_qualified_NO_LEFT_REC).setParseAction(make_post_qualified)
 
-    self.grammar = self.ty_pre_qualified
+    self.grammar = self.ty_post_qualified
     self.grammar.validate()
 
   def parse(self, cpp_type_name):
@@ -249,5 +262,6 @@ if __name__ == "__main__":
     "bool",
     "const bool",
     "volatile const signed unsigned",
+    "const uint64_t & const ** volatile &",
     ]:
     print "%s -> %s" % (e, p.parse(e))

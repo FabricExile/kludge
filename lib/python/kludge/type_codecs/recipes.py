@@ -1,3 +1,89 @@
+from kludge import CPPTypeExpr
+from kludge import SimpleTypeName
+
+def match_value_by_dict(lookup):
+
+  def perform_match(cls):
+    def impl(cls, cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.Direct):
+        kl_type_name = lookup.get(cpp_type_expr.get_unqualified_desc())
+        if kl_type_name:
+          return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
+
+    setattr(cls, 'maybe_get_type_codec', classmethod(impl))
+
+    return cls
+
+  return perform_match
+
+def match_const_ref_by_dict(lookup):
+
+  def perform_match(cls):
+    def impl(cls, cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+        and cpp_type_expr.pointee.is_const \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
+        if kl_type_name:
+          return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
+
+    setattr(cls, 'maybe_get_type_codec', classmethod(impl))
+
+    return cls
+
+  return perform_match
+
+def match_const_ptr_by_dict(lookup):
+
+  def perform_match(cls):
+    def impl(cls, cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
+        and cpp_type_expr.pointee.is_const \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
+        if kl_type_name:
+          return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
+
+    setattr(cls, 'maybe_get_type_codec', classmethod(impl))
+
+    return cls
+
+  return perform_match
+
+def match_mutable_ref_by_dict(lookup):
+
+  def perform_match(cls):
+    def impl(cls, cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+        and cpp_type_expr.pointee.is_mutable \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
+        if kl_type_name:
+          return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
+
+    setattr(cls, 'maybe_get_type_codec', classmethod(impl))
+
+    return cls
+
+  return perform_match
+
+def match_mutable_ptr_by_dict(lookup):
+
+  def perform_match(cls):
+    def impl(cls, cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
+        and cpp_type_expr.pointee.is_mutable \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
+        if kl_type_name:
+          return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
+
+    setattr(cls, 'maybe_get_type_codec', classmethod(impl))
+
+    return cls
+
+  return perform_match
+
 def in_param(cls):
 
   setattr(

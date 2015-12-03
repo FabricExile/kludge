@@ -187,29 +187,29 @@ class Parser:
 
   def __init__(self):
 
-    self.ty_void = self.key_void.setParseAction(lambda s,l,t: [Void()])
-    self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: [Bool()])
+    self.ty_void = self.key_void.setParseAction(lambda s,l,t: Void())
+    self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: Bool())
     self.ty_char = \
-        (self.key_char | self.key_int8_t).setParseAction(lambda s,l,t: [Char() ]) \
-      | self.key_uint8_t.setParseAction(lambda s,l,t: [Char().make_unsigned()])
+        (self.key_char | self.key_int8_t).setParseAction(lambda s,l,t: Char()) \
+      | self.key_uint8_t.setParseAction(lambda s,l,t: Char().make_unsigned())
     self.ty_short = \
-        (self.key_short | self.key_int16_t).setParseAction(lambda s,l,t: [Short()]) \
-      | self.key_uint16_t.setParseAction(lambda s,l,t: [Short().make_unsigned()])
+        (self.key_short | self.key_int16_t).setParseAction(lambda s,l,t: Short()) \
+      | self.key_uint16_t.setParseAction(lambda s,l,t: Short().make_unsigned())
     self.ty_int = \
-        (self.key_int | self.key_int32_t).setParseAction(lambda s,l,t: [Int()]) \
-      | (self.key_uint32_t).setParseAction(lambda s,l,t: [Int().make_unsigned()])
+        (self.key_int | self.key_int32_t).setParseAction(lambda s,l,t: Int()) \
+      | (self.key_uint32_t).setParseAction(lambda s,l,t: Int().make_unsigned())
     self.ty_long_long = \
-        ((self.key_long + self.key_long) | self.key_int64_t).setParseAction(lambda s,l,t: [LongLong()]) \
-      | self.key_uint64_t.setParseAction(lambda s,l,t: [LongLong().make_unsigned()])
+        ((self.key_long + self.key_long) | self.key_int64_t).setParseAction(lambda s,l,t: LongLong()) \
+      | self.key_uint64_t.setParseAction(lambda s,l,t: LongLong().make_unsigned())
     self.ty_unqualified_integer = self.ty_char | self.ty_short | self.ty_int | self.ty_long_long
     self.ty_integer = \
-        ( self.key_signed + self.ty_unqualified_integer ).setParseAction(lambda s,l,t: [t[1].make_signed()]) \
-      | ( self.key_unsigned + self.ty_unqualified_integer ).setParseAction(lambda s,l,t: [t[1].make_unsigned()]) \
+        ( self.key_signed + self.ty_unqualified_integer ).setParseAction(lambda s,l,t: t[1].make_signed()) \
+      | ( self.key_unsigned + self.ty_unqualified_integer ).setParseAction(lambda s,l,t: t[1].make_unsigned()) \
       | self.ty_unqualified_integer \
-      | self.key_signed.setParseAction(lambda s,l,t: [Int()]) \
-      | self.key_unsigned.setParseAction(lambda s,l,t: [Int().make_unsigned()])
-    self.ty_float = self.key_float.setParseAction(lambda s,l,t: [Float()])
-    self.ty_double = self.key_double.setParseAction(lambda s,l,t: [Double()])
+      | self.key_signed.setParseAction(lambda s,l,t: Int()) \
+      | self.key_unsigned.setParseAction(lambda s,l,t: Int().make_unsigned())
+    self.ty_float = self.key_float.setParseAction(lambda s,l,t: Float())
+    self.ty_double = self.key_double.setParseAction(lambda s,l,t: Double())
     self.ty_floating_point = self.ty_float | self.ty_double
     self.ty_builtin = self.ty_void | self.ty_bool | self.ty_integer | self.ty_floating_point
     self.ty_unqualified = self.ty_builtin
@@ -217,17 +217,20 @@ class Parser:
     self.ty_pre_qualified = Forward()
     self.ty_pre_qualified << MatchFirst([
         self.ty_unqualified,
-        (self.key_const + self.ty_pre_qualified).setParseAction(lambda s,l,t: [t[1].make_const()]),
-        (self.key_volatile + self.ty_pre_qualified).setParseAction(lambda s,l,t: [t[1].make_volatile()]),
+        (self.key_const + self.ty_pre_qualified).setParseAction(lambda s,l,t: t[1].make_const()),
+        (self.key_volatile + self.ty_pre_qualified).setParseAction(lambda s,l,t: t[1].make_volatile()),
         ])
 
-    # self.ty_post_qualified = Forward()
-    # self.ty_post_qualified << \
-    #     (self.ty_post_qualified + self.key_const).setParseAction(lambda s,l,t: [t[0].make_const()]) \
-    #   | (self.ty_post_qualified + self.key_volatile).setParseAction(lambda s,l,t: [t[0].make_volatile()]) \
-    #   | (self.ty_post_qualified + self.tok_ast).setParseAction(lambda s,l,t: [Pointer(t[0])]) \
-    #   | (self.ty_post_qualified + self.tok_amp).setParseAction(lambda s,l,t: [Reference(t[0])]) \
-    #   | self.ty_pre_qualified
+    # self.ty_post_qualified_NO_LEFT_REC = Forward()
+    # self.ty_post_qualified_NO_LEFT_REC << MatchFirst([
+    #   (self.key_const + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [t[1].make_const()]),
+    #   (self.key_volatile + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [t[1].make_volatile()]),
+    #   (self.tok_ast + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [Pointer(t[1])]),
+    #   (self.tok_amp + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [Reference(t[1])]),
+    #   Empty().setParseAction(lambda s,l,t: lambda ty: ty),
+    #   ])
+    # self.ty_post_qualified = \
+    #   (self.ty_pre_qualified + self.ty_post_qualified_NO_LEFT_REC).setParseAction(lambda s,l,t: [t[1](t[0])])
 
     self.grammar = self.ty_pre_qualified
     self.grammar.validate()
@@ -240,6 +243,7 @@ if __name__ == "__main__":
   for e in [
     "void",
     "const void",
+    "int *",
     "signed",
     "unsigned",
     "bool",

@@ -108,53 +108,44 @@ def io_param():
     return cls
   return deco
 
-def direct_result(cls):
+##############################################################################
+## Results
+##############################################################################
 
-  setattr(
-    cls,
-    'gen_direct_result_edk_type',
-    lambda self: self.type_name.kl.compound
-    )
+result_edk_name = "_KLUDGE_EDK_RESERVED_result"
 
-  setattr(
-    cls,
-    'gen_indirect_result_edk_param',
-    lambda self: ""
-    )
-
-  setattr(
-    cls,
-    'gen_edk_store_result_pre',
-    lambda self: self.type_name.edk + " _KLUDGE_EDK_RESERVED_result = "
-    )
-
-  setattr(
-    cls,
-    'gen_edk_store_result_post',
-    lambda self: ""
-    )
-
-  setattr(
-    cls,
-    'gen_edk_return_dir_result',
-    lambda self: "return _KLUDGE_EDK_RESERVED_result;"
-    )
-
-  return cls
-
-def direct_result_by_deref(cls):
-
-  cls = direct_result(cls)
-
-  setattr(
-    cls,
-    'gen_edk_store_result_pre',
-    lambda self: self.type_name.edk + " _KLUDGE_EDK_RESERVED_result = *"
-    )
-
-  return cls
-
-indirect_result_edk_name = "_KLUDGE_EDK_RESERVED_result"
+def direct_result(
+  pre = lambda edk_type_name, edk_name: edk_type_name + " " + edk_name + " = ",
+  post = lambda edk_type_name, edk_name: "",
+  ):
+  def deco(cls):
+    setattr(
+      cls,
+      'gen_direct_result_edk_type',
+      lambda self: self.type_name.kl.compound
+      )
+    setattr(
+      cls,
+      'gen_indirect_result_edk_param',
+      lambda self: ""
+      )
+    setattr(
+      cls,
+      'gen_edk_store_result_pre',
+      lambda self: pre(self.type_name.edk, result_edk_name)
+      )
+    setattr(
+      cls,
+      'gen_edk_store_result_post',
+      lambda self: post(self.type_name.edk, result_edk_name)
+      )
+    setattr(
+      cls,
+      'gen_edk_return_dir_result',
+      lambda self: "return " + result_edk_name + ";"
+      )
+    return cls
+  return deco
 
 def indirect_result(
   pre = lambda edk_name: edk_name + " = ",
@@ -174,12 +165,12 @@ def indirect_result(
     setattr(
       cls,
       'gen_edk_store_result_pre',
-      lambda self: pre(indirect_result_edk_name)
+      lambda self: pre(result_edk_name)
       )
     setattr(
       cls,
       'gen_edk_store_result_post',
-      lambda self: post(indirect_result_edk_name)
+      lambda self: post(result_edk_name)
       )
     setattr(
       cls,

@@ -26,31 +26,37 @@ cpp_base_type_to_kl_base_type = {
   }
 
 @match_value_by_dict(cpp_base_type_to_kl_base_type)
-@direct_result
+@direct_result()
 @in_param()
 @cpp_arg_is_edk_param_ref
 class SimpleValue(TypeCodec): pass
 
 @match_const_ref_by_dict(cpp_base_type_to_kl_base_type)
-@direct_result
+@direct_result()
 @in_param()
 @cpp_arg_is_edk_param_ref
 class SimpleConstRef(TypeCodec): pass
 
 @match_const_ptr_by_dict(cpp_base_type_to_kl_base_type)
-@direct_result_by_deref
+@direct_result(
+  pre = lambda edk_type_name, edk_name:
+    edk_type_name + " " + edk_name + " = *"
+  )
 @in_param()
 @cpp_arg_is_edk_param_ptr
 class SimpleConstPtr(TypeCodec): pass
 
 @match_mutable_ref_by_dict(cpp_base_type_to_kl_base_type)
-@direct_result
+@direct_result()
 @io_param()
 @cpp_arg_is_edk_param_ref
 class SimpleMutableRef(TypeCodec): pass
 
 @match_mutable_ptr_by_dict(cpp_base_type_to_kl_base_type)
-@direct_result_by_deref
+@direct_result(
+  pre = lambda edk_type_name, edk_name:
+    edk_type_name + " " + edk_name + " = *"
+  )
 @io_param()
 @cpp_arg_is_edk_param_ptr
 class SimpleMutablePtr(TypeCodec): pass

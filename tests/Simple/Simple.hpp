@@ -1,5 +1,5 @@
-#ifndef _Functions_hpp
-#define _Functions_hpp
+#ifndef _Simple_hpp
+#define _Simple_hpp
 
 #include <stdint.h>
 

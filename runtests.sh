@@ -6,6 +6,8 @@ for d in tests/*; do
   [ ${d: -5} == ".skip" ] && continue
   
   EXTNAME=$(basename $d)
+  [ -n "$1" ] && [ "$1" != "$EXTNAME" ] && continue
+
   INPUTS=$(ls $d/*.hpp | sort)
 
   ./kludge \

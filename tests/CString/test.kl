@@ -1,0 +1,7 @@
+require CString;
+
+operator entry() {
+  CStringParams("foo", "bar");
+  report(CStringValueReturn());
+  report(CStringConstRefReturn());
+}

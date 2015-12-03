@@ -133,7 +133,7 @@ def direct_result(cls):
   setattr(
     cls,
     'gen_edk_store_result_pre',
-    lambda self: self.type_name.edk + " _KLUDGE_CPP_RESERVED_result = "
+    lambda self: self.type_name.edk + " _KLUDGE_EDK_RESERVED_result = "
     )
 
   setattr(
@@ -145,7 +145,7 @@ def direct_result(cls):
   setattr(
     cls,
     'gen_edk_return_dir_result',
-    lambda self: "return _KLUDGE_CPP_RESERVED_result;"
+    lambda self: "return _KLUDGE_EDK_RESERVED_result;"
     )
 
   return cls
@@ -157,7 +157,41 @@ def direct_result_by_deref(cls):
   setattr(
     cls,
     'gen_edk_store_result_pre',
-    lambda self: self.type_name.edk + " _KLUDGE_CPP_RESERVED_result = *"
+    lambda self: self.type_name.edk + " _KLUDGE_EDK_RESERVED_result = *"
+    )
+
+  return cls
+
+def indirect_result(cls):
+
+  setattr(
+    cls,
+    'gen_direct_result_edk_type',
+    lambda self: "void"
+    )
+
+  setattr(
+    cls,
+    'gen_indirect_result_edk_param',
+    lambda self: "Traits< " + self.type_name.edk + " >::Result _KLUDGE_EDK_RESERVED_result"
+    )
+
+  setattr(
+    cls,
+    'gen_edk_store_result_pre',
+    lambda self: "_KLUDGE_EDK_RESERVED_result = "
+    )
+
+  setattr(
+    cls,
+    'gen_edk_store_result_post',
+    lambda self: ""
+    )
+
+  setattr(
+    cls,
+    'gen_edk_return_dir_result',
+    lambda self: ""
     )
 
   return cls

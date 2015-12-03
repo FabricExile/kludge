@@ -30,9 +30,6 @@ inline std::string TestStdStringValueReturn() { return "hello"; }
 inline std::string const &TestStdStringConstRefReturn() { static std::string foo = "hello"; return foo; }
 inline std::string &TestStdStringMutableRefReturn() { static std::string foo = "hello"; return foo; }
 
-inline char const * TestCStringValueReturn() { return "hello"; }
-inline char const * const &TestCStringConstRefReturn() { static char const *foo = "hello"; return foo; }
-
 inline float ReturnSecond( std::vector<float> const &vals ) { return vals[1]; }
 
 inline char const * ReturnSecondSecond( std::vector< std::vector<char const *> > const &vals ) { return vals[1][1]; }

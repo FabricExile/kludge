@@ -1,0 +1,25 @@
+
+#
+# Copyright 2010-2015 Fabric Software Inc. All rights reserved.
+#
+
+import os, sys
+
+extname = 'CString'
+basename = 'actual'
+
+try:
+  fabricPath = os.environ['FABRIC_DIR']
+except:
+  print "You must set FABRIC_DIR in your environment."
+  print "Refer to README.txt for more information."
+  sys.exit(1)
+SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
+Import('fabricBuildEnv')
+
+fabricBuildEnv.Append(CPPPATH = ["../.."])
+
+fabricBuildEnv.SharedLibrary(
+  '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),
+  [basename + '.cpp']
+  )

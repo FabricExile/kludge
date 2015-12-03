@@ -11,4 +11,9 @@ from CPPTypeExpr import \
         LongLong, \
       FloatingPoint, \
         Float, \
-        Double
+        Double, \
+    Custom, \
+  Complex, \
+    Pointer, \
+    Reference, \
+    Template

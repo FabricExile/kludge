@@ -15,7 +15,7 @@ class StdVectorBase(IndRet):
     self._element_type_codec = element_type_codec
 
   def gen_decl_std_vector(self, param_name):
-    element_param = ParamName("element")
+    element_param = ParamName("RESERVED_element")
     element_param.edk = param_name.edk + "[i]"
     return """std::vector< %s > %s;
 for ( uint32_t i = 0; i < %s.size(); ++i )

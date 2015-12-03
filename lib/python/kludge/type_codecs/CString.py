@@ -17,6 +17,10 @@ class CStringBase(IndRet):
   def gen_get_cstring(self, edk_name):
     return edk_name + ".getCString()"
 
+@match_cpp_expr_type(
+  CPPTypeExpr.Pointer(CPPTypeExpr.Char().make_const()),
+  SimpleTypeName('String', 'const char *')
+  )
 @indirect_result
 @in_param
 @cpp_arg_is_edk_param(lambda cpp_arg: cpp_arg + ".getCString()")

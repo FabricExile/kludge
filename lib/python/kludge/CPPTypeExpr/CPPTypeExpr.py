@@ -32,6 +32,14 @@ class Type:
   def __str__(self):
     return self.get_desc()
 
+  def __eq__(self, other):
+    return type(self) == type(other) \
+      and self.is_const == other.is_const \
+      and self.is_volatile == other.is_volatile
+
+  def __ne__(self, other):
+    return not self == other
+
 class Direct(Type):
 
   def __init__(self):
@@ -90,6 +98,10 @@ class Integer(Numeric):
   @abc.abstractmethod
   def get_signed_desc(self):
     pass
+
+  def __eq__(self, other):
+    return Numeric.__eq__(self, other) \
+      and self.is_signed == other.is_signed
 
 class Char(Integer):
 
@@ -153,6 +165,10 @@ class Custom(Direct):
   def get_unqualified_desc(self):
     return self.name
 
+  def __eq__(self, other):
+    return Direct.__eq__(self, other) \
+      and self.name == other.name
+
 class Template(Direct):
 
   def __init__(self, name, params):
@@ -166,10 +182,16 @@ class Template(Direct):
       self.params
       )) + " >"
 
+  def __eq__(self, other):
+    return Direct.__eq__(self, other) \
+      and self.name == other.name \
+      and self.params == other.params
+
 class Indirect(Type):
 
-  def __init__(self):
+  def __init__(self, pointee):
     Type.__init__(self)
+    self.pointee = pointee
 
   def get_desc(self):
     result = self.get_unqualified_desc()
@@ -179,11 +201,14 @@ class Indirect(Type):
       result += " volatile"
     return result
 
+  def __eq__(self, other):
+    return Type.__eq__(self, other) \
+      and self.pointee == other.pointee
+
 class Pointer(Indirect):
 
   def __init__(self, pointee):
-    Indirect.__init__(self)
-    self.pointee = pointee
+    Indirect.__init__(self, pointee)
 
   def get_unqualified_desc(self):
     return self.pointee.get_desc() + " *"
@@ -191,8 +216,7 @@ class Pointer(Indirect):
 class Reference(Indirect):
 
   def __init__(self, pointee):
-    Indirect.__init__(self)
-    self.pointee = pointee
+    Indirect.__init__(self, pointee)
 
   def get_unqualified_desc(self):
     return self.pointee.get_desc() + " &"

@@ -1,24 +1,28 @@
 from kludge import CPPTypeExpr
 from kludge import SimpleTypeName
 
-def match_value_by_dict(lookup):
+def match_cpp_expr_type(cpp_expr_type_to_match, type_name):
+  def deco(cls):
+    def impl(cls, cpp_type_expr, type_mgr):
+      if cpp_type_expr == cpp_expr_type_to_match:
+        return cls(type_name)          
+    setattr(cls, 'maybe_get_type_codec', classmethod(impl))
+    return cls
+  return deco
 
-  def perform_match(cls):
+def match_value_by_dict(lookup):
+  def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_expr.get_unqualified_desc())
         if kl_type_name:
           return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
-
     setattr(cls, 'maybe_get_type_codec', classmethod(impl))
-
     return cls
-
-  return perform_match
+  return deco
 
 def match_const_ref_by_dict(lookup):
-
-  def perform_match(cls):
+  def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
         and cpp_type_expr.pointee.is_const \
@@ -26,16 +30,12 @@ def match_const_ref_by_dict(lookup):
         kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
         if kl_type_name:
           return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
-
     setattr(cls, 'maybe_get_type_codec', classmethod(impl))
-
     return cls
-
-  return perform_match
+  return deco
 
 def match_const_ptr_by_dict(lookup):
-
-  def perform_match(cls):
+  def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
         and cpp_type_expr.pointee.is_const \
@@ -43,16 +43,12 @@ def match_const_ptr_by_dict(lookup):
         kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
         if kl_type_name:
           return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
-
     setattr(cls, 'maybe_get_type_codec', classmethod(impl))
-
     return cls
-
-  return perform_match
+  return deco
 
 def match_mutable_ref_by_dict(lookup):
-
-  def perform_match(cls):
+  def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
         and cpp_type_expr.pointee.is_mutable \
@@ -62,14 +58,11 @@ def match_mutable_ref_by_dict(lookup):
           return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
 
     setattr(cls, 'maybe_get_type_codec', classmethod(impl))
-
     return cls
-
-  return perform_match
+  return deco
 
 def match_mutable_ptr_by_dict(lookup):
-
-  def perform_match(cls):
+  def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
         and cpp_type_expr.pointee.is_mutable \
@@ -77,12 +70,9 @@ def match_mutable_ptr_by_dict(lookup):
         kl_type_name = lookup.get(cpp_type_expr.pointee.get_unqualified_desc())
         if kl_type_name:
           return cls(SimpleTypeName(kl_type_name, str(cpp_type_expr)))
-
     setattr(cls, 'maybe_get_type_codec', classmethod(impl))
-
     return cls
-
-  return perform_match
+  return deco
 
 def in_param(cls):
 
@@ -197,27 +187,24 @@ def indirect_result(cls):
   return cls
 
 def cpp_arg_is_edk_param(filter):
-  def impl(cls):
+  def deco(cls):
     setattr(
       cls,
       'gen_edk_param_to_cpp_arg',
       lambda self, param_name: ""
       )
-
     setattr(
       cls,
       'gen_cpp_arg',
       lambda self, param_name: filter(param_name.edk)
       )
-
     setattr(
       cls,
       'gen_cpp_arg_to_edk_param',
       lambda self, param_name: ""
       )
-
     return cls
-  return impl
+  return deco
 
 def cpp_arg_is_edk_param_ref(cls):
 

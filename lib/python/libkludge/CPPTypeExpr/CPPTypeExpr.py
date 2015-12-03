@@ -9,6 +9,10 @@ class Type:
     self.is_const = False
     self.is_volatile = False
 
+  @property
+  def is_mutable(self):
+    return not self.is_const
+
   def make_const(self):
     self.is_const = True
     return self
@@ -17,13 +21,9 @@ class Type:
     self.is_volatile = True
     return self
 
+  @abc.abstractmethod
   def get_desc(self):
-    result = self.get_unqualified_desc()
-    if self.is_const:
-      result += " const"
-    if self.is_volatile:
-      result += " volatile"
-    return result
+    pass
 
   @abc.abstractmethod
   def get_unqualified_desc(self):
@@ -32,7 +32,7 @@ class Type:
   def __str__(self):
     return self.get_desc()
 
-class Simple(Type):
+class Direct(Type):
 
   def __init__(self):
     Type.__init__(self)
@@ -45,26 +45,26 @@ class Simple(Type):
       result += "volatile "
     return result + self.get_unqualified_desc()
 
-class Void(Simple):
+class Void(Direct):
 
   def __init__(self):
-    Simple.__init__(self)
+    Direct.__init__(self)
 
   def get_unqualified_desc(self):
     return "void"
 
-class Bool(Simple):
+class Bool(Direct):
 
   def __init__(self):
-    Simple.__init__(self)
+    Direct.__init__(self)
 
   def get_unqualified_desc(self):
     return "bool"
 
-class Numeric(Simple):
+class Numeric(Direct):
 
   def __init__(self):
-    Simple.__init__(self)
+    Direct.__init__(self)
 
 class Integer(Numeric):
 
@@ -144,50 +144,58 @@ class Double(FloatingPoint):
   def get_unqualified_desc(self):
     return "double"
 
-class Custom(Simple):
+class Custom(Direct):
 
   def __init__(self, name):
-    Simple.__init__(self)
+    Direct.__init__(self)
     self.name = name
 
   def get_unqualified_desc(self):
     return self.name
 
-class Complex(Type):
+class Template(Direct):
+
+  def __init__(self, name, params):
+    Direct.__init__(self)
+    self.name = name
+    self.params = params
+
+  def get_unqualified_desc(self):
+    return self.name + "< " + ", ".join(map(
+      lambda param: param.get_desc(),
+      self.params
+      )) + " >"
+
+class Indirect(Type):
 
   def __init__(self):
     Type.__init__(self)
 
-class Pointer(Complex):
+  def get_desc(self):
+    result = self.get_unqualified_desc()
+    if self.is_const:
+      result += " const"
+    if self.is_volatile:
+      result += " volatile"
+    return result
+
+class Pointer(Indirect):
 
   def __init__(self, pointee):
-    Complex.__init__(self)
+    Indirect.__init__(self)
     self.pointee = pointee
 
   def get_unqualified_desc(self):
     return self.pointee.get_desc() + " *"
 
-class Reference(Complex):
+class Reference(Indirect):
 
   def __init__(self, pointee):
-    Complex.__init__(self)
+    Indirect.__init__(self)
     self.pointee = pointee
 
   def get_unqualified_desc(self):
     return self.pointee.get_desc() + " &"
-
-class Template(Complex):
-
-  def __init__(self, name, params):
-    Complex.__init__(self)
-    self.name = name
-    self.params = params
-
-  def get_unqualified_desc(self):
-    return self.name + "<" + ",".join(map(
-      lambda param: param.get_desc(),
-      self.params
-      )) + ">"
 
 class Parser:
 
@@ -258,8 +266,30 @@ class Parser:
       (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Custom(t[0].name + "::" + t[1].name)),
       self.ident,
       ])
-    self.ty_builtin = self.ty_void | self.ty_bool | self.ty_integer | self.ty_floating_point | self.ty_custom
-    self.ty_unqualified = self.ty_builtin
+
+    self.ty_post_qualified = Forward()
+
+    self.ty_templated_params = Forward()
+    self.ty_templated_params << MatchFirst([
+      self.ty_post_qualified + self.tok_comma + self.ty_templated_params,
+      self.ty_post_qualified,
+      Empty()
+      ])
+
+    def make_template(s,l,t):
+      return Template(t[0].name, t[1:])
+
+    self.ty_templated = \
+      (self.ty_custom + self.tok_langle + self.ty_templated_params + self.tok_rangle).setParseAction(make_template)
+
+    self.ty_unqualified = MatchFirst([
+      self.ty_void,
+      self.ty_bool,
+      self.ty_integer,
+      self.ty_floating_point,
+      self.ty_templated,
+      self.ty_custom,
+      ])
 
     self.ty_pre_qualified = Forward()
     self.ty_pre_qualified << MatchFirst([
@@ -289,27 +319,10 @@ class Parser:
       for i in range(1, len(t)):
         result = t[i](result)
       return result
-    self.ty_post_qualified = \
+    self.ty_post_qualified << \
       (self.ty_pre_qualified + self.ty_post_qualified_NO_LEFT_REC).setParseAction(make_post_qualified)
 
-    self.ty_templated = Forward()
-
-    self.ty_templated_params = Forward()
-    self.ty_templated_params << MatchFirst([
-      self.ty_templated + self.tok_comma + self.ty_templated_params,
-      self.ty_templated,
-      Empty()
-      ])
-
-    def make_template(s,l,t):
-      return Template(t[0].name, t[1:])
-
-    self.ty_templated << MatchFirst([
-      (self.ty_custom + self.tok_langle + self.ty_templated_params + self.tok_rangle).setParseAction(make_template),
-      self.ty_post_qualified
-      ])
-
-    self.grammar = self.ty_templated + StringEnd()
+    self.grammar = self.ty_post_qualified + StringEnd()
     self.grammar.validate()
 
   def parse(self, cpp_type_name):
@@ -330,6 +343,7 @@ if __name__ == "__main__":
     "std::string const &",
     "std::vector<std::string>",
     "some::nested<template::expr<int, another>, yet::another<const volatile void *>>",
+    "const std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > &",
     "const",
     "volatile",
     "int int",
@@ -337,6 +351,7 @@ if __name__ == "__main__":
     ]:
     try:
       r = str(p.parse(e))
-    except:
+    except Exception as ex:
       r = "ERROR"
+      # r += str(ex)
     print "%s -> %s" % (e, r)

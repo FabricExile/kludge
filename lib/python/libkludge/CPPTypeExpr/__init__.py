@@ -1,6 +1,6 @@
 from CPPTypeExpr import \
   Parser, \
-  Simple, \
+  Direct, \
     Void, \
     Bool, \
     Numeric, \
@@ -13,7 +13,7 @@ from CPPTypeExpr import \
         Float, \
         Double, \
     Custom, \
-  Complex, \
+    Template, \
+  Indirect, \
     Pointer, \
-    Reference, \
-    Template
+    Reference

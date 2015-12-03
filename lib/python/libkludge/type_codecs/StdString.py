@@ -1,20 +1,34 @@
 from libkludge.type_codecs.abstract import IndRet
+from libkludge import CPPTypeExpr
+from libkludge import SimpleTypeName
 
 class StdStringBase(IndRet):
+
+  @classmethod
+  def is_std_string(cls, cpp_type_expr):
+    return isinstance(cpp_type_expr, CPPTypeExpr.Template) \
+      and cpp_type_expr.name == "std::__1::basic_string" \
+      and len(cpp_type_expr.params) > 0 \
+      and isinstance(cpp_type_expr.params[0], CPPTypeExpr.Char)
 
   def __init__(self, type_name):
     IndRet.__init__(self, type_name)
 
   def gen_decl_std_string(self, edk_name, cpp_name):
-    return "std::string " + cpp_name + "(" + edk_name + ".getData(), " + edk_name + ".getLength());"
+    return self.type_name.cpp + " " + cpp_name + "(" + edk_name + ".getData(), " + edk_name + ".getLength());"
 
   def gen_tmp_std_string(self, edk_name):
-    return "std::string(" + edk_name + ".getData(), " + edk_name + ".getLength())"
+    return self.type_name.cpp + "(" + edk_name + ".getData(), " + edk_name + ".getLength())"
 
   def gen_upd_std_string(self, edk_name, cpp_name):
     return edk_name + " = String(" + cpp_name + ".size(), " + cpp_name + ".data());"
 
 class StdStringValue(StdStringBase):
+
+  @classmethod
+  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+    if cls.is_std_string(cpp_type_expr):
+      return StdStringValue(SimpleTypeName("String", str(cpp_type_expr)))
 
   def __init__(self, type_name):
     StdStringBase.__init__(self, type_name)
@@ -43,9 +57,34 @@ class StdStringValue(StdStringBase):
   def gen_cpp_arg_to_edk_param(self, edk_name, cpp_name):
     return ""
 
-StdStringConstRef = StdStringValue
+class StdStringConstRef(StdStringValue):
+
+  @classmethod
+  def is_std_string_const_ref(cls, cpp_type_expr):
+    return isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+      and cpp_type_expr.pointee.is_const \
+      and is_std_string(cpp_type_expr.pointee)
+
+  @classmethod
+  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+    if cls.is_std_string_const_ref(cpp_type_expr):
+      return StdStringConstRef(str(cpp_type_expr))
+
+  def __init__(self, type_name):
+    StdStringValue.__init__(self, type_name)
 
 class StdStringConstPtr(StdStringBase):
+
+  @classmethod
+  def is_std_string_const_ptr(cls, cpp_type_expr):
+    return isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
+      and cpp_type_expr.pointee.is_const \
+      and cls.is_std_string(cpp_type_expr.pointee)
+
+  @classmethod
+  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+    if cls.is_std_string_const_ptr(cpp_type_expr):
+      return StdStringConstPtr(SimpleTypeName("String", str(cpp_type_expr)))
 
   def __init__(self, type_name):
     StdStringBase.__init__(self, type_name)
@@ -76,6 +115,17 @@ class StdStringConstPtr(StdStringBase):
 
 class StdStringMutableRef(StdStringBase):
 
+  @classmethod
+  def is_std_string_mutable_ref(cls, cpp_type_expr):
+    return isinstance(cpp_type_expr, CPPTypeExpr.Reference) \
+      and cpp_type_expr.pointee.is_mutable \
+      and cls.is_std_string(cpp_type_expr.pointee)
+
+  @classmethod
+  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+    if cls.is_std_string_mutable_ref(cpp_type_expr):
+      return StdStringMutableRef(SimpleTypeName("String", str(cpp_type_expr)))
+
   def __init__(self, type_name):
     StdStringBase.__init__(self, type_name)
 
@@ -104,6 +154,17 @@ class StdStringMutableRef(StdStringBase):
     return self.gen_upd_std_string(edk_name, cpp_name)
 
 class StdStringMutablePtr(StdStringBase):
+
+  @classmethod
+  def is_std_string_mutable_ptr(cls, cpp_type_expr):
+    return isinstance(cpp_type_expr, CPPTypeExpr.Pointer) \
+      and cpp_type_expr.pointee.is_mutable \
+      and cls.is_std_string(cpp_type_expr.pointee)
+
+  @classmethod
+  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+    if cls.is_std_string_mutable_ptr(cpp_type_expr):
+      return StdStringMutablePtr(SimpleTypeName("String", str(cpp_type_expr)))
 
   def __init__(self, type_name):
     StdStringBase.__init__(self, type_name)

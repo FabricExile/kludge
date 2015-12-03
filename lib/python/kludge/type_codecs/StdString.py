@@ -68,13 +68,13 @@ class StdStringConstPtr(StdStringBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_in_param(edk_name)
 
-  def gen_edk_param_to_cpp_arg(self, param_name):
+  def gen_edk_to_cpp(self, param_name):
     return self.gen_decl_std_string(param_name)
 
   def gen_cpp_arg(self, param_name):
     return self.gen_cpp_ptr_to(param_name.cpp)
 
-  def gen_cpp_arg_to_edk_param(self, param_name):
+  def gen_cpp_to_edk(self, param_name):
     return ""
 
 class StdStringMutableRef(StdStringBase):
@@ -108,13 +108,13 @@ class StdStringMutableRef(StdStringBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_io_param(edk_name)
 
-  def gen_edk_param_to_cpp_arg(self, param_name):
+  def gen_edk_to_cpp(self, param_name):
     return self.gen_decl_std_string(param_name)
 
   def gen_cpp_arg(self, param_name):
     return param_name.cpp
 
-  def gen_cpp_arg_to_edk_param(self, param_name):
+  def gen_cpp_to_edk(self, param_name):
     return self.gen_upd_std_string(param_name)
 
 class StdStringMutablePtr(StdStringBase):
@@ -139,11 +139,11 @@ class StdStringMutablePtr(StdStringBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_io_param(edk_name)
 
-  def gen_edk_param_to_cpp_arg(self, param_name):
+  def gen_edk_to_cpp(self, param_name):
     return self.gen_decl_std_string(param_name)
 
   def gen_cpp_arg(self, param_name):
     return self.gen_cpp_ptr_to(param_name.cpp)
 
-  def gen_cpp_arg_to_edk_param(self, param_name):
+  def gen_cpp_to_edk(self, param_name):
     return self.gen_upd_std_string(param_name)

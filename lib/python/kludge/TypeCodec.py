@@ -40,13 +40,13 @@ class TypeCodec:
   def gen_edk_param(self, edk_name):
     self.raise_unsupported_as_param()
 
-  def gen_edk_param_to_cpp_arg(self, param_name):
+  def gen_edk_to_cpp(self, jinjenv, param_name):
     self.raise_unsupported_as_param()
 
   def gen_cpp_arg(self, param_name):
     self.raise_unsupported_as_param()
 
-  def gen_cpp_arg_to_edk_param(self, param_name):
+  def gen_cpp_to_edk(self, param_name):
     self.raise_unsupported_as_param()
 
   # Helpers

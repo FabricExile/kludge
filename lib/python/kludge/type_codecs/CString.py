@@ -13,7 +13,11 @@ def c_string_type_codec_generators(jinjenv, type_mgr):
     )
   @indirect_result()
   @in_param()
-  @cpp_arg_is_edk_param(lambda cpp_arg: cpp_arg + ".getCString()")
+  @conv(
+    cpp_arg = jinjenv.from_string(
+      "{{ param_name.edk }}.getCString()"
+      )
+    )
   class CString(TypeCodec): pass
 
   return [CString]

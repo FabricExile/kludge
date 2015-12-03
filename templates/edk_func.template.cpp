@@ -16,7 +16,7 @@ FABRIC_EXT_EXPORT
     )
 {
     {% for param in func.params %}
-    {{ param.gen_edk_param_to_cpp_arg() }}
+    {{ param.gen_edk_to_cpp() }}
     {% endfor %}
 
     {{ func.gen_edk_store_result_pre() }}
@@ -25,7 +25,7 @@ FABRIC_EXT_EXPORT
         ) {{ func.gen_edk_store_result_post() }};
 
     {% for param in func.params %}
-    {{ param.gen_cpp_arg_to_edk_param() }}
+    {{ param.gen_cpp_to_edk() }}
     {% endfor %}
 
     {{ func.gen_edk_return_dir_result() }}

@@ -180,11 +180,35 @@ def indirect_result(
     return cls
   return deco
 
+##############################################################################
+## Conversion
+##############################################################################
+
+def conv(
+  edk_to_cpp = "",
+  cpp_arg = "",
+  cpp_to_edk = "",
+  ):
+  def deco(cls):
+    def select(x):
+      if isinstance(x, basestring):
+        return lambda self, param_name: x
+      else:
+        return lambda self, param_name: x.render(
+          type_name = self.type_name,
+          param_name = param_name
+          )
+    setattr(cls, 'gen_edk_to_cpp', select(edk_to_cpp))
+    setattr(cls, 'gen_cpp_arg', select(cpp_arg))
+    setattr(cls, 'gen_cpp_to_edk', select(cpp_to_edk))
+    return cls
+  return deco
+
 def cpp_arg_is_edk_param(filter):
   def deco(cls):
     setattr(
       cls,
-      'gen_edk_param_to_cpp_arg',
+      'gen_edk_to_cpp',
       lambda self, param_name: ""
       )
     setattr(
@@ -194,48 +218,8 @@ def cpp_arg_is_edk_param(filter):
       )
     setattr(
       cls,
-      'gen_cpp_arg_to_edk_param',
+      'gen_cpp_to_edk',
       lambda self, param_name: ""
       )
     return cls
   return deco
-
-def cpp_arg_is_edk_param_ref(cls):
-
-  setattr(
-    cls,
-    'gen_edk_param_to_cpp_arg',
-    lambda self, param_name: ""
-    )
-
-  setattr(
-    cls,
-    'gen_cpp_arg',
-    lambda self, param_name: param_name.edk
-    )
-
-  setattr(
-    cls,
-    'gen_cpp_arg_to_edk_param',
-    lambda self, param_name: ""
-    )
-
-  return cls
-
-def cpp_arg_is_edk_param_ptr(cls):
-  setattr(
-    cls,
-    'gen_edk_param_to_cpp_arg',
-    lambda self, param_name: ""
-    )
-  setattr(
-    cls,
-    'gen_cpp_arg',
-    lambda self, param_name: "&" + param_name.edk
-    )
-  setattr(
-    cls,
-    'gen_cpp_arg_to_edk_param',
-    lambda self, param_name: ""
-    )
-  return cls

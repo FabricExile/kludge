@@ -31,6 +31,10 @@ class TypeMgr:
     self.add_type_codec_generators(
       c_string_type_codec_generators(jinjenv, self)
       )
+
+    self.add_type_codec_generators(
+      simple_type_codec_generators(jinjenv, self)
+      )
     # add_simple_type_codec_generators(jinjenv, self)
     # add_std_string_type_codec_generators(jinjenv, self)
     # add_std_vector_type_codec_generators(jinjenv, self)

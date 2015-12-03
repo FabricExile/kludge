@@ -28,13 +28,13 @@ class AllocatedCopiedWrapperValue(AllocatedCopiedWrapperBase):
   def gen_edk_param(self, edk_name):
     return self.gen_edk_in_param(edk_name)
 
-  def gen_edk_param_to_cpp_arg(self, param_name):
+  def gen_edk_to_cpp(self, param_name):
     return ""
 
   def gen_cpp_arg(self, param_name):
     return "*" + param_name.edk + ".cpp_ptr"
 
-  def gen_cpp_arg_to_edk_param(self, param_name):
+  def gen_cpp_to_edk(self, param_name):
     return ""
 
 class AllocatedCopiedWrapperConstRef(AllocatedCopiedWrapperValue):

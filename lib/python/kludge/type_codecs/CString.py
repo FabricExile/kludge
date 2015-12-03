@@ -11,6 +11,6 @@ from kludge import SimpleTypeName
   SimpleTypeName('String', 'const char *')
   )
 @indirect_result()
-@in_param
+@in_param()
 @cpp_arg_is_edk_param(lambda cpp_arg: cpp_arg + ".getCString()")
 class CString(TypeCodec): pass

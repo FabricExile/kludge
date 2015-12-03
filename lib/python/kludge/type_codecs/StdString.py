@@ -14,7 +14,7 @@ from kludge import SimpleTypeName
 @indirect_result(
   post=lambda edk_name: ".c_str()"
   )
-@in_param
+@in_param()
 @cpp_arg_is_edk_param(lambda cpp_arg: cpp_arg + ".getCString()")
 class StdString(TypeCodec): pass
 

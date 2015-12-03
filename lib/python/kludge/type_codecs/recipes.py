@@ -78,37 +78,35 @@ def match_mutable_ptr_by_dict(lookup):
     return cls
   return deco
 
-def in_param(cls):
+def in_param():
+  def deco(cls):
+    setattr(
+      cls,
+      'gen_kl_param',
+      lambda self, kl_name: self.gen_kl_in_param(kl_name)
+      )
+    setattr(
+      cls,
+      'gen_edk_param',
+      lambda self, edk_name: self.gen_edk_in_param(edk_name)
+      )
+    return cls
+  return deco
 
-  setattr(
-    cls,
-    'gen_kl_param',
-    lambda self, kl_name: self.gen_kl_in_param(kl_name)
-    )
-
-  setattr(
-    cls,
-    'gen_edk_param',
-    lambda self, edk_name: self.gen_edk_in_param(edk_name)
-    )
-
-  return cls
-
-def io_param(cls):
-
-  setattr(
-    cls,
-    'gen_kl_param',
-    lambda self, kl_name: self.gen_kl_io_param(kl_name)
-    )
-
-  setattr(
-    cls,
-    'gen_edk_param',
-    lambda self, edk_name: self.gen_edk_io_param(edk_name)
-    )
-
-  return cls
+def io_param():
+  def deco(cls):
+    setattr(
+      cls,
+      'gen_kl_param',
+      lambda self, kl_name: self.gen_kl_io_param(kl_name)
+      )
+    setattr(
+      cls,
+      'gen_edk_param',
+      lambda self, edk_name: self.gen_edk_io_param(edk_name)
+      )
+    return cls
+  return deco
 
 def direct_result(cls):
 

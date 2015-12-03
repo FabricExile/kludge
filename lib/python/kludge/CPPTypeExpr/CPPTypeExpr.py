@@ -156,7 +156,7 @@ class Double(FloatingPoint):
   def get_unqualified_desc(self):
     return "double"
 
-class Custom(Direct):
+class Named(Direct):
 
   def __init__(self, name):
     Direct.__init__(self)
@@ -250,7 +250,7 @@ class Parser:
     NotAny(key_const),
     NotAny(key_volatile),
     Word(alphas+"_", alphanums+"_"),
-    ]).setParseAction(lambda s,l,t: Custom(t[0]))
+    ]).setParseAction(lambda s,l,t: Named(t[0]))
 
   def __init__(self):
 
@@ -274,7 +274,7 @@ class Parser:
     self.ty_floating_point = self.ty_float | self.ty_double
     self.ty_custom = Forward()
     self.ty_custom << MatchFirst([
-      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Custom(t[0].name + "::" + t[1].name)),
+      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Named(t[0].name + "::" + t[1].name)),
       self.ident,
       ])
 

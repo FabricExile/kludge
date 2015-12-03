@@ -1,19 +1,18 @@
 from kludge import CPPTypeExpr
 from kludge import SimpleTypeName
 
-def match_cpp_expr_type(cpp_expr_types_to_match, type_name):
+def match_cpp_expr_types(cpp_expr_types_to_match, type_name):
   def deco(cls):
     def impl(cls, cpp_type_expr, type_mgr):
-      if hasattr(cpp_expr_types_to_match, '__iter__'):
-        for cpp_expr_type_to_match in cpp_expr_types_to_match:
-          if cpp_type_expr == cpp_expr_type_to_match:
-            return cls(type_name)          
-      else:
+      for cpp_expr_type_to_match in cpp_expr_types_to_match:
         if cpp_type_expr == cpp_expr_type_to_match:
           return cls(type_name)          
     setattr(cls, 'maybe_get_type_codec', classmethod(impl))
     return cls
   return deco
+
+def match_cpp_expr_type(cpp_expr_type_to_match, type_name):
+  return match_cpp_expr_types([cpp_expr_type_to_match], type_name)
 
 def match_value_by_dict(lookup):
   def deco(cls):
@@ -157,39 +156,40 @@ def direct_result_by_deref(cls):
 
   return cls
 
-def indirect_result(cls):
+indirect_result_edk_name = "_KLUDGE_EDK_RESERVED_result"
 
-  setattr(
-    cls,
-    'gen_direct_result_edk_type',
-    lambda self: "void"
-    )
-
-  setattr(
-    cls,
-    'gen_indirect_result_edk_param',
-    lambda self: "Traits< " + self.type_name.edk + " >::Result _KLUDGE_EDK_RESERVED_result"
-    )
-
-  setattr(
-    cls,
-    'gen_edk_store_result_pre',
-    lambda self: "_KLUDGE_EDK_RESERVED_result = "
-    )
-
-  setattr(
-    cls,
-    'gen_edk_store_result_post',
-    lambda self: ""
-    )
-
-  setattr(
-    cls,
-    'gen_edk_return_dir_result',
-    lambda self: ""
-    )
-
-  return cls
+def indirect_result(
+  pre = lambda edk_name: edk_name + " = ",
+  post = lambda edk_name: "",
+  ):
+  def deco(cls):
+    setattr(
+      cls,
+      'gen_direct_result_edk_type',
+      lambda self: "void"
+      )
+    setattr(
+      cls,
+      'gen_indirect_result_edk_param',
+      lambda self: "Traits< " + self.type_name.edk + " >::Result _KLUDGE_EDK_RESERVED_result"
+      )
+    setattr(
+      cls,
+      'gen_edk_store_result_pre',
+      lambda self: pre(indirect_result_edk_name)
+      )
+    setattr(
+      cls,
+      'gen_edk_store_result_post',
+      lambda self: post(indirect_result_edk_name)
+      )
+    setattr(
+      cls,
+      'gen_edk_return_dir_result',
+      lambda self: ""
+      )
+    return cls
+  return deco
 
 def cpp_arg_is_edk_param(filter):
   def deco(cls):

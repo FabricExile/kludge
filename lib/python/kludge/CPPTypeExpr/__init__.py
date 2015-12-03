@@ -12,7 +12,7 @@ from CPPTypeExpr import \
       FloatingPoint, \
         Float, \
         Double, \
-    Custom, \
+    Named, \
     Template, \
   Indirect, \
     PointerTo, \

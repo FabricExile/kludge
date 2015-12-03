@@ -7,82 +7,21 @@ from libkludge import CPPTypeExpr
 
 class TypeMgr:
 
-  built_in_type_codecs = [
-    SimpleValue(SimpleTypeName("Boolean", "bool")),
-    SimpleConstRef(SimpleTypeName("Boolean", "const bool &")),
-    SimpleConstPtr(SimpleTypeName("Boolean", "const bool *")),
-    SimpleMutableRef(SimpleTypeName("Boolean", "bool &")),
-    SimpleMutablePtr(SimpleTypeName("Boolean", "bool *")),
-    ###
-    SimpleValue(SimpleTypeName("SInt8", "signed char")),
-    SimpleConstRef(SimpleTypeName("SInt8", "const signed char &")),
-    SimpleMutableRef(SimpleTypeName("SInt8", "signed char &")),
-    ###
-    SimpleValue(SimpleTypeName("UInt8", "unsigned char")),
-    SimpleConstRef(SimpleTypeName("UInt8", "const unsigned char &")),
-    SimpleConstPtr(SimpleTypeName("UInt8", "const unsigned char *")),
-    SimpleMutableRef(SimpleTypeName("UInt8", "unsigned char &")),
-    SimpleMutablePtr(SimpleTypeName("UInt8", "unsigned char *")),
-    ###
-    SimpleValue(SimpleTypeName("SInt16", "short")),
-    SimpleConstRef(SimpleTypeName("SInt16", "const short &")),
-    SimpleConstPtr(SimpleTypeName("SInt16", "const short *")),
-    SimpleMutableRef(SimpleTypeName("SInt16", "short &")),
-    SimpleMutablePtr(SimpleTypeName("SInt16", "short *")),
-    ###
-    SimpleValue(SimpleTypeName("UInt16", "unsigned short")),
-    SimpleConstRef(SimpleTypeName("UInt16", "const unsigned short &")),
-    SimpleConstPtr(SimpleTypeName("UInt16", "const unsigned short *")),
-    SimpleMutableRef(SimpleTypeName("UInt16", "unsigned short &")),
-    SimpleMutablePtr(SimpleTypeName("UInt16", "unsigned short *")),
-    ###
-    SimpleValue(SimpleTypeName("SInt32", "int")),
-    SimpleConstRef(SimpleTypeName("SInt32", "const int &")),
-    SimpleConstPtr(SimpleTypeName("SInt32", "const int *")),
-    SimpleMutableRef(SimpleTypeName("SInt32", "int &")),
-    SimpleMutablePtr(SimpleTypeName("SInt32", "int *")),
-    ###
-    SimpleValue(SimpleTypeName("UInt32", "unsigned int")),
-    SimpleConstRef(SimpleTypeName("UInt32", "const unsigned int &")),
-    SimpleConstPtr(SimpleTypeName("UInt32", "const unsigned int *")),
-    SimpleMutableRef(SimpleTypeName("UInt32", "unsigned int &")),
-    SimpleMutablePtr(SimpleTypeName("UInt32", "unsigned int *")),
-    ###
-    SimpleValue(SimpleTypeName("SInt32", "long")),
-    SimpleConstRef(SimpleTypeName("SInt32", "const long &")),
-    SimpleConstPtr(SimpleTypeName("SInt32", "const long *")),
-    SimpleMutableRef(SimpleTypeName("SInt32", "long &")),
-    SimpleMutablePtr(SimpleTypeName("SInt32", "long *")),
-    ###
-    SimpleValue(SimpleTypeName("UInt32", "unsigned long")),
-    SimpleConstRef(SimpleTypeName("UInt32", "const unsigned long &")),
-    SimpleConstPtr(SimpleTypeName("UInt32", "const unsigned long *")),
-    SimpleMutableRef(SimpleTypeName("UInt32", "unsigned long &")),
-    SimpleMutablePtr(SimpleTypeName("UInt32", "unsigned long *")),
-    ###
-    SimpleValue(SimpleTypeName("SInt64", "long long")),
-    SimpleConstRef(SimpleTypeName("SInt64", "const long long &")),
-    SimpleConstPtr(SimpleTypeName("SInt64", "const long long *")),
-    SimpleMutableRef(SimpleTypeName("SInt64", "long long &")),
-    SimpleMutablePtr(SimpleTypeName("SInt64", "long long *")),
-    ###
-    SimpleValue(SimpleTypeName("UInt64", "unsigned long long")),
-    SimpleConstRef(SimpleTypeName("UInt64", "const unsigned long long &")),
-    SimpleConstPtr(SimpleTypeName("UInt64", "const unsigned long long *")),
-    SimpleMutableRef(SimpleTypeName("UInt64", "unsigned long long &")),
-    SimpleMutablePtr(SimpleTypeName("UInt64", "unsigned long long *")),
-    ###
-    SimpleValue(SimpleTypeName("Float32", "float")),
-    SimpleConstRef(SimpleTypeName("Float32", "const float &")),
-    SimpleConstPtr(SimpleTypeName("Float32", "const float *")),
-    SimpleMutableRef(SimpleTypeName("Float32", "float &")),
-    SimpleMutablePtr(SimpleTypeName("Float32", "float *")),
-    ###
-    SimpleValue(SimpleTypeName("Float64", "double")),
-    SimpleConstRef(SimpleTypeName("Float64", "const double &")),
-    SimpleConstPtr(SimpleTypeName("Float64", "const double *")),
-    SimpleMutableRef(SimpleTypeName("Float64", "double &")),
-    SimpleMutablePtr(SimpleTypeName("Float64", "double *")),
+  built_in_type_codec_generators = [
+    CStringValue,       # First so we don't catch in Simple...
+    CStringConstRef,
+    SimpleValue,
+    SimpleConstRef,
+    SimpleConstPtr,
+    SimpleMutableRef,
+    SimpleMutablePtr,
+    StdVectorValue,
+    StdVectorConstRef,
+    StdStringValue,
+    StdStringConstRef,
+    StdStringConstPtr,
+    StdStringMutableRef,
+    StdStringMutablePtr,
     ]
 
   def __init__(self):
@@ -90,19 +29,7 @@ class TypeMgr:
     self._type_codec_generators = []
     self._cpp_type_expr_parser = CPPTypeExpr.Parser()
 
-    self.add_type_codecs(TypeMgr.built_in_type_codecs)
-
-    self.add_type_codec_generators([
-      StdVectorValue,
-      StdVectorConstRef,
-      StdStringValue,
-      StdStringConstRef,
-      StdStringConstPtr,
-      StdStringMutableRef,
-      StdStringMutablePtr,
-      CStringValue,
-      CStringConstRef,
-      ])
+    self.add_type_codec_generators(self.built_in_type_codec_generators)
 
   def add_type_codec_generator(self, type_codec_generator):
     self._type_codec_generators.append(type_codec_generator)
@@ -148,20 +75,7 @@ class TypeMgr:
     raise Exception(cpp_type_name + ": no EDK type association found")
 
   def get_type_codec_for_clang_type(self, clang_type):
-    cpp_type_name = clang_type.spelling
-    if cpp_type_name == "void":
-      return None
-
-    type_codec = self.maybe_get_type_codec(cpp_type_name)
-    if type_codec:
-      return type_codec
-
-    canonical_cpp_type_name = clang_type.get_canonical().spelling
-    if canonical_cpp_type_name != cpp_type_name:
-      type_codec = self.maybe_get_type_codec(canonical_cpp_type_name)
-      if type_codec:
-        return type_codec
-    raise Exception(cpp_type_name + ": no EDK type association found")
+    return self.get_type_codec(clang_type.spelling)
 
   def convert_clang_params(self, clang_params):
     return map(

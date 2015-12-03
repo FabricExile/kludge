@@ -19,6 +19,7 @@ class CStringBase(IndRet):
 
 @indirect_result
 @in_param
+@cpp_arg_is_edk_param(lambda cpp_arg: cpp_arg + ".getCString()")
 class CStringValue(CStringBase):
 
   @classmethod
@@ -28,15 +29,6 @@ class CStringValue(CStringBase):
 
   def __init__(self, type_name):
     CStringBase.__init__(self, type_name)
-
-  def gen_edk_param_to_cpp_arg(self, param_name):
-    return ""
-
-  def gen_cpp_arg(self, param_name):
-    return self.gen_get_cstring(param_name.edk)
-
-  def gen_cpp_arg_to_edk_param(self, param_name):
-    return ""
 
 class CStringConstRef(CStringValue):
 

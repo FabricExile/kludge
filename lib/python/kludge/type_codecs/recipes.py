@@ -196,6 +196,29 @@ def indirect_result(cls):
 
   return cls
 
+def cpp_arg_is_edk_param(filter):
+  def impl(cls):
+    setattr(
+      cls,
+      'gen_edk_param_to_cpp_arg',
+      lambda self, param_name: ""
+      )
+
+    setattr(
+      cls,
+      'gen_cpp_arg',
+      lambda self, param_name: filter(param_name.edk)
+      )
+
+    setattr(
+      cls,
+      'gen_cpp_arg_to_edk_param',
+      lambda self, param_name: ""
+      )
+
+    return cls
+  return impl
+
 def cpp_arg_is_edk_param_ref(cls):
 
   setattr(

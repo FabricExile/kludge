@@ -58,7 +58,7 @@ class TypeCodec:
     return "io " + self.type_name.kl.base + " " + kl_name + self.type_name.kl.suffix
 
   def gen_edk_result_name(self):
-    return "_KLUDGE_EDK_result";
+    return "_KLUDGE_EDK_RESERVED_result";
 
   def gen_edk_traits(self):
     return "Traits< " + self.type_name.edk + " >"
@@ -76,7 +76,7 @@ class TypeCodec:
     return "&" + edk_name
 
   def gen_cpp_result_name(self):
-    return "_KLUDGE_CPP_result";
+    return "_KLUDGE_CPP_RESERVED_result";
 
   def gen_cpp_ptr_to(self, cpp_name):
     return "&" + cpp_name

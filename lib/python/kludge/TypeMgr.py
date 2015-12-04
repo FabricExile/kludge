@@ -12,9 +12,9 @@ class TypeMgr:
     self.add_type_codecs(
       build_c_string_type_codecs(jinjenv)
       )
-    # self.add_type_codecs(
-    #   build_simple_type_codecs(jinjenv)
-    #   )
+    self.add_type_codecs(
+      build_simple_type_codecs(jinjenv)
+      )
     # self.add_type_codecs(
     #   build_std_string_type_codecs(jinjenv)
     #   )

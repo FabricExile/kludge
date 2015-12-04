@@ -30,15 +30,14 @@ def build_simple_type_codecs(jinjenv):
       jinjenv
       ).match_value_by_dict(
         cpp_base_type_to_kl_base_type
-      ).no_conv_by_ref(
+      ).no_conv(
       ).param_in(
-      ).result_direct(
-      ),
+      ).result_direct(),
     TypeCodec(
       jinjenv
       ).match_const_ref_by_dict(
         cpp_base_type_to_kl_base_type
-      ).no_conv_by_ref(
+      ).no_conv(
       ).param_in(
       ).result_direct(
       ),
@@ -46,18 +45,21 @@ def build_simple_type_codecs(jinjenv):
       jinjenv
       ).match_const_ptr_by_dict(
         cpp_base_type_to_kl_base_type
-      ).no_conv_by_ptr(
+      ).no_conv(
       ).param_in(
         cpp = GenLambda(
           lambda gd: "&" + gd.name.cpp
           )
-      ).result_direct_deref_ptr(
+      ).result_direct(
+        decl_and_assign_cpp = GenLambda(
+          lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
+        )
       ),
     TypeCodec(
       jinjenv
       ).match_mutable_ref_by_dict(
         cpp_base_type_to_kl_base_type
-      ).no_conv_by_ref(
+      ).no_conv(
       ).param_io(
       ).result_direct(
       ),
@@ -65,11 +67,14 @@ def build_simple_type_codecs(jinjenv):
       jinjenv
       ).match_mutable_ptr_by_dict(
         cpp_base_type_to_kl_base_type
-      ).no_conv_by_ptr(
+      ).no_conv(
       ).param_io(
         cpp = GenLambda(
           lambda gd: "&" + gd.name.cpp
           )
-      ).result_direct_deref_ptr(
+      ).result_direct(
+        decl_and_assign_cpp = GenLambda(
+          lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
+        )
       ),
     ]

@@ -88,7 +88,7 @@ class Func(Decl):
   def params_cpp(self):
     snippets = []
     for param in self.params:
-      snippets.append(param.name.cpp)
+      snippets.append(param.param_cpp())
     return ",\n        ".join(snippets)
 
   def jinjify(self, target, jinjenv):

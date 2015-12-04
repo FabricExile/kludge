@@ -24,14 +24,14 @@ class GenData:
 
     self._codec = type_info.codec
 
-  @property
-  def edk_to_cpp(self):
-    return self._codec.gen_edk_to_cpp(self)
+  def conv_decl_cpp(self):
+    return self._codec.gen_conv_decl_cpp(self)
 
-  @property
-  def cpp_arg(self):
-    return self._codec.gen_cpp_arg(self)
+  def conv_edk_to_cpp(self):
+    return self._codec.gen_conv_edk_to_cpp(self)
 
-  @property
-  def cpp_to_edk(self):
-    return self._codec.gen_cpp_to_edk(self)
+  def conv_decl_edk(self):
+    return self._codec.gen_conv_decl_edk(self)
+
+  def conv_cpp_to_edk(self):
+    return self._codec.gen_conv_cpp_to_edk(self)

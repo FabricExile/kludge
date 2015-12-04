@@ -24,76 +24,71 @@ class Func(Decl):
       self._result_value = None
     self.params = params
 
-  @property
-  def kl_result_type(self):
+  def result_type_kl(self):
     if self._result_value:
-      return self._result_value.kl_result_type
+      return self._result_value.type_info.spec.kl.compound
     else:
       return ""
 
-  @property
-  def direct_result_edk_type(self):
+  def result_direct_type_edk(self):
     if self._result_value:
-      return self._result_value.direct_result_edk_type
+      return self._result_value.result_direct_type_edk()
     else:
       return "void"
 
-  @property
-  def edk_store_result_pre(self):
+  def result_indirect_param_edk(self):
     if self._result_value:
-      return self._result_value.edk_store_result_pre
+      return self._result_value.result_indirect_param_edk()
     else:
       return ""
 
-  @property
-  def edk_store_result_post(self):
+  def result_decl_and_assign_cpp(self):
     if self._result_value:
-      return self._result_value.edk_store_result_post
+      return self._result_value.result_decl_and_assign_cpp()
     else:
       return ""
 
-  @property
-  def edk_return_direct_result(self):
+  def result_indirect_assign_to_edk(self):
     if self._result_value:
-      return self._result_value.edk_return_direct_result
+      return self._result_value.result_indirect_assign_to_edk()
     else:
       return ""
 
-  @property
-  def kl_name(self):
+  def result_direct_return_edk(self):
+    if self._result_value:
+      return self._result_value.result_direct_return_edk()
+    else:
+      return ""
+
+  def name_kl(self):
     return "_".join(self._nested_function_name)
 
-  @property
-  def edk_name(self):
+  def name_edk(self):
     return self._extname + "_" + "_".join(self._nested_function_name)
 
-  @property
-  def cpp_name(self):
+  def name_cpp(self):
     return "::" + "::".join(self._nested_function_name)
 
-  @property
-  def kl_params(self):
+  def params_kl(self):
     snippets = []
     for param in self.params:
-      snippets.append(param.kl_param)
+      snippets.append(param.param_kl())
     return ",\n    ".join(snippets)
 
-  @property
-  def edk_params(self):
+  def params_edk(self):
     snippets = []
     if self._result_value:
-      indirect_result_edk_param = self._result_value.indirect_result_edk_param
-      if indirect_result_edk_param:
-        snippets.append(indirect_result_edk_param)
+      result_indirect_param_edk = self._result_value.result_indirect_param_edk()
+      if result_indirect_param_edk:
+        snippets.append(result_indirect_param_edk)
     for param in self.params:
-      snippets.append(param.edk_param)
+      snippets.append(param.param_edk())
     return ",\n    ".join(snippets)
 
-  @property
-  def cpp_args(self):
+  def params_cpp(self):
     snippets = []
     for param in self.params:
-      snippets.append(param.cpp_arg)
+      snippets.append(param.name.cpp)
     return ",\n        ".join(snippets)
 
   def jinjify(self, target, jinjenv):

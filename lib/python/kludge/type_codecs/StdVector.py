@@ -44,22 +44,37 @@ def build_std_vector_type_codecs(jinjenv):
       jinjenv
       ).match(
         match_value_or_const_ref
-      ).no_result(
+      ).result_indirect(
+        pre = GenLambda(
+          lambda gd: gd.type.cpp.name + " " + gd.name.cpp " = "
+          ),
+        post = """
+{{ name.edk }}.resize( 0 );
+for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
+  it != {{ name.cpp }}.end(); ++it )
+{
+  {{ element.type.cpp.name }} const &{{ element.name.cpp }} = *it;
+  {{ element.conv_decl_edk }}
+  {{ element.conv_cpp_to_edk }}
+  {{ name.edk }}.push( {{ element.conv_arg_edk }} );
+}
+"""
       ).in_param(
       ).conv(
-        edk_to_cpp = """
+        conv_edk_to_cpp = """
 std::vector< {{ element.type.cpp.name }} > {{ name.cpp }};
 {{ name.cpp }}.reserve( {{ name.edk }}.size() );
 for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
 {
   {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
-  {{ element.edk_to_cpp }}
-  {{ name.cpp }}.push_back( {{ element.cpp_arg }} );
+  {{ element.conv_decl_cpp }}
+  {{ element.conv_edk_to_cpp }}
+  {{ name.cpp }}.push_back( {{ element.conv_arg_cpp }} );
 }
 """,
-        cpp_arg = GenLambda(
+        conv_arg_cpp = GenLambda(
           lambda gd: gd.name.cpp
           ),
-        cpp_to_edk = GenStr(""),
+        conv_cpp_to_edk = GenStr(""),
       ),
     ]

@@ -30,40 +30,46 @@ def build_simple_type_codecs(jinjenv):
       jinjenv
       ).match_value_by_dict(
         cpp_base_type_to_kl_base_type
-      ).direct_result(
-      ).in_param(
       ).no_conv_by_ref(
+      ).param_in(
+      ).result_direct(
       ),
     TypeCodec(
       jinjenv
       ).match_const_ref_by_dict(
         cpp_base_type_to_kl_base_type
-      ).direct_result(
-      ).in_param(
       ).no_conv_by_ref(
+      ).param_in(
+      ).result_direct(
       ),
     TypeCodec(
       jinjenv
       ).match_const_ptr_by_dict(
-      cpp_base_type_to_kl_base_type
-      ).direct_result_deref_ptr(
-      ).in_param(
+        cpp_base_type_to_kl_base_type
       ).no_conv_by_ptr(
+      ).param_in(
+        cpp = GenLambda(
+          lambda gd: "&" + gd.name.cpp
+          )
+      ).result_direct_deref_ptr(
       ),
     TypeCodec(
       jinjenv
       ).match_mutable_ref_by_dict(
         cpp_base_type_to_kl_base_type
-      ).direct_result(
-      ).io_param(
       ).no_conv_by_ref(
+      ).param_io(
+      ).result_direct(
       ),
     TypeCodec(
       jinjenv
       ).match_mutable_ptr_by_dict(
         cpp_base_type_to_kl_base_type
-      ).direct_result_deref_ptr(
-      ).io_param(
       ).no_conv_by_ptr(
+      ).param_io(
+        cpp = GenLambda(
+          lambda gd: "&" + gd.name.cpp
+          )
+      ).result_direct_deref_ptr(
       ),
     ]

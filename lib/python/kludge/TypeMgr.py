@@ -1,8 +1,6 @@
 from kludge.type_codecs import *
 from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, ValueName, Value, TypeInfo
 
-# from edk_param import *
-
 class TypeMgr:
 
   def __init__(self, jinjenv):
@@ -14,15 +12,15 @@ class TypeMgr:
     self.add_type_codecs(
       build_c_string_type_codecs(jinjenv)
       )
-    self.add_type_codecs(
-      build_simple_type_codecs(jinjenv)
-      )
-    self.add_type_codecs(
-      build_std_string_type_codecs(jinjenv)
-      )
-    self.add_type_codecs(
-      build_std_vector_type_codecs(jinjenv)
-      )
+    # self.add_type_codecs(
+    #   build_simple_type_codecs(jinjenv)
+    #   )
+    # self.add_type_codecs(
+    #   build_std_string_type_codecs(jinjenv)
+    #   )
+    # self.add_type_codecs(
+    #   build_std_vector_type_codecs(jinjenv)
+    #   )
 
   def add_type_codec(self, type_codec):
     self._type_codecs.append(type_codec)

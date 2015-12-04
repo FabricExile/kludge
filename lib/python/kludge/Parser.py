@@ -107,7 +107,8 @@ class Parser:
         self.jinjenv = jinja2.Environment(
             trim_blocks=True,
             lstrip_blocks=True,
-            loader=jinja2.PackageLoader('__main__', 'templates')
+            loader=jinja2.PackageLoader('__main__', 'templates'),
+            undefined = jinja2.StrictUndefined,
             )
         self.type_mgr = TypeMgr(self.jinjenv)
         self.edk_decls = ast.DeclSet()

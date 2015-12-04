@@ -38,34 +38,27 @@ class TypeMgr:
       return type_info
 
     try:
-      cpp_type_spec = CPPTypeSpec(
-        cpp_type_name,
-        self._cpp_type_expr_parser.parse(cpp_type_name)
-        )
+      cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
     except:
       raise Exception(cpp_type_name + ": malformed C++ type expression")
 
     for type_codec in self._type_codecs:
-      type_spec = type_codec.maybe_match(cpp_type_spec, self)
+      type_spec = type_codec.maybe_match(cpp_type_expr, self)
       if type_spec:
         type_info = TypeInfo(type_codec, type_spec)
         self._cpp_type_name_to_type_info[cpp_type_name] = type_info
-        canon_cpp_type_name = str(cpp_type_spec.expr)
+        canon_cpp_type_name = str(cpp_type_expr)
         if canon_cpp_type_name != cpp_type_name:
-          canon_cpp_type_spec = CPPTypeSpec(
-            canon_cpp_type_name,
-            cpp_type_spec.expr
-            )
           canon_type_spec = TypeSpec(
             type_spec.kl.base,
             type_spec.kl.suffix,
             type_spec.edk.name,
-            canon_cpp_type_spec,
+            canon_cpp_type_name,
             [],
             )
           canon_type_info = TypeInfo(
             type_codec,
-            canon_cpp_type_spec
+            canon_type_spec
             )
           self._cpp_type_name_to_type_info[canon_cpp_type_name] = canon_type_info
         return type_info

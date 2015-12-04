@@ -38,7 +38,7 @@ class TypeCodec:
         self.set_hook(hook_name, impl)
 
     # Special signature and no reflection
-    def maybe_match_default(cpp_type_spec, type_mgr):
+    def maybe_match_default(cpp_type_name, cpp_type_spec, type_mgr):
       raise Exception("unimplemented match protocol")
     self.set_hook('maybe_match', maybe_match_default)
 
@@ -59,67 +59,72 @@ class TypeCodec:
     self.set_hook('maybe_match', impl)
     return self
 
-  def match_cpp_expr_types(self, cpp_expr_types_to_match, type_spec_builder):
-    def impl(cpp_type_spec, type_mgr):
+  def match_cpp_expr_types(self, cpp_expr_types_to_match, type_spec):
+    def impl(cpp_type_expr, type_mgr):
       for cpp_expr_type_to_match in cpp_expr_types_to_match:
-        if cpp_type_spec.expr == cpp_expr_type_to_match:
-          return type_spec_builder(cpp_type_spec)
+        if cpp_type_expr == cpp_expr_type_to_match:
+          return type_spec
     self.set_hook('maybe_match', impl)
     return self
 
-  def match_cpp_expr_type(self, cpp_expr_type_to_match, type_spec_builder):
-    return self.match_cpp_expr_types([cpp_expr_type_to_match], type_spec_builder)
+  def match_cpp_expr_type(self, cpp_expr_type_to_match, type_spec):
+    return self.match_cpp_expr_types([cpp_expr_type_to_match], type_spec)
 
   def match_value_by_dict(self, lookup):
-    def impl(cpp_type_spec, type_mgr):
-      if isinstance(cpp_type_spec.expr, CPPTypeExpr.Direct):
-        kl_type_name = lookup.get(cpp_type_spec.expr.get_unqualified_desc())
+    def impl(cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr.expr, CPPTypeExpr.Direct):
+        unqual_cpp_type_name = cpp_type_expr.get_unqualified_desc()
+        kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_const_ref_by_dict(self, lookup):
-    def impl(cpp_type_spec, type_mgr):
-      if isinstance(cpp_type_spec.expr, CPPTypeExpr.ReferenceTo) \
-        and cpp_type_spec.expr.pointee.is_const \
-        and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
-        kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
+    def impl(cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
+        and cpp_type_expr.pointee.is_const \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
+        kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_const_ptr_by_dict(self, lookup):
-    def impl(cpp_type_spec, type_mgr):
-      if isinstance(cpp_type_spec.expr, CPPTypeExpr.PointerTo) \
-        and cpp_type_spec.expr.pointee.is_const \
-        and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
-        kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
+    def impl(cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
+        and cpp_type_expr.pointee.is_const \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
+        kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_mutable_ref_by_dict(self, lookup):
-    def impl(cpp_type_spec, type_mgr):
-      if isinstance(cpp_type_spec.expr, CPPTypeExpr.ReferenceTo) \
-        and cpp_type_spec.expr.pointee.is_mutable \
-        and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
-        kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
+    def impl(cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
+        and cpp_type_expr.pointee.is_mutable \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
+        kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_mutable_ptr_by_dict(self, lookup):
-    def impl(cpp_type_spec, type_mgr):
-      if isinstance(cpp_type_spec.expr, CPPTypeExpr.PointerTo) \
-        and cpp_type_spec.expr.pointee.is_mutable \
-        and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
-        kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
+    def impl(cpp_type_expr, type_mgr):
+      if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
+        and cpp_type_expr.pointee.is_mutable \
+        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
+        kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -213,18 +218,18 @@ class TypeCodec:
       indirect_param_edk = GenStr(""),
       indirect_assign_to_edk = GenStr(""),
       direct_return_edk = GenLambda(
-        lambda gd: gd.conv_decl_edk + "\n  " + gd.conv_cpp_to_edk + "\n  return " + gd.name.edk + ";"
+        lambda gd: gd.conv_decl_edk() + "\n  " + gd.conv_cpp_to_edk() + "\n  return " + gd.name.edk + ";"
         ),
       )
 
   def result_indirect(self):
     return self.result(
-      direct_type_edk = GenStr(""),
+      direct_type_edk = GenStr("void"),
       indirect_param_edk = GenLambda(
         lambda gd: "Traits< " + gd.type.edk.name + " >::Result " + gd.name.edk
         ),
       indirect_assign_to_edk = GenLambda(
-        lambda gd: gd.conv_cpp_to_edk
+        lambda gd: gd.conv_cpp_to_edk()
         ),
       direct_return_edk = GenStr(""),
       )

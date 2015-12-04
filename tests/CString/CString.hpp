@@ -3,7 +3,7 @@
 
 inline void CStringParams(
   char const *cStringValue,
-  char const * const &CStringConstRef
+  char const * const &cStringConstRef
   ) {}
 
 inline char const *CStringValueReturn() { return "hello"; }

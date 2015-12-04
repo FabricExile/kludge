@@ -10,7 +10,7 @@ def build_c_string_type_codecs(jinjenv):
           PointerTo(Const(Char())),
           ReferenceTo(Const(PointerTo(Const(Char())))),
           ],
-        SimpleTypeSpec.builder('String')
+        SimpleTypeSpec('String', 'char const *')
       ).result_indirect(
       ).param_in(
       ).conv(
@@ -18,7 +18,7 @@ def build_c_string_type_codecs(jinjenv):
           lambda gd: gd.name.cpp + " = " + gd.name.edk + ".getCString();"
           ),
         cpp_to_edk = GenLambda(
-          lambda gd: gd.name.edk + " = " + gd.name.cpp + ".c_str();"
+          lambda gd: gd.name.edk + " = " + gd.name.cpp + ";"
           ),
       ),
     ]

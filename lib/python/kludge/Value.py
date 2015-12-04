@@ -10,7 +10,7 @@ class Value:
     self.name = value_name
     self.type_info = type_info
 
-    self._gen_data = GenData(self)
+    self._gen_data = GenData(value_name, type_info)
 
 for protocol_name, hook_names in TypeCodec.protocols.iteritems():
   for hook_name in hook_names:

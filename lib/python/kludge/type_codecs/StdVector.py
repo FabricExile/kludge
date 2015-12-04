@@ -11,7 +11,7 @@ def build_std_vector_type_codecs(jinjenv):
       '[]' + element_type_info.spec.kl.suffix,
       'VariableArray< ' + element_type_info.spec.edk.name + ' >',
       cpp_type_spec,
-      [Value(ValueName("RESERVED_element"), element_type_info)],
+      [element_type_info],
       )
 
   def match_value_or_const_ref(cpp_type_spec, type_mgr):

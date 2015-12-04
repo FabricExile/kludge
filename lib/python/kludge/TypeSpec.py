@@ -27,26 +27,26 @@ class TypeSpec:
     kl_suffix,
     edk_name,
     cpp_type_spec,
-    child_values,
+    child_type_infos,
     ):
     self.kl = KLTypeSpec(kl_base, kl_suffix)
     self.edk = EDKTypeSpec(edk_name)
     self.cpp = cpp_type_spec
-    self.child_values = child_values
+    self.child_type_infos = child_type_infos
 
   @staticmethod
   def builder(
     kl_base,
     kl_suffix,
     edk_name,
-    child_values,
+    child_type_infos,
     ):
     return lambda cpp_type_spec: TypeSpec(
       kl_base,
       kl_suffix,
       edk_name,
       cpp_type_spec,
-      child_values,
+      child_type_infos,
       )
 
 class SimpleTypeSpec(TypeSpec):

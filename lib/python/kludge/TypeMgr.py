@@ -12,12 +12,11 @@ class TypeMgr:
 
     # First so we don't catch in Simple...
     self.add_type_codecs(
-      c_string_type_codecs(jinjenv)
+      build_c_string_type_codecs(jinjenv)
       )
-
-    # self.add_type_codecs(
-    #   simple_type_codecs(jinjenv)
-    #   )
+    self.add_type_codecs(
+      build_simple_type_codecs(jinjenv)
+      )
 
     # add_simple_type_codecs(jinjenv)
     # add_std_string_type_codecs(jinjenv)

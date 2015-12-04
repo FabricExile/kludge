@@ -1,32 +1,4 @@
-class GenSpec: pass
-
-class GenStr:
-  def __init__(self, value):
-    self._value = value
-  def make_gen(self, jinjenv):
-    return lambda gd: self._value
-
-class GenLambda:
-  def __init__(self, value):
-    self._value = value
-  def make_gen(self, jinjenv):
-    return self._value
-
-class GenTmpl:
-  def __init__(self, value):
-    self._value = value
-  def make_gen(self, jinjenv):
-    # IMPORTANT: bake the template so it is not regenerated on each invocation
-    template = jinjenv.from_string(self._value)
-    return lambda gd: template.render(gd.__dict__)
-
-class GenFile:
-  def __init__(self, value):
-    self._value = value
-  def make_gen(self, jinjenv):
-    # IMPORTANT: bake the template so it is not regenerated on each invocation
-    template = jinjenv.get_template(self._value)
-    return lambda gd: template.render(gd.__dict__)
+from kludge import GenStr, GenLambda, CPPTypeExpr, SimpleTypeSpec
 
 class TypeCodec:
 
@@ -65,55 +37,55 @@ class TypeCodec:
     return self.match_cpp_expr_types([cpp_expr_type_to_match], type_spec_builder)
 
   def match_value_by_dict(self, lookup):
-    def impl(self, cpp_type_spec, type_mgr):
+    def impl(cpp_type_spec, type_mgr):
       if isinstance(cpp_type_spec.expr, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_spec.expr.get_unqualified_desc())
         if kl_type_name:
-          return SimpleTypeInfo(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_const_ref_by_dict(self, lookup):
-    def impl(self, cpp_type_spec, type_mgr):
+    def impl(cpp_type_spec, type_mgr):
       if isinstance(cpp_type_spec.expr, CPPTypeExpr.ReferenceTo) \
         and cpp_type_spec.expr.pointee.is_const \
         and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
         if kl_type_name:
-          return SimpleTypeInfo(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_const_ptr_by_dict(self, lookup):
-    def impl(self, cpp_type_spec, type_mgr):
+    def impl(cpp_type_spec, type_mgr):
       if isinstance(cpp_type_spec.expr, CPPTypeExpr.PointerTo) \
         and cpp_type_spec.expr.pointee.is_const \
         and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
         if kl_type_name:
-          return SimpleTypeInfo(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_mutable_ref_by_dict(self, lookup):
-    def impl(self, cpp_type_spec, type_mgr):
+    def impl(cpp_type_spec, type_mgr):
       if isinstance(cpp_type_spec.expr, CPPTypeExpr.ReferenceTo) \
         and cpp_type_spec.expr.pointee.is_mutable \
         and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
         if kl_type_name:
-          return SimpleTypeInfo(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
     self.set_hook('maybe_match', impl)
     return self
 
   def match_mutable_ptr_by_dict(self, lookup):
-    def impl(self, cpp_type_spec, type_mgr):
+    def impl(cpp_type_spec, type_mgr):
       if isinstance(cpp_type_spec.expr, CPPTypeExpr.PointerTo) \
         and cpp_type_spec.expr.pointee.is_mutable \
         and isinstance(cpp_type_spec.expr.pointee, CPPTypeExpr.Direct):
         kl_type_name = lookup.get(cpp_type_spec.expr.pointee.get_unqualified_desc())
         if kl_type_name:
-          return SimpleTypeInfo(kl_type_name, cpp_type_spec)
+          return SimpleTypeSpec(kl_type_name, cpp_type_spec)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -171,7 +143,7 @@ class TypeCodec:
 
   def direct_result(
     self,
-    pre = GenLambda(lambda gd: gd.type.edk.name + " " + gd.name.edk),
+    pre = GenLambda(lambda gd: gd.type.edk.name + " " + gd.name.edk + " = "),
     post = GenStr(""),
     ):
     self.set_hook(

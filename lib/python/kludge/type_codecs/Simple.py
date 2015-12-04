@@ -1,7 +1,6 @@
-from kludge import TypeCodec
-from kludge.type_codecs.recipes import *
+from kludge import TypeCodec, GenLambda
 
-def simple_type_codec_generators(jinjenv, type_mgr):
+def build_simple_type_codecs(jinjenv):
   cpp_base_type_to_kl_base_type = {
     "bool": "Boolean",
     "char": "SInt8",
@@ -26,56 +25,66 @@ def simple_type_codec_generators(jinjenv, type_mgr):
     "double": "Float64",
     }
 
-  @match_value_by_dict(cpp_base_type_to_kl_base_type)
-  @direct_result()
-  @in_param()
-  @conv(
-    cpp_arg = jinjenv.from_string("{{ param_name.edk }}")
-    )
-  class SimpleValue(TypeCodec): pass
-
-  @match_const_ref_by_dict(cpp_base_type_to_kl_base_type)
-  @direct_result()
-  @in_param()
-  @conv(
-    cpp_arg = jinjenv.from_string("{{ param_name.edk }}")
-    )
-  class SimpleConstRef(TypeCodec): pass
-
-  @match_const_ptr_by_dict(cpp_base_type_to_kl_base_type)
-  @direct_result(
-    pre = lambda edk_type_name, edk_name:
-      edk_type_name + " " + edk_name + " = *"
-    )
-  @in_param()
-  @conv(
-    cpp_arg = jinjenv.from_string("&{{ param_name.edk }}")
-    )
-  class SimpleConstPtr(TypeCodec): pass
-
-  @match_mutable_ref_by_dict(cpp_base_type_to_kl_base_type)
-  @direct_result()
-  @io_param()
-  @conv(
-    cpp_arg = jinjenv.from_string("{{ param_name.edk }}")
-    )
-  class SimpleMutableRef(TypeCodec): pass
-
-  @match_mutable_ptr_by_dict(cpp_base_type_to_kl_base_type)
-  @direct_result(
-    pre = lambda edk_type_name, edk_name:
-      edk_type_name + " " + edk_name + " = *"
-    )
-  @io_param()
-  @conv(
-    cpp_arg = jinjenv.from_string("&{{ param_name.edk }}")
-    )
-  class SimpleMutablePtr(TypeCodec): pass
-
   return [
-    SimpleValue,
-    SimpleConstRef,
-    SimpleConstPtr,
-    SimpleMutableRef,
-    SimpleMutablePtr,
+    TypeCodec(
+      jinjenv
+      ).match_value_by_dict(
+        cpp_base_type_to_kl_base_type
+      ).direct_result(
+      ).in_param(
+      ).conv(
+        cpp_arg = GenLambda(
+          lambda gd: gd.name.edk
+          )
+      ),
+    TypeCodec(
+      jinjenv
+      ).match_const_ref_by_dict(
+        cpp_base_type_to_kl_base_type
+      ).direct_result(
+      ).in_param(
+      ).conv(
+        cpp_arg = GenLambda(
+          lambda gd: gd.name.edk
+          )
+      ),
+    TypeCodec(
+      jinjenv
+      ).match_const_ptr_by_dict(
+      cpp_base_type_to_kl_base_type
+      ).direct_result(
+        pre = GenLambda(
+          lambda gd: gd.type.edk.name + " " + gd.name.edk + " = *"
+          )
+      ).in_param(
+      ).conv(
+        cpp_arg = GenLambda(
+          lambda gd: "&" + gd.name.edk
+          )
+      ),
+    TypeCodec(
+      jinjenv
+      ).match_mutable_ref_by_dict(
+        cpp_base_type_to_kl_base_type
+      ).direct_result(
+      ).io_param(
+      ).conv(
+        cpp_arg = GenLambda(
+          lambda gd: gd.name.edk
+          )
+      ),
+    TypeCodec(
+      jinjenv
+      ).match_mutable_ptr_by_dict(
+        cpp_base_type_to_kl_base_type
+      ).direct_result(
+        pre = GenLambda(
+          lambda gd: gd.type.edk.name + " " + gd.name.edk + " = *"
+          )
+      ).io_param(
+      ).conv(
+        cpp_arg = GenLambda(
+          lambda gd: "&" + gd.name.edk
+          )
+      ),
     ]

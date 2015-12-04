@@ -8,15 +8,18 @@ class TypeCodec:
     ):
     self.jinjenv = jinjenv
 
+    self._init_result_protocol()
+
   def set_hook(self, name, meth):
-    if meth != None:
-      setattr(self, name, meth)
+    setattr(self, name, meth)
 
   def make_gen(self, gen_spec):
-    if gen_spec != None:
-      if isinstance(gen_spec, basestring):
-        gen_spec = GenTmpl(gen_spec)
-      return gen_spec.make_gen(self.jinjenv)
+    if isinstance(gen_spec, basestring):
+      gen_spec = GenTmpl(gen_spec)
+    return gen_spec.make_gen(self.jinjenv)
+
+  def raise_missing_or_invalid(self, name):
+    raise Exception("missing or invalid '" + name + "' (must be a string or an instance of GenXXX)")
 
   # Protocol: match
 
@@ -107,45 +110,79 @@ class TypeCodec:
 
   def conv(
     self,
-    edk_to_cpp = GenStr(""),
+    edk_to_cpp = None,
     cpp_arg = None,
-    cpp_to_edk = GenStr(""),
+    cpp_to_edk = None,
     ):
-    self.set_hook('gen_edk_to_cpp', self.make_gen(edk_to_cpp))
-    self.set_hook('gen_cpp_arg', self.make_gen(cpp_arg))
-    self.set_hook('gen_cpp_to_edk', self.make_gen(cpp_to_edk))
+    try:
+      self.set_hook('gen_edk_to_cpp', self.make_gen(edk_to_cpp))
+    except:
+      self.raise_missing_or_invalid("edk_to_cpp")
+    try:
+      self.set_hook('gen_cpp_arg', self.make_gen(cpp_arg))
+    except:
+      self.raise_missing_or_invalid("cpp_arg")
+    try:
+      self.set_hook('gen_cpp_to_edk', self.make_gen(cpp_to_edk))
+    except:
+      self.raise_missing_or_invalid("cpp_to_edk")
     return self
+
+  def no_conv(
+    self,
+    cpp_arg = None,
+    ):
+    return self.conv(
+      edk_to_cpp = GenStr(""),
+      cpp_arg = cpp_arg,
+      cpp_to_edk = GenStr(""),
+      )
+
+  def no_conv_by_ref(self):
+    return self.no_conv(
+      cpp_arg = GenLambda(lambda gd: gd.name.edk),
+      )
+
+  def no_conv_by_ptr(self):
+    return self.no_conv(
+      cpp_arg = GenLambda(lambda gd: "&" + gd.name.edk),
+      )
 
   # Protocol: result
 
-  def raise_unsupported_as_result(self, gd):
-    raise Exception(gd.type_spec.cpp.name + ": unsupported as result")
+  result_protocol_gen_names = [
+    'gen_kl_result_type',
+    'gen_direct_result_edk_type',
+    'gen_indirect_result_edk_param',
+    'gen_edk_store_result_pre',
+    'gen_edk_store_result_post',
+    'gen_edk_return_dir_result',
+    ]
 
-  def gen_kl_result_type(self, gd):
-    return gd.type.kl.compound
-
-  def gen_direct_result_edk_type(self, gd):
-    self.raise_unsupported_as_result(gd)
-
-  def gen_indirect_result_edk_param(self, gd):
-    self.raise_unsupported_as_result(gd)
-
-  def gen_edk_store_result_pre(self, gd):
-    self.raise_unsupported_as_result(gd)
-
-  def gen_edk_store_result_post(self, gd):
-    self.raise_unsupported_as_result(gd)
-
-  def gen_edk_return_dir_result(self, gd):
-    self.raise_unsupported_as_result(gd)
+  def _init_result_protocol(self):
+    def impl(gd):
+      raise Exception("unimplemented result protocol")
+    for gen_name in TypeCodec.result_protocol_gen_names:
+      self.set_hook(gen_name, impl)
 
   # Recipes: result
+
+  def no_result(self):
+    def impl(gd):
+      raise Exception(gd.type.cpp.name + ": unsupported as a result type")
+    for gen_name in TypeCodec.result_protocol_gen_names:
+      self.set_hook(gen_name, impl)
+    return self
 
   def direct_result(
     self,
     pre = GenLambda(lambda gd: gd.type.edk.name + " " + gd.name.edk + " = "),
     post = GenStr(""),
     ):
+    self.set_hook(
+      'gen_kl_result_type',
+      lambda gd: gd.type.kl.compound
+      )
     self.set_hook(
       'gen_direct_result_edk_type',
       lambda gd: gd.type.edk.name
@@ -154,19 +191,34 @@ class TypeCodec:
       'gen_indirect_result_edk_param',
       lambda gd: ""
       )
-    self.set_hook('gen_edk_store_result_pre', self.make_gen(pre))
-    self.set_hook('gen_edk_store_result_post', self.make_gen(post))
+    try:
+      self.set_hook('gen_edk_store_result_pre', self.make_gen(pre))
+    except:
+      self.raise_missing_or_invalid("pre")
+    try:
+      self.set_hook('gen_edk_store_result_post', self.make_gen(post))
+    except:
+      self.raise_missing_or_invalid("post")
     self.set_hook(
       'gen_edk_return_dir_result',
       lambda gd: "return " + gd.name.edk + ";"
       )
     return self
 
+  def direct_result_deref_ptr(self):
+    return self.direct_result(
+      pre = GenLambda(lambda gd: gd.type.edk.name + " " + gd.name.edk + " = *")
+      )
+
   def indirect_result(
     self,
     pre = GenLambda(lambda gd: gd.name.edk + " = "),
     post = GenStr(""),
     ):
+    self.set_hook(
+      'gen_kl_result_type',
+      lambda gd: gd.type.kl.compound
+      )
     self.set_hook(
       'gen_direct_result_edk_type',
       lambda gd: "void"
@@ -175,8 +227,14 @@ class TypeCodec:
       'gen_indirect_result_edk_param',
       lambda gd: "Traits< " + gd.type.edk.name + " >::Result " + gd.name.edk
       )
-    self.set_hook('gen_edk_store_result_pre', self.make_gen(pre))
-    self.set_hook('gen_edk_store_result_post', self.make_gen(post))
+    try:
+      self.set_hook('gen_edk_store_result_pre', self.make_gen(pre))
+    except:
+      self.raise_missing_or_invalid("pre")
+    try:
+      self.set_hook('gen_edk_store_result_post', self.make_gen(post))
+    except:
+      self.raise_missing_or_invalid("post")
     self.set_hook(
       'gen_edk_return_dir_result',
       lambda gd: ""

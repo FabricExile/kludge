@@ -13,7 +13,7 @@ def build_c_string_type_codecs(jinjenv):
         SimpleTypeSpec.builder('String')
       ).indirect_result(
       ).in_param(
-      ).conv(
+      ).no_conv(
         cpp_arg = GenLambda(
           lambda gd: gd.name.edk + ".getCString()"
           )

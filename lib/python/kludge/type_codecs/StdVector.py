@@ -37,7 +37,7 @@ for ( uint32_t i = 0; i < %s.size(); ++i )
 class StdVectorValue(StdVectorBase):
 
   @classmethod
-  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+  def maybe_match(cls, cpp_type_expr, type_mgr):
     if cls.is_std_vector(cpp_type_expr):
       element_type_codec = type_mgr.get_type_codec(str(cpp_type_expr.params[0]))
       return StdVectorValue(
@@ -86,7 +86,7 @@ class StdVectorConstRef(StdVectorValue):
       and cls.is_std_vector(cpp_type_expr.pointee)
 
   @classmethod
-  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+  def maybe_match(cls, cpp_type_expr, type_mgr):
     if cls.is_std_vector_const_ref(cpp_type_expr):
       element_type_codec = type_mgr.get_type_codec(str(cpp_type_expr.pointee.params[0]))
       return StdVectorConstRef(

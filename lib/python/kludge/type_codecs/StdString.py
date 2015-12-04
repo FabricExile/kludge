@@ -46,7 +46,7 @@ class StdStringConstPtr(StdStringBase):
       and cls.is_std_string(cpp_type_expr.pointee)
 
   @classmethod
-  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+  def maybe_match(cls, cpp_type_expr, type_mgr):
     if cls.is_std_string_const_ptr(cpp_type_expr):
       return StdStringConstPtr(SimpleTypeName("String", "const std::string *"))
 
@@ -86,7 +86,7 @@ class StdStringMutableRef(StdStringBase):
       and cls.is_std_string(cpp_type_expr.pointee)
 
   @classmethod
-  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+  def maybe_match(cls, cpp_type_expr, type_mgr):
     if cls.is_std_string_mutable_ref(cpp_type_expr):
       return StdStringMutableRef(SimpleTypeName("String", "std::string &"))
 
@@ -126,7 +126,7 @@ class StdStringMutablePtr(StdStringBase):
       and cls.is_std_string(cpp_type_expr.pointee)
 
   @classmethod
-  def maybe_get_type_codec(cls, cpp_type_expr, type_mgr):
+  def maybe_match(cls, cpp_type_expr, type_mgr):
     if cls.is_std_string_mutable_ptr(cpp_type_expr):
       return StdStringMutablePtr(SimpleTypeName("String", "std::string *"))
 

@@ -109,7 +109,7 @@ class Parser:
             lstrip_blocks=True,
             loader=jinja2.PackageLoader('__main__', 'templates')
             )
-        self.edk_type_mgr = TypeMgr(self.jinjenv)
+        self.type_mgr = TypeMgr(self.jinjenv)
         self.edk_decls = ast.DeclSet()
 
     def init(self, ext_name, clang_opts):
@@ -780,7 +780,8 @@ fabricBuildEnv.SharedLibrary(
     def parse_FUNCTION_DECL(self, include_filename, indent, cursor):
         print "%sFUNCTION_DECL %s" % (indent, cursor.displayname)
 
-        try:
+        if True:
+        # try:
             param_index = 1
             clang_params = []
             for param_cursor in cursor.get_children():
@@ -799,12 +800,12 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     self.get_nested_name(cursor),
-                    self.edk_type_mgr.get_type_codec_for_clang_type(cursor.result_type),
-                    self.edk_type_mgr.convert_clang_params(clang_params),
+                    self.type_mgr.get_type_info_for_clang_type(cursor.result_type),
+                    self.type_mgr.convert_clang_params(clang_params),
                     )
                 )
-        except Exception as e:
-            print "%s Unable to wrap function: %s" % (indent, str(e))
+        # except Exception as e:
+        #     print "%s Unable to wrap function: %s" % (indent, str(e))
 
     ignored_cursor_kinds = [
         CursorKind.MACRO_DEFINITION,

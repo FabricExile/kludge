@@ -1,5 +1,5 @@
 from kludge.ast import Decl
-from kludge import GenData, ValueName
+from kludge import ValueName, Value
 
 class Func(Decl):
   def __init__(
@@ -16,73 +16,84 @@ class Func(Decl):
 
     self._nested_function_name = nested_function_name
     if result_type_info:
-      self._result_type_codec = result_type_info.codec
-      self._result_gen_data = GenData(ValueName("RESERVED_result"), result_type_info.spec)
+      self._result_value = Value(
+        ValueName("RESERVED_result"),
+        result_type_info,
+        )
     else:
-      self._result_type_codec = None
+      self._result_value = None
     self.params = params
 
-
-
-  def gen_kl_result_type(self):
-    if self._result_type_codec:
-      return self._result_type_codec.gen_kl_result_type(self._result_gen_data)
+  @property
+  def kl_result_type(self):
+    if self._result_value:
+      return self._result_value.kl_result_type
     else:
       return ""
 
-  def gen_direct_result_edk_type(self):
-    if self._result_type_codec:
-      return self._result_type_codec.gen_direct_result_edk_type(self._result_gen_data)
+  @property
+  def direct_result_edk_type(self):
+    if self._result_value:
+      return self._result_value.direct_result_edk_type
     else:
       return "void"
 
-  def gen_edk_store_result_pre(self):
-    if self._result_type_codec:
-      return self._result_type_codec.gen_edk_store_result_pre(self._result_gen_data)
+  @property
+  def edk_store_result_pre(self):
+    if self._result_value:
+      return self._result_value.edk_store_result_pre
     else:
       return ""
 
-  def gen_edk_store_result_post(self):
-    if self._result_type_codec:
-      return self._result_type_codec.gen_edk_store_result_post(self._result_gen_data)
+  @property
+  def edk_store_result_post(self):
+    if self._result_value:
+      return self._result_value.edk_store_result_post
     else:
       return ""
 
-  def gen_edk_return_dir_result(self):
-    if self._result_type_codec:
-      return self._result_type_codec.gen_edk_return_dir_result(self._result_gen_data)
+  @property
+  def edk_return_direct_result(self):
+    if self._result_value:
+      return self._result_value.edk_return_direct_result
     else:
       return ""
 
-  def gen_kl_name(self):
+  @property
+  def kl_name(self):
     return "_".join(self._nested_function_name)
 
-  def gen_edk_name(self):
+  @property
+  def edk_name(self):
     return self._extname + "_" + "_".join(self._nested_function_name)
 
-  def gen_cpp_name(self):
+  @property
+  def cpp_name(self):
     return "::" + "::".join(self._nested_function_name)
 
-  def gen_kl_params(self):
+  @property
+  def kl_params(self):
     snippets = []
     for param in self.params:
-      snippets.append(param.gen_kl_param())
+      snippets.append(param.kl_param)
     return ",\n    ".join(snippets)
 
-  def gen_edk_params(self):
+  @property
+  def edk_params(self):
     snippets = []
-    if self._result_type_codec:
-      edk_ind_ret_param = self._result_type_codec.gen_indirect_result_edk_param(self._result_gen_data)
-      if edk_ind_ret_param:
-        snippets.append(edk_ind_ret_param)
+    if self._result_value:
+      indirect_result_edk_param = self._result_value.indirect_result_edk_param
+      if indirect_result_edk_param:
+        snippets.append(indirect_result_edk_param)
     for param in self.params:
-      snippets.append(param.gen_edk_param())
+      snippets.append(param.edk_param)
     return ",\n    ".join(snippets)
 
-  def gen_cpp_args(self):
+  @property
+  def cpp_args(self):
     snippets = []
     for param in self.params:
-      snippets.append(param.gen_cpp_arg())
+      snippets.append(param.cpp_arg)
     return ",\n        ".join(snippets)
 
   def jinjify(self, target, jinjenv):

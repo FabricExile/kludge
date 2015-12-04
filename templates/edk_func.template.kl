@@ -1,16 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // KLUDGE EDK Function
-// {{ func.gen_desc() }}
-// {{ func.gen_location() }}
+// {{ func.desc }}
+// {{ func.location }}
 //
 //////////////////////////////////////////////////////////////////////////////
 //
 
-{{ func.gen_kl_result_type() }}
-{{ func.gen_kl_name() }}(
-    {{ func.gen_kl_params() }}
-    ) = "{{ func.gen_edk_name() }}";
+{{ func.kl_result_type }}
+{{ func.kl_name }}(
+    {{ func.kl_params }}
+    ) = "{{ func.edk_name }}";
 
 //
 //////////////////////////////////////////////////////////////////////////////

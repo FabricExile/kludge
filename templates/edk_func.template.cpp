@@ -1,34 +1,34 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // KLUDGE EDK Function
-// {{ func.gen_desc() }}
-// {{ func.gen_location() }}
+// {{ func.desc }}
+// {{ func.location }}
 //
 //////////////////////////////////////////////////////////////////////////////
 //
 
-#include <{{ func.gen_include_filename() }}>
+#include <{{ func.include_filename }}>
 
 FABRIC_EXT_EXPORT
-{{ func.gen_direct_result_edk_type() }}
-{{ func.gen_edk_name() }}(
-    {{ func.gen_edk_params() }}
+{{ func.direct_result_edk_type }}
+{{ func.edk_name }}(
+    {{ func.edk_params }}
     )
 {
     {% for param in func.params %}
-    {{ param.gen_edk_to_cpp() }}
+    {{ param.edk_to_cpp }}
     {% endfor %}
 
-    {{ func.gen_edk_store_result_pre() }}
-    {{ func.gen_cpp_name() }}(
-        {{ func.gen_cpp_args() }}
-        ) {{ func.gen_edk_store_result_post() }};
+    {{ func.edk_store_result_pre }}
+    {{ func.cpp_name }}(
+        {{ func.cpp_args }}
+        ) {{ func.edk_store_result_post }};
 
     {% for param in func.params %}
-    {{ param.gen_cpp_to_edk() }}
+    {{ param.cpp_to_edk }}
     {% endfor %}
 
-    {{ func.gen_edk_return_dir_result() }}
+    {{ func.edk_return_direct_result }}
 }
 
 //

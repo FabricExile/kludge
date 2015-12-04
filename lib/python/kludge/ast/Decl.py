@@ -13,13 +13,16 @@ class Decl:
     self._location = location
     self._desc = desc
 
-  def gen_include_filename(self):
+  @property
+  def include_filename(self):
     return self._include_filename
 
-  def gen_location(self):
+  @property
+  def location(self):
     return self._location
 
-  def gen_desc(self):
+  @property
+  def desc(self):
     return self._desc
 
   @abc.abstractmethod

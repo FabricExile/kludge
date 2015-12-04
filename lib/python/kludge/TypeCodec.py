@@ -1,6 +1,26 @@
-from kludge import GenStr, GenLambda, CPPTypeExpr, SimpleTypeSpec
+from kludge import GenStr, GenLambda, GenTmpl, CPPTypeExpr, SimpleTypeSpec
 
 class TypeCodec:
+
+  protocols = {
+    'conversion': [
+      'edk_to_cpp',
+      'cpp_arg',
+      'cpp_to_edk',
+      ],
+    'result': [
+      'kl_result_type',
+      'direct_result_edk_type',
+      'indirect_result_edk_param',
+      'edk_store_result_pre',
+      'edk_store_result_post',
+      'edk_return_direct_result',
+      ],
+    'params': [
+      'kl_param',
+      'edk_param',
+      ],
+    }
 
   def __init__(
     self,
@@ -8,7 +28,16 @@ class TypeCodec:
     ):
     self.jinjenv = jinjenv
 
-    self._init_result_protocol()
+    for protocol_name, hook_names in TypeCodec.protocols.iteritems():
+      def impl(gd):
+        raise Exception("unimplemented " + protocol_name + " protocol")
+      for hook_name in hook_names:
+        self.set_hook(hook_name, impl)
+
+    # Special signature and no reflection
+    def maybe_match_default(cpp_type_spec, type_mgr):
+      raise Exception("unimplemented match protocol")
+    self.set_hook('maybe_match', maybe_match_default)
 
   def set_hook(self, name, meth):
     setattr(self, name, meth)
@@ -21,12 +50,11 @@ class TypeCodec:
   def raise_missing_or_invalid(self, name):
     raise Exception("missing or invalid '" + name + "' (must be a string or an instance of GenXXX)")
 
-  # Protocol: match
-
-  def maybe_match(self, cpp_type_spec, type_mgr):
-    raise Exception(cpp_type_spec.name + ": unimplemented match protocol")
-
   # Recipes: match
+
+  def match(self, impl):
+    self.set_hook('maybe_match', impl)
+    return self
 
   def match_cpp_expr_types(self, cpp_expr_types_to_match, type_spec_builder):
     def impl(cpp_type_spec, type_mgr):
@@ -92,20 +120,6 @@ class TypeCodec:
     self.set_hook('maybe_match', impl)
     return self
 
-  # Protocol: conversion
-
-  def raise_unimplemented_conversion(self, gd):
-    raise Exception(gd.type_spec.cpp.name + ": unimplmeneted conversion protocol")
-
-  def gen_edk_to_cpp(self, gd):
-    self.raise_unimplemented_conversion(gd)
-
-  def gen_cpp_arg(self, gd):
-    self.raise_unimplemented_conversion(gd)
-
-  def gen_cpp_to_edk(self, gd):
-    self.raise_unimplemented_conversion(gd)
-
   # Recipes: conversion
 
   def conv(
@@ -148,30 +162,13 @@ class TypeCodec:
       cpp_arg = GenLambda(lambda gd: "&" + gd.name.edk),
       )
 
-  # Protocol: result
-
-  result_protocol_gen_names = [
-    'gen_kl_result_type',
-    'gen_direct_result_edk_type',
-    'gen_indirect_result_edk_param',
-    'gen_edk_store_result_pre',
-    'gen_edk_store_result_post',
-    'gen_edk_return_dir_result',
-    ]
-
-  def _init_result_protocol(self):
-    def impl(gd):
-      raise Exception("unimplemented result protocol")
-    for gen_name in TypeCodec.result_protocol_gen_names:
-      self.set_hook(gen_name, impl)
-
   # Recipes: result
 
   def no_result(self):
     def impl(gd):
       raise Exception(gd.type.cpp.name + ": unsupported as a result type")
-    for gen_name in TypeCodec.result_protocol_gen_names:
-      self.set_hook(gen_name, impl)
+    for hook_name in TypeCodec.protocols['result']:
+      self.set_hook('gen_' + hook_name, impl)
     return self
 
   def direct_result(
@@ -200,7 +197,7 @@ class TypeCodec:
     except:
       self.raise_missing_or_invalid("post")
     self.set_hook(
-      'gen_edk_return_dir_result',
+      'gen_edk_return_direct_result',
       lambda gd: "return " + gd.name.edk + ";"
       )
     return self
@@ -236,21 +233,10 @@ class TypeCodec:
     except:
       self.raise_missing_or_invalid("post")
     self.set_hook(
-      'gen_edk_return_dir_result',
+      'gen_edk_return_direct_result',
       lambda gd: ""
       )
     return self
- 
-  # Protocol: params
-
-  def raise_unsupported_as_param(self, gd):
-    raise Exception(gd.type_spec.cpp.name + ": unsupported as params")
-
-  def gen_kl_param(self, gd):
-    self.raise_unsupported_as_param(gd)
-
-  def gen_edk_param(self, gd):
-    self.raise_unsupported_as_param(gd)
  
   # Recipes: params
 

@@ -21,20 +21,53 @@ class CPPTypeSpec:
 
 class TypeSpec:
 
-  def __init__(self, kl_base, kl_suffix, edk_name, cpp_type_spec):
+  def __init__(
+    self,
+    kl_base,
+    kl_suffix,
+    edk_name,
+    cpp_type_spec,
+    child_values,
+    ):
     self.kl = KLTypeSpec(kl_base, kl_suffix)
     self.edk = EDKTypeSpec(edk_name)
     self.cpp = cpp_type_spec
+    self.child_values = child_values
 
   @staticmethod
-  def builder(kl_base, kl_suffix, edk_name):
-    return lambda cpp_type_spec: TypeSpec(kl_base, kl_suffix, edk_name, cpp_type_spec)
+  def builder(
+    kl_base,
+    kl_suffix,
+    edk_name,
+    child_values,
+    ):
+    return lambda cpp_type_spec: TypeSpec(
+      kl_base,
+      kl_suffix,
+      edk_name,
+      cpp_type_spec,
+      child_values,
+      )
 
 class SimpleTypeSpec(TypeSpec):
 
-  def __init__(self, kl_name, cpp_type_spec):
-    TypeSpec.__init__(self, kl_name, "", kl_name, cpp_type_spec)
+  def __init__(
+    self,
+    kl_name,
+    cpp_type_spec,
+    ):
+    TypeSpec.__init__(
+      self,
+      kl_name,
+      "",
+      kl_name,
+      cpp_type_spec,
+      [],
+      )
 
   @staticmethod
   def builder(kl_name):
-    return lambda cpp_type_spec: SimpleTypeSpec(kl_name, cpp_type_spec)
+    return lambda cpp_type_spec: SimpleTypeSpec(
+      kl_name,
+      cpp_type_spec,
+      )

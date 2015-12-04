@@ -1,103 +1,67 @@
-from kludge.type_codecs.abstract import IndRet
-from kludge import CPPTypeExpr
-from kludge import ParamName
-from kludge import TypeName
+from kludge import TypeSpec, TypeCodec, GenStr, GenLambda, SimpleTypeSpec
+from kludge.CPPTypeExpr import *
 
-class StdVectorBase(IndRet):
+def build_std_vector_type_codecs(jinjenv):
+  class StdVectorTypeSpec(TypeSpec):
 
-  @classmethod
-  def is_std_vector(cls, cpp_type_expr):
-    return isinstance(cpp_type_expr, CPPTypeExpr.Template) \
-      and cpp_type_expr.name == "std::vector"
+    def __init__(
+      self,
+      cpp_type_spec,
+      element_type_info,
+      ):
+      TypeSpec.__init__(
+        element_type_info.spec.kl.base,
+        '[]' + element_type_info.spec.kl.suffix,
+        'VariableArray< ' + element_type_info.spec.edk.name + ' >',
+        cpp_type_spec,
+        [Value(ValueName("RESERVED_element"), element_type_info)],
+        )
 
-  def __init__(self, type_name, element_type_codec):
-    IndRet.__init__(self, type_name)
-    self._element_type_codec = element_type_codec
+  def match_value_or_const_ref(cpp_type_spec, type_mgr):
+    cpp_type_expr = cpp_type_spec.expr
+    if isinstance(cpp_type_expr, Template) \
+      and cpp_type_expr.name == "std::vector":
+        element_cpp_type_expr = cpp_type_expr.params[0]
+        element_cpp_type_name = str(element_cpp_type_expr)
+        element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
+        if element_type_info:
+          return StdVectorTypeInfo(
+            cpp_type_spec,
+            element_type_info,
+            )
+    if isinstance(cpp_type_expr, ReferenceTo) \
+      and cpp_type_expr.pointee.is_const() \
+      and isinstance(cpp_type_expr.pointee, Template) \
+      and cpp_type_expr.pointee.name == 'std::vector':
+        element_cpp_type_expr = cpp_type_expr.pointee.params[0]
+        element_cpp_type_name = str(element_cpp_type_expr)
+        element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
+        if element_type_info:
+          return StdVectorTypeSpec(
+            cpp_type_spec,
+            element_type_info,
+            )
 
-  def gen_decl_std_vector(self, param_name):
-    element_param = ParamName("RESERVED_element")
-    element_param.edk = param_name.edk + "[i]"
-    return """std::vector< %s > %s;
-for ( uint32_t i = 0; i < %s.size(); ++i )
+  return [
+    TypeCodec(
+      jinjenv
+      ).match(
+        match_value_or_const_ref
+      ).no_result(
+      ).in_param(
+      ).conv(
+        edk_to_cpp = """
+std::vector< {{ element.cpp.name }} > {{ name.cpp }};
+{{ name.cpp }}.reserve( {{ name.edk }}.size() );
+for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
 {
-  %s
-  %s.push_back(%s);
-}""" % (
-  self._element_type_codec.type_name.cpp,
-  param_name.cpp,
-  param_name.edk,
-  self._element_type_codec.gen_edk_to_cpp(element_param),
-  param_name.cpp,
-  self._element_type_codec.gen_cpp_arg(element_param),
-  )
-
-  def gen_upd_std_string(self, param_name):
-    raise Exception("Unimplemented")
-
-class StdVectorValue(StdVectorBase):
-
-  @classmethod
-  def maybe_match(cls, cpp_type_expr, type_mgr):
-    if cls.is_std_vector(cpp_type_expr):
-      element_type_codec = type_mgr.get_type_codec(str(cpp_type_expr.params[0]))
-      return StdVectorValue(
-        TypeName(
-          element_type_codec.type_name.kl.base,
-          element_type_codec.type_name.kl.suffix + "[]",
-          "VariableArray< " + element_type_codec.type_name.edk + " >",
-          "std::vector< " + element_type_codec.type_name.cpp + " >",
+  {{ element.edk_to_cpp() }}
+  {{ name.cpp }}.push_back( {{ element.cpp_arg }} );
+}
+""",
+        cpp_arg = GenLambda(
+          lambda gd: gd.name.cpp
           ),
-        element_type_codec
-        )
-
-  def __init__(self, type_name, element_type_codec):
-    StdVectorBase.__init__(self, type_name, element_type_codec)
-
-  def gen_indirect_result_edk_param(self):
-    return self.gen_edk_result_param()
-
-  def gen_edk_store_result_pre(self):
-    raise Exception("Unimplemented")
-
-  def gen_edk_store_result_post(self):
-    raise Exception("Unimplemented")
-
-  def gen_kl_param(self, kl_name):
-    return self.gen_kl_in_param(kl_name)
-
-  def gen_edk_param(self, edk_name):
-    return self.gen_edk_in_param(edk_name)
-
-  def gen_edk_to_cpp(self, param_name):
-    return self.gen_decl_std_vector(param_name)
-
-  def gen_cpp_arg(self, param_name):
-    return param_name.cpp
-
-  def gen_cpp_to_edk(self, param_name):
-    return ""
-
-class StdVectorConstRef(StdVectorValue):
-
-  @classmethod
-  def is_std_vector_const_ref(cls, cpp_type_expr):
-    return isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
-      and cpp_type_expr.pointee.is_const \
-      and cls.is_std_vector(cpp_type_expr.pointee)
-
-  @classmethod
-  def maybe_match(cls, cpp_type_expr, type_mgr):
-    if cls.is_std_vector_const_ref(cpp_type_expr):
-      element_type_codec = type_mgr.get_type_codec(str(cpp_type_expr.pointee.params[0]))
-      return StdVectorConstRef(
-        TypeName(
-          element_type_codec.type_name.kl.base,
-          element_type_codec.type_name.kl.suffix + "[]",
-          "VariableArray< " + element_type_codec.type_name.edk + " >",
-          "const std::vector< " + element_type_codec.type_name.cpp + " > &",
-          ),
-        element_type_codec
-        )
-
-  def __init__(self, type_name, element_type_codec):
-    StdVectorValue.__init__(self, type_name, element_type_codec)
+        cpp_to_edk = GenStr(""),
+      ),
+    ]

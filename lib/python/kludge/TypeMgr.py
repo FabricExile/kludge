@@ -1,5 +1,5 @@
 from kludge.type_codecs import *
-from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, ValueName, Param, TypeInfo
+from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, ValueName, Value, TypeInfo
 
 # from edk_param import *
 
@@ -20,10 +20,9 @@ class TypeMgr:
     self.add_type_codecs(
       build_std_string_type_codecs(jinjenv)
       )
-
-    # add_simple_type_codecs(jinjenv)
-    # add_std_string_type_codecs(jinjenv)
-    # add_std_vector_type_codecs(jinjenv)
+    self.add_type_codecs(
+      build_std_vector_type_codecs(jinjenv)
+      )
 
   def add_type_codec(self, type_codec):
     self._type_codecs.append(type_codec)
@@ -63,7 +62,8 @@ class TypeMgr:
             type_spec.kl.base,
             type_spec.kl.suffix,
             type_spec.edk.name,
-            canon_cpp_type_spec
+            canon_cpp_type_spec,
+            [],
             )
           canon_type_info = TypeInfo(
             type_codec,
@@ -88,5 +88,5 @@ class TypeMgr:
   def convert_clang_params(self, clang_params):
     def mapper(clang_param):
       type_info = self.get_type_info_for_clang_type(clang_param.clang_type)
-      return Param(ValueName(clang_param.name), type_info)
+      return Value(ValueName(clang_param.name), type_info)
     return map(mapper, clang_params)

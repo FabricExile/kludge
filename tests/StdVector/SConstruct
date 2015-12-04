@@ -5,7 +5,7 @@
 
 import os, sys
 
-extname = 'Functions'
+extname = 'StdVector'
 basename = 'actual'
 
 try:

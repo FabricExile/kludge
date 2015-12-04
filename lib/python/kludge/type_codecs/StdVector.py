@@ -48,11 +48,12 @@ def build_std_vector_type_codecs(jinjenv):
       ).in_param(
       ).conv(
         edk_to_cpp = """
-std::vector< {{ element.cpp.name }} > {{ name.cpp }};
+std::vector< {{ element.type.cpp.name }} > {{ name.cpp }};
 {{ name.cpp }}.reserve( {{ name.edk }}.size() );
 for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
 {
-  {{ element.edk_to_cpp() }}
+  {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
+  {{ element.edk_to_cpp }}
   {{ name.cpp }}.push_back( {{ element.cpp_arg }} );
 }
 """,

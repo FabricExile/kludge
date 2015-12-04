@@ -7,12 +7,14 @@ class GenData:
       lambda child: child._gen_data,
       value.type_info.spec.child_values
       )
+    if self.children:
+      setattr(
+        self,
+        'element',
+        self.children[0]
+        )
 
     self._codec = value.type_info.codec
-
-  @property
-  def element(self):
-    return self.children[0]
 
   @property
   def edk_to_cpp(self):

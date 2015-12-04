@@ -46,14 +46,8 @@ def build_simple_type_codecs(jinjenv):
       ).match_const_ptr_by_dict(
         cpp_base_type_to_kl_base_type
       ).no_conv(
-      ).param_in(
-        cpp = GenLambda(
-          lambda gd: "&" + gd.name.cpp
-          )
-      ).result_direct(
-        decl_and_assign_cpp = GenLambda(
-          lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
-        )
+      ).param_in_to_ptr(
+      ).result_direct_from_ptr(
       ),
     TypeCodec(
       jinjenv
@@ -68,13 +62,7 @@ def build_simple_type_codecs(jinjenv):
       ).match_mutable_ptr_by_dict(
         cpp_base_type_to_kl_base_type
       ).no_conv(
-      ).param_io(
-        cpp = GenLambda(
-          lambda gd: "&" + gd.name.cpp
-          )
-      ).result_direct(
-        decl_and_assign_cpp = GenLambda(
-          lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
-        )
+      ).param_io_to_ptr(
+      ).result_direct_from_ptr(
       ),
     ]

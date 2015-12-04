@@ -226,6 +226,13 @@ class TypeCodec:
         ),
       )
 
+  def result_direct_from_ptr(self):
+    return self.result_direct(
+      decl_and_assign_cpp = GenLambda(
+        lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
+        )
+      )
+
   def result_indirect(
     self,
     decl_and_assign_cpp = GenLambda(
@@ -244,6 +251,13 @@ class TypeCodec:
       direct_return_edk = GenStr(""),
       )
  
+  def result_indirect_from_ptr(self):
+    return self.result_indirect(
+      decl_and_assign_cpp = GenLambda(
+        lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
+        )
+      )
+
   # Recipes: param
 
   def param(
@@ -295,6 +309,13 @@ class TypeCodec:
       cpp_to_edk = GenStr(""),
       )
 
+  def param_in_to_ptr(self):
+    return self.param_in(
+      cpp = GenLambda(
+        lambda gd: "&" + gd.name.cpp
+        )
+      )      
+
   def param_io(
     self,
     cpp = GenLambda(
@@ -313,3 +334,10 @@ class TypeCodec:
         lambda gd: gd.conv_cpp_to_edk()
         ),
       )
+
+  def param_io_to_ptr(self):
+    return self.param_io(
+      cpp = GenLambda(
+        lambda gd: "&" + gd.name.cpp
+        )
+      )      

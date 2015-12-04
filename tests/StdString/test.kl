@@ -8,14 +8,14 @@ operator entry() {
   StdStringParams(
     "value",
     "constRef",
-    mutableRef,
-    "constPtr",
-    mutablePtr
+    // mutableRef,
+    // "constPtr",
+    // mutablePtr
     );
   report("After: mutableRef = " + mutableRef);
   report("After: mutablePtr = " + mutablePtr);
 
   report("StdStringValueReturn() = " + StdStringValueReturn());
   report("StdStringConstRefReturn() = " + StdStringConstRefReturn());
-  report("StdStringMutableRefReturn() = " + StdStringMutableRefReturn());
+  // report("StdStringMutableRefReturn() = " + StdStringMutableRefReturn());
 }

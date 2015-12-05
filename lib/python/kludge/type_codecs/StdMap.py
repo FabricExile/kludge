@@ -82,7 +82,7 @@ def build_std_map_type_codecs():
         key_cpp_type_name = str(key_cpp_type_expr)
         key_type_info = type_mgr.maybe_get_type_info(key_cpp_type_name)
         if key_type_info:
-          value_cpp_type_expr = cpp_type_expr.pointee.params[0]
+          value_cpp_type_expr = cpp_type_expr.pointee.params[1]
           value_cpp_type_name = str(value_cpp_type_expr)
           value_type_info = type_mgr.maybe_get_type_info(value_cpp_type_name)
           if value_type_info:

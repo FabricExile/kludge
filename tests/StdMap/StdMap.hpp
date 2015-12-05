@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-inline float ReturnValue(
+inline float ReturnValueForKey(
   std::map<float, float> const &vals,
   float key
   )
@@ -13,12 +13,16 @@ inline float ReturnValue(
   return it->second;
 }
 
-// inline char const * ReturnSecondSecond(
-//   std::map< std::map<char const *> > const &vals
-//   )
-// {
-//   return vals[1][1];
-// }
+inline char const *ReturnValueForKeyKey(
+  std::map< unsigned, std::map<std::string, char const *> > const &vals,
+  unsigned key1,
+  std::string const &key2
+  )
+{
+  std::map< unsigned, std::map<std::string, char const *> >::const_iterator it = vals.find( key1 );
+  std::map<std::string, char const *>::const_iterator jt = it->second.find( key2 );
+  return jt->second;
+}
 
 // inline std::map< std::map<std::string> > ReturnStringArrayArray()
 // {

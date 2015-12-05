@@ -9,9 +9,9 @@ def build_std_vector_type_codecs():
     element_type_info,
     ):
     return TypeSpec(
-      element_type_info.spec.kl.base,
-      '[]' + element_type_info.spec.kl.suffix,
-      'VariableArray< ' + element_type_info.spec.edk.name + ' >',
+      element_type_info.kl.base,
+      '[]' + element_type_info.kl.suffix,
+      'VariableArray< ' + element_type_info.edk.name + ' >',
       unqual_cpp_type_name,
       cpp_type_expr,
       [element_type_info],
@@ -47,17 +47,20 @@ def build_std_vector_type_codecs():
       ),
     )
 
+  def is_std_vector(cpp_type_expr):
+    return isinstance(cpp_type_expr, Template) \
+      and cpp_type_expr.name == "std::vector"
+
   def match_value(cls, cpp_type_expr, type_mgr):
-    if isinstance(cpp_type_expr, Template) \
-      and cpp_type_expr.name == "std::vector":
-        element_cpp_type_expr = cpp_type_expr.params[0]
-        element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_expr)
-        if element_type_info:
-          return build_std_vector_type_spec(
-            'std::vector< ' + element_type_info.spec.cpp.qual_name + ' >',
-            cpp_type_expr,
-            element_type_info,
-            )
+    if is_std_vector(cpp_type_expr):
+      element_cpp_type_expr = cpp_type_expr.params[0]
+      element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_expr)
+      if element_type_info:
+        return build_std_vector_type_spec(
+          'std::vector< ' + element_type_info.cpp.qual_name + ' >',
+          cpp_type_expr,
+          element_type_info,
+          )
 
   class StdVectorValueTypeCodec(StdVectorTypeCodecBase): pass
   StdVectorValueTypeCodec.match(match_value)
@@ -65,14 +68,14 @@ def build_std_vector_type_codecs():
 
   def match_const_ref(cls, cpp_type_expr, type_mgr):
     if isinstance(cpp_type_expr, ReferenceTo) \
-      and cpp_type_expr.pointee.is_const \
-      and isinstance(cpp_type_expr.pointee, Template) \
-      and cpp_type_expr.pointee.name == 'std::vector':
-        element_cpp_type_expr = cpp_type_expr.pointee.params[0]
+      and cpp_type_expr.pointee.is_const:
+      base_cpp_type_expr = cpp_type_expr.pointee
+      if is_std_vector(base_cpp_type_expr):
+        element_cpp_type_expr = base_cpp_type_expr.params[0]
         element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_expr)
         if element_type_info:
           return build_std_vector_type_spec(
-            'std::vector< ' + element_type_info.spec.cpp.qual_name + ' >',
+            'std::vector< ' + element_type_info.cpp.qual_name + ' >',
             cpp_type_expr,
             element_type_info,
             )

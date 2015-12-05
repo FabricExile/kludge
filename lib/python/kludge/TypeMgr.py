@@ -47,20 +47,6 @@ class TypeMgr:
       if type_spec:
         type_info = TypeInfo(type_codec, type_spec)
         self._cpp_type_name_to_type_info[cpp_type_name] = type_info
-        canon_cpp_type_name = str(cpp_type_expr)
-        if canon_cpp_type_name != cpp_type_name:
-          canon_type_spec = TypeSpec(
-            type_spec.kl.base,
-            type_spec.kl.suffix,
-            type_spec.edk.name,
-            canon_cpp_type_name,
-            [],
-            )
-          canon_type_info = TypeInfo(
-            type_codec,
-            canon_type_spec
-            )
-          self._cpp_type_name_to_type_info[canon_cpp_type_name] = canon_type_info
         return type_info
 
   def get_type_info(self, cpp_type_name):

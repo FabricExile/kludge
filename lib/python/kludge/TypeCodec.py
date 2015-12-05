@@ -3,6 +3,13 @@ from kludge import GenStr, GenLambda, GenTmpl, CPPTypeExpr, SimpleTypeSpec
 class TypeCodec:
 
   protocols = {
+    'traits': [
+      'traits_kl',
+      'traits_edk',
+      'traits_cpp',
+      'traits_pointer_make',
+      'traits_pointer_undo',
+      ],
     'conversion': [
       'conv_edk_to_cpp',
       'conv_edk_to_cpp_decl',
@@ -32,15 +39,19 @@ class TypeCodec:
     self.jinjenv = jinjenv
 
     for protocol_name, hook_names in TypeCodec.protocols.iteritems():
-      def impl(gd):
+      def impl(gd, protocol_name=protocol_name):
         raise Exception("unimplemented " + protocol_name + " protocol")
       for hook_name in hook_names:
-        self.set_hook(hook_name, impl)
+        self.set_hook('gen_' + hook_name, impl)
 
     # Special signature and no reflection
     def maybe_match_default(cpp_type_name, cpp_type_spec, type_mgr):
       raise Exception("unimplemented match protocol")
     self.set_hook('maybe_match', maybe_match_default)
+
+    # param() and result() are optional
+    self.param()
+    self.result()
 
   def set_hook(self, name, meth):
     setattr(self, name, meth)
@@ -59,16 +70,17 @@ class TypeCodec:
     self.set_hook('maybe_match', impl)
     return self
 
-  def match_cpp_expr_types(self, cpp_expr_types_to_match, type_spec):
+  def match_cpp_type_exprs(self, cpp_expr_types_to_match, type_spec_builder):
     def impl(cpp_type_expr, type_mgr):
       for cpp_expr_type_to_match in cpp_expr_types_to_match:
         if cpp_type_expr == cpp_expr_type_to_match:
-          return type_spec
+          unqual_cpp_type_name = str(cpp_type_expr)
+          return type_spec_builder(unqual_cpp_type_name)
     self.set_hook('maybe_match', impl)
     return self
 
-  def match_cpp_expr_type(self, cpp_expr_type_to_match, type_spec):
-    return self.match_cpp_expr_types([cpp_expr_type_to_match], type_spec)
+  def match_cpp_type_expr(self, cpp_expr_type_to_match, type_spec_builder):
+    return self.match_cpp_type_exprs([cpp_expr_type_to_match], type_spec_builder)
 
   def match_value_by_dict(self, lookup):
     def impl(cpp_type_expr, type_mgr):
@@ -76,7 +88,8 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name)
+          qual_cpp_type_name = str(cpp_type_expr)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -88,7 +101,8 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name)
+          qual_cpp_type_name = str(cpp_type_expr)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -100,7 +114,8 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name)
+          qual_cpp_type_name = str(cpp_type_expr)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -112,7 +127,8 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name)
+          qual_cpp_type_name = str(cpp_type_expr)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -124,19 +140,95 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name)
+          qual_cpp_type_name = str(cpp_type_expr)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
     self.set_hook('maybe_match', impl)
     return self
+
+  # Recipes: traits
+
+  def traits(
+    self,
+    kl = None,
+    edk = None,
+    cpp = None,
+    pointer_make = GenStr(""),
+    pointer_undo = GenStr(""),
+    ):
+    try:
+      self.set_hook('gen_traits_kl', self.make_gen(kl))
+    except:
+      self.raise_missing_or_invalid('kl')
+    try:
+      self.set_hook('gen_traits_edk', self.make_gen(edk))
+    except:
+      self.raise_missing_or_invalid('edk')
+    try:
+      self.set_hook('gen_traits_cpp', self.make_gen(cpp))
+    except:
+      self.raise_missing_or_invalid('cpp')
+    try:
+      self.set_hook('gen_traits_pointer_make', self.make_gen(pointer_make))
+    except:
+      self.raise_missing_or_invalid('pointer_make')
+    try:
+      self.set_hook('gen_traits_pointer_undo', self.make_gen(pointer_undo))
+    except:
+      self.raise_missing_or_invalid('pointer_undo')
+    return self
+
+  def traits_value(self):
+    return self.traits(
+      kl = GenStr(""),
+      edk = GenStr("INParam"),
+      cpp = GenStr(""),
+      )
+
+  def traits_const_ref(self):
+    return self.traits(
+      kl = GenStr(""),
+      edk = GenStr("INParam"),
+      cpp = GenStr("const &"),
+      )
+
+  def traits_const_ptr(self):
+    return self.traits(
+      kl = GenStr(""),
+      edk = GenStr("INParam"),
+      cpp = GenStr("const *"),
+      pointer_make = GenStr("&"),
+      pointer_undo = GenStr("*"),
+      )
+
+  def traits_mutable_ref(self):
+    return self.traits(
+      kl = GenStr("io"),
+      edk = GenStr("IOParam"),
+      cpp = GenStr("&"),
+      )
+
+  def traits_mutable_ptr(self):
+    return self.traits(
+      kl = GenStr("io"),
+      edk = GenStr("IOParam"),
+      cpp = GenStr("*"),
+      pointer_make = GenStr("&"),
+      pointer_undo = GenStr("*"),
+      )
 
   # Recipes: conversion
 
   def conv(
     self,
-    edk_to_cpp = None,
-    edk_to_cpp_decl = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.conv_edk_to_cpp()
+    edk_to_cpp = GenLambda(
+      lambda gd: gd.name.cpp + " = " + gd.name.edk + ";"
       ),
-    cpp_to_edk = None,
+    edk_to_cpp_decl = GenLambda(
+      lambda gd: gd.type.cpp.unqual + " " + gd.conv_edk_to_cpp()
+      ),
+    cpp_to_edk = GenLambda(
+      lambda gd: gd.name.edk + " = " + gd.name.cpp + ";"
+      ),
     cpp_to_edk_decl = GenLambda(
       lambda gd: gd.type.edk.name + " " + gd.conv_cpp_to_edk()
       ),
@@ -159,32 +251,52 @@ class TypeCodec:
       self.raise_missing_or_invalid('cpp_to_edk_decl')
     return self
 
-  def no_conv(self):
+  def conv_none_const(self):
     return self.conv(
-      edk_to_cpp = GenLambda(
-        lambda gd: gd.name.cpp + " = " + gd.name.edk + ";"
+      edk_to_cpp = GenStr(""),
+      edk_to_cpp_decl = GenLambda(
+        lambda gd: gd.type.cpp.unqual + " const &" + gd.name.cpp + " = " + gd.name.edk + ";"
         ),
-      cpp_to_edk = GenLambda(
-        lambda gd: gd.name.edk + " = " + gd.name.cpp + ";"
+      cpp_to_edk = GenStr(""),
+      cpp_to_edk_decl = GenLambda(
+        lambda gd: gd.type.edk.name + " const &" + gd.name.edk + " = " + gd.name.cpp + ";"
+        ),
+      )
+
+  def conv_none_mutable(self):
+    return self.conv(
+      edk_to_cpp = GenStr(""),
+      edk_to_cpp_decl = GenLambda(
+        lambda gd: gd.type.cpp.unqual + " &" + gd.name.cpp + " = " + gd.name.edk + ";"
+        ),
+      cpp_to_edk = GenStr(""),
+      cpp_to_edk_decl = GenLambda(
+        lambda gd: gd.type.edk.name + " const &" + gd.name.edk + " = " + gd.name.cpp + ";"
         ),
       )
 
   # Recipes: result
 
-  def no_result(self):
+  def result_forbidden(self):
     def impl(gd):
-      raise Exception(gd.type.cpp.name + ": unsupported as a result type")
+      raise Exception(gd.type.cpp.unqual + ": unsupported as a result type")
     for hook_name in TypeCodec.protocols['result']:
       self.set_hook('gen_' + hook_name, impl)
     return self
 
   def result(
     self,
-    direct_type_edk = None,
-    indirect_param_edk = None,
-    decl_and_assign_cpp = None,
-    indirect_assign_to_edk = None,
-    direct_return_edk = None,
+    direct_type_edk = GenStr("void"),
+    indirect_param_edk = GenLambda(
+      lambda gd: "Traits< " + gd.type.edk.name + " >::Result " + gd.name.edk
+      ),
+    decl_and_assign_cpp = GenLambda(
+      lambda gd: gd.type.cpp.unqual + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
+      ),
+    indirect_assign_to_edk = GenLambda(
+      lambda gd: gd.conv_cpp_to_edk()
+      ),
+    direct_return_edk = GenStr(""),
     ):
     try:
       self.set_hook('gen_result_direct_type_edk', self.make_gen(direct_type_edk))
@@ -211,7 +323,7 @@ class TypeCodec:
   def result_direct(
     self,
     decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = "
+      lambda gd: gd.type.cpp.unqual + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
       ),
     ):
     return self.result(
@@ -226,49 +338,23 @@ class TypeCodec:
         ),
       )
 
-  def result_direct_from_ptr(self):
-    return self.result_direct(
-      decl_and_assign_cpp = GenLambda(
-        lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = *"
-        )
-      )
-
-  def result_indirect(
-    self,
-    decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = "
-      ),
-    ):
-    return self.result(
-      direct_type_edk = GenStr("void"),
-      indirect_param_edk = GenLambda(
-        lambda gd: "Traits< " + gd.type.edk.name + " >::Result " + gd.name.edk
-        ),
-      decl_and_assign_cpp = decl_and_assign_cpp,
-      indirect_assign_to_edk = GenLambda(
-        lambda gd: gd.conv_cpp_to_edk()
-        ),
-      direct_return_edk = GenStr(""),
-      )
- 
-  def result_indirect_from_ptr(self):
-    return self.result_indirect(
-      decl_and_assign_cpp = GenLambda(
-        lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = *"
-        )
-      )
-
   # Recipes: param
 
   def param(
     self,
-    kl = None,
-    edk = None,
+    kl = GenLambda(
+      lambda gd: gd.traits_kl() + " " + gd.type.kl.base + " " + gd.name.kl + gd.type.kl.suffix
+      ),
+    edk = GenLambda(
+      lambda gd: "Traits< " + gd.type.edk.name + " >::" + gd.traits_edk() + " " + gd.name.edk
+      ),
     edk_to_cpp_decl = GenLambda(
       lambda gd: gd.conv_edk_to_cpp_decl()
       ),
-    cpp = None,
-    cpp_to_edk = None,
+    cpp = GenLambda(
+      lambda gd: gd.traits_pointer_make() + gd.name.cpp
+      ),
+    cpp_to_edk = GenStr(""),
     ):
     try:
       self.set_hook('gen_param_edk', self.make_gen(edk))
@@ -292,52 +378,13 @@ class TypeCodec:
       self.raise_missing_or_invalid('cpp_to_edk')
     return self
 
-  def param_in(
-    self,
-    cpp = GenLambda(
-      lambda gd: gd.name.cpp
-      )
-    ):
-    return self.param(
-      kl = GenLambda(
-        lambda gd: gd.type.kl.base + " " + gd.name.kl + gd.type.kl.suffix
-        ),
-      edk = GenLambda(
-        lambda gd: "Traits< " + gd.type.edk.name + " >::INParam " + gd.name.edk
-        ),
-      cpp = cpp,
-      cpp_to_edk = GenStr(""),
-      )
+  def param_in(self):
+    return self.param()
 
-  def param_in_to_ptr(self):
-    return self.param_in(
-      cpp = GenLambda(
-        lambda gd: "&" + gd.name.cpp
-        )
-      )      
-
-  def param_io(
-    self,
-    cpp = GenLambda(
-      lambda gd: gd.name.cpp
-      )
-    ):
+  def param_io(self):
     return self.param(
-      kl = GenLambda(
-        lambda gd: "io " + gd.type.kl.base + " " + gd.name.kl + gd.type.kl.suffix
-        ),
-      edk = GenLambda(
-        lambda gd: "Traits< " + gd.type.edk.name + " >::IOParam " + gd.name.edk
-        ),
-      cpp = cpp,
       cpp_to_edk = GenLambda(
         lambda gd: gd.conv_cpp_to_edk()
         ),
       )
 
-  def param_io_to_ptr(self):
-    return self.param_io(
-      cpp = GenLambda(
-        lambda gd: "&" + gd.name.cpp
-        )
-      )      

@@ -5,11 +5,10 @@ def build_std_string_type_codecs(jinjenv):
   return [
     TypeCodec(
       jinjenv
-      ).match_cpp_expr_types([
-          Named("std::string"),
-          ReferenceTo(Const(Named("std::string"))),
-        ],
-        SimpleTypeSpec('String', 'std::string')
+      ).match_cpp_type_expr(
+        Named("std::string"),
+        SimpleTypeSpec.builder('String', 'std::string')
+      ).traits_value(
       ).conv(
         edk_to_cpp = GenLambda(
           lambda gd: gd.name.cpp + " = " + gd.name.edk + ".getCString();"
@@ -17,14 +16,27 @@ def build_std_string_type_codecs(jinjenv):
         cpp_to_edk = GenLambda(
           lambda gd: gd.name.edk + " = " + gd.name.cpp + ".c_str();"
           ),
-      ).param_in(
-      ).result_indirect(
       ),
     TypeCodec(
       jinjenv
-      ).match_cpp_expr_type(
+      ).match_cpp_type_expr(
+        ReferenceTo(Const(Named("std::string"))),
+        SimpleTypeSpec.builder('String', 'std::string')
+      ).traits_const_ref(
+      ).conv(
+        edk_to_cpp = GenLambda(
+          lambda gd: gd.name.cpp + " = " + gd.name.edk + ".getCString();"
+          ),
+        cpp_to_edk = GenLambda(
+          lambda gd: gd.name.edk + " = " + gd.name.cpp + ".c_str();"
+          ),
+      ),
+    TypeCodec(
+      jinjenv
+      ).match_cpp_type_expr(
         PointerTo(Const(Named("std::string"))),
-        SimpleTypeSpec('String', "std::string")
+        SimpleTypeSpec.builder('String', "std::string")
+      ).traits_const_ptr(
       ).conv(
         edk_to_cpp = GenLambda(
           lambda gd: gd.name.cpp + " = " + gd.name.edk + ".getCString();"
@@ -32,14 +44,14 @@ def build_std_string_type_codecs(jinjenv):
         cpp_to_edk = GenLambda(
           lambda gd: gd.name.edk + " = " + gd.name.cpp + ".c_str();"
           ),
-      ).param_in_to_ptr(
-      ).no_result(
+      ).result_forbidden(
       ),
     TypeCodec(
       jinjenv
-      ).match_cpp_expr_type(
+      ).match_cpp_type_expr(
         ReferenceTo(Named("std::string")),
-        SimpleTypeSpec('String', 'std::string')
+        SimpleTypeSpec.builder('String', 'std::string')
+      ).traits_mutable_ref(
       ).conv(
         edk_to_cpp = GenLambda(
           lambda gd: gd.name.cpp + " = " + gd.name.edk + ".getCString();"
@@ -48,13 +60,13 @@ def build_std_string_type_codecs(jinjenv):
           lambda gd: gd.name.edk + " = " + gd.name.cpp + ".c_str();"
           ),
       ).param_io(
-      ).result_indirect(
       ),
     TypeCodec(
       jinjenv
-      ).match_cpp_expr_type(
+      ).match_cpp_type_expr(
         PointerTo(Named("std::string")),
-        SimpleTypeSpec('String', 'std::string')
+        SimpleTypeSpec.builder('String', 'std::string')
+      ).traits_mutable_ptr(
       ).conv(
         edk_to_cpp = GenLambda(
           lambda gd: gd.name.cpp + " = " + gd.name.edk + ".getCString();"
@@ -62,7 +74,7 @@ def build_std_string_type_codecs(jinjenv):
         cpp_to_edk = GenLambda(
           lambda gd: gd.name.edk + " = " + gd.name.cpp + ".c_str();"
           ),
-      ).param_io_to_ptr(
-      ).no_result(
+      ).param_io(
+      ).result_forbidden(
       ),
     ]

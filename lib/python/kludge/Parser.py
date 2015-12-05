@@ -192,6 +192,7 @@ SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
 Import('fabricBuildEnv')
 
 fabricBuildEnv.Append(CPPPATH = ["../.."])
+fabricBuildEnv.Append(CXXFLAGS = ["-g"])
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),

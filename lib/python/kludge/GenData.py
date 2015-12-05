@@ -1,4 +1,4 @@
-from kludge import ValueName
+from kludge import ValueName, TypeCodec
 
 class GenData:
 
@@ -22,16 +22,11 @@ class GenData:
         self.children[0]
         )
 
-    self._codec = type_info.codec
-
-  def conv_edk_to_cpp(self):
-    return self._codec.gen_conv_edk_to_cpp(self)
-
-  def conv_edk_to_cpp_decl(self):
-    return self._codec.gen_conv_edk_to_cpp_decl(self)
-
-  def conv_cpp_to_edk(self):
-    return self._codec.gen_conv_cpp_to_edk(self)
-
-  def conv_cpp_to_edk_decl(self):
-    return self._codec.gen_conv_cpp_to_edk_decl(self)
+    for protocol_name, hook_names in TypeCodec.protocols.iteritems():
+      for hook_name in hook_names:
+        def impl(type_codec = type_info.codec, gen_hook_name = 'gen_' + hook_name):
+          return getattr(
+            type_codec,
+            gen_hook_name
+            )(self)
+        setattr(self, hook_name, impl)

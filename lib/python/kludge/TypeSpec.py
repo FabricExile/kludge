@@ -17,8 +17,9 @@ class EDKTypeSpec:
 
 class CPPTypeSpec:
 
-  def __init__(self, cpp_type_name):
-    self.name = cpp_type_name
+  def __init__(self, unqual_cpp_type_name, qual_cpp_type_name):
+    self.unqual = unqual_cpp_type_name
+    self.qual = qual_cpp_type_name
 
 class TypeSpec:
 
@@ -27,48 +28,37 @@ class TypeSpec:
     kl_base,
     kl_suffix,
     edk_name,
-    cpp_type_name,
+    unqual_cpp_type_name,
+    qual_cpp_type_name,
     child_type_infos,
     ):
     self.kl = KLTypeSpec(kl_base, kl_suffix)
     self.edk = EDKTypeSpec(edk_name)
-    self.cpp = CPPTypeSpec(cpp_type_name)
+    self.cpp = CPPTypeSpec(unqual_cpp_type_name, qual_cpp_type_name)
     self.child_type_infos = child_type_infos
-
-  @staticmethod
-  def builder(
-    kl_base,
-    kl_suffix,
-    edk_name,
-    child_type_infos,
-    ):
-    return lambda cpp_type_name: TypeSpec(
-      kl_base,
-      kl_suffix,
-      edk_name,
-      cpp_type_name,
-      child_type_infos,
-      )
 
 class SimpleTypeSpec(TypeSpec):
 
   def __init__(
     self,
     kl_name,
-    cpp_type_name,
+    unqual_cpp_type_name,
+    qual_cpp_type_name,
     ):
     TypeSpec.__init__(
       self,
       kl_name,
       "",
       kl_name,
-      cpp_type_name,
+      unqual_cpp_type_name,
+      qual_cpp_type_name,
       [],
       )
 
   @staticmethod
-  def builder(kl_name):
-    return lambda cpp_type_name: SimpleTypeSpec(
+  def builder(kl_name, unqual_cpp_type_name):
+    return lambda qual_cpp_type_name: SimpleTypeSpec(
       kl_name,
-      cpp_type_name,
+      unqual_cpp_type_name,
+      qual_cpp_type_name,
       )

@@ -20,6 +20,7 @@ def build_std_vector_type_codecs():
   class StdVectorTypeCodecBase(TypeCodec): pass
   StdVectorTypeCodecBase.conv(
     edk_to_cpp = """
+    {{ name.cpp }}.clear();
     {{ name.cpp }}.reserve( {{ name.edk }}.size() );
     for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
     {

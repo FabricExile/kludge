@@ -21,6 +21,7 @@ def build_std_map_type_codecs():
   class StdMapTypeCodecBase(TypeCodec): pass
   StdMapTypeCodecBase.conv(
     edk_to_cpp = """
+    {{ name.cpp }}.clear();
     for ( {{ type.edk.name }}::CIT it = {{ name.edk }}.begin();
       it != {{ name.edk }}.end(); ++it )
     {

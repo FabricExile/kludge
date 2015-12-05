@@ -70,11 +70,19 @@ class TypeCodec:
       gen_spec = GenTmpl(gen_spec)
     return gen_spec.make_gen()
 
+  @classmethod
+  def raise_unimplemented_protocol(cls, protocol_name):
+    raise Exception("unimplemented " + protocol_name + " protocol on " + cls.__name__)
+
   @staticmethod
   def raise_missing_or_invalid(name):
     raise Exception("missing or invalid '" + name + "' (must be a string or an instance of GenXXX)")
 
   # Recipes: match
+
+  @classmethod
+  def maybe_match(cls, cpp_type_expr, type_mgr):
+    cls.raise_unimplemented_protocol('match')
 
   @classmethod
   def match(cls, impl):
@@ -422,14 +430,9 @@ class TypeCodec:
 
 for protocol_name, hook_names in TypeCodec.protocols.iteritems():
   def impl(self, protocol_name=protocol_name):
-    raise Exception("unimplemented " + protocol_name + " protocol on " + self.__class__.__name__)
+    self.__class__.raise_unimplemented_protocol(protocol_name)
   for hook_name in hook_names:
     TypeCodec.set_hook(hook_name, impl)
-
-# Special signature and no reflection
-def maybe_match_default(cpp_type_name, cpp_type_spec, type_mgr):
-  raise Exception("unimplemented match protocol")
-TypeCodec.set_hook('maybe_match', staticmethod(maybe_match_default))
 
 # param() and result() are optional
 TypeCodec.param()

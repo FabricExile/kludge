@@ -1,5 +1,7 @@
 class TypeInfo:
 
+  class VOID: pass
+
   def __init__(
     self,
     type_codec_cls,

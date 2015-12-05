@@ -1,5 +1,6 @@
 from kludge.type_codecs import *
 from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, ValueName, Value, TypeInfo
+import clang.cindex
 
 class TypeMgr:
 
@@ -31,19 +32,42 @@ class TypeMgr:
   def add_type_codecs(self, type_codecs):
     for type_codec in type_codecs:
       self.add_type_codec(type_codec)
-    
-  def maybe_get_type_info(self, cpp_type_name):
-    if cpp_type_name == "void":
-      return None
 
+  @staticmethod
+  def parse_value(value):
+    if isinstance(value, CPPTypeExpr.Type):
+      if isinstance(value, CPPTypeExpr.Void):
+        return None, None
+      cpp_type_expr = value
+      cpp_type_name = str(cpp_type_expr)
+    elif isinstance(value, basestring):
+      if value == "void":
+        return None, None
+      cpp_type_expr = None
+      cpp_type_name = void
+    elif isinstance(value, clang.cindex.Type):
+      cpp_type_name = value.spelling
+      if cpp_type_name == "void":
+        return None, None
+      cpp_type_expr = None
+    else:
+      raise Exception("unexpected argument type")
+    return cpp_type_name, cpp_type_expr
+
+  def maybe_get_type_info(self, value):
+    cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
+    if not cpp_type_name:
+      return TypeInfo.VOID
+    
     type_info = self._cpp_type_name_to_type_info.get(cpp_type_name, None)
     if type_info:
       return type_info
 
-    try:
-      cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
-    except:
-      raise Exception(cpp_type_name + ": malformed C++ type expression")
+    if not cpp_type_expr:
+      try:
+        cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
+      except:
+        raise Exception(cpp_type_name + ": malformed C++ type expression")
 
     for type_codec in self._type_codecs:
       type_spec = type_codec.maybe_match(cpp_type_expr, self)
@@ -52,21 +76,19 @@ class TypeMgr:
         self._cpp_type_name_to_type_info[cpp_type_name] = type_info
         return type_info
 
-  def get_type_info(self, cpp_type_name):
-    if cpp_type_name == "void":
-      return None
-
-    type_info = self.maybe_get_type_info(cpp_type_name)
+  def get_type_info(self, value):
+    type_info = self.maybe_get_type_info(value)
     if type_info:
-      return type_info
+      if type_info == TypeInfo.VOID:
+        return None
+      else:
+        return type_info
 
+    cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
     raise Exception(cpp_type_name + ": no EDK type association found")
-
-  def get_type_info_for_clang_type(self, clang_type):
-    return self.get_type_info(clang_type.spelling)
 
   def convert_clang_params(self, clang_params):
     def mapper(clang_param):
-      type_info = self.get_type_info_for_clang_type(clang_param.clang_type)
+      type_info = self.get_type_info(clang_param.clang_type)
       return type_info.make_codec(ValueName(clang_param.name))
     return map(mapper, clang_params)

@@ -56,12 +56,10 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
     if isinstance(cpp_type_expr, Template) \
       and cpp_type_expr.name == "std::map":
         key_cpp_type_expr = cpp_type_expr.params[0]
-        key_cpp_type_name = str(key_cpp_type_expr)
-        key_type_info = type_mgr.maybe_get_type_info(key_cpp_type_name)
+        key_type_info = type_mgr.maybe_get_type_info(key_cpp_type_expr)
         if key_type_info:
           value_cpp_type_expr = cpp_type_expr.params[1]
-          value_cpp_type_name = str(value_cpp_type_expr)
-          value_type_info = type_mgr.maybe_get_type_info(value_cpp_type_name)
+          value_type_info = type_mgr.maybe_get_type_info(value_cpp_type_expr)
           if value_type_info:
             return build_std_map_type_spec(
               'std::map< ' + key_type_info.spec.cpp.qual_name + ', ' + value_type_info.spec.cpp.qual_name + ' >',
@@ -80,12 +78,10 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
       and isinstance(cpp_type_expr.pointee, Template) \
       and cpp_type_expr.pointee.name == 'std::map':
         key_cpp_type_expr = cpp_type_expr.pointee.params[0]
-        key_cpp_type_name = str(key_cpp_type_expr)
-        key_type_info = type_mgr.maybe_get_type_info(key_cpp_type_name)
+        key_type_info = type_mgr.maybe_get_type_info(key_cpp_type_expr)
         if key_type_info:
           value_cpp_type_expr = cpp_type_expr.pointee.params[1]
-          value_cpp_type_name = str(value_cpp_type_expr)
-          value_type_info = type_mgr.maybe_get_type_info(value_cpp_type_name)
+          value_type_info = type_mgr.maybe_get_type_info(value_cpp_type_expr)
           if value_type_info:
             return build_std_map_type_spec(
               'std::map< ' + key_type_info.spec.cpp.qual_name + ', ' + value_type_info.spec.cpp.qual_name + ' >',

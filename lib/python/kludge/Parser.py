@@ -803,7 +803,7 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     self.get_nested_name(cursor),
-                    self.type_mgr.get_type_info_for_clang_type(cursor.result_type),
+                    self.type_mgr.get_type_info(cursor.result_type),
                     self.type_mgr.convert_clang_params(clang_params),
                     )
                 )

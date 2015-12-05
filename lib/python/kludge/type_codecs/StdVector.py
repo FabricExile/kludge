@@ -51,8 +51,7 @@ def build_std_vector_type_codecs():
     if isinstance(cpp_type_expr, Template) \
       and cpp_type_expr.name == "std::vector":
         element_cpp_type_expr = cpp_type_expr.params[0]
-        element_cpp_type_name = str(element_cpp_type_expr)
-        element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
+        element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_expr)
         if element_type_info:
           return build_std_vector_type_spec(
             'std::vector< ' + element_type_info.spec.cpp.qual_name + ' >',
@@ -70,8 +69,7 @@ def build_std_vector_type_codecs():
       and isinstance(cpp_type_expr.pointee, Template) \
       and cpp_type_expr.pointee.name == 'std::vector':
         element_cpp_type_expr = cpp_type_expr.pointee.params[0]
-        element_cpp_type_name = str(element_cpp_type_expr)
-        element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
+        element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_expr)
         if element_type_info:
           return build_std_vector_type_spec(
             'std::vector< ' + element_type_info.spec.cpp.qual_name + ' >',

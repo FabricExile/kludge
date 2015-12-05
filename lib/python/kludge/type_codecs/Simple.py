@@ -31,14 +31,14 @@ def build_simple_type_codecs(jinjenv):
       ).match_value_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_value(
-      ).conv_none_const(
+      ).conv_none(
       ).result_direct(),
     TypeCodec(
       jinjenv
       ).match_const_ref_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_const_ref(
-      ).conv_none_const(
+      ).conv_none(
       ).result_direct(
       ),
     TypeCodec(
@@ -46,7 +46,7 @@ def build_simple_type_codecs(jinjenv):
       ).match_const_ptr_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_const_ptr(
-      ).conv_none_const(
+      ).conv_none(
       ).result_direct(
       ),
     TypeCodec(
@@ -54,7 +54,7 @@ def build_simple_type_codecs(jinjenv):
       ).match_mutable_ref_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_mutable_ref(
-      ).conv_none_mutable(
+      ).conv_none(
       ).param_io(
       ).result_direct(
       ),
@@ -63,7 +63,7 @@ def build_simple_type_codecs(jinjenv):
       ).match_mutable_ptr_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_mutable_ptr(
-      ).conv_none_mutable(
+      ).conv_none(
       ).param_io(
       ).result_direct(
       ),

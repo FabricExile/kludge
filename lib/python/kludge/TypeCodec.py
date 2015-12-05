@@ -9,6 +9,7 @@ class TypeCodec:
       'traits_cpp',
       'traits_pointer_make',
       'traits_pointer_undo',
+      'traits_reference',
       ],
     'conversion': [
       'conv_edk_to_cpp',
@@ -152,8 +153,9 @@ class TypeCodec:
     kl = None,
     edk = None,
     cpp = None,
-    pointer_make = GenStr(""),
-    pointer_undo = GenStr(""),
+    pointer_make = None,
+    pointer_undo = None,
+    reference = None,
     ):
     try:
       self.set_hook('gen_traits_kl', self.make_gen(kl))
@@ -175,6 +177,10 @@ class TypeCodec:
       self.set_hook('gen_traits_pointer_undo', self.make_gen(pointer_undo))
     except:
       self.raise_missing_or_invalid('pointer_undo')
+    try:
+      self.set_hook('gen_traits_reference', self.make_gen(reference))
+    except:
+      self.raise_missing_or_invalid('reference')
     return self
 
   def traits_value(self):
@@ -182,6 +188,9 @@ class TypeCodec:
       kl = GenStr(""),
       edk = GenStr("INParam"),
       cpp = GenStr(""),
+      pointer_make = GenStr(""),
+      pointer_undo = GenStr(""),
+      reference = GenStr("const &"),
       )
 
   def traits_const_ref(self):
@@ -189,6 +198,9 @@ class TypeCodec:
       kl = GenStr(""),
       edk = GenStr("INParam"),
       cpp = GenStr("const &"),
+      pointer_make = GenStr(""),
+      pointer_undo = GenStr(""),
+      reference = GenStr("const &"),
       )
 
   def traits_const_ptr(self):
@@ -198,6 +210,7 @@ class TypeCodec:
       cpp = GenStr("const *"),
       pointer_make = GenStr("&"),
       pointer_undo = GenStr("*"),
+      reference = GenStr("const &"),
       )
 
   def traits_mutable_ref(self):
@@ -205,6 +218,9 @@ class TypeCodec:
       kl = GenStr("io"),
       edk = GenStr("IOParam"),
       cpp = GenStr("&"),
+      pointer_make = GenStr(""),
+      pointer_undo = GenStr(""),
+      reference = GenStr("&"),
       )
 
   def traits_mutable_ptr(self):
@@ -214,6 +230,7 @@ class TypeCodec:
       cpp = GenStr("*"),
       pointer_make = GenStr("&"),
       pointer_undo = GenStr("*"),
+      reference = GenStr("&"),
       )
 
   # Recipes: conversion
@@ -251,23 +268,11 @@ class TypeCodec:
       self.raise_missing_or_invalid('cpp_to_edk_decl')
     return self
 
-  def conv_none_const(self):
+  def conv_none(self):
     return self.conv(
       edk_to_cpp = GenStr(""),
       edk_to_cpp_decl = GenLambda(
-        lambda gd: gd.type.cpp.unqual + " const &" + gd.name.cpp + " = " + gd.name.edk + ";"
-        ),
-      cpp_to_edk = GenStr(""),
-      cpp_to_edk_decl = GenLambda(
-        lambda gd: gd.type.edk.name + " const &" + gd.name.edk + " = " + gd.name.cpp + ";"
-        ),
-      )
-
-  def conv_none_mutable(self):
-    return self.conv(
-      edk_to_cpp = GenStr(""),
-      edk_to_cpp_decl = GenLambda(
-        lambda gd: gd.type.cpp.unqual + " &" + gd.name.cpp + " = " + gd.name.edk + ";"
+        lambda gd: gd.type.cpp.unqual + " " + gd.traits_reference() + gd.name.cpp + " = " + gd.name.edk + ";"
         ),
       cpp_to_edk = GenStr(""),
       cpp_to_edk_decl = GenLambda(

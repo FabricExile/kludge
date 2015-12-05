@@ -17,7 +17,7 @@ class GenTmpl:
     self._value = value
   def make_gen(self, jinjenv):
     # IMPORTANT: bake the template so it is not regenerated on each invocation
-    template = jinjenv.from_string(self._value)
+    template = jinjenv.from_string(self._value.strip())
     return lambda gd: template.render(gd.__dict__)
 
 class GenFile:

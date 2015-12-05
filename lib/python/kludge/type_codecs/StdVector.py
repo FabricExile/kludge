@@ -45,26 +45,30 @@ def build_std_vector_type_codecs(jinjenv):
         match_value_or_const_ref
       ).conv(
         edk_to_cpp = """
-{{ name.cpp }}.reserve( {{ name.edk }}.size() );
-for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
-{
-  {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
-  {{ element.conv_decl_cpp() }}
-  {{ element.conv_edk_to_cpp() }}
-  {{ name.cpp }}.push_back( {{ element.name.cpp }} );
-}
+    {{ name.cpp }}.reserve( {{ name.edk }}.size() );
+    for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
+    {
+        {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
+        {{ element.conv_edk_to_cpp_decl() }}
+        {{ name.cpp }}.push_back( {{ element.name.cpp }} );
+    }
 """,
+        edk_to_cpp_decl = GenLambda(
+          lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
+        ),
         cpp_to_edk = """
-{{ name.edk }}.resize( 0 );
-for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
-  it != {{ name.cpp }}.end(); ++it )
-{
-  {{ element.type.cpp.name }} const &{{ element.name.cpp }} = *it;
-  {{ element.conv_decl_edk() }}
-  {{ element.conv_cpp_to_edk() }}
-  {{ name.edk }}.push( {{ element.name.cpp }} );
-}
-"""
+    {{ name.edk }}.resize( 0 );
+    for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
+      it != {{ name.cpp }}.end(); ++it )
+    {
+        {{ element.type.cpp.name }} const &{{ element.name.cpp }} = *it;
+        {{ element.conv_cpp_to_edk_decl() }}
+        {{ name.edk }}.push( {{ element.name.cpp }} );
+    }
+""",
+        cpp_to_edk_decl = GenLambda(
+          lambda gd: gd.type.edk.name + " " + gd.name.edk + ";\n    " + gd.conv_cpp_to_edk()
+        ),
       ).param_in(
       ).result_indirect(
       ),

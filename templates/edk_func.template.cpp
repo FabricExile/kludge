@@ -16,7 +16,7 @@ FABRIC_EXT_EXPORT
     )
 {
 {% for param in func.params %}
-    {{ param.param_edk_to_cpp() }}
+    {{ param.param_edk_to_cpp_decl() }}
 {% endfor %}
 
     {{ func.result_decl_and_assign_cpp() }}

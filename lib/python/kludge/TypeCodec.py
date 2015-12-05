@@ -4,10 +4,10 @@ class TypeCodec:
 
   protocols = {
     'conversion': [
-      'conv_decl_cpp',
       'conv_edk_to_cpp',
-      'conv_decl_edk',
+      'conv_edk_to_cpp_decl',
       'conv_cpp_to_edk',
+      'conv_cpp_to_edk_decl',
       ],
     'result': [
       'result_direct_type_edk',
@@ -19,7 +19,7 @@ class TypeCodec:
     'param': [
       'param_kl',
       'param_edk',
-      'param_edk_to_cpp',
+      'param_edk_to_cpp_decl',
       'param_cpp',
       'param_cpp_to_edk',
       ],
@@ -132,31 +132,31 @@ class TypeCodec:
 
   def conv(
     self,
-    decl_cpp = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";"
-      ),
     edk_to_cpp = None,
-    decl_edk = GenLambda(
-      lambda gd: gd.type.edk.name + " " + gd.name.edk + ";"
+    edk_to_cpp_decl = GenLambda(
+      lambda gd: gd.type.cpp.name + " " + gd.conv_edk_to_cpp()
       ),
     cpp_to_edk = None,
+    cpp_to_edk_decl = GenLambda(
+      lambda gd: gd.type.edk.name + " " + gd.conv_cpp_to_edk()
+      ),
     ):
-    try:
-      self.set_hook('gen_conv_decl_cpp', self.make_gen(decl_cpp))
-    except:
-      self.raise_missing_or_invalid('decl_cpp')
     try:
       self.set_hook('gen_conv_edk_to_cpp', self.make_gen(edk_to_cpp))
     except:
       self.raise_missing_or_invalid('edk_to_cpp')
     try:
+      self.set_hook('gen_conv_edk_to_cpp_decl', self.make_gen(edk_to_cpp_decl))
+    except:
+      self.raise_missing_or_invalid('edk_to_cpp_decl')
+    try:
       self.set_hook('gen_conv_cpp_to_edk', self.make_gen(cpp_to_edk))
     except:
       self.raise_missing_or_invalid('cpp_to_edk')
     try:
-      self.set_hook('gen_conv_decl_edk', self.make_gen(decl_edk))
+      self.set_hook('gen_conv_cpp_to_edk_decl', self.make_gen(cpp_to_edk_decl))
     except:
-      self.raise_missing_or_invalid('decl_edk')
+      self.raise_missing_or_invalid('cpp_to_edk_decl')
     return self
 
   def no_conv(self):
@@ -211,7 +211,7 @@ class TypeCodec:
   def result_direct(
     self,
     decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = "
+      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = "
       ),
     ):
     return self.result(
@@ -222,21 +222,21 @@ class TypeCodec:
       decl_and_assign_cpp = decl_and_assign_cpp,
       indirect_assign_to_edk = GenStr(""),
       direct_return_edk = GenLambda(
-        lambda gd: gd.conv_decl_edk() + "\n  " + gd.conv_cpp_to_edk() + "\n  return " + gd.name.edk + ";"
+        lambda gd: gd.conv_cpp_to_edk_decl() + "\n  return " + gd.name.edk + ";"
         ),
       )
 
   def result_direct_from_ptr(self):
     return self.result_direct(
       decl_and_assign_cpp = GenLambda(
-        lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
+        lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = *"
         )
       )
 
   def result_indirect(
     self,
     decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = "
+      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = "
       ),
     ):
     return self.result(
@@ -254,7 +254,7 @@ class TypeCodec:
   def result_indirect_from_ptr(self):
     return self.result_indirect(
       decl_and_assign_cpp = GenLambda(
-        lambda gd: gd.conv_decl_cpp() + "\n  " + gd.name.cpp + " = *"
+        lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = *"
         )
       )
 
@@ -264,8 +264,8 @@ class TypeCodec:
     self,
     kl = None,
     edk = None,
-    edk_to_cpp = GenLambda(
-      lambda gd: gd.conv_decl_cpp() + "\n  " + gd.conv_edk_to_cpp()
+    edk_to_cpp_decl = GenLambda(
+      lambda gd: gd.conv_edk_to_cpp_decl()
       ),
     cpp = None,
     cpp_to_edk = None,
@@ -279,9 +279,9 @@ class TypeCodec:
     except:
       self.raise_missing_or_invalid('kl')
     try:
-      self.set_hook('gen_param_edk_to_cpp', self.make_gen(edk_to_cpp))
+      self.set_hook('gen_param_edk_to_cpp_decl', self.make_gen(edk_to_cpp_decl))
     except:
-      self.raise_missing_or_invalid('edk_to_cpp')
+      self.raise_missing_or_invalid('edk_to_cpp_decl')
     try:
       self.set_hook('gen_param_cpp', self.make_gen(cpp))
     except:

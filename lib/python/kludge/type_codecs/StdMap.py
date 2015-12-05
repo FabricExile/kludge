@@ -1,5 +1,6 @@
 from kludge import TypeSpec, TypeCodec, GenStr, GenLambda, SimpleTypeSpec, ValueName, Value
 from kludge.CPPTypeExpr import *
+from kludge.CPPTypeExpr.helpers import *
 
 def build_std_map_type_codecs():
 
@@ -76,8 +77,7 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
   StdMapValueTypeCodec.traits_value()
 
   def match_const_ref(cls, cpp_type_expr, type_mgr):
-    if isinstance(cpp_type_expr, ReferenceTo) \
-      and cpp_type_expr.pointee.is_const:
+    if is_const_ref(cpp_type_expr):
       base_cpp_type_expr = cpp_type_expr.pointee
       if is_std_map(base_cpp_type_expr):
         key_cpp_type_expr = base_cpp_type_expr.params[0]

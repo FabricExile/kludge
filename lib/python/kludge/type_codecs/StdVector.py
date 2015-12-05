@@ -63,7 +63,7 @@ def build_std_vector_type_codecs(jinjenv):
     {
         {{ element.type.cpp.name }} const &{{ element.name.cpp }} = *it;
         {{ element.conv_cpp_to_edk_decl() }}
-        {{ name.edk }}.push( {{ element.name.cpp }} );
+        {{ name.edk }}.push( {{ element.name.edk }} );
     }
 """,
         cpp_to_edk_decl = GenLambda(

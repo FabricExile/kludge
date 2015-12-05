@@ -18,4 +18,20 @@ inline char const * ReturnSecondSecond(
   return vals[1][1];
 }
 
+inline std::vector< std::vector<std::string> > ReturnStringArrayArray()
+{
+  std::vector<std::string> b;
+  b.push_back("hello");
+  b.push_back("there");
+  b.push_back("my");
+  b.push_back("friend");
+
+  std::vector< std::vector<std::string> > a;
+  a.push_back(b);
+  a.push_back(b);
+  a.push_back(b);
+
+  return a;
+}
+
 #endif

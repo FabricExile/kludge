@@ -17,4 +17,6 @@ operator entry() {
   b[1][1] = "buzzy";
   report("b = " + b);
   report("ReturnSecondSecond(b) = " + ReturnSecondSecond(b));
+
+  report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
 }

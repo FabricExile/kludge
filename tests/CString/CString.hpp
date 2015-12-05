@@ -1,6 +1,8 @@
 #ifndef _CString_hpp
 #define _CString_hpp
 
+#include <string>
+
 inline const char *CStringParams(
   char const *cStringValue,
   char const * const &cStringConstRef

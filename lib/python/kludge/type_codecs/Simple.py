@@ -25,41 +25,36 @@ def build_simple_type_codecs():
     "double": "Float64",
     }
 
+  class SimpleTypeCodecBase(TypeCodec): pass
+  SimpleTypeCodecBase.conv_none()
+  SimpleTypeCodecBase.result_direct()
+
+  class SimpleValueTypeCodec(SimpleTypeCodecBase): pass
+  SimpleValueTypeCodec.match_value_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleValueTypeCodec.traits_value()
+
+  class SimpleConstRefTypeCodec(SimpleTypeCodecBase): pass
+  SimpleConstRefTypeCodec.match_const_ref_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleConstRefTypeCodec.traits_const_ref()
+
+  class SimpleConstPtrTypeCodec(SimpleTypeCodecBase): pass
+  SimpleConstPtrTypeCodec.match_const_ptr_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleConstPtrTypeCodec.traits_const_ptr()
+
+  class SimpleMutableRefType(SimpleTypeCodecBase): pass
+  SimpleMutableRefType.match_mutable_ref_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleMutableRefType.traits_mutable_ref()
+  SimpleMutableRefType.param_io()
+
+  class SimpleMutablePtrType(SimpleTypeCodecBase): pass
+  SimpleMutablePtrType.match_mutable_ptr_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleMutablePtrType.traits_mutable_ptr()
+  SimpleMutablePtrType.param_io()
+
   return [
-    TypeCodec(
-      ).match_value_by_dict(
-        cpp_base_type_to_kl_base_type
-      ).traits_value(
-      ).conv_none(
-      ).result_direct(),
-    TypeCodec(
-      ).match_const_ref_by_dict(
-        cpp_base_type_to_kl_base_type
-      ).traits_const_ref(
-      ).conv_none(
-      ).result_direct(
-      ),
-    TypeCodec(
-      ).match_const_ptr_by_dict(
-        cpp_base_type_to_kl_base_type
-      ).traits_const_ptr(
-      ).conv_none(
-      ).result_direct(
-      ),
-    TypeCodec(
-      ).match_mutable_ref_by_dict(
-        cpp_base_type_to_kl_base_type
-      ).traits_mutable_ref(
-      ).conv_none(
-      ).param_io(
-      ).result_direct(
-      ),
-    TypeCodec(
-      ).match_mutable_ptr_by_dict(
-        cpp_base_type_to_kl_base_type
-      ).traits_mutable_ptr(
-      ).conv_none(
-      ).param_io(
-      ).result_direct(
-      ),
+    SimpleValueTypeCodec,
+    SimpleConstRefTypeCodec,
+    SimpleConstPtrTypeCodec,
+    SimpleMutableRefType,
+    SimpleMutablePtrType,
     ]

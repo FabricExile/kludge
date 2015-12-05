@@ -17,7 +17,36 @@ def build_std_vector_type_codecs():
       [element_type_info],
       )
 
-  def match_value(cpp_type_expr, type_mgr):
+  class StdVectorTypeCodecBase(TypeCodec): pass
+  StdVectorTypeCodecBase.conv(
+    edk_to_cpp = """
+    {{ name.cpp }}.reserve( {{ name.edk }}.size() );
+    for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
+    {
+        {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
+        {{ element.conv_edk_to_cpp_decl() }}
+        {{ name.cpp }}.push_back( {{ element.name.cpp }} );
+    }
+""",
+    edk_to_cpp_decl = GenLambda(
+      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
+      ),
+    cpp_to_edk = """
+    {{ name.edk }}.resize( 0 );
+    for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
+      it != {{ name.cpp }}.end(); ++it )
+    {
+        {{ element.type.cpp.name }} const &{{ element.name.cpp }} = {{ element.traits_pointer_undo() }}*it;
+        {{ element.conv_cpp_to_edk_decl() }}
+        {{ name.edk }}.push( {{ element.name.edk }} );
+    }
+""",
+    cpp_to_edk_decl = GenLambda(
+      lambda gd: gd.type.edk.name + " " + gd.name.edk + ";\n    " + gd.conv_cpp_to_edk()
+      ),
+    )
+
+  def match_value(cls, cpp_type_expr, type_mgr):
     if isinstance(cpp_type_expr, Template) \
       and cpp_type_expr.name == "std::vector":
         element_cpp_type_expr = cpp_type_expr.params[0]
@@ -30,7 +59,11 @@ def build_std_vector_type_codecs():
             element_type_info,
             )
 
-  def match_const_ref(cpp_type_expr, type_mgr):
+  class StdVectorValueTypeCodec(StdVectorTypeCodecBase): pass
+  StdVectorValueTypeCodec.match(match_value)
+  StdVectorValueTypeCodec.traits_value()
+
+  def match_const_ref(cls, cpp_type_expr, type_mgr):
     if isinstance(cpp_type_expr, ReferenceTo) \
       and cpp_type_expr.pointee.is_const \
       and isinstance(cpp_type_expr.pointee, Template) \
@@ -45,67 +78,11 @@ def build_std_vector_type_codecs():
             element_type_info,
             )
 
+  class StdVectorConstRefTypeCodec(StdVectorTypeCodecBase): pass
+  StdVectorConstRefTypeCodec.match(match_const_ref)
+  StdVectorConstRefTypeCodec.traits_const_ref()
+
   return [
-    TypeCodec(
-      ).match(
-        match_value
-      ).traits_value(
-      ).conv(
-        edk_to_cpp = """
-    {{ name.cpp }}.reserve( {{ name.edk }}.size() );
-    for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
-    {
-        {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
-        {{ element.conv_edk_to_cpp_decl() }}
-        {{ name.cpp }}.push_back( {{ element.name.cpp }} );
-    }
-""",
-        edk_to_cpp_decl = GenLambda(
-          lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
-        ),
-        cpp_to_edk = """
-    {{ name.edk }}.resize( 0 );
-    for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
-      it != {{ name.cpp }}.end(); ++it )
-    {
-        {{ element.type.cpp.name }} const &{{ element.name.cpp }} = {{ element.traits_pointer_undo() }}*it;
-        {{ element.conv_cpp_to_edk_decl() }}
-        {{ name.edk }}.push( {{ element.name.edk }} );
-    }
-""",
-        cpp_to_edk_decl = GenLambda(
-          lambda gd: gd.type.edk.name + " " + gd.name.edk + ";\n    " + gd.conv_cpp_to_edk()
-        ),
-      ),
-    TypeCodec(
-      ).match(
-        match_const_ref
-      ).traits_const_ref(
-      ).conv(
-        edk_to_cpp = """
-    {{ name.cpp }}.reserve( {{ name.edk }}.size() );
-    for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
-    {
-        {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
-        {{ element.conv_edk_to_cpp_decl() }}
-        {{ name.cpp }}.push_back( {{ element.name.cpp }} );
-    }
-""",
-        edk_to_cpp_decl = GenLambda(
-          lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
-        ),
-        cpp_to_edk = """
-    {{ name.edk }}.resize( 0 );
-    for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
-      it != {{ name.cpp }}.end(); ++it )
-    {
-        {{ element.type.cpp.name }} const &{{ element.name.cpp }} = {{ element.traits_pointer_undo() }}*it;
-        {{ element.conv_cpp_to_edk_decl() }}
-        {{ name.edk }}.push( {{ element.name.edk }} );
-    }
-""",
-        cpp_to_edk_decl = GenLambda(
-          lambda gd: gd.type.edk.name + " " + gd.name.edk + ";\n    " + gd.conv_cpp_to_edk()
-        ),
-      ),
+    StdVectorValueTypeCodec,
+    StdVectorConstRefTypeCodec,
     ]

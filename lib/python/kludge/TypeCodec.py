@@ -1,4 +1,4 @@
-from kludge import GenStr, GenLambda, GenTmpl, CPPTypeExpr, SimpleTypeSpec
+from kludge import GenStr, GenLambda, GenTmpl, CPPTypeExpr, ValueName, SimpleTypeSpec
 
 class TypeCodec:
 
@@ -33,63 +33,82 @@ class TypeCodec:
       ],
     }
 
-  def __init__(self):
-    for protocol_name, hook_names in TypeCodec.protocols.iteritems():
-      def impl(gd, protocol_name=protocol_name):
-        raise Exception("unimplemented " + protocol_name + " protocol")
-      for hook_name in hook_names:
-        self.set_hook('gen_' + hook_name, impl)
+  def __init__(
+    self,
+    value_name,
+    type_spec,
+    ):
+    self.name = value_name
+    self.type = type_spec
+    self.children = []
+    child_index = 1
+    for child_type_info in type_spec.child_type_infos:
+      self.children.append(
+        child_type_info.make_codec(
+          ValueName(value_name.kl + "_RESERVED_child_%u" % child_index),
+          )
+        )
+      child_index += 1
+    if self.children:
+      setattr(
+        self,
+        'element',
+        self.children[0]
+        )
 
-    # Special signature and no reflection
-    def maybe_match_default(cpp_type_name, cpp_type_spec, type_mgr):
-      raise Exception("unimplemented match protocol")
-    self.set_hook('maybe_match', maybe_match_default)
+  @classmethod
+  def set_class_hook(cls, name, meth):
+    setattr(cls, name, classmethod(meth))
 
-    # param() and result() are optional
-    self.param()
-    self.result()
+  @classmethod
+  def set_hook(cls, name, meth):
+    setattr(cls, name, meth)
 
-  def set_hook(self, name, meth):
-    setattr(self, name, meth)
-
-  def make_gen(self, gen_spec):
+  @staticmethod
+  def make_gen(gen_spec):
     if isinstance(gen_spec, basestring):
       gen_spec = GenTmpl(gen_spec)
     return gen_spec.make_gen()
 
-  def raise_missing_or_invalid(self, name):
+  @staticmethod
+  def raise_missing_or_invalid(name):
     raise Exception("missing or invalid '" + name + "' (must be a string or an instance of GenXXX)")
 
   # Recipes: match
 
-  def match(self, impl):
-    self.set_hook('maybe_match', impl)
-    return self
+  @classmethod
+  def match(cls, impl):
+    cls.set_class_hook('maybe_match', impl)
+    return cls
 
-  def match_cpp_type_exprs(self, cpp_expr_types_to_match, type_spec_builder):
-    def impl(cpp_type_expr, type_mgr):
+  @classmethod
+  def match_cpp_type_exprs(cls, cpp_expr_types_to_match, type_spec_builder):
+    def impl(cls, cpp_type_expr, type_mgr):
       for cpp_expr_type_to_match in cpp_expr_types_to_match:
         if cpp_type_expr == cpp_expr_type_to_match:
           unqual_cpp_type_name = str(cpp_type_expr)
           return type_spec_builder(cpp_type_expr)
-    self.set_hook('maybe_match', impl)
-    return self
+    cls.set_class_hook('maybe_match', impl)
+    return cls
 
-  def match_cpp_type_expr(self, cpp_expr_type_to_match, type_spec_builder):
-    return self.match_cpp_type_exprs([cpp_expr_type_to_match], type_spec_builder)
+  @classmethod
+  def match_cpp_type_expr(cls, cpp_expr_type_to_match, type_spec_builder):
+    return cls.match_cpp_type_exprs([cpp_expr_type_to_match], type_spec_builder)
 
-  def match_value_by_dict(self, lookup):
-    def impl(cpp_type_expr, type_mgr):
+  @classmethod
+  def match_value_by_dict(cls, lookup):
+    def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.Direct):
         unqual_cpp_type_name = cpp_type_expr.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
           return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
-    self.set_hook('maybe_match', impl)
-    return self
+    cls.set_class_hook('maybe_match', impl)
+    return cls
 
-  def match_const_ref_by_dict(self, lookup):
-    def impl(cpp_type_expr, type_mgr):
+  @classmethod
+  def match_const_ref_by_dict(cls, lookup):
+    def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
         and cpp_type_expr.pointee.is_const \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
@@ -97,11 +116,12 @@ class TypeCodec:
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
           return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
-    self.set_hook('maybe_match', impl)
-    return self
+    cls.set_class_hook('maybe_match', impl)
+    return cls
 
-  def match_const_ptr_by_dict(self, lookup):
-    def impl(cpp_type_expr, type_mgr):
+  @classmethod
+  def match_const_ptr_by_dict(cls, lookup):
+    def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
         and cpp_type_expr.pointee.is_const \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
@@ -109,11 +129,12 @@ class TypeCodec:
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
           return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
-    self.set_hook('maybe_match', impl)
-    return self
+    cls.set_class_hook('maybe_match', impl)
+    return cls
 
-  def match_mutable_ref_by_dict(self, lookup):
-    def impl(cpp_type_expr, type_mgr):
+  @classmethod
+  def match_mutable_ref_by_dict(cls, lookup):
+    def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
         and cpp_type_expr.pointee.is_mutable \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
@@ -121,11 +142,12 @@ class TypeCodec:
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
           return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
-    self.set_hook('maybe_match', impl)
-    return self
+    cls.set_class_hook('maybe_match', impl)
+    return cls
 
-  def match_mutable_ptr_by_dict(self, lookup):
-    def impl(cpp_type_expr, type_mgr):
+  @classmethod
+  def match_mutable_ptr_by_dict(cls, lookup):
+    def impl(cls, cpp_type_expr, type_mgr):
       if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
         and cpp_type_expr.pointee.is_mutable \
         and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
@@ -133,13 +155,14 @@ class TypeCodec:
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
           return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
-    self.set_hook('maybe_match', impl)
-    return self
+    cls.set_class_hook('maybe_match', impl)
+    return cls
 
   # Recipes: traits
 
+  @classmethod
   def traits(
-    self,
+    cls,
     kl = None,
     edk = None,
     cpp = None,
@@ -148,33 +171,34 @@ class TypeCodec:
     reference = None,
     ):
     try:
-      self.set_hook('gen_traits_kl', self.make_gen(kl))
+      cls.set_hook('traits_kl', cls.make_gen(kl))
     except:
-      self.raise_missing_or_invalid('kl')
+      cls.raise_missing_or_invalid('kl')
     try:
-      self.set_hook('gen_traits_edk', self.make_gen(edk))
+      cls.set_hook('traits_edk', cls.make_gen(edk))
     except:
-      self.raise_missing_or_invalid('edk')
+      cls.raise_missing_or_invalid('edk')
     try:
-      self.set_hook('gen_traits_cpp', self.make_gen(cpp))
+      cls.set_hook('traits_cpp', cls.make_gen(cpp))
     except:
-      self.raise_missing_or_invalid('cpp')
+      cls.raise_missing_or_invalid('cpp')
     try:
-      self.set_hook('gen_traits_pointer_make', self.make_gen(pointer_make))
+      cls.set_hook('traits_pointer_make', cls.make_gen(pointer_make))
     except:
-      self.raise_missing_or_invalid('pointer_make')
+      cls.raise_missing_or_invalid('pointer_make')
     try:
-      self.set_hook('gen_traits_pointer_undo', self.make_gen(pointer_undo))
+      cls.set_hook('traits_pointer_undo', cls.make_gen(pointer_undo))
     except:
-      self.raise_missing_or_invalid('pointer_undo')
+      cls.raise_missing_or_invalid('pointer_undo')
     try:
-      self.set_hook('gen_traits_reference', self.make_gen(reference))
+      cls.set_hook('traits_reference', cls.make_gen(reference))
     except:
-      self.raise_missing_or_invalid('reference')
-    return self
+      cls.raise_missing_or_invalid('reference')
+    return cls
 
-  def traits_value(self):
-    return self.traits(
+  @classmethod
+  def traits_value(cls):
+    return cls.traits(
       kl = GenStr(""),
       edk = GenStr("INParam"),
       cpp = GenStr(""),
@@ -183,8 +207,9 @@ class TypeCodec:
       reference = GenStr("const &"),
       )
 
-  def traits_const_ref(self):
-    return self.traits(
+  @classmethod
+  def traits_const_ref(cls):
+    return cls.traits(
       kl = GenStr(""),
       edk = GenStr("INParam"),
       cpp = GenStr("const &"),
@@ -193,8 +218,9 @@ class TypeCodec:
       reference = GenStr("const &"),
       )
 
-  def traits_const_ptr(self):
-    return self.traits(
+  @classmethod
+  def traits_const_ptr(cls):
+    return cls.traits(
       kl = GenStr(""),
       edk = GenStr("INParam"),
       cpp = GenStr("const *"),
@@ -203,8 +229,9 @@ class TypeCodec:
       reference = GenStr("const &"),
       )
 
-  def traits_mutable_ref(self):
-    return self.traits(
+  @classmethod
+  def traits_mutable_ref(cls):
+    return cls.traits(
       kl = GenStr("io"),
       edk = GenStr("IOParam"),
       cpp = GenStr("&"),
@@ -213,8 +240,9 @@ class TypeCodec:
       reference = GenStr("&"),
       )
 
-  def traits_mutable_ptr(self):
-    return self.traits(
+  @classmethod
+  def traits_mutable_ptr(cls):
+    return cls.traits(
       kl = GenStr("io"),
       edk = GenStr("IOParam"),
       cpp = GenStr("*"),
@@ -225,162 +253,184 @@ class TypeCodec:
 
   # Recipes: conversion
 
+  @classmethod
   def conv(
-    self,
+    cls,
     edk_to_cpp = GenLambda(
-      lambda gd: gd.name.cpp + " = " + gd.name.edk + ";"
+      lambda self: self.name.cpp + " = " + self.name.edk + ";"
       ),
     edk_to_cpp_decl = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.conv_edk_to_cpp()
+      lambda self: self.type.cpp.name + " " + self.conv_edk_to_cpp()
       ),
     cpp_to_edk = GenLambda(
-      lambda gd: gd.name.edk + " = " + gd.name.cpp + ";"
+      lambda self: self.name.edk + " = " + self.name.cpp + ";"
       ),
     cpp_to_edk_decl = GenLambda(
-      lambda gd: gd.type.edk.name + " " + gd.conv_cpp_to_edk()
+      lambda self: self.type.edk.name + " " + self.conv_cpp_to_edk()
       ),
     ):
     try:
-      self.set_hook('gen_conv_edk_to_cpp', self.make_gen(edk_to_cpp))
+      cls.set_hook('conv_edk_to_cpp', cls.make_gen(edk_to_cpp))
     except Exception as e:
       print str(e)
-      self.raise_missing_or_invalid('edk_to_cpp')
+      cls.raise_missing_or_invalid('edk_to_cpp')
     try:
-      self.set_hook('gen_conv_edk_to_cpp_decl', self.make_gen(edk_to_cpp_decl))
+      cls.set_hook('conv_edk_to_cpp_decl', cls.make_gen(edk_to_cpp_decl))
     except:
-      self.raise_missing_or_invalid('edk_to_cpp_decl')
+      cls.raise_missing_or_invalid('edk_to_cpp_decl')
     try:
-      self.set_hook('gen_conv_cpp_to_edk', self.make_gen(cpp_to_edk))
+      cls.set_hook('conv_cpp_to_edk', cls.make_gen(cpp_to_edk))
     except:
-      self.raise_missing_or_invalid('cpp_to_edk')
+      cls.raise_missing_or_invalid('cpp_to_edk')
     try:
-      self.set_hook('gen_conv_cpp_to_edk_decl', self.make_gen(cpp_to_edk_decl))
+      cls.set_hook('conv_cpp_to_edk_decl', cls.make_gen(cpp_to_edk_decl))
     except:
-      self.raise_missing_or_invalid('cpp_to_edk_decl')
-    return self
+      cls.raise_missing_or_invalid('cpp_to_edk_decl')
+    return cls
 
-  def conv_none(self):
-    return self.conv(
+  @classmethod
+  def conv_none(cls):
+    return cls.conv(
       edk_to_cpp = GenStr(""),
       edk_to_cpp_decl = GenLambda(
-        lambda gd: gd.type.cpp.name + " " + gd.traits_reference() + gd.name.cpp + " = " + gd.name.edk + ";"
+        lambda self: self.type.cpp.name + " " + self.traits_reference() + self.name.cpp + " = " + self.name.edk + ";"
         ),
       cpp_to_edk = GenStr(""),
       cpp_to_edk_decl = GenLambda(
-        lambda gd: gd.type.edk.name + " const &" + gd.name.edk + " = " + gd.name.cpp + ";"
+        lambda self: self.type.edk.name + " const &" + self.name.edk + " = " + self.name.cpp + ";"
         ),
       )
 
   # Recipes: result
 
-  def result_forbidden(self):
-    def impl(gd):
-      raise Exception(gd.type.cpp.name + ": unsupported as a result type")
+  @classmethod
+  def result_forbidden(cls):
+    def impl(self):
+      raise Exception(self.type.cpp.name + ": unsupported as a result type")
     for hook_name in TypeCodec.protocols['result']:
-      self.set_hook('gen_' + hook_name, impl)
-    return self
+      cls.set_hook(hook_name, impl)
+    return cls
 
+  @classmethod
   def result(
-    self,
+    cls,
     direct_type_edk = GenStr("void"),
     indirect_param_edk = GenLambda(
-      lambda gd: "Traits< " + gd.type.edk.name + " >::Result " + gd.name.edk
+      lambda self: "Traits< " + self.type.edk.name + " >::Result " + self.name.edk
       ),
     decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
+      lambda self: self.type.cpp.name + " " + self.name.cpp + " = " + self.traits_pointer_undo()
       ),
     indirect_assign_to_edk = GenLambda(
-      lambda gd: gd.conv_cpp_to_edk()
+      lambda self: self.conv_cpp_to_edk()
       ),
     direct_return_edk = GenStr(""),
     ):
     try:
-      self.set_hook('gen_result_direct_type_edk', self.make_gen(direct_type_edk))
+      cls.set_hook('result_direct_type_edk', cls.make_gen(direct_type_edk))
     except:
-      self.raise_missing_or_invalid('direct_type_edk')
+      cls.raise_missing_or_invalid('direct_type_edk')
     try:
-      self.set_hook('gen_result_indirect_param_edk', self.make_gen(indirect_param_edk))
+      cls.set_hook('result_indirect_param_edk', cls.make_gen(indirect_param_edk))
     except:
-      self.raise_missing_or_invalid('indirect_param_edk')
+      cls.raise_missing_or_invalid('indirect_param_edk')
     try:
-      self.set_hook('gen_result_decl_and_assign_cpp', self.make_gen(decl_and_assign_cpp))
+      cls.set_hook('result_decl_and_assign_cpp', cls.make_gen(decl_and_assign_cpp))
     except:
-      self.raise_missing_or_invalid('decl_and_assign_cpp')
+      cls.raise_missing_or_invalid('decl_and_assign_cpp')
     try:
-      self.set_hook('gen_result_indirect_assign_to_edk', self.make_gen(indirect_assign_to_edk))
+      cls.set_hook('result_indirect_assign_to_edk', cls.make_gen(indirect_assign_to_edk))
     except:
-      self.raise_missing_or_invalid('indirect_assign_to_edk')
+      cls.raise_missing_or_invalid('indirect_assign_to_edk')
     try:
-      self.set_hook('gen_result_direct_return_edk', self.make_gen(direct_return_edk))
+      cls.set_hook('result_direct_return_edk', cls.make_gen(direct_return_edk))
     except:
-      self.raise_missing_or_invalid('direct_return_edk')
-    return self
+      cls.raise_missing_or_invalid('direct_return_edk')
+    return cls
 
+  @classmethod
   def result_direct(
-    self,
+    cls,
     decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
+      lambda self: self.type.cpp.name + " " + self.name.cpp + " = " + self.traits_pointer_undo()
       ),
     ):
-    return self.result(
+    return cls.result(
       direct_type_edk = GenLambda(
-        lambda gd: gd.type.edk.name
+        lambda self: self.type.edk.name
         ),
       indirect_param_edk = GenStr(""),
       decl_and_assign_cpp = decl_and_assign_cpp,
       indirect_assign_to_edk = GenStr(""),
       direct_return_edk = GenLambda(
-        lambda gd: gd.conv_cpp_to_edk_decl() + "\n  return " + gd.name.edk + ";"
+        lambda self: self.conv_cpp_to_edk_decl() + "\n  return " + self.name.edk + ";"
         ),
       )
 
   # Recipes: param
 
+  @classmethod
   def param(
-    self,
+    cls,
     kl = GenLambda(
-      lambda gd: gd.traits_kl() + " " + gd.type.kl.base + " " + gd.name.kl + gd.type.kl.suffix
+      lambda self: self.traits_kl() + " " + self.type.kl.base + " " + self.name.kl + self.type.kl.suffix
       ),
     edk = GenLambda(
-      lambda gd: "Traits< " + gd.type.edk.name + " >::" + gd.traits_edk() + " " + gd.name.edk
+      lambda self: "Traits< " + self.type.edk.name + " >::" + self.traits_edk() + " " + self.name.edk
       ),
     edk_to_cpp_decl = GenLambda(
-      lambda gd: gd.conv_edk_to_cpp_decl()
+      lambda self: self.conv_edk_to_cpp_decl()
       ),
     cpp = GenLambda(
-      lambda gd: gd.traits_pointer_make() + gd.name.cpp
+      lambda self: self.traits_pointer_make() + self.name.cpp
       ),
     cpp_to_edk = GenStr(""),
     ):
     try:
-      self.set_hook('gen_param_edk', self.make_gen(edk))
+      cls.set_hook('param_edk', cls.make_gen(edk))
     except:
-      self.raise_missing_or_invalid('edk')
+      cls.raise_missing_or_invalid('edk')
     try:
-      self.set_hook('gen_param_kl', self.make_gen(kl))
+      cls.set_hook('param_kl', cls.make_gen(kl))
     except:
-      self.raise_missing_or_invalid('kl')
+      cls.raise_missing_or_invalid('kl')
     try:
-      self.set_hook('gen_param_edk_to_cpp_decl', self.make_gen(edk_to_cpp_decl))
+      cls.set_hook('param_edk_to_cpp_decl', cls.make_gen(edk_to_cpp_decl))
     except:
-      self.raise_missing_or_invalid('edk_to_cpp_decl')
+      cls.raise_missing_or_invalid('edk_to_cpp_decl')
     try:
-      self.set_hook('gen_param_cpp', self.make_gen(cpp))
+      cls.set_hook('param_cpp', cls.make_gen(cpp))
     except:
-      self.raise_missing_or_invalid('cpp')
+      cls.raise_missing_or_invalid('cpp')
     try:
-      self.set_hook('gen_param_cpp_to_edk', self.make_gen(cpp_to_edk))
+      cls.set_hook('param_cpp_to_edk', cls.make_gen(cpp_to_edk))
     except:
-      self.raise_missing_or_invalid('cpp_to_edk')
-    return self
+      cls.raise_missing_or_invalid('cpp_to_edk')
+    return cls
 
-  def param_in(self):
-    return self.param()
+  @classmethod
+  def param_in(cls):
+    return cls.param()
 
-  def param_io(self):
-    return self.param(
+  @classmethod
+  def param_io(cls):
+    return cls.param(
       cpp_to_edk = GenLambda(
-        lambda gd: gd.conv_cpp_to_edk()
+        lambda self: self.conv_cpp_to_edk()
         ),
       )
 
+for protocol_name, hook_names in TypeCodec.protocols.iteritems():
+  def impl(self, protocol_name=protocol_name):
+    raise Exception("unimplemented " + protocol_name + " protocol on " + self.__class__.__name__)
+  for hook_name in hook_names:
+    TypeCodec.set_hook(hook_name, impl)
+
+# Special signature and no reflection
+def maybe_match_default(cpp_type_name, cpp_type_spec, type_mgr):
+  raise Exception("unimplemented match protocol")
+TypeCodec.set_hook('maybe_match', staticmethod(maybe_match_default))
+
+# param() and result() are optional
+TypeCodec.param()
+TypeCodec.result()

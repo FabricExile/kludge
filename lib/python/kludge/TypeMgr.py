@@ -65,5 +65,5 @@ class TypeMgr:
   def convert_clang_params(self, clang_params):
     def mapper(clang_param):
       type_info = self.get_type_info_for_clang_type(clang_param.clang_type)
-      return Value(ValueName(clang_param.name), type_info)
+      return type_info.make_codec(ValueName(clang_param.name))
     return map(mapper, clang_params)

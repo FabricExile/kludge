@@ -16,47 +16,46 @@ class Func(Decl):
 
     self._nested_function_name = nested_function_name
     if result_type_info:
-      self._result_value = Value(
+      self._result_codec = result_type_info.make_codec(
         ValueName("RESERVED_result"),
-        result_type_info,
         )
     else:
-      self._result_value = None
+      self._result_codec = None
     self.params = params
 
   def result_type_kl(self):
-    if self._result_value:
-      return self._result_value.type_info.spec.kl.compound
+    if self._result_codec:
+      return self._result_codec.type.kl.compound
     else:
       return ""
 
   def result_direct_type_edk(self):
-    if self._result_value:
-      return self._result_value.result_direct_type_edk()
+    if self._result_codec:
+      return self._result_codec.result_direct_type_edk()
     else:
       return "void"
 
   def result_indirect_param_edk(self):
-    if self._result_value:
-      return self._result_value.result_indirect_param_edk()
+    if self._result_codec:
+      return self._result_codec.result_indirect_param_edk()
     else:
       return ""
 
   def result_decl_and_assign_cpp(self):
-    if self._result_value:
-      return self._result_value.result_decl_and_assign_cpp()
+    if self._result_codec:
+      return self._result_codec.result_decl_and_assign_cpp()
     else:
       return ""
 
   def result_indirect_assign_to_edk(self):
-    if self._result_value:
-      return self._result_value.result_indirect_assign_to_edk()
+    if self._result_codec:
+      return self._result_codec.result_indirect_assign_to_edk()
     else:
       return ""
 
   def result_direct_return_edk(self):
-    if self._result_value:
-      return self._result_value.result_direct_return_edk()
+    if self._result_codec:
+      return self._result_codec.result_direct_return_edk()
     else:
       return ""
 
@@ -77,8 +76,8 @@ class Func(Decl):
 
   def params_edk(self):
     snippets = []
-    if self._result_value:
-      result_indirect_param_edk = self._result_value.result_indirect_param_edk()
+    if self._result_codec:
+      result_indirect_param_edk = self._result_codec.result_indirect_param_edk()
       if result_indirect_param_edk:
         snippets.append(result_indirect_param_edk)
     for param in self.params:

@@ -18,9 +18,9 @@ class TypeMgr:
     self.add_type_codecs(
       build_std_string_type_codecs(jinjenv)
       )
-    # self.add_type_codecs(
-    #   build_std_vector_type_codecs(jinjenv)
-    #   )
+    self.add_type_codecs(
+      build_std_vector_type_codecs(jinjenv)
+      )
 
   def add_type_codec(self, type_codec):
     self._type_codecs.append(type_codec)

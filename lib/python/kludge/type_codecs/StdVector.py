@@ -3,19 +3,18 @@ from kludge.CPPTypeExpr import *
 
 def build_std_vector_type_codecs(jinjenv):
   def build_std_vector_type_spec(
-    cpp_type_spec,
+    cpp_type_name,
     element_type_info,
     ):
     return TypeSpec(
       element_type_info.spec.kl.base,
       '[]' + element_type_info.spec.kl.suffix,
       'VariableArray< ' + element_type_info.spec.edk.name + ' >',
-      cpp_type_spec,
+      cpp_type_name,
       [element_type_info],
       )
 
-  def match_value_or_const_ref(cpp_type_spec, type_mgr):
-    cpp_type_expr = cpp_type_spec.expr
+  def match_value_or_const_ref(cpp_type_expr, type_mgr):
     if isinstance(cpp_type_expr, Template) \
       and cpp_type_expr.name == "std::vector":
         element_cpp_type_expr = cpp_type_expr.params[0]
@@ -23,7 +22,7 @@ def build_std_vector_type_codecs(jinjenv):
         element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
         if element_type_info:
           return build_std_vector_type_spec(
-            cpp_type_spec,
+            'std::vector< ' + element_type_info.spec.cpp.name + ' >',
             element_type_info,
             )
     if isinstance(cpp_type_expr, ReferenceTo) \
@@ -35,7 +34,7 @@ def build_std_vector_type_codecs(jinjenv):
         element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
         if element_type_info:
           return build_std_vector_type_spec(
-            cpp_type_spec,
+            'std::vector< ' + element_type_info.spec.cpp.name + ' >',
             element_type_info,
             )
 
@@ -44,37 +43,29 @@ def build_std_vector_type_codecs(jinjenv):
       jinjenv
       ).match(
         match_value_or_const_ref
-      ).result_indirect(
-        pre = GenLambda(
-          lambda gd: gd.type.cpp.name + " " + gd.name.cpp " = "
-          ),
-        post = """
+      ).conv(
+        edk_to_cpp = """
+{{ name.cpp }}.reserve( {{ name.edk }}.size() );
+for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
+{
+  {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
+  {{ element.conv_decl_cpp() }}
+  {{ element.conv_edk_to_cpp() }}
+  {{ name.cpp }}.push_back( {{ element.name.cpp }} );
+}
+""",
+        cpp_to_edk = """
 {{ name.edk }}.resize( 0 );
 for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
   it != {{ name.cpp }}.end(); ++it )
 {
   {{ element.type.cpp.name }} const &{{ element.name.cpp }} = *it;
-  {{ element.conv_decl_edk }}
-  {{ element.conv_cpp_to_edk }}
-  {{ name.edk }}.push( {{ element.conv_arg_edk }} );
+  {{ element.conv_decl_edk() }}
+  {{ element.conv_cpp_to_edk() }}
+  {{ name.edk }}.push( {{ element.name.cpp }} );
 }
 """
-      ).in_param(
-      ).conv(
-        conv_edk_to_cpp = """
-std::vector< {{ element.type.cpp.name }} > {{ name.cpp }};
-{{ name.cpp }}.reserve( {{ name.edk }}.size() );
-for ( uint32_t i = 0; i < {{ name.edk }}.size(); ++i )
-{
-  {{ element.type.edk.name }} const &{{ element.name.edk }} = {{ name.edk }}[i];
-  {{ element.conv_decl_cpp }}
-  {{ element.conv_edk_to_cpp }}
-  {{ name.cpp }}.push_back( {{ element.conv_arg_cpp }} );
-}
-""",
-        conv_arg_cpp = GenLambda(
-          lambda gd: gd.name.cpp
-          ),
-        conv_cpp_to_edk = GenStr(""),
+      ).param_in(
+      ).result_indirect(
       ),
     ]

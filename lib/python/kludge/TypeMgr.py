@@ -3,23 +3,23 @@ from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, ValueName, Value, TypeInf
 
 class TypeMgr:
 
-  def __init__(self, jinjenv):
+  def __init__(self):
     self._type_codecs = []
     self._cpp_type_name_to_type_info = {}
     self._cpp_type_expr_parser = CPPTypeExpr.Parser()
 
     # First so we don't catch in Simple...
     self.add_type_codecs(
-      build_c_string_type_codecs(jinjenv)
+      build_c_string_type_codecs()
       )
     self.add_type_codecs(
-      build_simple_type_codecs(jinjenv)
+      build_simple_type_codecs()
       )
     self.add_type_codecs(
-      build_std_string_type_codecs(jinjenv)
+      build_std_string_type_codecs()
       )
     self.add_type_codecs(
-      build_std_vector_type_codecs(jinjenv)
+      build_std_vector_type_codecs()
       )
 
   def add_type_codec(self, type_codec):

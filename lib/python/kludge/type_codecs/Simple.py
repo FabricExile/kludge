@@ -1,6 +1,6 @@
 from kludge import TypeCodec, GenLambda
 
-def build_simple_type_codecs(jinjenv):
+def build_simple_type_codecs():
   cpp_base_type_to_kl_base_type = {
     "bool": "Boolean",
     "char": "SInt8",
@@ -27,14 +27,12 @@ def build_simple_type_codecs(jinjenv):
 
   return [
     TypeCodec(
-      jinjenv
       ).match_value_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_value(
       ).conv_none(
       ).result_direct(),
     TypeCodec(
-      jinjenv
       ).match_const_ref_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_const_ref(
@@ -42,7 +40,6 @@ def build_simple_type_codecs(jinjenv):
       ).result_direct(
       ),
     TypeCodec(
-      jinjenv
       ).match_const_ptr_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_const_ptr(
@@ -50,7 +47,6 @@ def build_simple_type_codecs(jinjenv):
       ).result_direct(
       ),
     TypeCodec(
-      jinjenv
       ).match_mutable_ref_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_mutable_ref(
@@ -59,7 +55,6 @@ def build_simple_type_codecs(jinjenv):
       ).result_direct(
       ),
     TypeCodec(
-      jinjenv
       ).match_mutable_ptr_by_dict(
         cpp_base_type_to_kl_base_type
       ).traits_mutable_ptr(

@@ -5,7 +5,7 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-from kludge import TypeMgr, clang_wrapper, ast
+from kludge import GenSpec, TypeMgr, clang_wrapper, ast
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -110,7 +110,8 @@ class Parser:
             loader=jinja2.PackageLoader('__main__', 'templates'),
             undefined = jinja2.StrictUndefined,
             )
-        self.type_mgr = TypeMgr(self.jinjenv)
+        GenSpec.jinjenv = self.jinjenv
+        self.type_mgr = TypeMgr()
         self.edk_decls = ast.DeclSet()
 
     def init(self, ext_name, clang_opts):

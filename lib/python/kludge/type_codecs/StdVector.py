@@ -1,7 +1,7 @@
 from kludge import TypeSpec, TypeCodec, GenStr, GenLambda, SimpleTypeSpec, ValueName, Value
 from kludge.CPPTypeExpr import *
 
-def build_std_vector_type_codecs(jinjenv):
+def build_std_vector_type_codecs():
 
   def build_std_vector_type_spec(
     unqual_cpp_type_name,
@@ -47,7 +47,6 @@ def build_std_vector_type_codecs(jinjenv):
 
   return [
     TypeCodec(
-      jinjenv
       ).match(
         match_value
       ).traits_value(
@@ -79,7 +78,6 @@ def build_std_vector_type_codecs(jinjenv):
         ),
       ),
     TypeCodec(
-      jinjenv
       ).match(
         match_const_ref
       ).traits_const_ref(

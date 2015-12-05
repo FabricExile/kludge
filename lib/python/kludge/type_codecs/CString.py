@@ -1,10 +1,9 @@
 from kludge import TypeCodec, GenLambda, SimpleTypeSpec
 from kludge.CPPTypeExpr import *
 
-def build_c_string_type_codecs(jinjenv):
+def build_c_string_type_codecs():
   return [
     TypeCodec(
-      jinjenv
       ).match_cpp_type_expr(
         PointerTo(Const(Char())),
         SimpleTypeSpec.builder('String', 'char const *')
@@ -18,7 +17,6 @@ def build_c_string_type_codecs(jinjenv):
           ),
       ),
     TypeCodec(
-      jinjenv
       ).match_cpp_type_expr(
         ReferenceTo(Const(PointerTo(Const(Char())))),
         SimpleTypeSpec.builder('String', 'char const *')

@@ -33,12 +33,7 @@ class TypeCodec:
       ],
     }
 
-  def __init__(
-    self,
-    jinjenv,
-    ):
-    self.jinjenv = jinjenv
-
+  def __init__(self):
     for protocol_name, hook_names in TypeCodec.protocols.iteritems():
       def impl(gd, protocol_name=protocol_name):
         raise Exception("unimplemented " + protocol_name + " protocol")
@@ -60,7 +55,7 @@ class TypeCodec:
   def make_gen(self, gen_spec):
     if isinstance(gen_spec, basestring):
       gen_spec = GenTmpl(gen_spec)
-    return gen_spec.make_gen(self.jinjenv)
+    return gen_spec.make_gen()
 
   def raise_missing_or_invalid(self, name):
     raise Exception("missing or invalid '" + name + "' (must be a string or an instance of GenXXX)")
@@ -247,7 +242,8 @@ class TypeCodec:
     ):
     try:
       self.set_hook('gen_conv_edk_to_cpp', self.make_gen(edk_to_cpp))
-    except:
+    except Exception as e:
+      print str(e)
       self.raise_missing_or_invalid('edk_to_cpp')
     try:
       self.set_hook('gen_conv_edk_to_cpp_decl', self.make_gen(edk_to_cpp_decl))

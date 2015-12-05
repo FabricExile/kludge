@@ -1,10 +1,9 @@
 from kludge import TypeCodec, GenStr, GenLambda, SimpleTypeSpec
 from kludge.CPPTypeExpr import *
 
-def build_std_string_type_codecs(jinjenv):
+def build_std_string_type_codecs():
   return [
     TypeCodec(
-      jinjenv
       ).match_cpp_type_expr(
         Named("std::string"),
         SimpleTypeSpec.builder('String', 'std::string')
@@ -18,7 +17,6 @@ def build_std_string_type_codecs(jinjenv):
           ),
       ),
     TypeCodec(
-      jinjenv
       ).match_cpp_type_expr(
         ReferenceTo(Const(Named("std::string"))),
         SimpleTypeSpec.builder('String', 'std::string')
@@ -32,7 +30,6 @@ def build_std_string_type_codecs(jinjenv):
           ),
       ),
     TypeCodec(
-      jinjenv
       ).match_cpp_type_expr(
         PointerTo(Const(Named("std::string"))),
         SimpleTypeSpec.builder('String', "std::string")
@@ -47,7 +44,6 @@ def build_std_string_type_codecs(jinjenv):
       ).result_forbidden(
       ),
     TypeCodec(
-      jinjenv
       ).match_cpp_type_expr(
         ReferenceTo(Named("std::string")),
         SimpleTypeSpec.builder('String', 'std::string')
@@ -62,7 +58,6 @@ def build_std_string_type_codecs(jinjenv):
       ).param_io(
       ),
     TypeCodec(
-      jinjenv
       ).match_cpp_type_expr(
         PointerTo(Named("std::string")),
         SimpleTypeSpec.builder('String', 'std::string')

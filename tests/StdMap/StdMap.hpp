@@ -24,30 +24,21 @@ inline char const *ReturnValueForKeyKey(
   return jt->second;
 }
 
-// inline std::map< std::map<std::string> > ReturnStringArrayArray()
-// {
-//   std::map<std::string> b;
-//   b.push_back("hello");
-//   b.push_back("there");
-//   b.push_back("my");
-//   b.push_back("friend");
+inline std::map< char const *, std::map<float, std::string> > ReturnNestedMap()
+{
+  std::map<float, std::string> m1;
+  m1[-6.54] = "asdf";
+  m1[2.31] = "qowe";
+  
+  std::map<float, std::string> m2;
+  m2[1.56] = "vibawe";
+  m2[-2.31] = "asdvi";
+  
+  std::map< char const *, std::map<float, std::string> > m;
+  m["foo"] = m1;
+  m["bar"] = m2;
 
-//   std::map< std::map<std::string> > a;
-//   a.push_back(b);
-//   a.push_back(b);
-//   a.push_back(b);
-
-//   return a;
-// }
-
-// inline std::map<double *> ReturnDoublePtrArray()
-// {
-//   std::map<double *> result;
-//   static double pi = 3.14;
-//   result.push_back(&pi);
-//   result.push_back(&pi);
-//   result.push_back(&pi);
-//   return result;
-// }
+  return m;
+}
 
 #endif

@@ -14,7 +14,5 @@ operator entry() {
   report("b = " + b);
   report("ReturnValueForKeyKey(b, 93, 'bar') = " + ReturnValueForKeyKey(b, 93, 'bar'));
 
-  // report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
-
-  // report("ReturnDoublePtrArray() = " + ReturnDoublePtrArray());
+  report("ReturnNestedMap() = " + ReturnNestedMap());
 }

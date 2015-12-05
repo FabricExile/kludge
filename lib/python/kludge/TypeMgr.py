@@ -21,6 +21,9 @@ class TypeMgr:
     self.add_type_codecs(
       build_std_vector_type_codecs()
       )
+    self.add_type_codecs(
+      build_std_map_type_codecs()
+      )
 
   def add_type_codec(self, type_codec):
     self._type_codecs.append(type_codec)

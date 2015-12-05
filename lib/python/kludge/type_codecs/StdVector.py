@@ -5,7 +5,7 @@ def build_std_vector_type_codecs(jinjenv):
 
   def build_std_vector_type_spec(
     unqual_cpp_type_name,
-    qual_cpp_type_name,
+    cpp_type_expr,
     element_type_info,
     ):
     return TypeSpec(
@@ -13,7 +13,7 @@ def build_std_vector_type_codecs(jinjenv):
       '[]' + element_type_info.spec.kl.suffix,
       'VariableArray< ' + element_type_info.spec.edk.name + ' >',
       unqual_cpp_type_name,
-      qual_cpp_type_name,
+      cpp_type_expr,
       [element_type_info],
       )
 
@@ -25,8 +25,8 @@ def build_std_vector_type_codecs(jinjenv):
         element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
         if element_type_info:
           return build_std_vector_type_spec(
-            'std::vector< ' + element_type_info.spec.cpp.qual + ' >',
-            str(cpp_type_expr),
+            'std::vector< ' + element_type_info.spec.cpp.qual_name + ' >',
+            cpp_type_expr,
             element_type_info,
             )
 
@@ -40,8 +40,8 @@ def build_std_vector_type_codecs(jinjenv):
         element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_name)
         if element_type_info:
           return build_std_vector_type_spec(
-            'std::vector< ' + element_type_info.spec.cpp.qual + ' >',
-            str(cpp_type_expr),
+            'std::vector< ' + element_type_info.spec.cpp.qual_name + ' >',
+            cpp_type_expr,
             element_type_info,
             )
 
@@ -62,14 +62,14 @@ def build_std_vector_type_codecs(jinjenv):
     }
 """,
         edk_to_cpp_decl = GenLambda(
-          lambda gd: gd.type.cpp.unqual + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
+          lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
         ),
         cpp_to_edk = """
     {{ name.edk }}.resize( 0 );
-    for ( {{ type.cpp.unqual }}::const_iterator it = {{ name.cpp }}.begin();
+    for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
       it != {{ name.cpp }}.end(); ++it )
     {
-        {{ element.type.cpp.unqual }} const &{{ element.name.cpp }} = {{ element.traits_pointer_undo() }}*it;
+        {{ element.type.cpp.name }} const &{{ element.name.cpp }} = {{ element.traits_pointer_undo() }}*it;
         {{ element.conv_cpp_to_edk_decl() }}
         {{ name.edk }}.push( {{ element.name.edk }} );
     }
@@ -94,14 +94,14 @@ def build_std_vector_type_codecs(jinjenv):
     }
 """,
         edk_to_cpp_decl = GenLambda(
-          lambda gd: gd.type.cpp.unqual + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
+          lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
         ),
         cpp_to_edk = """
     {{ name.edk }}.resize( 0 );
-    for ( {{ type.cpp.unqual }}::const_iterator it = {{ name.cpp }}.begin();
+    for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
       it != {{ name.cpp }}.end(); ++it )
     {
-        {{ element.type.cpp.unqual }} const &{{ element.name.cpp }} = {{ element.traits_pointer_undo() }}*it;
+        {{ element.type.cpp.name }} const &{{ element.name.cpp }} = {{ element.traits_pointer_undo() }}*it;
         {{ element.conv_cpp_to_edk_decl() }}
         {{ name.edk }}.push( {{ element.name.edk }} );
     }

@@ -76,7 +76,7 @@ class TypeCodec:
       for cpp_expr_type_to_match in cpp_expr_types_to_match:
         if cpp_type_expr == cpp_expr_type_to_match:
           unqual_cpp_type_name = str(cpp_type_expr)
-          return type_spec_builder(unqual_cpp_type_name)
+          return type_spec_builder(cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -89,8 +89,7 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          qual_cpp_type_name = str(cpp_type_expr)
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -102,8 +101,7 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          qual_cpp_type_name = str(cpp_type_expr)
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -115,8 +113,7 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          qual_cpp_type_name = str(cpp_type_expr)
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -128,8 +125,7 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          qual_cpp_type_name = str(cpp_type_expr)
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -141,8 +137,7 @@ class TypeCodec:
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
-          qual_cpp_type_name = str(cpp_type_expr)
-          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, qual_cpp_type_name)
+          return SimpleTypeSpec(kl_type_name, unqual_cpp_type_name, cpp_type_expr)
     self.set_hook('maybe_match', impl)
     return self
 
@@ -241,7 +236,7 @@ class TypeCodec:
       lambda gd: gd.name.cpp + " = " + gd.name.edk + ";"
       ),
     edk_to_cpp_decl = GenLambda(
-      lambda gd: gd.type.cpp.unqual + " " + gd.conv_edk_to_cpp()
+      lambda gd: gd.type.cpp.name + " " + gd.conv_edk_to_cpp()
       ),
     cpp_to_edk = GenLambda(
       lambda gd: gd.name.edk + " = " + gd.name.cpp + ";"
@@ -272,7 +267,7 @@ class TypeCodec:
     return self.conv(
       edk_to_cpp = GenStr(""),
       edk_to_cpp_decl = GenLambda(
-        lambda gd: gd.type.cpp.unqual + " " + gd.traits_reference() + gd.name.cpp + " = " + gd.name.edk + ";"
+        lambda gd: gd.type.cpp.name + " " + gd.traits_reference() + gd.name.cpp + " = " + gd.name.edk + ";"
         ),
       cpp_to_edk = GenStr(""),
       cpp_to_edk_decl = GenLambda(
@@ -284,7 +279,7 @@ class TypeCodec:
 
   def result_forbidden(self):
     def impl(gd):
-      raise Exception(gd.type.cpp.unqual + ": unsupported as a result type")
+      raise Exception(gd.type.cpp.name + ": unsupported as a result type")
     for hook_name in TypeCodec.protocols['result']:
       self.set_hook('gen_' + hook_name, impl)
     return self
@@ -296,7 +291,7 @@ class TypeCodec:
       lambda gd: "Traits< " + gd.type.edk.name + " >::Result " + gd.name.edk
       ),
     decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.type.cpp.unqual + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
+      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
       ),
     indirect_assign_to_edk = GenLambda(
       lambda gd: gd.conv_cpp_to_edk()
@@ -328,7 +323,7 @@ class TypeCodec:
   def result_direct(
     self,
     decl_and_assign_cpp = GenLambda(
-      lambda gd: gd.type.cpp.unqual + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
+      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + " = " + gd.traits_pointer_undo()
       ),
     ):
     return self.result(

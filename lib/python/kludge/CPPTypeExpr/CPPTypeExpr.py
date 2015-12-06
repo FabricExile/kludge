@@ -127,6 +127,14 @@ class Int(Integer):
   def get_signed_desc(self):
     return "int"
 
+class Long(Integer):
+
+  def __init__(self):
+    Integer.__init__(self)
+
+  def get_signed_desc(self):
+    return "long"
+
 class LongLong(Integer):
 
   def __init__(self):
@@ -245,6 +253,7 @@ class Parser:
   key_unsigned = Keyword("unsigned")
   key_const = Keyword("const")
   key_volatile = Keyword("volatile")
+  key_struct = Keyword("struct")
 
   ident = And([
     NotAny(key_const),
@@ -259,8 +268,9 @@ class Parser:
     self.ty_char = self.key_char.setParseAction(lambda s,l,t: Char())
     self.ty_short = self.key_short.setParseAction(lambda s,l,t: Short())
     self.ty_int = self.key_int.setParseAction(lambda s,l,t: Int())
+    self.ty_long = self.key_long.setParseAction(lambda s,l,t: Long())
     self.ty_long_long = (self.key_long + self.key_long).setParseAction(lambda s,l,t: LongLong())
-    self.ty_unqualified_integer = self.ty_char | self.ty_short | self.ty_int | self.ty_long_long
+    self.ty_unqualified_integer = self.ty_char | self.ty_short | self.ty_int | self.ty_long_long | self.ty_long
     self.ty_integer = Forward()
     self.ty_integer << MatchFirst([
       ( self.key_signed + self.ty_integer ).setParseAction(lambda s,l,t: t[1].make_signed()),
@@ -275,6 +285,7 @@ class Parser:
     self.ty_custom = Forward()
     self.ty_custom << MatchFirst([
       (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Named(t[0].name + "::" + t[1].name)),
+      self.key_struct.suppress() + self.ident,
       self.ident,
       ])
 

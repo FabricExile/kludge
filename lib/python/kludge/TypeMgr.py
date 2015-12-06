@@ -38,16 +38,17 @@ class TypeMgr:
       self.add_type_codec(type_codec)
 
   def add_type_alias(self, new_cpp_type_name, old_cpp_type_name):
-    old_type_info = self.get_type_info(old_cpp_type_name)
-    new_type_spec = SimpleTypeSpec(
-      new_cpp_type_name,
-      new_cpp_type_name,
-      CPPTypeExpr.Named(new_cpp_type_name),
-      )
-    self._alias_new_type_specs.append(new_type_spec)
-    self._alias_new_cpp_type_name_to_old_cpp_type_expr[new_type_spec.cpp.name] = old_type_info
-    self._cpp_type_name_to_type_info[new_cpp_type_name] = old_type_info
-    
+    old_type_info = self.maybe_get_type_info(old_cpp_type_name)
+    if old_type_info:
+      new_cpp_type_expr = CPPTypeExpr.Named(new_cpp_type_name)
+      new_type_spec = SimpleTypeSpec(
+        new_cpp_type_name,
+        new_cpp_type_name,
+        new_cpp_type_expr,
+        )
+      self._alias_new_type_specs.append(new_type_spec)
+      self._alias_new_cpp_type_name_to_old_cpp_type_expr[new_type_spec.cpp.name] = old_type_info
+
   @staticmethod
   def parse_value(value):
     if isinstance(value, CPPTypeExpr.Type):

@@ -234,34 +234,41 @@ def Const(ty):
 
 class Parser:
 
-  tok_ast = Literal("*").suppress()
-  tok_amp = Literal("&").suppress()
-  tok_colon_colon = Literal("::").suppress()
-  tok_langle = Literal("<").suppress()
-  tok_rangle = Literal(">").suppress()
-  tok_comma = Literal(",").suppress()
+  def _build_named(self, name):
+    type_info = self._alias_map.get(name)
+    if type_info:
+      return type_info.cpp.expr
+    return Named(name)
 
-  key_void = Keyword("void")
-  key_bool = Keyword("bool")
-  key_char = Keyword("char")
-  key_short = Keyword("short")
-  key_int = Keyword("int")
-  key_long = Keyword("long")
-  key_float = Keyword("float")
-  key_double = Keyword("double")
-  key_signed = Keyword("signed")
-  key_unsigned = Keyword("unsigned")
-  key_const = Keyword("const")
-  key_volatile = Keyword("volatile")
-  key_struct = Keyword("struct")
+  def __init__(self, alias_map):
+    self.tok_ast = Literal("*").suppress()
+    self.tok_amp = Literal("&").suppress()
+    self.tok_colon_colon = Literal("::").suppress()
+    self.tok_langle = Literal("<").suppress()
+    self.tok_rangle = Literal(">").suppress()
+    self.tok_comma = Literal(",").suppress()
 
-  ident = And([
-    NotAny(key_const),
-    NotAny(key_volatile),
-    Word(alphas+"_", alphanums+"_"),
-    ]).setParseAction(lambda s,l,t: Named(t[0]))
+    self.key_void = Keyword("void")
+    self.key_bool = Keyword("bool")
+    self.key_char = Keyword("char")
+    self.key_short = Keyword("short")
+    self.key_int = Keyword("int")
+    self.key_long = Keyword("long")
+    self.key_float = Keyword("float")
+    self.key_double = Keyword("double")
+    self.key_signed = Keyword("signed")
+    self.key_unsigned = Keyword("unsigned")
+    self.key_const = Keyword("const")
+    self.key_volatile = Keyword("volatile")
+    self.key_struct = Keyword("struct")
 
-  def __init__(self):
+    self.ident = And([
+      NotAny(self.key_const),
+      NotAny(self.key_volatile),
+      Word(alphas+"_", alphanums+"_"),
+      ]).setParseAction(lambda s,l,t: self._build_named(t[0]))
+
+    self._alias_map = alias_map
 
     self.ty_void = self.key_void.setParseAction(lambda s,l,t: Void())
     self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: Bool())
@@ -348,7 +355,9 @@ class Parser:
     self.grammar.validate()
 
   def parse(self, cpp_type_name):
-    return self.grammar.parseString(cpp_type_name)[0]
+    result = self.grammar.parseString(cpp_type_name)[0]
+    print "parse('"+cpp_type_name+"') = '"+str(result)
+    return result
 
 if __name__ == "__main__":
   p = Parser()

@@ -1,5 +1,5 @@
 from kludge.ast import Decl
-from kludge import ValueName, Value
+from kludge import ValueName, Value, CPPTypeExpr
 
 class Func(Decl):
   def __init__(
@@ -15,7 +15,7 @@ class Func(Decl):
     Decl.__init__(self, extname, include_filename, location, desc)
 
     self._nested_function_name = nested_function_name
-    if result_type_info:
+    if not isinstance(result_type_info.cpp.expr, CPPTypeExpr.Void):
       self._result_codec = result_type_info.make_codec(
         ValueName("RESERVED_result"),
         )

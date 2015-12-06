@@ -1,0 +1,8 @@
+require Aliases;
+
+operator entry() {
+  AliasType alias_value = 42;
+  report("alias_value = " + alias_value);
+
+  report("ReturnAliasValue() = " + ReturnAliasValue());
+}

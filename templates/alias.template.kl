@@ -1,0 +1,1 @@
+alias {{ old_type_info.kl.base }} {{ new_type_spec.kl.compound }}{{ old_type_info.kl.suffix }};

@@ -1,5 +1,5 @@
 from kludge.type_codecs import *
-from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, SimpleTypeSpec, ValueName, Value, TypeInfo
+from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, SimpleTypeSpec, TypeCodec, ValueName, Value, TypeInfo
 import clang.cindex
 
 class TypeMgr:
@@ -11,7 +11,16 @@ class TypeMgr:
     self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
 
     self._cpp_type_name_to_type_info = {}
-    self._cpp_type_expr_parser = CPPTypeExpr.Parser()
+    self._cpp_type_expr_parser = CPPTypeExpr.Parser(self._alias_new_cpp_type_name_to_old_cpp_type_expr)
+
+    self._cpp_type_name_to_type_info['void'] = TypeInfo(
+      TypeCodec,
+      SimpleTypeSpec(
+        '',
+        'void',
+        CPPTypeExpr.Void()
+        )
+      )
 
     # First so we don't catch in Simple...
     self.add_type_codecs(
@@ -52,19 +61,13 @@ class TypeMgr:
   @staticmethod
   def parse_value(value):
     if isinstance(value, CPPTypeExpr.Type):
-      if isinstance(value, CPPTypeExpr.Void):
-        return None, None
       cpp_type_expr = value
       cpp_type_name = str(cpp_type_expr)
     elif isinstance(value, basestring):
-      if value == "void":
-        return None, None
       cpp_type_expr = None
       cpp_type_name = value
     elif isinstance(value, clang.cindex.Type):
       cpp_type_name = value.spelling
-      if cpp_type_name == "void":
-        return None, None
       cpp_type_expr = None
     else:
       raise Exception("unexpected argument type")
@@ -104,10 +107,7 @@ class TypeMgr:
   def get_type_info(self, value):
     type_info = self.maybe_get_type_info(value)
     if type_info:
-      if type_info == TypeInfo.VOID:
-        return None
-      else:
-        return type_info
+      return type_info
 
     cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
     raise Exception(cpp_type_name + ": no EDK type association found")

@@ -26,6 +26,4 @@ class Decl:
     return self._desc
 
   @abc.abstractmethod
-  def jinjify(self, target, jinjenv):
-    """Return a lambda that generates code for the given target (kl, cpp)"""
-    return
+  def jinja_stream(self, jinjenv, lang): pass

@@ -6,6 +6,10 @@ class TypeMgr:
 
   def __init__(self):
     self._type_codecs = []
+
+    self._type_alias_order = []
+    self._type_alias_map = {}
+
     self._cpp_type_name_to_type_info = {}
     self._cpp_type_expr_parser = CPPTypeExpr.Parser()
 
@@ -32,6 +36,11 @@ class TypeMgr:
   def add_type_codecs(self, type_codecs):
     for type_codec in type_codecs:
       self.add_type_codec(type_codec)
+
+  def add_type_alias(self, src_cpp_type_name, dst_cpp_type_name):
+    dst_type_info = self.get_type_info(dst_cpp_type_name)
+    self._type_alias_order.append(src_cpp_type_name)
+    self._type_alias_order_map.append(src_cpp_type_name, dst_type_info)
 
   @staticmethod
   def parse_value(value):
@@ -101,3 +110,12 @@ class TypeMgr:
       type_info = self.get_type_info(clang_param.clang_type)
       return type_info.make_codec(ValueName(clang_param.name))
     return map(mapper, clang_params)
+
+  def alias_jinja_streams(self, jinjenv, lang):
+    return map(
+      lambda src_name: jinjenv.get_template('alias.template.' + lang).stream(
+        src_name = src_name,
+        dst_type_info = self._type_alias_map[src_name],
+        ),
+      self._type_alias_order,
+      )

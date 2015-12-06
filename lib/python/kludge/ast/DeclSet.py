@@ -6,11 +6,8 @@ class DeclSet:
   def add(self, decl):
     self._decls.append(decl)
 
-  def jinjify(self, target, jinjenv, ext_name):
-    return lambda: jinjenv.get_template('edk_ext.template.' + target).render(
-      ext_name = ext_name,
-      decl_gens = map(
-        lambda decl: decl.jinjify(target, jinjenv),
-        self._decls
-        )
+  def jinja_streams(self, jinjenv, lang):
+    return map(
+      lambda decl: decl.jinja_stream(jinjenv, lang),
+      self._decls
       )

@@ -90,5 +90,5 @@ class Func(Decl):
       snippets.append(param.param_cpp())
     return ",\n        ".join(snippets)
 
-  def jinjify(self, target, jinjenv):
-    return lambda: jinjenv.get_template('edk_func.template.'+target).render(func = self)
+  def jinja_stream(self, jinjenv, lang):
+    return jinjenv.get_template('func.template.' + lang).render(func = self)

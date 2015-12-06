@@ -764,21 +764,25 @@ fabricBuildEnv.SharedLibrary(
             'leave': self.cpp_leave,
             }))
 
-    # def parse_type_ref(self, indent, cursor):
-    #     if cursor.
-
-    def parse_TYPEDEF_DECL(self, header, indent, cursor):
-        print "%sTYPEDEF_DECL %s -> %s" % (indent, cursor.type.spelling, cursor.underlying_typedef_type.spelling)
+    def dump_cursor(self, indent, cursor):
+        print indent + str(cursor.kind) + " " + cursor.displayname
+        print indent + str(cursor.location)
+        childIndent = indent + "."
         for childCursor in cursor.get_children():
-            self.parse_cursor(header, indent+" ", childCursor)
-
-    def parse_NAMESPACE(self, header, indent, cursor):
-        print "%sNAMESPACE %s" % (indent, cursor.displayname)
-        self.parse_children(header, indent+" ", cursor)
+            self.dump_cursor(childIndent, childCursor)
 
     def parse_CLASS_DECL(self, header, indent, cursor):
         print "%sCLASS_DECL %s" % (indent, cursor.displayname)
         self.parse_type_decl(header, indent, cursor, {})
+
+    def parse_MACRO_INSTANTIATION(self, include_filename, indent, cursor):
+        print dir(cursor)
+        self.dump_cursor(indent, cursor)
+        print indent + ".get_definition() ->"
+        self.dump_cursor(indent + ' ', cursor.get_definition())
+
+    def parse_TYPEDEF_DECL(self, header, indent, cursor):
+        print "%sTYPEDEF_DECL %s -> %s" % (indent, cursor.type.spelling, cursor.underlying_typedef_type.spelling)
 
     def parse_FUNCTION_DECL(self, include_filename, indent, cursor):
         print "%sFUNCTION_DECL %s" % (indent, cursor.displayname)
@@ -819,8 +823,15 @@ fabricBuildEnv.SharedLibrary(
         cursor_kind = cursor.kind
         if cursor_kind in Parser.ignored_cursor_kinds:
             pass
-        elif cursor_kind == CursorKind.NAMESPACE:
-            self.parse_NAMESPACE(include_filename, indent, cursor)
+        elif cursor_kind in [
+            CursorKind.NAMESPACE,
+            CursorKind.UNEXPOSED_DECL,
+            ]:
+            self.parse_children(include_filename, indent, cursor)
+        elif cursor_kind == CursorKind.MACRO_INSTANTIATION:
+            self.parse_MACRO_INSTANTIATION(include_filename, indent, cursor)
+        elif cursor_kind == CursorKind.TYPEDEF_DECL:
+            self.parse_TYPEDEF_DECL(include_filename, indent, cursor)
         elif cursor_kind == CursorKind.FUNCTION_DECL:
             self.parse_FUNCTION_DECL(include_filename, indent, cursor)
         else:
@@ -838,7 +849,8 @@ fabricBuildEnv.SharedLibrary(
             unit_filename,
             self.clang_args,
             None,
-            clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
+            clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
+            # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
             )
 
         skip = False
@@ -930,7 +942,14 @@ fabricBuildEnv.SharedLibrary(
                     )
 
             self.output_cpp(kl_type, snippets['cpp'])
-        
+
+    def jinja_stream(self, lang):
+        return self.jinjenv.get_template("template." + lang).stream(
+            ext_name = self.ext_name,
+            aliases = lambda: self.type_mgr.alias_jinja_streams(self.jinjenv, lang),
+            funcs = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),
+            )
+    
     def output(
         self,
         output_kl_filename,
@@ -955,8 +974,5 @@ fabricBuildEnv.SharedLibrary(
 
             kl_struct.methods = methods
 
-        with open(output_cpp_filename, "w") as fh:
-            fh.write(self.edk_decls.jinjify('cpp', self.jinjenv, self.ext_name)())
-
-        with open(output_kl_filename, "w") as fh:
-            fh.write(self.edk_decls.jinjify('kl', self.jinjenv, self.ext_name)())
+        self.jinja_stream('kl').dump(output_kl_filename)
+        self.jinja_stream('cpp').dump(output_cpp_filename)

@@ -1,5 +1,5 @@
 from kludge.type_codecs import *
-from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, ValueName, Value, TypeInfo
+from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, SimpleTypeSpec, ValueName, Value, TypeInfo
 import clang.cindex
 
 class TypeMgr:
@@ -7,8 +7,8 @@ class TypeMgr:
   def __init__(self):
     self._type_codecs = []
 
-    self._type_alias_order = []
-    self._type_alias_map = {}
+    self._alias_new_type_specs = []
+    self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
 
     self._cpp_type_name_to_type_info = {}
     self._cpp_type_expr_parser = CPPTypeExpr.Parser()
@@ -37,10 +37,15 @@ class TypeMgr:
     for type_codec in type_codecs:
       self.add_type_codec(type_codec)
 
-  def add_type_alias(self, src_cpp_type_name, dst_cpp_type_name):
-    dst_type_info = self.get_type_info(dst_cpp_type_name)
-    self._type_alias_order.append(src_cpp_type_name)
-    self._type_alias_order_map.append(src_cpp_type_name, dst_type_info)
+  def add_type_alias(self, new_cpp_type_name, old_cpp_type_name):
+    old_type_info = self.get_type_info(old_cpp_type_name)
+    new_type_spec = SimpleTypeSpec(
+      new_cpp_type_name,
+      new_cpp_type_name,
+      CPPTypeExpr.Named(new_cpp_type_name),
+      )
+    self._alias_new_type_specs.append(new_type_spec)
+    self._alias_new_cpp_type_name_to_old_cpp_type_expr[new_type_spec.cpp.name] = old_type_info
 
   @staticmethod
   def parse_value(value):
@@ -53,7 +58,7 @@ class TypeMgr:
       if value == "void":
         return None, None
       cpp_type_expr = None
-      cpp_type_name = void
+      cpp_type_name = value
     elif isinstance(value, clang.cindex.Type):
       cpp_type_name = value.spelling
       if cpp_type_name == "void":
@@ -113,9 +118,9 @@ class TypeMgr:
 
   def alias_jinja_streams(self, jinjenv, lang):
     return map(
-      lambda src_name: jinjenv.get_template('alias.template.' + lang).stream(
-        src_name = src_name,
-        dst_type_info = self._type_alias_map[src_name],
+      lambda new_type_spec: jinjenv.get_template('alias.template.' + lang).stream(
+        new_type_spec = new_type_spec,
+        old_type_info = self._alias_new_cpp_type_name_to_old_cpp_type_expr[new_type_spec.cpp.name],
         ),
-      self._type_alias_order,
+      self._alias_new_type_specs,
       )

@@ -48,13 +48,15 @@ def build_std_vector_type_codecs():
       ),
     )
 
-  def is_std_vector(cpp_type_expr):
-    return isinstance(cpp_type_expr, Template) \
-      and cpp_type_expr.name == "std::vector"
+  def element_if_std_vector(cpp_type_expr):
+    if isinstance(cpp_type_expr, Template) \
+      and cpp_type_expr.name == "std::vector" \
+      and len(cpp_type_expr.params) == 1:
+        return cpp_type_expr.params[0]
 
   def match_value(cls, cpp_type_expr, type_mgr):
-    if is_std_vector(cpp_type_expr):
-      element_cpp_type_expr = cpp_type_expr.params[0]
+    element_cpp_type_expr = element_if_std_vector(cpp_type_expr)
+    if element_cpp_type_expr:
       element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_expr)
       if element_type_info:
         return build_std_vector_type_spec(
@@ -68,10 +70,10 @@ def build_std_vector_type_codecs():
   StdVectorValueTypeCodec.traits_value()
 
   def match_const_ref(cls, cpp_type_expr, type_mgr):
-    if is_const_ref(cpp_type_expr):
-      base_cpp_type_expr = cpp_type_expr.pointee
-      if is_std_vector(base_cpp_type_expr):
-        element_cpp_type_expr = base_cpp_type_expr.params[0]
+    base_cpp_type_expr = pointee_if_const_ref(cpp_type_expr)
+    if base_cpp_type_expr:
+      element_cpp_type_expr = element_if_std_vector(base_cpp_type_expr)
+      if element_cpp_type_expr:
         element_type_info = type_mgr.maybe_get_type_info(element_cpp_type_expr)
         if element_type_info:
           return build_std_vector_type_spec(

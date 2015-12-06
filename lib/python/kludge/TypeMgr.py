@@ -55,26 +55,35 @@ class TypeMgr:
     return cpp_type_name, cpp_type_expr
 
   def maybe_get_type_info(self, value):
-    cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
-    if not cpp_type_name:
-      return TypeInfo.VOID
-    
-    type_info = self._cpp_type_name_to_type_info.get(cpp_type_name, None)
-    if type_info:
-      return type_info
+    if hasattr(value, '__iter__'):
+      result = []
+      for v in value:
+        r = self.maybe_get_type_info(v)
+        if not r:
+          return None
+        result.append(r)
+      return result
+    else:
+      cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
+      if not cpp_type_name:
+        return TypeInfo.VOID
 
-    if not cpp_type_expr:
-      try:
-        cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
-      except:
-        raise Exception(cpp_type_name + ": malformed C++ type expression")
-
-    for type_codec in self._type_codecs:
-      type_spec = type_codec.maybe_match(cpp_type_expr, self)
-      if type_spec:
-        type_info = TypeInfo(type_codec, type_spec)
-        self._cpp_type_name_to_type_info[cpp_type_name] = type_info
+      type_info = self._cpp_type_name_to_type_info.get(cpp_type_name, None)
+      if type_info:
         return type_info
+
+      if not cpp_type_expr:
+        try:
+          cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
+        except:
+          raise Exception(cpp_type_name + ": malformed C++ type expression")
+
+      for type_codec in self._type_codecs:
+        type_spec = type_codec.maybe_match(cpp_type_expr, self)
+        if type_spec:
+          type_info = TypeInfo(type_codec, type_spec)
+          self._cpp_type_name_to_type_info[cpp_type_name] = type_info
+          return type_info
 
   def get_type_info(self, value):
     type_info = self.maybe_get_type_info(value)

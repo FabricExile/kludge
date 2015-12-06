@@ -1,4 +1,7 @@
 from kludge.CPPTypeExpr import ReferenceTo
 
-def is_const_ref(cpp_type_expr):
-  return isinstance(cpp_type_expr, ReferenceTo) and cpp_type_expr.pointee.is_const
+def pointee_if_const_ref(cpp_type_expr):
+  if isinstance(cpp_type_expr, ReferenceTo):
+    pointee = cpp_type_expr.pointee
+    if pointee.is_const:
+      return pointee

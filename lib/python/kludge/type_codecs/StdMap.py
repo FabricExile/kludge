@@ -53,45 +53,41 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
       ),
     )
 
-  def is_std_map(cpp_type_expr):
-    return isinstance(cpp_type_expr, Template) \
-      and cpp_type_expr.name == "std::map"
+  def key_value_if_std_map(cpp_type_expr):
+    if isinstance(cpp_type_expr, Template) \
+      and cpp_type_expr.name == "std::map" \
+      and len(cpp_type_expr.params) == 2:
+      return cpp_type_expr.params[0], cpp_type_expr.params[1]
 
   def match_value(cls, cpp_type_expr, type_mgr):
-    if is_std_map(cpp_type_expr):
-      key_cpp_type_expr = cpp_type_expr.params[0]
-      key_type_info = type_mgr.maybe_get_type_info(key_cpp_type_expr)
-      if key_type_info:
-        value_cpp_type_expr = cpp_type_expr.params[1]
-        value_type_info = type_mgr.maybe_get_type_info(value_cpp_type_expr)
-        if value_type_info:
-          return build_std_map_type_spec(
-            'std::map< ' + key_type_info.cpp.qual_name + ', ' + value_type_info.cpp.qual_name + ' >',
-            cpp_type_expr,
-            key_type_info,
-            value_type_info,
-            )
+    child_cpp_type_exprs = key_value_if_std_map(cpp_type_expr)
+    if child_cpp_type_exprs:
+      child_type_infos = type_mgr.maybe_get_type_info(child_cpp_type_exprs)
+      if child_type_infos:
+        return build_std_map_type_spec(
+          'std::map< ' + child_type_infos[0].cpp.qual_name + ', ' + child_type_infos[1].cpp.qual_name + ' >',
+          cpp_type_expr,
+          child_type_infos[0],
+          child_type_infos[1],
+          )
 
   class StdMapValueTypeCodec(StdMapTypeCodecBase): pass
   StdMapValueTypeCodec.match(match_value)
   StdMapValueTypeCodec.traits_value()
 
   def match_const_ref(cls, cpp_type_expr, type_mgr):
-    if is_const_ref(cpp_type_expr):
-      base_cpp_type_expr = cpp_type_expr.pointee
-      if is_std_map(base_cpp_type_expr):
-        key_cpp_type_expr = base_cpp_type_expr.params[0]
-        key_type_info = type_mgr.maybe_get_type_info(key_cpp_type_expr)
-        if key_type_info:
-          value_cpp_type_expr = base_cpp_type_expr.params[1]
-          value_type_info = type_mgr.maybe_get_type_info(value_cpp_type_expr)
-          if value_type_info:
-            return build_std_map_type_spec(
-              'std::map< ' + key_type_info.cpp.qual_name + ', ' + value_type_info.cpp.qual_name + ' >',
-              cpp_type_expr,
-              key_type_info,
-              value_type_info,
-              )
+    base_cpp_type_expr = pointee_if_const_ref(cpp_type_expr)
+    if base_cpp_type_expr:
+      child_cpp_type_exprs = key_value_if_std_map(base_cpp_type_expr)
+      if child_cpp_type_exprs:
+        child_type_infos = type_mgr.maybe_get_type_info(child_cpp_type_exprs)
+        if child_type_infos:
+          return build_std_map_type_spec(
+            'std::map< ' + child_type_infos[0].cpp.qual_name + ', ' + child_type_infos[1].cpp.qual_name + ' >',
+            cpp_type_expr,
+            child_type_infos[0],
+            child_type_infos[1],
+            )
 
   class StdMapConstRefTypeCodec(StdMapTypeCodecBase): pass
   StdMapConstRefTypeCodec.match(match_const_ref)

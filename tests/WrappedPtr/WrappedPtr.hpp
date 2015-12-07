@@ -1,15 +1,15 @@
 #ifndef _WrappedPtr_HPP
 #define _WrappedPtr_HPP
 
-class WrappedPtr {
+class Class {
 public:
 
-  WrappedPtr() {}
-  WrappedPtr( float x ) : m_x( x ) {}
-  WrappedPtr( WrappedPtr const &that ) : m_x( that.m_x ) {}
-  ~WrappedPtr() {}
+  Class() {}
+  Class( float x ) : m_x( x ) {}
+  Class( Class const &that ) : m_x( that.m_x ) {}
+  ~Class() {}
 
-  WrappedPtr &operator=( WrappedPtr const &that )
+  Class &operator=( Class const &that )
   {
     m_x = that.m_x;
     return *this;
@@ -28,8 +28,8 @@ private:
   float m_x;
 };
 
-WrappedPtr ReturnWrappedPtr() {
-  return WrappedPtr( 6.74 );
+Class ReturnClass() {
+  return Class( 6.74 );
 }
 
 #endif

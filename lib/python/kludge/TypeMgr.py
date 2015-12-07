@@ -65,6 +65,9 @@ class TypeMgr:
         )
       self._alias_new_type_specs.append(new_type_spec)
       self._alias_new_cpp_type_name_to_old_cpp_type_expr[new_type_spec.cpp.name] = old_type_info
+      return new_type_spec, old_type_info._spec
+    else:
+      return None, None
 
   @staticmethod
   def parse_value(value):
@@ -125,12 +128,3 @@ class TypeMgr:
       type_info = self.get_type_info(clang_param.clang_type)
       return type_info.make_codec(ValueName(clang_param.name))
     return map(mapper, clang_params)
-
-  def alias_jinja_streams(self, jinjenv, lang):
-    return map(
-      lambda new_type_spec: jinjenv.get_template('alias.template.' + lang).stream(
-        new_type_spec = new_type_spec,
-        old_type_info = self._alias_new_cpp_type_name_to_old_cpp_type_expr[new_type_spec.cpp.name],
-        ),
-      self._alias_new_type_specs,
-      )

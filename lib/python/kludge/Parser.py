@@ -785,11 +785,22 @@ fabricBuildEnv.SharedLibrary(
         print indent + ".get_definition() ->"
         self.dump_cursor(indent + ' ', cursor.get_definition())
 
-    def parse_TYPEDEF_DECL(self, header, indent, cursor):
+    def parse_TYPEDEF_DECL(self, include_filename, indent, cursor):
         new_cpp_type_name = cursor.type.spelling
         old_cpp_type_name = cursor.underlying_typedef_type.spelling
         print "%sTYPEDEF_DECL %s -> %s" % (indent, new_cpp_type_name, old_cpp_type_name)
-        self.type_mgr.add_type_alias(new_cpp_type_name, old_cpp_type_name)
+        new_type_spec, old_type_spec = self.type_mgr.add_type_alias(new_cpp_type_name, old_cpp_type_name)
+        if new_type_spec and old_type_spec:
+            self.edk_decls.add(
+                ast.Alias(
+                    self.ext_name,
+                    include_filename,
+                    self.get_location(cursor.location),
+                    cursor.displayname,
+                    new_type_spec,
+                    old_type_spec,
+                    )
+                )
 
     def parse_FUNCTION_DECL(self, include_filename, indent, cursor):
         print "%sFUNCTION_DECL %s" % (indent, cursor.displayname)
@@ -955,8 +966,7 @@ fabricBuildEnv.SharedLibrary(
     def jinja_stream(self, lang):
         return self.jinjenv.get_template("template." + lang).stream(
             ext_name = self.ext_name,
-            gen_alias_streams = lambda: self.type_mgr.alias_jinja_streams(self.jinjenv, lang),
-            gen_func_streams = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),
+            gen_decl_streams = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),
             )
     
     def output(

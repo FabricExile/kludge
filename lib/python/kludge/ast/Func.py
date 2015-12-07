@@ -97,4 +97,4 @@ class Func(Decl):
     return ",\n".join(snippets)
 
   def jinja_stream(self, jinjenv, lang):
-    return jinjenv.get_template('func.template.' + lang).render(func = self)
+    return jinjenv.get_template('func.template.' + lang).stream(func = self)

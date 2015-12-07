@@ -772,11 +772,20 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.dump_cursor(childIndent, childCursor)
 
-    def parse_CLASS_DECL(self, header, indent, cursor):
+    def parse_CLASS_DECL(self, include_filename, indent, cursor):
         print "%sCLASS_DECL %s" % (indent, cursor.displayname)
         class_name = cursor.spelling
         self.type_mgr.add_type_codecs(
             build_wrapped_ptr_type_codecs(class_name)
+            )
+        self.edk_decls.add(
+            ast.WrappedPtrDecl(
+                self.ext_name,
+                include_filename,
+                self.get_location(cursor.location),
+                cursor.displayname,
+                class_name,
+                )
             )
 
     def parse_MACRO_INSTANTIATION(self, include_filename, indent, cursor):

@@ -12,7 +12,7 @@ def build_wrapped_ptr_type_codecs(class_name):
       ),
     cpp_to_edk = """
 delete {{ name.edk }}.cpp_ptr;
-{{ name.edk }} = new {{ type.cpp.name }}( {{ name.cpp }} );
+{{ name.edk }}.cpp_ptr = new {{ type.cpp.name }}( {{ name.cpp }} );
 """,
     cpp_to_edk_decl = GenLambda(
       lambda _: _.type.edk.name + " " + _.name.edk + ";\n" + _.conv_cpp_to_edk()

@@ -3,10 +3,13 @@
 set -ve
 
 for d in tests/*; do
-  [ ${d: -5} == ".skip" ] && continue
   
   EXTNAME=$(basename $d)
-  [ -n "$1" ] && [ "$1" != "$EXTNAME" ] && continue
+  if [ -n "$1" ]; then
+    [ "$1" != "$EXTNAME" ] && continue
+  else
+    [ -f "$d/skip" ] && continue
+  fi
 
   INPUTS=$(ls $d/*.hpp | sort)
 

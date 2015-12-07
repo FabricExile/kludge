@@ -27,14 +27,14 @@ for ( {{ type.edk.name }}::CIT it = {{ name.edk }}.begin();
   it != {{ name.edk }}.end(); ++it )
 {
     {{ children[0].type.edk.name }} const &{{ children[0].name.edk }} = it.key();
-    {{ children[0].conv_edk_to_cpp_decl() }}
+    {{ children[0].conv_edk_to_cpp_decl() | indent(4) }}
     {{ children[1].type.edk.name }} const &{{ children[1].name.edk }} = it.value();
-    {{ children[1].conv_edk_to_cpp_decl() }}
+    {{ children[1].conv_edk_to_cpp_decl() | indent(4) }}
     {{ name.cpp }}[{{ children[0].name.cpp }}] = {{ children[1].name.cpp }};
 }
 """,
     edk_to_cpp_decl = GenLambda(
-      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n    " + gd.conv_edk_to_cpp()
+      lambda gd: gd.type.cpp.name + " " + gd.name.cpp + ";\n" + gd.conv_edk_to_cpp()
       ),
     cpp_to_edk = """
 // {{ name.edk }}.clear();
@@ -42,14 +42,14 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
   it != {{ name.cpp }}.end(); ++it )
 {
     {{ children[0].type.cpp.name }} const &{{ children[0].name.cpp }} = {{ children[0].traits_pointer_undo() }}it->first;
-    {{ children[0].conv_cpp_to_edk_decl() }}
+    {{ children[0].conv_cpp_to_edk_decl() | indent(4) }}
     {{ children[1].type.cpp.name }} const &{{ children[1].name.cpp }} = {{ children[1].traits_pointer_undo() }}it->second;
-    {{ children[1].conv_cpp_to_edk_decl() }}
+    {{ children[1].conv_cpp_to_edk_decl() | indent(4) }}
     {{ name.edk }}[{{ children[0].name.edk }}] = {{ children[1].name.edk }};
 }
 """,
     cpp_to_edk_decl = GenLambda(
-      lambda gd: gd.type.edk.name + " " + gd.name.edk + ";\n    " + gd.conv_cpp_to_edk()
+      lambda gd: gd.type.edk.name + " " + gd.name.edk + ";\n" + gd.conv_cpp_to_edk()
       ),
     )
 

@@ -371,7 +371,7 @@ class TypeCodec:
       decl_and_assign_cpp = decl_and_assign_cpp,
       indirect_assign_to_edk = GenStr(""),
       direct_return_edk = GenLambda(
-        lambda self: self.conv_cpp_to_edk_decl() + "\n  return " + self.name.edk + ";"
+        lambda self: self.conv_cpp_to_edk_decl() + "\nreturn " + self.name.edk + ";"
         ),
       )
 

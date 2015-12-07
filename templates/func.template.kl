@@ -9,7 +9,7 @@
 
 {{ func.result_type_kl() }}
 {{ func.name_kl() }}(
-    {{ func.params_kl() }}
+    {{ func.params_kl() | indent(4) }}
     ) = "{{ func.name_edk() }}";
 
 //

@@ -12,24 +12,24 @@
 FABRIC_EXT_EXPORT
 {{ func.result_direct_type_edk() }}
 {{ func.name_edk() }}(
-    {{ func.params_edk() }}
+    {{ func.params_edk() | indent(4) }}
     )
 {
 {% for param in func.params %}
-    {{ param.param_edk_to_cpp_decl() }}
+    {{ param.param_edk_to_cpp_decl() | indent(4) }}
 {% endfor %}
 
-    {{ func.result_decl_and_assign_cpp() }}
-    {{ func.name_cpp() }}(
-        {{ func.params_cpp() }}
+    {{ func.result_decl_and_assign_cpp() | indent(4) }}
+    {{ func.name_cpp() | indent(4) }}(
+        {{ func.params_cpp() | indent(8) }}
         );
 
 {% for param in func.params %}
-    {{ param.param_cpp_to_edk() }}
+    {{ param.param_cpp_to_edk() | indent(4) }}
 {% endfor %}
 
-    {{ func.result_indirect_assign_to_edk() }}
-    {{ func.result_direct_return_edk() }}
+    {{ func.result_indirect_assign_to_edk() | indent(4) }}
+    {{ func.result_direct_return_edk() | indent(4) }}
 }
 
 //

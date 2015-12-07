@@ -72,7 +72,7 @@ class Func(Decl):
     snippets = []
     for param in self.params:
       snippets.append(param.param_kl())
-    return ",\n    ".join(snippets)
+    return ",\n".join(snippets)
 
   def params_edk(self):
     snippets = []
@@ -82,13 +82,13 @@ class Func(Decl):
         snippets.append(result_indirect_param_edk)
     for param in self.params:
       snippets.append(param.param_edk())
-    return ",\n    ".join(snippets)
+    return ",\n".join(snippets)
 
   def params_cpp(self):
     snippets = []
     for param in self.params:
       snippets.append(param.param_cpp())
-    return ",\n        ".join(snippets)
+    return ",\n".join(snippets)
 
   def jinja_stream(self, jinjenv, lang):
     return jinjenv.get_template('func.template.' + lang).render(func = self)

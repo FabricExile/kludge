@@ -338,7 +338,7 @@ class TypeCodec:
     cls,
     direct_type_edk = GenStr("void"),
     indirect_param_edk = GenLambda(
-      lambda self: "Traits< " + self.type.edk.name + " >::Result " + self.name.edk
+      lambda self: "::Fabric::EDK::KL::Traits< " + self.type.edk.name + " >::Result " + self.name.edk
       ),
     indirect_init_edk = GenStr(""),
     decl_and_assign_cpp = GenLambda(
@@ -403,7 +403,7 @@ class TypeCodec:
       lambda self: self.traits_kl() + " " + self.type.kl.base + " " + self.name.kl + self.type.kl.suffix
       ),
     edk = GenLambda(
-      lambda self: "Traits< " + self.type.edk.name + " >::" + self.traits_edk() + " " + self.name.edk
+      lambda self: "::Fabric::EDK::KL::Traits< " + self.type.edk.name + " >::" + self.traits_edk() + " " + self.name.edk
       ),
     edk_to_cpp_decl = GenLambda(
       lambda self: self.conv_edk_to_cpp_decl()

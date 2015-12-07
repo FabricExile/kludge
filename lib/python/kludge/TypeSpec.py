@@ -13,7 +13,7 @@ class KLTypeSpec:
 class EDKTypeSpec:
 
   def __init__(self, name):
-    self.name = name
+    self.name = "::Fabric::EDK::KL::" + name
 
 class CPPTypeSpec:
 

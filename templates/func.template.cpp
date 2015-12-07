@@ -15,6 +15,8 @@ FABRIC_EXT_EXPORT
     {{ func.params_edk() | indent(4) }}
     )
 {
+    {{ func.result_indirect_init_edk() | indent(4) }}
+
 {% for param in func.params %}
     {{ param.param_edk_to_cpp_decl() | indent(4) }}
 {% endfor %}

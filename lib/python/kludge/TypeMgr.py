@@ -13,9 +13,10 @@ class TypeMgr:
     self._cpp_type_name_to_type_info = {}
     self._cpp_type_expr_parser = CPPTypeExpr.Parser(self._alias_new_cpp_type_name_to_old_cpp_type_expr)
 
-    # 'void' must be explcitly checked for by clients
-    self._cpp_type_name_to_type_info['void'] = TypeInfo(
-      TypeCodec,
+    # 'void' must be explcitly checked for by clients.  This is just hear to
+    # make sure that 'void' can be looked up
+    self.add_type_info(
+      'void',
       SimpleTypeSpec(
         '',
         'void',
@@ -49,6 +50,9 @@ class TypeMgr:
   def add_type_codecs(self, type_codecs):
     for type_codec in type_codecs:
       self.add_type_codec(type_codec)
+
+  def add_type_info(self, cpp_type_name, type_info):
+    self._cpp_type_name_to_type_info[cpp_type_name] = type_info
 
   def add_type_alias(self, new_cpp_type_name, old_cpp_type_name):
     old_type_info = self.maybe_get_type_info(old_cpp_type_name)
@@ -105,7 +109,7 @@ class TypeMgr:
         type_spec = type_codec.maybe_match(cpp_type_expr, self)
         if type_spec:
           type_info = TypeInfo(type_codec, type_spec)
-          self._cpp_type_name_to_type_info[cpp_type_name] = type_info
+          self.add_type_info(cpp_type_name, type_info)
           return type_info
 
   def get_type_info(self, value):

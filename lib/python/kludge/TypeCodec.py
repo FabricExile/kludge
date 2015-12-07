@@ -20,6 +20,7 @@ class TypeCodec:
     'result': [
       'result_direct_type_edk',
       'result_indirect_param_edk',
+      'result_indirect_init_edk',
       'result_decl_and_assign_cpp',
       'result_indirect_assign_to_edk',
       'result_direct_return_edk',
@@ -339,6 +340,7 @@ class TypeCodec:
     indirect_param_edk = GenLambda(
       lambda self: "Traits< " + self.type.edk.name + " >::Result " + self.name.edk
       ),
+    indirect_init_edk = GenStr(""),
     decl_and_assign_cpp = GenLambda(
       lambda self: self.type.cpp.name + " " + self.name.cpp + " = " + self.traits_pointer_undo()
       ),
@@ -355,6 +357,10 @@ class TypeCodec:
       cls.set_hook('result_indirect_param_edk', cls.make_gen(indirect_param_edk))
     except:
       cls.raise_missing_or_invalid('indirect_param_edk')
+    try:
+      cls.set_hook('result_indirect_init_edk', cls.make_gen(indirect_init_edk))
+    except:
+      cls.raise_missing_or_invalid('indirect_init_edk')
     try:
       cls.set_hook('result_decl_and_assign_cpp', cls.make_gen(decl_and_assign_cpp))
     except:

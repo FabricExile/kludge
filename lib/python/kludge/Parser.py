@@ -6,6 +6,7 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
 from kludge import GenSpec, TypeMgr, clang_wrapper, ast
+from kludge.type_codecs import build_wrapped_ptr_type_codecs
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -773,7 +774,10 @@ fabricBuildEnv.SharedLibrary(
 
     def parse_CLASS_DECL(self, header, indent, cursor):
         print "%sCLASS_DECL %s" % (indent, cursor.displayname)
-        self.parse_type_decl(header, indent, cursor, {})
+        class_name = cursor.spelling
+        self.type_mgr.add_type_codecs(
+            build_wrapped_ptr_type_codecs(class_name)
+            )
 
     def parse_MACRO_INSTANTIATION(self, include_filename, indent, cursor):
         print dir(cursor)
@@ -835,6 +839,8 @@ fabricBuildEnv.SharedLibrary(
             self.parse_MACRO_INSTANTIATION(include_filename, indent, cursor)
         elif cursor_kind == CursorKind.TYPEDEF_DECL:
             self.parse_TYPEDEF_DECL(include_filename, indent, cursor)
+        elif cursor_kind == CursorKind.CLASS_DECL:
+            self.parse_CLASS_DECL(include_filename, indent, cursor)
         elif cursor_kind == CursorKind.FUNCTION_DECL:
             self.parse_FUNCTION_DECL(include_filename, indent, cursor)
         else:

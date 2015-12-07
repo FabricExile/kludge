@@ -41,6 +41,12 @@ class Func(Decl):
     else:
       return ""
 
+  def result_indirect_init_edk(self):
+    if self._result_codec:
+      return self._result_codec.result_indirect_init_edk()
+    else:
+      return ""
+
   def result_decl_and_assign_cpp(self):
     if self._result_codec:
       return self._result_codec.result_decl_and_assign_cpp()

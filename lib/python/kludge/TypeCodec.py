@@ -309,6 +309,19 @@ class TypeCodec:
         ),
       )
 
+  @classmethod
+  def conv_none_cast_away_const(cls):
+    return cls.conv(
+      edk_to_cpp = GenStr(""),
+      edk_to_cpp_decl = GenLambda(
+        lambda self: self.type.cpp.name + " " + self.traits_reference() + self.name.cpp + " = const_cast< " + self.type.cpp.name+ " " + self.traits_reference() + " >( " + self.name.edk + ");"
+        ),
+      cpp_to_edk = GenStr(""),
+      cpp_to_edk_decl = GenLambda(
+        lambda self: self.type.edk.name + " const &" + self.name.edk + " = const_cast< " + self.type.edk.name + " const & >( " + self.name.cpp + ");"
+        ),
+      )
+
   # Recipes: result
 
   @classmethod

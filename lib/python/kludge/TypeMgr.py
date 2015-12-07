@@ -13,6 +13,7 @@ class TypeMgr:
     self._cpp_type_name_to_type_info = {}
     self._cpp_type_expr_parser = CPPTypeExpr.Parser(self._alias_new_cpp_type_name_to_old_cpp_type_expr)
 
+    # 'void' must be explcitly checked for by clients
     self._cpp_type_name_to_type_info['void'] = TypeInfo(
       TypeCodec,
       SimpleTypeSpec(
@@ -25,6 +26,9 @@ class TypeMgr:
     # First so we don't catch in Simple...
     self.add_type_codecs(
       build_c_string_type_codecs()
+      )
+    self.add_type_codecs(
+      build_void_ptr_type_codecs()
       )
     self.add_type_codecs(
       build_simple_type_codecs()

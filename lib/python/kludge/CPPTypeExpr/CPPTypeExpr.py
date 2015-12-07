@@ -356,7 +356,7 @@ class Parser:
 
   def parse(self, cpp_type_name):
     result = self.grammar.parseString(cpp_type_name)[0]
-    print "parse('"+cpp_type_name+"') = '"+str(result)
+    # print "parse('"+cpp_type_name+"') = '"+str(result)+"'"
     return result
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ struct {{ decl.type.kl.compound }} {
 {% for member in decl.members %}
   {% if member.is_public %}
 {{ member.codec.type.kl.compound }} {{ decl.type.kl.compound }}.GET_{{ member.codec.name.kl }}() = "{{ decl.type.kl.compound }}_GET_{{ member.codec.name.kl }}";
-{{ decl.type.kl.compound }}.SET_{{ member.codec.name.kl }}({{ member.codec.type.kl.base }} {{ member.codec.name.kl }}{{ member.codec.type.kl.suffix }}) = "{{ decl.type.kl.compound }}_SET_{{ member.codec.name.kl }}";
+{{ decl.type.kl.compound }}.SET_{{ member.codec.name.kl }}!({{ member.codec.type.kl.base }} {{ member.codec.name.kl }}{{ member.codec.type.kl.suffix }}) = "{{ decl.type.kl.compound }}_SET_{{ member.codec.name.kl }}";
 
   {% endif %}
 {% endfor %}

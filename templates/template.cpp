@@ -18,5 +18,6 @@ IMPLEMENT_FABRIC_EDK_ENTRIES({{ ext_name }})
 {% for decl_stream in gen_decl_streams() %}
 {% for decl_stream_item in decl_stream %}
 {{ decl_stream_item }}
+
 {% endfor %}
 {% endfor %}

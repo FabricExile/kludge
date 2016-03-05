@@ -17,10 +17,13 @@ class TypeMgr:
     # make sure that 'void' can be looked up
     self.add_type_info(
       'void',
-      SimpleTypeSpec(
-        '',
-        'void',
-        CPPTypeExpr.Void()
+      TypeInfo(
+        None,
+        SimpleTypeSpec(
+          '',
+          'void',
+          CPPTypeExpr.Void()
+          )
         )
       )
 
@@ -96,7 +99,7 @@ class TypeMgr:
     else:
       cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
       if not cpp_type_name:
-        return TypeInfo.VOID
+        return None
 
       type_info = self._cpp_type_name_to_type_info.get(cpp_type_name, None)
       if type_info:

@@ -11,6 +11,7 @@ from gen_spec import GenSpec
 from type_mgr import TypeMgr
 from value_name import ValueName
 from member import Member
+from instance_method import InstanceMethod
 from codecs import build_wrapped_ptr_codecs, build_in_place_struct_codecs
 
 class CPPType:
@@ -784,9 +785,12 @@ fabricBuildEnv.SharedLibrary(
     def parse_CLASS_DECL(self, include_filename, indent, cursor):
         print "%sCLASS_DECL %s" % (indent, cursor.displayname)
 
+        print cursor.type.get_canonical().spelling
         class_name = cursor.spelling
 
         clang_members = []
+        clang_static_methods = []
+        clang_instance_methods = []
 
         for child in cursor.get_children():
             if child.kind == CursorKind.FIELD_DECL:
@@ -805,19 +809,25 @@ fabricBuildEnv.SharedLibrary(
             #     parent_class_name = self.get_kl_class_name(cpp_class_name)
             #     kl_type.parent = parent_class_name
 
-            # if child.kind == CursorKind.CXX_METHOD:
-            #     print child.kind
-            #     result_type_info = self.type_mgr.get_type_info(child.result_type)
-            #     print "result_type_info = " + str(result_type_info)
+            if child.kind == CursorKind.CXX_METHOD:
+                if child.is_static_method():
+                    clang_static_methods.append(child)
+                elif child.spelling.startswith("operator"):
+                    pass
+                else:
+                    clang_instance_methods.append(child)
+                continue
 
-            #     is_const = child.type.spelling.endswith('const')
-            #     print "this_cpp_type_name = " + child.type.spelling
-            #     # this_type_info = self.type_mgr.get_type_info(
+                # result_type_info = self.type_mgr.get_type_info(child.result_type)
+                # print "result_type_info = " + str(result_type_info)
 
-            #     if child.is_static_method():
-            #         pass
-            #     else:
-            #         pass
+                # is_const = child.type.spelling.endswith('const')
+                # print "this_cpp_type_name = " + child.type.spelling
+                # # this_type_info = self.type_mgr.get_type_info(
+
+                # if child.is_static_method():
+                #     continue
+
                 # if child.spelling in self.skip_methods:
                 #     self.print_skipping(
                 #         child.displayname,
@@ -944,6 +954,11 @@ fabricBuildEnv.SharedLibrary(
             for clang_member in clang_members
             ]
 
+        instance_methods = [
+            InstanceMethod(self.type_mgr, clang_instance_method)
+            for clang_instance_method in clang_instance_methods
+            ]
+
         can_in_place = all(member and member.codec.is_in_place for member in members)
         if can_in_place:
             self.type_mgr.add_codecs(
@@ -957,6 +972,7 @@ fabricBuildEnv.SharedLibrary(
                     cursor.displayname,
                     self.type_mgr.get_type_info(class_name).make_codec(ValueName("RESERVED_self")),
                     members,
+                    instance_methods,
                     "in_place_struct_decl",
                     )
                 )
@@ -972,6 +988,7 @@ fabricBuildEnv.SharedLibrary(
                     cursor.displayname,
                     self.type_mgr.get_type_info(class_name).make_codec(ValueName("RESERVED_self")),
                     members,
+                    instance_methods,
                     "wrapped_ptr_decl",
                     )
                 )

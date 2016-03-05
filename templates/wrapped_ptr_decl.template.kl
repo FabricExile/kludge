@@ -11,4 +11,11 @@ struct {{ decl.type.kl.compound }} {
 
   {% endif %}
 {% endfor %}
+
+{% for method in decl.methods %}
+{{ method.result_codec.type.kl.compound }}
+{{ decl.type.kl.compound }}.{{ method.name }}(
+    ) = "{{ decl.type.kl.compound }}_{{ method.name }}";
+
+{% endfor %}
 {% endblock body %}

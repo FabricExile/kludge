@@ -1,8 +1,12 @@
 {% extends "decl.template.cpp" %}
 {% block body %}
-struct {{ decl.type.kl.compound }} {
+namespace Fabric { namespace EDK { namespace KL {
+
+struct {{ decl.type.edk.local_name }} {
   ::{{ decl.type.cpp.name }} *cpp_ptr;
 };
+
+} } }
 
 {% for member in decl.members %}
     {% if member.is_public %}
@@ -40,4 +44,27 @@ void
     
     {% endif %}
 {% endfor %}
+
+{% for method in decl.methods %}
+FABRIC_EXT_EXPORT
+{{ method.result_codec.result_direct_type_edk() }}
+{{ decl.type.kl.compound }}_{{ method.name }}(
+    {% set indirect_param_edk = method.result_codec.result_indirect_param_edk() %}
+    {% if indirect_param_edk %}
+      {{ indirect_param_edk | indent(4) }},
+    {% endif %}
+    {{ decl.self.param_edk() | indent(4) }}
+    )
+{
+    {{ method.result_codec.result_indirect_init_edk() | indent(4) }}
+
+    {{ method.result_codec.result_decl_and_assign_cpp() | indent(4) }}
+        {{ decl.self.name.edk }}.cpp_ptr->{{ method.name }}(
+            );
+
+    {{ method.result_codec.result_indirect_assign_to_edk() | indent(4) }}
+    {{ method.result_codec.result_direct_return_edk() | indent(4) }}
+}
+{% endfor %}
+
 {% endblock body %}

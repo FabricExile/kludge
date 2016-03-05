@@ -12,4 +12,6 @@ operator entry() {
   report("Before value.SET_stringValue('hello'): value.GET_stringValue() = " + value.GET_stringValue());
   value.SET_stringValue('hello');
   report("After value.SET_stringValue('hello'): value.GET_stringValue() = " + value.GET_stringValue());
+
+  report("value.publicMethod() = " + value.publicMethod());
 }

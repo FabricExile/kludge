@@ -9,12 +9,8 @@
 
 #include <{{ decl.include_filename }}>
 
-namespace Fabric { namespace EDK { namespace KL {
-
 {% block body %}
 {% endblock body %}
-
-} } }
 
 //
 //////////////////////////////////////////////////////////////////////////////

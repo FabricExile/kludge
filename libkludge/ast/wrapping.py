@@ -9,6 +9,7 @@ class Wrapping(Decl):
     desc,
     self_codec,
     members,
+    methods,
     template_basename,
     ):
     Decl.__init__(
@@ -21,6 +22,7 @@ class Wrapping(Decl):
     self.type = self_codec.type
     self.self = self_codec
     self.members = members
+    self.methods = methods
     self._template_basename = template_basename
 
   def jinja_stream(self, jinjenv, lang):

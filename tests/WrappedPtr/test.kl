@@ -15,4 +15,13 @@ operator entry() {
 
   report("value.publicMethod() = " + value.publicMethod());
   report("value.getDesc() = " + value.getDesc());
+  report("value.getMulFloatValue(5.12) = " + value.getMulFloatValue(5.12));
+
+  Float32 floatValue;
+  String stringValue;
+  SInt32 intValue;
+  value.exportValues(floatValue, stringValue, intValue);
+  report("value.exportValues(...): floatValue = " + floatValue);
+  report("value.exportValues(...): stringValue = " + stringValue);
+  report("value.exportValues(...): intValue = " + intValue);
 }

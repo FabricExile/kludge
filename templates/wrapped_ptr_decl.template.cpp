@@ -47,23 +47,49 @@ void
 
 {% for method in decl.methods %}
 FABRIC_EXT_EXPORT
+{% if method.result_codec %}
 {{ method.result_codec.result_direct_type_edk() }}
+{% else %}
+void
+{% endif %}
 {{ decl.type.kl.compound }}_{{ method.name }}(
+{% if method.result_codec %}
     {% set indirect_param_edk = method.result_codec.result_indirect_param_edk() %}
     {% if indirect_param_edk %}
-      {{ indirect_param_edk | indent(4) }},
+    {{ indirect_param_edk | indent(4) }},
     {% endif %}
+{% endif %}
     {{ decl.self.param_edk() | indent(4) }}
+{% for param in method.params %}
+    , {{ param.param_edk() }}
+{% endfor %}
     )
 {
+{% if method.result_codec %}
     {{ method.result_codec.result_indirect_init_edk() | indent(4) }}
+{% endif %}
 
+{% for param in method.params %}
+    {{ param.param_edk_to_cpp_decl() | indent(4) }}
+{% endfor %}
+
+{% if method.result_codec %}
     {{ method.result_codec.result_decl_and_assign_cpp() | indent(4) }}
+{% endif %}
         {{ decl.self.name.edk }}.cpp_ptr->{{ method.name }}(
+{% for param in method.params %}
+            {{ param.param_cpp() | indent(12) }}{{ "," if not loop.last else "" }}
+{% endfor %}            
             );
 
+{% for param in method.params %}
+    {{ param.param_cpp_to_edk() | indent(4) }}
+{% endfor %}
+
+{% if method.result_codec %}
     {{ method.result_codec.result_indirect_assign_to_edk() | indent(4) }}
     {{ method.result_codec.result_direct_return_edk() | indent(4) }}
+{% endif %}
 }
 {% endfor %}
 

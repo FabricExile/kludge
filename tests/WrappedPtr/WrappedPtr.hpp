@@ -39,6 +39,19 @@ public:
     return "stringValue: " + stringValue;
   }
 
+  float getMulFloatValue( float x ) const { return x * floatValue; }
+
+  void exportValues(
+    float &_floatValue,
+    std::string &_stringValue,
+    int &_intValue
+    )
+  {
+    _floatValue = floatValue;
+    _stringValue = stringValue;
+    _intValue = pri_intValue;
+  }
+
 protected:
 
   std::string const &protectedMethod() { return stringValue; }

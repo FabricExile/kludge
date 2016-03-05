@@ -3,4 +3,5 @@ require WrappedPtr;
 operator entry() {
   Class value;
   report("ReturnClass() = " + ReturnClass());
+  report("ReturnClassVec() = " + ReturnClassVec());
 }

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 class Class {
 public:
@@ -39,6 +40,13 @@ private:
 
 Class ReturnClass() {
   return Class( 6.74 );
+}
+
+std::vector<Class> ReturnClassVec() {
+  std::vector<Class> result;
+  result.push_back( Class( 3.14 ) );
+  result.push_back( Class( -3.45 ) );
+  return result;
 }
 
 #endif

@@ -28,14 +28,14 @@ def build_in_place_struct_codecs(class_name):
   InPlaceStructConstRefCodec.traits_const_ref()
 
   class InPlaceStructConstPtrCodec(InPlaceStructCodecBase): pass
-  InPlaceStructConstRefCodec.match_cpp_type_expr(
+  InPlaceStructConstPtrCodec.match_cpp_type_expr(
     PointerTo(Const(Named(class_name))),
     SimpleTypeSpec.builder(class_name, class_name)
     )
   InPlaceStructConstPtrCodec.traits_const_ptr()
 
   class InPlaceStructMutableRefType(InPlaceStructCodecBase): pass
-  InPlaceStructConstRefCodec.match_cpp_type_expr(
+  InPlaceStructMutableRefType.match_cpp_type_expr(
     ReferenceTo(Named(class_name)),
     SimpleTypeSpec.builder(class_name, class_name)
     )
@@ -43,7 +43,7 @@ def build_in_place_struct_codecs(class_name):
   InPlaceStructMutableRefType.param_io()
 
   class InPlaceStructMutablePtrType(InPlaceStructCodecBase): pass
-  InPlaceStructConstRefCodec.match_cpp_type_expr(
+  InPlaceStructMutablePtrType.match_cpp_type_expr(
     PointerTo(Named(class_name)),
     SimpleTypeSpec.builder(class_name, class_name)
     )

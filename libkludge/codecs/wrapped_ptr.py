@@ -41,7 +41,16 @@ delete {{ name.edk }}.cpp_ptr;
     )
   WrappedPtrConstRefCodec.traits_const_ref()
 
+  class WrappedPtrMutableRefCodec(WrappedPtrCodecBase): pass
+  WrappedPtrMutableRefCodec.match_cpp_type_expr(
+    ReferenceTo(Named(class_name)),
+    SimpleTypeSpec.builder(class_name, class_name)
+    )
+  WrappedPtrMutableRefCodec.traits_mutable_ref()
+  WrappedPtrMutableRefCodec.param_io()
+
   return [
     WrappedPtrValueCodec,
     WrappedPtrConstRefCodec,
+    WrappedPtrMutableRefCodec,
     ]

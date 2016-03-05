@@ -1,13 +1,13 @@
 {% extends "decl.template.kl" %}
 {% block body %}
-struct {{ decl.type.kl.compound }} {
+struct {{ decl.self_type_name.kl.compound }} {
   private Data cpp_ptr;
 };
 
   {% for member in decl.members %}
     {% if member.is_public %}
-{{ member.codec.type.kl.compound }} {{ decl.type.kl.compound }}.GET_{{ member.codec.name.kl }}() = "{{ decl.type.kl.compound }}_GET_{{ member.codec.name.kl }}";
-{{ decl.type.kl.compound }}.SET_{{ member.codec.name.kl }}!({{ member.codec.type.kl.base }} {{ member.codec.name.kl }}{{ member.codec.type.kl.suffix }}) = "{{ decl.type.kl.compound }}_SET_{{ member.codec.name.kl }}";
+{{ member.codec.type.kl.compound }} {{ decl.self_type_name.kl.compound }}.GET_{{ member.codec.name.kl }}() = "{{ decl.self_type_name.kl.compound }}_GET_{{ member.codec.name.kl }}";
+{{ decl.self_type_name.kl.compound }}.SET_{{ member.codec.name.kl }}!({{ member.codec.type.kl.base }} {{ member.codec.name.kl }}{{ member.codec.type.kl.suffix }}) = "{{ decl.self_type_name.kl.compound }}_SET_{{ member.codec.name.kl }}";
 
     {% endif %}
   {% endfor %}
@@ -16,11 +16,11 @@ struct {{ decl.type.kl.compound }} {
     {% if method.result_codec %}
 {{ method.result_codec.type.kl.compound }}
     {% endif %}
-{{ decl.type.kl.compound }}.{{ method.name }}(
+{{ decl.self_type_name.kl.compound }}.{{ method.name }}(
     {% for param in method.params %}
     {{ param.param_kl() }}{{ "," if not loop.last else "" }}
     {% endfor %}
-    ) = "{{ decl.type.kl.compound }}_{{ method.name }}";
+    ) = "{{ decl.self_type_name.kl.compound }}_{{ method.name }}";
 
   {% endfor %}
 {% endblock body %}

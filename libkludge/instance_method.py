@@ -10,6 +10,7 @@ class InstanceMethod:
     clang_instance_method,
     ):
     self.name = clang_instance_method.spelling
+    self.is_const = clang_instance_method.type.spelling.endswith('const')
 
     clang_result_type = clang_instance_method.result_type
     if clang_result_type and clang_result_type.kind != TypeKind.VOID:

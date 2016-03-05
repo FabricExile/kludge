@@ -964,13 +964,15 @@ fabricBuildEnv.SharedLibrary(
             self.type_mgr.add_codecs(
                 build_in_place_struct_codecs(class_name)
                 )
+            self_type_info = self.type_mgr.get_type_info("const " + class_name + " &")
             self.edk_decls.add(
                 ast.Wrapping(
                     self.ext_name,
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    self.type_mgr.get_type_info(class_name).make_codec(ValueName("RESERVED_self")),
+                    self.type_mgr,
+                    class_name,
                     members,
                     instance_methods,
                     "in_place_struct_decl",
@@ -986,7 +988,8 @@ fabricBuildEnv.SharedLibrary(
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    self.type_mgr.get_type_info(class_name).make_codec(ValueName("RESERVED_self")),
+                    self.type_mgr,
+                    class_name,
                     members,
                     instance_methods,
                     "wrapped_ptr_decl",

@@ -6,4 +6,5 @@ operator entry() {
   report("ReturnClassVec() = " + ReturnClassVec());
   value = ReturnClass();
   report("value.intValue = " + value.intValue);
+  report("value.getDesc() = " + value.getDesc());
 }

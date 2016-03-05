@@ -949,6 +949,10 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     class_name,
+                    map(
+                        lambda member: self.type_mgr.get_type_info(member.type).make_codec(ValueName(member.displayname)),
+                        members
+                        )
                     )
                 )
         else:

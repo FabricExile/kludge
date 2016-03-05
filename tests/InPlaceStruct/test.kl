@@ -1,4 +1,4 @@
-require WrappedPtr;
+require InPlaceStruct;
 
 operator entry() {
   Class value;

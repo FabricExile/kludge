@@ -4,7 +4,12 @@ from kludge.CPPTypeExpr import *
 def build_in_place_struct_type_codecs(class_name):
   class InPlaceStructTypeCodecBase(TypeCodec): pass
   InPlaceStructTypeCodecBase.conv_none()
-
+  InPlaceStructTypeCodecBase.result(
+    decl_and_assign_cpp = GenLambda(
+      lambda self: self.name.edk + " = " + self.traits_pointer_undo()
+      ),
+    indirect_assign_to_edk = GenStr(""),
+    )
   class InPlaceStructValueTypeCodec(InPlaceStructTypeCodecBase): pass
   InPlaceStructValueTypeCodec.match_cpp_type_expr(
     Named(class_name),

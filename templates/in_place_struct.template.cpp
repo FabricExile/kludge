@@ -11,8 +11,7 @@
 
 namespace Fabric { namespace EDK { namespace KL {
 
-struct {{ in_place_struct.name }} {
-};
+typedef ::{{ in_place_struct.name }} {{ in_place_struct.name }};
 
 } } }
 

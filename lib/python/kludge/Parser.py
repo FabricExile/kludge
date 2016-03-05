@@ -800,19 +800,19 @@ fabricBuildEnv.SharedLibrary(
             #     parent_class_name = self.get_kl_class_name(cpp_class_name)
             #     kl_type.parent = parent_class_name
 
-            if child.kind == CursorKind.CXX_METHOD:
-                print child.kind
-                result_type_info = self.type_mgr.get_type_info(child.result_type)
-                print "result_type_info = " + str(result_type_info)
+            # if child.kind == CursorKind.CXX_METHOD:
+            #     print child.kind
+            #     result_type_info = self.type_mgr.get_type_info(child.result_type)
+            #     print "result_type_info = " + str(result_type_info)
 
-                is_const = child.type.spelling.endswith('const')
-                print "this_cpp_type_name = " + child.type.spelling
-                # this_type_info = self.type_mgr.get_type_info(
+            #     is_const = child.type.spelling.endswith('const')
+            #     print "this_cpp_type_name = " + child.type.spelling
+            #     # this_type_info = self.type_mgr.get_type_info(
 
-                if child.is_static_method():
-                    pass
-                else:
-                    pass
+            #     if child.is_static_method():
+            #         pass
+            #     else:
+            #         pass
                 # if child.spelling in self.skip_methods:
                 #     self.print_skipping(
                 #         child.displayname,

@@ -14,9 +14,10 @@ def build_wrapped_ptr_type_codecs(class_name):
 delete {{ name.edk }}.cpp_ptr;
 {{ name.edk }}.cpp_ptr = new {{ type.cpp.name }}( {{ name.cpp }} );
 """,
-    cpp_to_edk_decl = GenLambda(
-      lambda _: _.type.edk.name + " " + _.name.edk + ";\n" + _.conv_cpp_to_edk()
-      ),
+    cpp_to_edk_decl = """
+{{ type.edk.name }} {{ name.edk }};
+{{ name.edk }}.cpp_ptr = new {{ type.cpp.name }}( {{ name.cpp }} );
+""",
     )
   WrappedPtrTypeCodecBase.result(
     indirect_init_edk = """

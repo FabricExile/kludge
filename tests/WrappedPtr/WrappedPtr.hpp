@@ -13,11 +13,11 @@ public:
   Class( Class const &that ) : m_str( that.m_str ) {}
   ~Class() {}
 
-  // Class &operator=( Class const &that )
-  // {
-  //   m_str = that.m_str;
-  //   return *this;
-  // }
+  Class &operator=( Class const &that )
+  {
+    m_str = that.m_str;
+    return *this;
+  }
 
   std::string const &publicMethod() { return m_str; }
 

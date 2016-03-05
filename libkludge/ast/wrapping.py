@@ -7,7 +7,6 @@ class Wrapping(Decl):
     include_filename,
     location,
     desc,
-    type_name,
     self_codec,
     members,
     template_basename,
@@ -19,7 +18,7 @@ class Wrapping(Decl):
         location,
         desc,
         )
-    self.type_name = type_name
+    self.type = self_codec.type
     self.self = self_codec
     self.members = members
     self._template_basename = template_basename

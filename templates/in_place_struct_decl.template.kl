@@ -1,6 +1,6 @@
 {% extends "decl.template.kl" %}
 {% block body %}
-struct {{ decl.type_name }} {
+struct {{ decl.type.kl.compound }} {
 {% for member in decl.members %}
     {{ "public" if member.is_public else "private" }}
     {{ member.codec.type.kl.base + " " + member.codec.name.kl + member.codec.type.kl.suffix + ";" | indent(4) }}

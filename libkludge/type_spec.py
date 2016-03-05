@@ -14,6 +14,7 @@ class EDKTypeSpec:
 
   def __init__(self, name):
     self.name = "::Fabric::EDK::KL::" + name
+    self.local_name = name
 
 class CPPTypeSpec:
 

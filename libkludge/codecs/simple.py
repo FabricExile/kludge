@@ -1,4 +1,5 @@
-from kludge import TypeCodec, GenLambda
+from libkludge.codec import Codec
+from libkludge.gen_spec import GenLambda
 
 def build_simple_type_codecs():
   cpp_base_type_to_kl_base_type = {
@@ -25,37 +26,37 @@ def build_simple_type_codecs():
     "double": "Float64",
     }
 
-  class SimpleTypeCodecBase(TypeCodec): pass
-  SimpleTypeCodecBase.conv_none()
-  SimpleTypeCodecBase.result_direct()
+  class SimpleCodecBase(Codec): pass
+  SimpleCodecBase.conv_none()
+  SimpleCodecBase.result_direct()
 
-  class SimpleValueTypeCodec(SimpleTypeCodecBase): pass
-  SimpleValueTypeCodec.match_value_by_dict(cpp_base_type_to_kl_base_type)
-  SimpleValueTypeCodec.traits_value()
-  SimpleValueTypeCodec.prop_in_place()
+  class SimpleValueCodec(SimpleCodecBase): pass
+  SimpleValueCodec.match_value_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleValueCodec.traits_value()
+  SimpleValueCodec.prop_in_place()
 
-  class SimpleConstRefTypeCodec(SimpleTypeCodecBase): pass
-  SimpleConstRefTypeCodec.match_const_ref_by_dict(cpp_base_type_to_kl_base_type)
-  SimpleConstRefTypeCodec.traits_const_ref()
+  class SimpleConstRefCodec(SimpleCodecBase): pass
+  SimpleConstRefCodec.match_const_ref_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleConstRefCodec.traits_const_ref()
 
-  class SimpleConstPtrTypeCodec(SimpleTypeCodecBase): pass
-  SimpleConstPtrTypeCodec.match_const_ptr_by_dict(cpp_base_type_to_kl_base_type)
-  SimpleConstPtrTypeCodec.traits_const_ptr()
+  class SimpleConstPtrCodec(SimpleCodecBase): pass
+  SimpleConstPtrCodec.match_const_ptr_by_dict(cpp_base_type_to_kl_base_type)
+  SimpleConstPtrCodec.traits_const_ptr()
 
-  class SimpleMutableRefType(SimpleTypeCodecBase): pass
+  class SimpleMutableRefType(SimpleCodecBase): pass
   SimpleMutableRefType.match_mutable_ref_by_dict(cpp_base_type_to_kl_base_type)
   SimpleMutableRefType.traits_mutable_ref()
   SimpleMutableRefType.param_io()
 
-  class SimpleMutablePtrType(SimpleTypeCodecBase): pass
+  class SimpleMutablePtrType(SimpleCodecBase): pass
   SimpleMutablePtrType.match_mutable_ptr_by_dict(cpp_base_type_to_kl_base_type)
   SimpleMutablePtrType.traits_mutable_ptr()
   SimpleMutablePtrType.param_io()
 
   return [
-    SimpleValueTypeCodec,
-    SimpleConstRefTypeCodec,
-    SimpleConstPtrTypeCodec,
+    SimpleValueCodec,
+    SimpleConstRefCodec,
+    SimpleConstPtrCodec,
     SimpleMutableRefType,
     SimpleMutablePtrType,
     ]

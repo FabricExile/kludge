@@ -1,4 +1,4 @@
-from kludge.CPPTypeExpr import *
+from libkludge.cpp_type_expr_parser import *
 
 class KLTypeSpec:
 

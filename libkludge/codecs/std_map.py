@@ -1,6 +1,9 @@
-from kludge import TypeSpec, TypeCodec, GenStr, GenLambda, SimpleTypeSpec, ValueName, Value
-from kludge.CPPTypeExpr import *
-from kludge.CPPTypeExpr.helpers import *
+from libkludge.type_spec import TypeSpec, SimpleTypeSpec
+from libkludge.codec import Codec
+from libkludge.gen_spec import GenStr, GenLambda
+from libkludge.value_name import ValueName
+from libkludge.cpp_type_expr_parser import *
+from libkludge.cpp_type_expr_parser.helpers import *
 
 def build_std_map_type_codecs():
 
@@ -19,8 +22,8 @@ def build_std_map_type_codecs():
       [key_type_info, value_type_info],
       )
 
-  class StdMapTypeCodecBase(TypeCodec): pass
-  StdMapTypeCodecBase.conv(
+  class StdMapCodecBase(Codec): pass
+  StdMapCodecBase.conv(
     edk_to_cpp = """
 {{ name.cpp }}.clear();
 for ( {{ type.edk.name }}::CIT it = {{ name.edk }}.begin();
@@ -71,9 +74,9 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
           child_type_infos[1],
           )
 
-  class StdMapValueTypeCodec(StdMapTypeCodecBase): pass
-  StdMapValueTypeCodec.match(match_value)
-  StdMapValueTypeCodec.traits_value()
+  class StdMapValueCodec(StdMapCodecBase): pass
+  StdMapValueCodec.match(match_value)
+  StdMapValueCodec.traits_value()
 
   def match_const_ref(cls, cpp_type_expr, type_mgr):
     base_cpp_type_expr = pointee_if_const_ref(cpp_type_expr)
@@ -89,11 +92,11 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
             child_type_infos[1],
             )
 
-  class StdMapConstRefTypeCodec(StdMapTypeCodecBase): pass
-  StdMapConstRefTypeCodec.match(match_const_ref)
-  StdMapConstRefTypeCodec.traits_const_ref()
+  class StdMapConstRefCodec(StdMapCodecBase): pass
+  StdMapConstRefCodec.match(match_const_ref)
+  StdMapConstRefCodec.traits_const_ref()
 
   return [
-    StdMapValueTypeCodec,
-    StdMapConstRefTypeCodec,
+    StdMapValueCodec,
+    StdMapConstRefCodec,
     ]

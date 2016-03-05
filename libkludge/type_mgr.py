@@ -1,5 +1,8 @@
-from kludge.type_codecs import *
-from kludge import CPPTypeExpr, CPPTypeSpec, TypeSpec, SimpleTypeSpec, TypeCodec, ValueName, Value, TypeInfo
+from codecs import *
+import cpp_type_expr_parser
+from type_spec import CPPTypeSpec, TypeSpec, SimpleTypeSpec
+from value_name import ValueName
+from type_info import TypeInfo
 import clang.cindex
 
 class TypeMgr:
@@ -11,7 +14,7 @@ class TypeMgr:
     self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
 
     self._cpp_type_name_to_type_info = {}
-    self._cpp_type_expr_parser = CPPTypeExpr.Parser(self._alias_new_cpp_type_name_to_old_cpp_type_expr)
+    self._cpp_type_expr_parser = cpp_type_expr_parser.Parser(self._alias_new_cpp_type_name_to_old_cpp_type_expr)
 
     # 'void' must be explcitly checked for by clients.  This is just hear to
     # make sure that 'void' can be looked up
@@ -22,7 +25,7 @@ class TypeMgr:
         SimpleTypeSpec(
           '',
           'void',
-          CPPTypeExpr.Void()
+          cpp_type_expr_parser.Void()
           )
         )
       )
@@ -60,7 +63,7 @@ class TypeMgr:
   def add_type_alias(self, new_cpp_type_name, old_cpp_type_name):
     old_type_info = self.maybe_get_type_info(old_cpp_type_name)
     if old_type_info:
-      new_cpp_type_expr = CPPTypeExpr.Named(new_cpp_type_name)
+      new_cpp_type_expr = cpp_type_expr_parser.Named(new_cpp_type_name)
       new_type_spec = SimpleTypeSpec(
         new_cpp_type_name,
         new_cpp_type_name,
@@ -74,7 +77,7 @@ class TypeMgr:
 
   @staticmethod
   def parse_value(value):
-    if isinstance(value, CPPTypeExpr.Type):
+    if isinstance(value, cpp_type_expr_parser.Type):
       cpp_type_expr = value
       cpp_type_name = str(cpp_type_expr)
     elif isinstance(value, basestring):

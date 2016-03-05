@@ -5,8 +5,13 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-from kludge import GenSpec, TypeMgr, ValueName, Member, clang_wrapper, ast
-from kludge.type_codecs import build_wrapped_ptr_type_codecs, build_in_place_struct_type_codecs
+import clang_wrapper
+import ast
+from gen_spec import GenSpec
+from type_mgr import TypeMgr
+from value_name import ValueName
+from member import Member
+from codecs import build_wrapped_ptr_type_codecs, build_in_place_struct_type_codecs
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -1006,7 +1011,7 @@ fabricBuildEnv.SharedLibrary(
                     if len(param_name) == 0:
                         param_name = "_param_%u" % param_index
                     param_clang_type = param_cursor.type
-                    clang_params.append(clang_wrapper.Param(param_name, param_clang_type))
+                    clang_params.append(clang_wrapper.ClangParam(param_name, param_clang_type))
                 param_index += 1
 
             self.edk_decls.add(

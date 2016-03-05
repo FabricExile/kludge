@@ -1,6 +1,6 @@
-from kludge.ast import Decl
+from decl import Decl
 
-class WrappedPtrDecl(Decl):
+class InPlaceStructDecl(Decl):
   def __init__(
     self,
     extname,
@@ -8,13 +8,11 @@ class WrappedPtrDecl(Decl):
     location,
     desc,
     name,
-    self_type_codec,
     members,
     ):
     Decl.__init__(self, extname, include_filename, location, desc)
     self.name = name
-    self.self = self_type_codec
     self.members = members
 
   def jinja_stream(self, jinjenv, lang):
-    return jinjenv.get_template('wrapped_ptr.template.' + lang).stream(wrapped_ptr = self)
+    return jinjenv.get_template('in_place_struct.template.' + lang).stream(in_place_struct = self)

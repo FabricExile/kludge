@@ -1,9 +1,11 @@
-from kludge import TypeCodec, GenStr, GenLambda, SimpleTypeSpec
-from kludge.CPPTypeExpr import *
+from libkludge.codec import Codec
+from libkludge.gen_spec import GenStr, GenLambda
+from libkludge.type_spec import SimpleTypeSpec
+from libkludge.cpp_type_expr_parser import *
 
 def build_wrapped_ptr_type_codecs(class_name):
-  class WrappedPtrTypeCodecBase(TypeCodec): pass
-  WrappedPtrTypeCodecBase.conv(
+  class WrappedPtrCodecBase(Codec): pass
+  WrappedPtrCodecBase.conv(
     edk_to_cpp = """
 {{ name.cpp }} = *{{ name.edk }}.cpp_ptr;
 """,
@@ -19,27 +21,27 @@ delete {{ name.edk }}.cpp_ptr;
 {{ name.edk }}.cpp_ptr = new {{ type.cpp.name }}( {{ name.cpp }} );
 """,
     )
-  WrappedPtrTypeCodecBase.result(
+  WrappedPtrCodecBase.result(
     indirect_init_edk = """
 {{ name.edk }}.cpp_ptr = 0;
 """,
     )
 
-  class WrappedPtrValueTypeCodec(WrappedPtrTypeCodecBase): pass
-  WrappedPtrValueTypeCodec.match_cpp_type_expr(
+  class WrappedPtrValueCodec(WrappedPtrCodecBase): pass
+  WrappedPtrValueCodec.match_cpp_type_expr(
     Named(class_name),
     SimpleTypeSpec.builder(class_name, class_name)
     )
-  WrappedPtrValueTypeCodec.traits_value()
+  WrappedPtrValueCodec.traits_value()
 
-  class WrappedPtrConstRefTypeCodec(WrappedPtrTypeCodecBase): pass
-  WrappedPtrConstRefTypeCodec.match_cpp_type_expr(
+  class WrappedPtrConstRefCodec(WrappedPtrCodecBase): pass
+  WrappedPtrConstRefCodec.match_cpp_type_expr(
     ReferenceTo(Const(Named(class_name))),
     SimpleTypeSpec.builder(class_name, class_name)
     )
-  WrappedPtrConstRefTypeCodec.traits_const_ref()
+  WrappedPtrConstRefCodec.traits_const_ref()
 
   return [
-    WrappedPtrValueTypeCodec,
-    WrappedPtrConstRefTypeCodec,
+    WrappedPtrValueCodec,
+    WrappedPtrConstRefCodec,
     ]

@@ -1,5 +1,6 @@
-from kludge.ast import Decl
-from kludge import ValueName, Value, CPPTypeExpr
+from decl import Decl
+from libkludge.value_name import ValueName
+from libkludge.cpp_type_expr_parser import *
 
 class Alias(Decl):
   def __init__(

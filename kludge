@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-import os, sys
+import libkludge
 
-sys.path.append(os.path.join('lib', 'python'))
-
-import kludge.Parser
-
-kludge.Parser().main()
+libkludge.Parser().main()

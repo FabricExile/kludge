@@ -1,6 +1,9 @@
-from kludge import GenStr, GenLambda, GenTmpl, CPPTypeExpr, ValueName, SimpleTypeSpec
+from gen_spec import GenStr, GenLambda, GenTmpl
+import cpp_type_expr_parser
+from value_name import ValueName
+from type_spec import SimpleTypeSpec
 
-class TypeCodec:
+class Codec:
 
   protocols = {
     'traits': [
@@ -115,7 +118,7 @@ class TypeCodec:
   @classmethod
   def match_value_by_dict(cls, lookup):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.Direct):
+      if isinstance(cpp_type_expr, cpp_type_expr_parser.Direct):
         unqual_cpp_type_name = cpp_type_expr.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
@@ -126,9 +129,9 @@ class TypeCodec:
   @classmethod
   def match_const_ref_by_dict(cls, lookup):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
+      if isinstance(cpp_type_expr, cpp_type_expr_parser.ReferenceTo) \
         and cpp_type_expr.pointee.is_const \
-        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        and isinstance(cpp_type_expr.pointee, cpp_type_expr_parser.Direct):
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
@@ -139,9 +142,9 @@ class TypeCodec:
   @classmethod
   def match_const_ptr_by_dict(cls, lookup):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
+      if isinstance(cpp_type_expr, cpp_type_expr_parser.PointerTo) \
         and cpp_type_expr.pointee.is_const \
-        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        and isinstance(cpp_type_expr.pointee, cpp_type_expr_parser.Direct):
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
@@ -152,9 +155,9 @@ class TypeCodec:
   @classmethod
   def match_mutable_ref_by_dict(cls, lookup):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.ReferenceTo) \
+      if isinstance(cpp_type_expr, cpp_type_expr_parser.ReferenceTo) \
         and cpp_type_expr.pointee.is_mutable \
-        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        and isinstance(cpp_type_expr.pointee, cpp_type_expr_parser.Direct):
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
@@ -165,9 +168,9 @@ class TypeCodec:
   @classmethod
   def match_mutable_ptr_by_dict(cls, lookup):
     def impl(cls, cpp_type_expr, type_mgr):
-      if isinstance(cpp_type_expr, CPPTypeExpr.PointerTo) \
+      if isinstance(cpp_type_expr, cpp_type_expr_parser.PointerTo) \
         and cpp_type_expr.pointee.is_mutable \
-        and isinstance(cpp_type_expr.pointee, CPPTypeExpr.Direct):
+        and isinstance(cpp_type_expr.pointee, cpp_type_expr_parser.Direct):
         unqual_cpp_type_name = cpp_type_expr.pointee.get_unqualified_desc()
         kl_type_name = lookup.get(unqual_cpp_type_name)
         if kl_type_name:
@@ -337,7 +340,7 @@ class TypeCodec:
   def result_forbidden(cls):
     def impl(self):
       raise Exception(self.type.cpp.name + ": unsupported as a result type")
-    for hook_name in TypeCodec.protocols['result']:
+    for hook_name in Codec.protocols['result']:
       cls.set_hook(hook_name, impl)
     return cls
 
@@ -455,12 +458,12 @@ class TypeCodec:
         ),
       )
 
-for protocol_name, hook_names in TypeCodec.protocols.iteritems():
+for protocol_name, hook_names in Codec.protocols.iteritems():
   def impl(self, protocol_name=protocol_name):
     self.__class__.raise_unimplemented_protocol(protocol_name)
   for hook_name in hook_names:
-    TypeCodec.set_hook(hook_name, impl)
+    Codec.set_hook(hook_name, impl)
 
 # param() and result() are optional
-TypeCodec.param()
-TypeCodec.result()
+Codec.param()
+Codec.result()

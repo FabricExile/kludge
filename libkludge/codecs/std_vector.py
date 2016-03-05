@@ -1,6 +1,9 @@
-from kludge import TypeSpec, TypeCodec, GenStr, GenLambda, SimpleTypeSpec, ValueName, Value
-from kludge.CPPTypeExpr import *
-from kludge.CPPTypeExpr.helpers import *
+from libkludge.codec import Codec
+from libkludge.type_spec import TypeSpec, SimpleTypeSpec
+from libkludge.gen_spec import GenStr, GenLambda
+from libkludge.value_name import ValueName
+from libkludge.cpp_type_expr_parser import *
+from libkludge.cpp_type_expr_parser.helpers import *
 
 def build_std_vector_type_codecs():
 
@@ -18,8 +21,8 @@ def build_std_vector_type_codecs():
       [element_type_info],
       )
 
-  class StdVectorTypeCodecBase(TypeCodec): pass
-  StdVectorTypeCodecBase.conv(
+  class StdVectorCodecBase(Codec): pass
+  StdVectorCodecBase.conv(
     edk_to_cpp = """
 {{ name.cpp }}.clear();
 {{ name.cpp }}.reserve( {{ name.edk }}.size() );
@@ -65,9 +68,9 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
           element_type_info,
           )
 
-  class StdVectorValueTypeCodec(StdVectorTypeCodecBase): pass
-  StdVectorValueTypeCodec.match(match_value)
-  StdVectorValueTypeCodec.traits_value()
+  class StdVectorValueCodec(StdVectorCodecBase): pass
+  StdVectorValueCodec.match(match_value)
+  StdVectorValueCodec.traits_value()
 
   def match_const_ref(cls, cpp_type_expr, type_mgr):
     base_cpp_type_expr = pointee_if_const_ref(cpp_type_expr)
@@ -82,11 +85,11 @@ for ( {{ type.cpp.name }}::const_iterator it = {{ name.cpp }}.begin();
             element_type_info,
             )
 
-  class StdVectorConstRefTypeCodec(StdVectorTypeCodecBase): pass
-  StdVectorConstRefTypeCodec.match(match_const_ref)
-  StdVectorConstRefTypeCodec.traits_const_ref()
+  class StdVectorConstRefCodec(StdVectorCodecBase): pass
+  StdVectorConstRefCodec.match(match_const_ref)
+  StdVectorConstRefCodec.traits_const_ref()
 
   return [
-    StdVectorValueTypeCodec,
-    StdVectorConstRefTypeCodec,
+    StdVectorValueCodec,
+    StdVectorConstRefCodec,
     ]

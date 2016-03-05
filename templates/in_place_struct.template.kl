@@ -9,7 +9,7 @@
 
 struct {{ in_place_struct.name }} {
 {% for member in in_place_struct.members %}
-    {{ member.type.kl.base + " " + member.name.kl + member.type.kl.suffix + ";" | indent(4) }}
+    {{ member.codec.type.kl.base + " " + member.codec.name.kl + member.codec.type.kl.suffix + ";" | indent(4) }}
 {% endfor %}
 };
 

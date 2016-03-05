@@ -1,4 +1,4 @@
-from kludge.CPPTypeExpr import ReferenceTo
+from expr import ReferenceTo
 
 def pointee_if_const_ref(cpp_type_expr):
   if isinstance(cpp_type_expr, ReferenceTo):

@@ -1,5 +1,6 @@
-from kludge.ast import Decl
-from kludge import ValueName, Value, CPPTypeExpr
+from decl import Decl
+from libkludge.value_name import ValueName
+from libkludge import cpp_type_expr_parser
 
 class Func(Decl):
   def __init__(
@@ -15,7 +16,7 @@ class Func(Decl):
     Decl.__init__(self, extname, include_filename, location, desc)
 
     self._nested_function_name = nested_function_name
-    if not isinstance(result_type_info.cpp.expr, CPPTypeExpr.Void):
+    if not isinstance(result_type_info.cpp.expr, cpp_type_expr_parser.Void):
       self._result_codec = result_type_info.make_codec(
         ValueName("RESERVED_result"),
         )

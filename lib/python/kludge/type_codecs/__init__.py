@@ -4,4 +4,5 @@ from kludge.type_codecs.CString import build_c_string_type_codecs
 from kludge.type_codecs.StdString import build_std_string_type_codecs
 from kludge.type_codecs.StdVector import build_std_vector_type_codecs
 from kludge.type_codecs.StdMap import build_std_map_type_codecs
+from kludge.type_codecs.InPlaceStruct import build_in_place_struct_type_codecs
 from kludge.type_codecs.WrappedPtr import build_wrapped_ptr_type_codecs

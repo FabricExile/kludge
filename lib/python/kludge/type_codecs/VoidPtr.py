@@ -6,6 +6,7 @@ def build_void_ptr_type_codecs():
   VoidPtrBaseTypeCodec.traits_value()
   VoidPtrBaseTypeCodec.conv_none()
   VoidPtrBaseTypeCodec.result_direct()
+  VoidPtrBaseTypeCodec.prop_in_place()
 
   class ConstVoidPtrTypeCodec(VoidPtrBaseTypeCodec): pass
   ConstVoidPtrTypeCodec.match_cpp_type_expr(

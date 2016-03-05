@@ -9,43 +9,41 @@ class Class {
 public:
 
   Class() {}
-  Class( float x ) : m_x( x ) {}
-  Class( Class const &that ) : m_x( that.m_x ) {}
+  Class( std::string const &str ) : m_str( str ) {}
+  Class( Class const &that ) : m_str( that.m_str ) {}
   ~Class() {}
 
   // Class &operator=( Class const &that )
   // {
-  //   m_x = that.m_x;
+  //   m_str = that.m_str;
   //   return *this;
   // }
 
-  float publicMethod() { return m_x; }
+  std::string const &publicMethod() { return m_str; }
 
   std::string getDesc() const {
-    char buf[20];
-    snprintf( buf, 20, "%f", m_x );
-    return std::string( buf );
+    return "str: " + m_str;
   }
 
 protected:
 
-  float protectedMethod() { return m_x; }
+  std::string const &protectedMethod() { return m_str; }
 
 private:
 
-  float privateMethod() { return m_x; }
+  std::string const &privateMethod() { return m_str; }
 
-  float m_x;
+  std::string m_str;
 };
 
 Class ReturnClass() {
-  return Class( 6.74 );
+  return Class( "foo" );
 }
 
 std::vector<Class> ReturnClassVec() {
   std::vector<Class> result;
-  result.push_back( Class( 3.14 ) );
-  result.push_back( Class( -3.45 ) );
+  result.push_back( Class( "bar" ) );
+  result.push_back( Class( "baz" ) );
   return result;
 }
 

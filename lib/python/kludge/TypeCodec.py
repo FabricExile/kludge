@@ -79,7 +79,15 @@ class TypeCodec:
   def raise_missing_or_invalid(name):
     raise Exception("missing or invalid '" + name + "' (must be a string or an instance of GenXXX)")
 
-  # Recipes: match
+  # Properties
+
+  is_in_place = False
+
+  @classmethod
+  def prop_in_place(cls, is_in_place = True):
+    cls.is_in_place = is_in_place
+
+  # Matching
 
   @classmethod
   def maybe_match(cls, cpp_type_expr, type_mgr):

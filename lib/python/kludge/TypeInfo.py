@@ -20,5 +20,8 @@ class TypeInfo:
   def cpp(self):
     return self._spec.cpp
 
+  def is_in_place(self):
+    return self._codec_cls.is_in_place
+
   def make_codec(self, value_name):
     return self._codec_cls(value_name, self._spec)

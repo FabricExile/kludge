@@ -5,8 +5,8 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-from kludge import GenSpec, TypeMgr, clang_wrapper, ast
-from kludge.type_codecs import build_wrapped_ptr_type_codecs
+from kludge import GenSpec, TypeMgr, ValueName, clang_wrapper, ast
+from kludge.type_codecs import build_wrapped_ptr_type_codecs, build_in_place_struct_type_codecs
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -780,20 +780,14 @@ fabricBuildEnv.SharedLibrary(
         print "%sCLASS_DECL %s" % (indent, cursor.displayname)
 
         class_name = cursor.spelling
-        self.type_mgr.add_type_codecs(
-            build_wrapped_ptr_type_codecs(class_name)
-            )
-        self.edk_decls.add(
-            ast.WrappedPtrDecl(
-                self.ext_name,
-                include_filename,
-                self.get_location(cursor.location),
-                cursor.displayname,
-                class_name,
-                )
-            )
+
+        members = []
 
         for child in cursor.get_children():
+            if child.kind == CursorKind.FIELD_DECL:
+                members.append(child)
+                continue
+
             if child.access_specifier != AccessSpecifier.PUBLIC:
                 continue
 
@@ -936,6 +930,40 @@ fabricBuildEnv.SharedLibrary(
                 # method.codegen.is_operator = operator
 
                 # kl_type.methods.append(method)
+
+        can_in_place = True
+        for member in members:
+            member_type_info = self.type_mgr.maybe_get_type_info(member.type)
+            if not member_type_info or not member_type_info.is_in_place():
+                can_in_place = False
+                break
+
+        if can_in_place:
+            self.type_mgr.add_type_codecs(
+                build_in_place_struct_type_codecs(class_name)
+                )
+            self.edk_decls.add(
+                ast.InPlaceStructDecl(
+                    self.ext_name,
+                    include_filename,
+                    self.get_location(cursor.location),
+                    cursor.displayname,
+                    class_name,
+                    )
+                )
+        else:
+            self.type_mgr.add_type_codecs(
+                build_wrapped_ptr_type_codecs(class_name)
+                )
+            self.edk_decls.add(
+                ast.WrappedPtrDecl(
+                    self.ext_name,
+                    include_filename,
+                    self.get_location(cursor.location),
+                    cursor.displayname,
+                    class_name,
+                    )
+                )
 
     def parse_MACRO_INSTANTIATION(self, include_filename, indent, cursor):
         print dir(cursor)

@@ -33,7 +33,7 @@ delete {{ name.edk }}.cpp_ptr;
 
   class WrappedPtrConstRefTypeCodec(WrappedPtrTypeCodecBase): pass
   WrappedPtrConstRefTypeCodec.match_cpp_type_expr(
-    PointerTo(Const(Named(class_name))),
+    ReferenceTo(Const(Named(class_name))),
     SimpleTypeSpec.builder(class_name, class_name)
     )
   WrappedPtrConstRefTypeCodec.traits_const_ref()

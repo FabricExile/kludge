@@ -32,6 +32,7 @@ def build_simple_type_codecs():
   class SimpleValueTypeCodec(SimpleTypeCodecBase): pass
   SimpleValueTypeCodec.match_value_by_dict(cpp_base_type_to_kl_base_type)
   SimpleValueTypeCodec.traits_value()
+  SimpleValueTypeCodec.prop_in_place()
 
   class SimpleConstRefTypeCodec(SimpleTypeCodecBase): pass
   SimpleConstRefTypeCodec.match_const_ref_by_dict(cpp_base_type_to_kl_base_type)

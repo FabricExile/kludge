@@ -3,7 +3,7 @@ from libkludge.gen_spec import GenStr, GenLambda
 from libkludge.type_spec import SimpleTypeSpec
 from libkludge.cpp_type_expr_parser import *
 
-def build_in_place_struct_type_codecs(class_name):
+def build_in_place_struct_codecs(class_name):
   class InPlaceStructCodecBase(Codec): pass
   InPlaceStructCodecBase.conv_none()
   InPlaceStructCodecBase.result(

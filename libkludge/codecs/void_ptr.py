@@ -3,7 +3,7 @@ from libkludge.type_spec import SimpleTypeSpec
 from libkludge.gen_spec import GenLambda, GenStr, GenLambda
 from libkludge.cpp_type_expr_parser import *
 
-def build_void_ptr_type_codecs():
+def build_void_ptr_codecs():
   class VoidPtrBaseCodec(Codec): pass
   VoidPtrBaseCodec.traits_value()
   VoidPtrBaseCodec.conv_none()

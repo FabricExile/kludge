@@ -2,10 +2,10 @@ class TypeInfo:
 
   def __init__(
     self,
-    type_codec_cls,
+    codec_cls,
     type_spec,
     ):
-    self._codec_cls = type_codec_cls
+    self._codec_cls = codec_cls
     self._spec = type_spec
 
   @property

@@ -8,7 +8,7 @@ import clang.cindex
 class TypeMgr:
 
   def __init__(self):
-    self._type_codecs = []
+    self._codecs = []
 
     self._alias_new_type_specs = []
     self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
@@ -31,31 +31,31 @@ class TypeMgr:
       )
 
     # First so we don't catch in Simple...
-    self.add_type_codecs(
-      build_c_string_type_codecs()
+    self.add_codecs(
+      build_c_string_codecs()
       )
-    self.add_type_codecs(
-      build_void_ptr_type_codecs()
+    self.add_codecs(
+      build_void_ptr_codecs()
       )
-    self.add_type_codecs(
-      build_simple_type_codecs()
+    self.add_codecs(
+      build_simple_codecs()
       )
-    self.add_type_codecs(
-      build_std_string_type_codecs()
+    self.add_codecs(
+      build_std_string_codecs()
       )
-    self.add_type_codecs(
-      build_std_vector_type_codecs()
+    self.add_codecs(
+      build_std_vector_codecs()
       )
-    self.add_type_codecs(
-      build_std_map_type_codecs()
+    self.add_codecs(
+      build_std_map_codecs()
       )
 
-  def add_type_codec(self, type_codec):
-    self._type_codecs.append(type_codec)
+  def add_codec(self, codec):
+    self._codecs.append(codec)
 
-  def add_type_codecs(self, type_codecs):
-    for type_codec in type_codecs:
-      self.add_type_codec(type_codec)
+  def add_codecs(self, codecs):
+    for codec in codecs:
+      self.add_codec(codec)
 
   def add_type_info(self, cpp_type_name, type_info):
     self._cpp_type_name_to_type_info[cpp_type_name] = type_info
@@ -114,10 +114,10 @@ class TypeMgr:
         except:
           raise Exception(cpp_type_name + ": malformed C++ type expression")
 
-      for type_codec in self._type_codecs:
-        type_spec = type_codec.maybe_match(cpp_type_expr, self)
+      for codec in self._codecs:
+        type_spec = codec.maybe_match(cpp_type_expr, self)
         if type_spec:
-          type_info = TypeInfo(type_codec, type_spec)
+          type_info = TypeInfo(codec, type_spec)
           self.add_type_info(cpp_type_name, type_info)
           return type_info
 

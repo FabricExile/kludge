@@ -3,7 +3,7 @@ from libkludge.gen_spec import GenStr, GenLambda
 from libkludge.type_spec import SimpleTypeSpec
 from libkludge.cpp_type_expr_parser import *
 
-def build_std_string_type_codecs():
+def build_std_string_codecs():
   class StdStringCodecBase(Codec): pass
   StdStringCodecBase.conv(
     edk_to_cpp = GenLambda(

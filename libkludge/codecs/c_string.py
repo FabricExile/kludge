@@ -3,7 +3,7 @@ from libkludge.gen_spec import GenLambda
 from libkludge.type_spec import SimpleTypeSpec
 from libkludge.cpp_type_expr_parser import *
 
-def build_c_string_type_codecs():
+def build_c_string_codecs():
   class CStringCodecBase(Codec): pass
   CStringCodecBase.conv(
     edk_to_cpp = GenLambda(

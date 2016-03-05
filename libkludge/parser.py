@@ -11,7 +11,7 @@ from gen_spec import GenSpec
 from type_mgr import TypeMgr
 from value_name import ValueName
 from member import Member
-from codecs import build_wrapped_ptr_type_codecs, build_in_place_struct_type_codecs
+from codecs import build_wrapped_ptr_codecs, build_in_place_struct_codecs
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -946,8 +946,8 @@ fabricBuildEnv.SharedLibrary(
 
         can_in_place = all(member and member.codec.is_in_place for member in members)
         if can_in_place:
-            self.type_mgr.add_type_codecs(
-                build_in_place_struct_type_codecs(class_name)
+            self.type_mgr.add_codecs(
+                build_in_place_struct_codecs(class_name)
                 )
             self.edk_decls.add(
                 ast.InPlaceStructDecl(
@@ -960,8 +960,8 @@ fabricBuildEnv.SharedLibrary(
                     )
                 )
         else:
-            self.type_mgr.add_type_codecs(
-                build_wrapped_ptr_type_codecs(class_name)
+            self.type_mgr.add_codecs(
+                build_wrapped_ptr_codecs(class_name)
                 )
             self.edk_decls.add(
                 ast.WrappedPtrDecl(

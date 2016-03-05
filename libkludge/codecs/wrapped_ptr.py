@@ -3,7 +3,7 @@ from libkludge.gen_spec import GenStr, GenLambda
 from libkludge.type_spec import SimpleTypeSpec
 from libkludge.cpp_type_expr_parser import *
 
-def build_wrapped_ptr_type_codecs(class_name):
+def build_wrapped_ptr_codecs(class_name):
   class WrappedPtrCodecBase(Codec): pass
   WrappedPtrCodecBase.conv(
     edk_to_cpp = """

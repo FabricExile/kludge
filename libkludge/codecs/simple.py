@@ -1,7 +1,7 @@
 from libkludge.codec import Codec
 from libkludge.gen_spec import GenLambda
 
-def build_simple_type_codecs():
+def build_simple_codecs():
   cpp_base_type_to_kl_base_type = {
     "bool": "Boolean",
     "char": "SInt8",

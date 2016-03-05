@@ -5,7 +5,7 @@ from libkludge.value_name import ValueName
 from libkludge.cpp_type_expr_parser import *
 from libkludge.cpp_type_expr_parser.helpers import *
 
-def build_std_vector_type_codecs():
+def build_std_vector_codecs():
 
   def build_std_vector_type_spec(
     unqual_cpp_type_name,

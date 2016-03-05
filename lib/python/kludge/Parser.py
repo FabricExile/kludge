@@ -965,7 +965,7 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     class_name,
-                    self.type_mgr.get_type_info(class_name).make_codec(ValueName("_SELF")),
+                    self.type_mgr.get_type_info(class_name).make_codec(ValueName("RESERVED_self")),
                     members
                     )
                 )

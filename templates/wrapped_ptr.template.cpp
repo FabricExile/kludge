@@ -36,6 +36,19 @@ FABRIC_EXT_EXPORT
     {{ member.codec.result_direct_return_edk() | indent(4) }}
 }
     
+FABRIC_EXT_EXPORT
+void
+{{ wrapped_ptr.name }}_SET_{{ member.codec.name.kl }}(
+    {{ wrapped_ptr.self.param_edk() | indent(4) }},
+    {{ member.codec.param_edk() | indent(4)}}
+    )
+{
+    {{ member.codec.param_edk_to_cpp_decl() | indent(4) }}
+
+    {{ wrapped_ptr.self.name.edk }}.cpp_ptr->{{ member.codec.name.kl }} =
+        {{ member.codec.param_cpp() }};
+}
+    
     {% endif %}
 {% endfor %}
 

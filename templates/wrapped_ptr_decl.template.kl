@@ -1,13 +1,13 @@
 {% extends "decl.template.kl" %}
 {% block body %}
-struct {{ decl.name }} {
+struct {{ decl.type_name }} {
   private Data cpp_ptr;
 };
 
 {% for member in decl.members %}
   {% if member.is_public %}
-{{ member.codec.type.kl.compound }} {{ decl.name }}.GET_{{ member.codec.name.kl }}() = "{{ decl.name }}_GET_{{ member.codec.name.kl }}";
-{{ decl.name }}.SET_{{ member.codec.name.kl }}({{ member.codec.type.kl.base }} {{ member.codec.name.kl }}{{ member.codec.type.kl.suffix }}) = "{{ decl.name }}_SET_{{ member.codec.name.kl }}";
+{{ member.codec.type.kl.compound }} {{ decl.type_name }}.GET_{{ member.codec.name.kl }}() = "{{ decl.type_name }}_GET_{{ member.codec.name.kl }}";
+{{ decl.type_name }}.SET_{{ member.codec.name.kl }}({{ member.codec.type.kl.base }} {{ member.codec.name.kl }}{{ member.codec.type.kl.suffix }}) = "{{ decl.type_name }}_SET_{{ member.codec.name.kl }}";
 
   {% endif %}
 {% endfor %}

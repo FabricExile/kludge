@@ -1,4 +1,4 @@
 {% extends "decl.template.cpp" %}
 {% block body %}
-typedef ::{{ decl.name }} {{ decl.name }};
+typedef ::{{ decl.type_name }} {{ decl.type_name }};
 {% endblock body %}

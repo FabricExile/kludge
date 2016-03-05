@@ -1,14 +1,14 @@
 {% extends "decl.template.cpp" %}
 {% block body %}
-struct {{ decl.name }} {
-  ::{{ decl.name }} *cpp_ptr;
+struct {{ decl.type_name }} {
+  ::{{ decl.type_name }} *cpp_ptr;
 };
 
 {% for member in decl.members %}
     {% if member.is_public %}
 FABRIC_EXT_EXPORT
 {{ member.codec.result_direct_type_edk() }}
-{{ decl.name }}_GET_{{ member.codec.name.kl }}(
+{{ decl.type_name }}_GET_{{ member.codec.name.kl }}(
     {% set indirect_param_edk = member.codec.result_indirect_param_edk() %}
     {% if indirect_param_edk %}
       {{ indirect_param_edk | indent(4) }},
@@ -27,7 +27,7 @@ FABRIC_EXT_EXPORT
     
 FABRIC_EXT_EXPORT
 void
-{{ decl.name }}_SET_{{ member.codec.name.kl }}(
+{{ decl.type_name }}_SET_{{ member.codec.name.kl }}(
     {{ decl.self.param_edk() | indent(4) }},
     {{ member.codec.param_edk() | indent(4)}}
     )

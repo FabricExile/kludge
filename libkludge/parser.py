@@ -950,13 +950,15 @@ fabricBuildEnv.SharedLibrary(
                 build_in_place_struct_codecs(class_name)
                 )
             self.edk_decls.add(
-                ast.InPlaceStructDecl(
+                ast.Wrapping(
                     self.ext_name,
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
                     class_name,
-                    members
+                    self.type_mgr.get_type_info(class_name).make_codec(ValueName("RESERVED_self")),
+                    members,
+                    "in_place_struct_decl",
                     )
                 )
         else:
@@ -964,14 +966,15 @@ fabricBuildEnv.SharedLibrary(
                 build_wrapped_ptr_codecs(class_name)
                 )
             self.edk_decls.add(
-                ast.WrappedPtrDecl(
+                ast.Wrapping(
                     self.ext_name,
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
                     class_name,
                     self.type_mgr.get_type_info(class_name).make_codec(ValueName("RESERVED_self")),
-                    members
+                    members,
+                    "wrapped_ptr_decl",
                     )
                 )
 

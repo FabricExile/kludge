@@ -1,16 +1,7 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// KLUDGE EDK Function
-// {{ func.desc }}
-// {{ func.location }}
-//
-//////////////////////////////////////////////////////////////////////////////
-//
-
-{{ func.result_type_kl() }}
-{{ func.name_kl() }}(
-    {{ func.params_kl() | indent(4) }}
-    ) = "{{ func.name_edk() }}";
-
-//
-//////////////////////////////////////////////////////////////////////////////
+{% extends "decl.template.kl" %}
+{% block body %}
+{{ decl.result_type_kl() }}
+{{ decl.name_kl() }}(
+    {{ decl.params_kl() | indent(4) }}
+    ) = "{{ decl.name_edk() }}";
+{% endblock body %}

@@ -1,3 +1,4 @@
+{% import "macros.cpp" as macros %}
 {% extends "decl.template.cpp" %}
 {% block body %}
 namespace Fabric { namespace EDK { namespace KL {
@@ -47,49 +48,16 @@ void
 
 {% for method in decl.methods %}
 FABRIC_EXT_EXPORT
-{% if method.result_codec %}
-{{ method.result_codec.result_direct_type_edk() }}
-{% else %}
-void
-{% endif %}
+{{ macros.edk_result_type(method.result_codec) }}
 {{ decl.type.kl.compound }}_{{ method.name }}(
-{% if method.result_codec %}
-    {% set indirect_param_edk = method.result_codec.result_indirect_param_edk() %}
-    {% if indirect_param_edk %}
-    {{ indirect_param_edk | indent(4) }},
-    {% endif %}
-{% endif %}
-    {{ decl.self.param_edk() | indent(4) }}
-{% for param in method.params %}
-    , {{ param.param_edk() }}
-{% endfor %}
+    {{ macros.edk_param_list(method.result_codec, decl.self, method.params) | indent(4) }}
     )
 {
-{% if method.result_codec %}
-    {{ method.result_codec.result_indirect_init_edk() | indent(4) }}
-{% endif %}
-
-{% for param in method.params %}
-    {{ param.param_edk_to_cpp_decl() | indent(4) }}
-{% endfor %}
-
-{% if method.result_codec %}
-    {{ method.result_codec.result_decl_and_assign_cpp() | indent(4) }}
-{% endif %}
+    {{ macros.cpp_call_pre(method.result_codec, method.params) | indent(4) }}
         {{ decl.self.name.edk }}.cpp_ptr->{{ method.name }}(
-{% for param in method.params %}
-            {{ param.param_cpp() | indent(12) }}{{ "," if not loop.last else "" }}
-{% endfor %}            
+            {{ macros.cpp_call_args(method.params) | indent(12) }}
             );
-
-{% for param in method.params %}
-    {{ param.param_cpp_to_edk() | indent(4) }}
-{% endfor %}
-
-{% if method.result_codec %}
-    {{ method.result_codec.result_indirect_assign_to_edk() | indent(4) }}
-    {{ method.result_codec.result_direct_return_edk() | indent(4) }}
-{% endif %}
+    {{ macros.cpp_call_post(method.result_codec, method.params) | indent(4) }}
 }
 {% endfor %}
 

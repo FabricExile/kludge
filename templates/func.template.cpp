@@ -1,38 +1,16 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// KLUDGE EDK Function
-// {{ func.desc }}
-// {{ func.location }}
-//
-//////////////////////////////////////////////////////////////////////////////
-//
-
-#include <{{ func.include_filename }}>
-
+{% import "macros.cpp" as macros %}
+{% extends "decl.template.cpp" %}
+{% block body %}
 FABRIC_EXT_EXPORT
-{{ func.result_direct_type_edk() }}
-{{ func.name_edk() }}(
-    {{ func.params_edk() | indent(4) }}
+{{ macros.edk_result_type(decl.result_codec) }}
+{{ decl.name_edk() }}(
+    {{ macros.edk_param_list(decl.result_codec, None, decl.params) | indent(4) }}
     )
 {
-    {{ func.result_indirect_init_edk() | indent(4) }}
-
-{% for param in func.params %}
-    {{ param.param_edk_to_cpp_decl() | indent(4) }}
-{% endfor %}
-
-    {{ func.result_decl_and_assign_cpp() | indent(4) }}
-    {{ func.name_cpp() | indent(4) }}(
-        {{ func.params_cpp() | indent(8) }}
+    {{ macros.cpp_call_pre(decl.result_codec, decl.params) | indent(4) }}
+    {{ decl.name_cpp() | indent(4) }}(
+        {{ macros.cpp_call_args(decl.params) }}
         );
-
-{% for param in func.params %}
-    {{ param.param_cpp_to_edk() | indent(4) }}
-{% endfor %}
-
-    {{ func.result_indirect_assign_to_edk() | indent(4) }}
-    {{ func.result_direct_return_edk() | indent(4) }}
+    {{ macros.cpp_call_post(decl.result_codec, decl.params) | indent(4) }}
 }
-
-//
-//////////////////////////////////////////////////////////////////////////////
+{% endblock body %}

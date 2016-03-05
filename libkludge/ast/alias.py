@@ -12,7 +12,13 @@ class Alias(Decl):
     new_type_spec,
     old_type_spec,
     ):
-    Decl.__init__(self, extname, include_filename, location, desc)
+    Decl.__init__(
+        self,
+        extname,
+        include_filename,
+        location,
+        "Type alias '%s'" % desc
+        )
     self.new_type = new_type_spec
     self.old_type = old_type_spec
 

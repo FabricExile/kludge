@@ -4,4 +4,6 @@ operator entry() {
   Class value;
   report("ReturnClass() = " + ReturnClass());
   report("ReturnClassVec() = " + ReturnClassVec());
+  value = ReturnClass();
+  report("value.intValue = " + value.intValue);
 }

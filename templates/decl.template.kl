@@ -1,19 +1,14 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // KLUDGE EDK WrappedPtr
-// {{ in_place_struct.desc }}
-// {{ in_place_struct.location }}
+// {{ decl.desc }}
+// {{ decl.location }}
 //
 //////////////////////////////////////////////////////////////////////////////
 //
 
-#include <{{ in_place_struct.include_filename }}>
-
-namespace Fabric { namespace EDK { namespace KL {
-
-typedef ::{{ in_place_struct.name }} {{ in_place_struct.name }};
-
-} } }
+{% block body %}
+{% endblock body %}
 
 //
 //////////////////////////////////////////////////////////////////////////////

@@ -9,43 +9,54 @@ class Class {
 public:
 
   Class() {}
-  Class( float x ) : m_x( x ) {}
-  Class( Class const &that ) : m_x( that.m_x ) {}
+  Class( int _intValue, float _floatValue )
+    : intValue( _intValue ), floatValue( _floatValue ) 
+    {}
+  Class( Class const &that )
+    : intValue( that.intValue ), floatValue( that.floatValue )
+    {}
   ~Class() {}
 
-  // Class &operator=( Class const &that )
-  // {
-  //   m_x = that.m_x;
-  //   return *this;
-  // }
+  Class &operator=( Class const &that )
+  {
+    intValue = that.intValue;
+    floatValue = that.floatValue;
+    return *this;
+  }
 
-  float publicMethod() { return m_x; }
+  float publicMethod() { return floatValue; }
 
   std::string getDesc() const {
-    char buf[20];
-    snprintf( buf, 20, "%f", m_x );
+    char buf[256];
+    snprintf( buf, 256, "intValue:%d floatValue:%f", intValue, floatValue );
     return std::string( buf );
   }
 
 protected:
 
-  float protectedMethod() { return m_x; }
+  float protectedMethod() { return floatValue; }
 
 private:
 
-  float privateMethod() { return m_x; }
+  float privateMethod() { return floatValue; }
 
-  float m_x;
+public:
+
+  int intValue;
+
+private:
+
+  float floatValue;
 };
 
 Class ReturnClass() {
-  return Class( 6.74 );
+  return Class( 92, 6.74 );
 }
 
 std::vector<Class> ReturnClassVec() {
   std::vector<Class> result;
-  result.push_back( Class( 3.14 ) );
-  result.push_back( Class( -3.45 ) );
+  result.push_back( Class( 3, 3.14 ) );
+  result.push_back( Class( -14, -3.45 ) );
   return result;
 }
 

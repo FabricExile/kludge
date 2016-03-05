@@ -1,0 +1,9 @@
+{% extends "decl.template.kl" %}
+{% block body %}
+struct {{ decl.name }} {
+{% for member in decl.members %}
+    {{ "public" if member.is_public else "private" }}
+    {{ member.codec.type.kl.base + " " + member.codec.name.kl + member.codec.type.kl.suffix + ";" | indent(4) }}
+{% endfor %}
+};
+{% endblock body %}

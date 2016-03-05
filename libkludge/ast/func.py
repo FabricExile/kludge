@@ -13,7 +13,13 @@ class Func(Decl):
     result_type_info,
     params,
     ):
-    Decl.__init__(self, extname, include_filename, location, desc)
+    Decl.__init__(
+      self,
+      extname,
+      include_filename,
+      location,
+      "Global function '%s'" % desc
+      )
 
     self._nested_function_name = nested_function_name
     if not isinstance(result_type_info.cpp.expr, cpp_type_expr_parser.Void):

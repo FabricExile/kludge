@@ -14,4 +14,5 @@ operator entry() {
   report("After value.SET_stringValue('hello'): value.GET_stringValue() = " + value.GET_stringValue());
 
   report("value.publicMethod() = " + value.publicMethod());
+  report("value.getDesc() = " + value.getDesc());
 }

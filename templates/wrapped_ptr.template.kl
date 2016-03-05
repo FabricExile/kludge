@@ -11,5 +11,12 @@ struct {{ wrapped_ptr.name }} {
   private Data cpp_ptr;
 };
 
+{% for member in wrapped_ptr.members %}
+  {% if member.is_public %}
+{{ member.codec.type.kl.compound }} {{ wrapped_ptr.name }}.GET_{{ member.codec.name.kl }}() = "{{ wrapped_ptr.name }}_GET_{{ member.codec.name.kl }}";
+
+  {% endif %}
+{% endfor %}
+
 //
 //////////////////////////////////////////////////////////////////////////////

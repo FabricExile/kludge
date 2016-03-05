@@ -5,4 +5,5 @@ from kludge.GenSpec import GenSpec, GenStr, GenLambda, GenTmpl, GenFile
 from kludge.TypeCodec import TypeCodec
 from kludge.Value import Value
 from kludge.TypeMgr import TypeMgr
+from kludge.Member import Member
 from kludge.Parser import Parser

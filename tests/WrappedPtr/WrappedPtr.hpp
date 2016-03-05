@@ -9,41 +9,54 @@ class Class {
 public:
 
   Class() {}
-  Class( std::string const &str ) : m_str( str ) {}
-  Class( Class const &that ) : m_str( that.m_str ) {}
+  Class( float pub, std::string const &pri )
+    : m_pub( pub )
+    , m_pri( pri )
+    {}
+  Class( Class const &that )
+    : m_pub( that.m_pub )
+    , m_pri( that.m_pri )
+    {}
   ~Class() {}
 
   Class &operator=( Class const &that )
   {
-    m_str = that.m_str;
+    m_pub = that.m_pub;
+    m_pri = that.m_pri;
     return *this;
   }
 
-  std::string const &publicMethod() { return m_str; }
+  std::string const &publicMethod() { return m_pri; }
 
   std::string getDesc() const {
-    return "str: " + m_str;
+    return "pri: " + m_pri;
   }
 
 protected:
 
-  std::string const &protectedMethod() { return m_str; }
+  std::string const &protectedMethod() { return m_pri; }
 
 private:
 
-  std::string const &privateMethod() { return m_str; }
+  std::string const &privateMethod() { return m_pri; }
 
-  std::string m_str;
+public:
+
+  float m_pub;
+
+private:
+
+  std::string m_pri;
 };
 
 Class ReturnClass() {
-  return Class( "foo" );
+  return Class( 5.61, "foo" );
 }
 
 std::vector<Class> ReturnClassVec() {
   std::vector<Class> result;
-  result.push_back( Class( "bar" ) );
-  result.push_back( Class( "baz" ) );
+  result.push_back( Class( 1.2, "bar" ) );
+  result.push_back( Class( -97.1, "baz" ) );
   return result;
 }
 

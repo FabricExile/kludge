@@ -5,7 +5,7 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-from kludge import GenSpec, TypeMgr, ValueName, clang_wrapper, ast
+from kludge import GenSpec, TypeMgr, ValueName, Member, clang_wrapper, ast
 from kludge.type_codecs import build_wrapped_ptr_type_codecs, build_in_place_struct_type_codecs
 
 class CPPType:
@@ -781,11 +781,11 @@ fabricBuildEnv.SharedLibrary(
 
         class_name = cursor.spelling
 
-        members = []
+        clang_members = []
 
         for child in cursor.get_children():
             if child.kind == CursorKind.FIELD_DECL:
-                members.append(child)
+                clang_members.append(child)
                 continue
 
             if child.access_specifier != AccessSpecifier.PUBLIC:
@@ -931,13 +931,15 @@ fabricBuildEnv.SharedLibrary(
 
                 # kl_type.methods.append(method)
 
-        can_in_place = True
-        for member in members:
-            member_type_info = self.type_mgr.maybe_get_type_info(member.type)
-            if not member_type_info or not member_type_info.is_in_place():
-                can_in_place = False
-                break
+        members = [
+            Member(
+                self.type_mgr.get_type_info(clang_member.type).make_codec(ValueName(clang_member.displayname)),
+                clang_member.access_specifier == AccessSpecifier.PUBLIC
+                )
+            for clang_member in clang_members
+            ]
 
+        can_in_place = all(member and member.codec.is_in_place for member in members)
         if can_in_place:
             self.type_mgr.add_type_codecs(
                 build_in_place_struct_type_codecs(class_name)
@@ -949,10 +951,7 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     class_name,
-                    map(
-                        lambda member: self.type_mgr.get_type_info(member.type).make_codec(ValueName(member.displayname)),
-                        members
-                        )
+                    members
                     )
                 )
         else:
@@ -966,6 +965,8 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     class_name,
+                    self.type_mgr.get_type_info(class_name).make_codec(ValueName("_SELF")),
+                    members
                     )
                 )
 

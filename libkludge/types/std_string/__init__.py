@@ -20,11 +20,11 @@ class StdStringTypeCodec(TypeCodec):
         )
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
-    tds["conv"]["edk_to_lib"] = "types/builtin/std_string/conv"
-    tds["conv"]["lib_to_edk"] = "types/builtin/std_string/conv"
-    return tds
+  def build_codec_lookup_rules(self):
+    rules = TypeCodec.build_codec_lookup_rules(self)
+    rules["conv"]["edk_to_lib"] = "types/builtin/std_string/conv"
+    rules["conv"]["lib_to_edk"] = "types/builtin/std_string/conv"
+    return rules
 
 class StdStringSelector(Selector):
 

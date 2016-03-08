@@ -19,8 +19,8 @@ class StdMapTypeCodec(TypeCodec):
       [key_dqtc, value_dqtc]
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
+  def build_codec_lookup_rules(self):
+    tds = TypeCodec.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/std_map/conv"
     return tds
 

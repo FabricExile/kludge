@@ -18,8 +18,8 @@ class InPlaceStructTypeCodec(TypeCodec):
         )
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
+  def build_codec_lookup_rules(self):
+    tds = TypeCodec.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["result"]["decl_and_assign_lib"] = "types/builtin/in_place_struct/result"
     tds["result"]["indirect_lib_to_edk"] = "types/builtin/in_place_struct/result"

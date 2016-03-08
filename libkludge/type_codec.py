@@ -15,9 +15,9 @@ class TypeCodec:
     self.jinjenv = jinjenv
     self.type_info = type_info
     self.child_dqtcs = child_dqtcs
-    self._type_dir_spec = None
+    self._codec_lookup_rules = None
 
-  def build_type_dir_spec(self):
+  def build_codec_lookup_rules(self):
     return {
       "conv": {"*": "protocols/conv/builtin/default"},
       "result": {"*": "protocols/result/builtin/indirect"},
@@ -26,9 +26,9 @@ class TypeCodec:
       }
 
   def _resolve_proto_dir(self, proto, obj):
-    if not self._type_dir_spec:
-      self._type_dir_spec = self.build_type_dir_spec()
-    proto_dict = self._type_dir_spec.get(proto)
+    if not self._codec_lookup_rules:
+      self._codec_lookup_rules = self.build_codec_lookup_rules()
+    proto_dict = self._codec_lookup_rules.get(proto)
     if proto_dict:
       obj_dir = proto_dict.get(obj)
       if obj_dir:
@@ -36,7 +36,7 @@ class TypeCodec:
       default_obj_dir = proto_dict.get("*")
       if default_obj_dir:
         return default_obj_dir
-    raise Exception("Unable to resolve proto='%s', obj='%s' in type_dir_spec = '%s'" % (proto, obj, str(self._type_dir_spec)))
+    raise Exception("Unable to resolve proto='%s', obj='%s' in codec_lookup_rules = '%s'" % (proto, obj, str(self._codec_lookup_rules)))
 
   def _render(self, proto, obj, lang, env):
     template_path = "%s/%s.%s" % (self._resolve_proto_dir(proto, obj), obj, lang)

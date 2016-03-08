@@ -23,10 +23,10 @@ class StdVectorTypeCodec(TypeCodec):
       [element_dqtc]
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
-    tds["conv"]["*"] = "types/builtin/std_vector/conv"
-    return tds
+  def build_codec_lookup_rules(self):
+    rules = TypeCodec.build_codec_lookup_rules(self)
+    rules["conv"]["*"] = "types/builtin/std_vector/conv"
+    return rules
 
 class StdVectorSelector(Selector):
 

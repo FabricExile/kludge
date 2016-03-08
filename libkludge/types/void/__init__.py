@@ -21,8 +21,8 @@ class VoidTypeCodec(TypeCodec):
         )
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
+  def build_codec_lookup_rules(self):
+    tds = TypeCodec.build_codec_lookup_rules(self)
     tds["result"]["*"] = "types/builtin/void/result"
     return tds
 

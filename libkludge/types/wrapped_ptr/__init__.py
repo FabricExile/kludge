@@ -22,11 +22,11 @@ class WrappedPtrTypeCodec(TypeCodec):
         )
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
-    tds["conv"]["*"] = "types/builtin/wrapped_ptr/conv"
-    tds["result"]["indirect_init_edk"] = "types/builtin/wrapped_ptr/result"
-    return tds    
+  def build_codec_lookup_rules(self):
+    rules = TypeCodec.build_codec_lookup_rules(self)
+    rules["conv"]["*"] = "types/builtin/wrapped_ptr/conv"
+    rules["result"]["indirect_init_edk"] = "types/builtin/wrapped_ptr/result"
+    return rules
 
 class WrappedPtrSelector(Selector):
 

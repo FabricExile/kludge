@@ -19,8 +19,8 @@ class SimpleTypeCodec(TypeCodec):
         )
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
+  def build_codec_lookup_rules(self):
+    tds = TypeCodec.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["result"]["*"] = "protocols/result/builtin/direct"
     return tds

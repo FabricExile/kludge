@@ -16,8 +16,8 @@ class CStringTypeCodec(TypeCodec):
         )
       )
 
-  def build_type_dir_spec(self):
-    tds = TypeCodec.build_type_dir_spec(self)
+  def build_codec_lookup_rules(self):
+    tds = TypeCodec.build_codec_lookup_rules(self)
     tds["conv"]["edk_to_lib"] = "types/builtin/c_string/conv"
     tds["conv"]["lib_to_edk"] = "types/builtin/c_string/conv"
     return tds

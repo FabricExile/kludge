@@ -1,0 +1,23 @@
+{######################################################################}
+{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
+{######################################################################}
+
+{% extends "ast/builtin/decl.template.kl" %}
+{% block body %}
+struct {{decl.this_type_info.kl.name.compound}} {
+  {% for member in decl.members %}
+    {{"public" if member.is_public else "private"}}
+    {{member.type_info.kl.name.base}} {{member.name}}{{member.type_info.kl.name.suffix}};
+  {% endfor %}
+};
+
+  {% for method in decl.methods %}
+{{method.result.type_info.kl.name.compound}}
+{{decl.this_type_info.kl.name.compound}}.{{method.name}}(
+    {% for param in method.params %}
+    {{ param.render_kl()}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{decl.this_type_info.kl.name.compound}}_{{method.name}}";
+
+  {% endfor %}
+{% endblock body %}

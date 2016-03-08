@@ -1,77 +1,51 @@
-from codecs import *
+#
+# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+#
+
+from types import *
 import cpp_type_expr_parser
-from type_spec import CPPTypeSpec, TypeSpec, SimpleTypeSpec
 from value_name import ValueName
 from type_info import TypeInfo
+from dir_qual_type_codec import DirQualTypeCodec
+from param_codec import ParamCodec
 import clang.cindex
+from cpp_type_expr_parser import Named
 
 class TypeMgr:
 
-  def __init__(self):
-    self._codecs = []
+  def __init__(self, jinjenv):
+    self._selectors = []
 
-    self._alias_new_type_specs = []
-    self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
+    self._alias_name_to_expr = {}
 
-    self._cpp_type_name_to_type_info = {}
-    self._cpp_type_expr_parser = cpp_type_expr_parser.Parser(self._alias_new_cpp_type_name_to_old_cpp_type_expr)
+    self._cpp_type_name_to_dqtc = {}
+    self._cpp_type_expr_parser = cpp_type_expr_parser.Parser(self._alias_name_to_expr)
 
-    # 'void' must be explcitly checked for by clients.  This is just hear to
-    # make sure that 'void' can be looked up
-    self.add_type_info(
-      'void',
-      TypeInfo(
-        None,
-        SimpleTypeSpec(
-          '',
-          'void',
-          cpp_type_expr_parser.Void()
-          )
-        )
-      )
+    # Order is very important here!
+    self.add_selector(VoidSelector(jinjenv))
+    self.add_selector(CStringSelector(jinjenv))  # must come before Simple so it matches char const *
+    self.add_selector(VoidPtrSelector(jinjenv))
+    self.add_selector(SimpleSelector(jinjenv))
+    self.add_selector(StdStringSelector(jinjenv))
+    self.add_selector(StdVectorSelector(jinjenv))
+    self.add_selector(StdMapSelector(jinjenv))
 
-    # First so we don't catch in Simple...
-    self.add_codecs(
-      build_c_string_codecs()
-      )
-    self.add_codecs(
-      build_void_ptr_codecs()
-      )
-    self.add_codecs(
-      build_simple_codecs()
-      )
-    self.add_codecs(
-      build_std_string_codecs()
-      )
-    self.add_codecs(
-      build_std_vector_codecs()
-      )
-    self.add_codecs(
-      build_std_map_codecs()
-      )
+  def add_selector(self, codec):
+    self._selectors.append(codec)
 
-  def add_codec(self, codec):
-    self._codecs.append(codec)
-
-  def add_codecs(self, codecs):
-    for codec in codecs:
-      self.add_codec(codec)
-
-  def add_type_info(self, cpp_type_name, type_info):
-    self._cpp_type_name_to_type_info[cpp_type_name] = type_info
+  def add_dqtc(self, cpp_type_name, dqtc):
+    self._cpp_type_name_to_dqtc[cpp_type_name] = dqtc
 
   def add_type_alias(self, new_cpp_type_name, old_cpp_type_name):
-    old_type_info = self.maybe_get_type_info(old_cpp_type_name)
-    if old_type_info:
-      new_cpp_type_expr = cpp_type_expr_parser.Named(new_cpp_type_name)
-      new_type_spec = SimpleTypeSpec(
-        new_cpp_type_name,
-        new_cpp_type_name,
-        new_cpp_type_expr,
+    old_dqtc = self.maybe_get_dqtc(old_cpp_type_name)
+    if old_dqtc:
+      old_type_info = old_dqtc.type_info
+      new_type_info = TypeInfo(
+        lib_expr = Named(new_cpp_type_name),
+        name = new_cpp_type_name,
         )
-      self._alias_new_type_specs.append(new_type_spec)
-      self._alias_new_cpp_type_name_to_old_cpp_type_expr[new_type_spec.cpp.name] = old_type_info
-      return new_type_spec, old_type_info._spec
+      self._alias_name_to_expr[new_cpp_type_name] = old_type_info.lib.expr
+      return new_type_info, old_type_info
     else:
       return None, None
 
@@ -90,47 +64,39 @@ class TypeMgr:
       raise Exception("unexpected argument type")
     return cpp_type_name, cpp_type_expr
 
-  def maybe_get_type_info(self, value):
-    if hasattr(value, '__iter__'):
-      result = []
-      for v in value:
-        r = self.maybe_get_type_info(v)
-        if not r:
-          return None
-        result.append(r)
-      return result
-    else:
-      cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
-      if not cpp_type_name:
-        return None
+  def maybe_get_dqtc(self, value):
+    cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
+    if not cpp_type_name:
+      return None
 
-      type_info = self._cpp_type_name_to_type_info.get(cpp_type_name, None)
-      if type_info:
-        return type_info
+    dqtc = self._cpp_type_name_to_dqtc.get(cpp_type_name)
+    if dqtc:
+      return dqtc
 
-      if not cpp_type_expr:
-        try:
-          cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
-        except:
-          raise Exception(cpp_type_name + ": malformed C++ type expression")
+    if not cpp_type_expr:
+      try:
+        cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
+      except Exception as e:
+        raise Exception(cpp_type_name + ": malformed C++ type expression (%s)" % str(e))
 
-      for codec in self._codecs:
-        type_spec = codec.maybe_match(cpp_type_expr, self)
-        if type_spec:
-          type_info = TypeInfo(codec, type_spec)
-          self.add_type_info(cpp_type_name, type_info)
-          return type_info
+    undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
 
-  def get_type_info(self, value):
-    type_info = self.maybe_get_type_info(value)
-    if type_info:
-      return type_info
+    for selector in self._selectors:
+      dqtc = selector.maybe_create_dqtc(self, cpp_type_expr)
+      if dqtc:
+        self.add_dqtc(cpp_type_name, dqtc)
+        return dqtc
+
+  def get_dqtc(self, value):
+    dqtc = self.maybe_get_dqtc(value)
+    if dqtc:
+      return dqtc
 
     cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
     raise Exception(cpp_type_name + ": no EDK type association found")
 
   def convert_clang_params(self, clang_params):
     def mapper(clang_param):
-      type_info = self.get_type_info(clang_param.clang_type)
-      return type_info.make_codec(ValueName(clang_param.name))
+      dqtc = self.get_dqtc(clang_param.clang_type)
+      return ParamCodec(dqtc, clang_param.name)
     return map(mapper, clang_params)

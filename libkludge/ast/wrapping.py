@@ -1,5 +1,6 @@
 from decl import Decl
-from libkludge.value_name import ValueName
+from libkludge.value_name import this_cpp_value_name
+from libkludge.this_codec import ThisCodec
 
 class Wrapping(Decl):
   def __init__(
@@ -8,8 +9,7 @@ class Wrapping(Decl):
     include_filename,
     location,
     desc,
-    type_mgr,
-    self_type_name,
+    this_type_codec,
     members,
     methods,
     template_basename,
@@ -21,9 +21,10 @@ class Wrapping(Decl):
         location,
         desc,
         )
-    self.self_type_name = type_mgr.get_type_info(self_type_name)
-    self.self_codec_const = type_mgr.get_type_info(self_type_name + " const &").make_codec(ValueName("RESERVED_self"))
-    self.self_codec_mutable = type_mgr.get_type_info(self_type_name + " &").make_codec(ValueName("RESERVED_self"))
+    self.this_value_name = this_cpp_value_name
+    self.this_type_info = this_type_codec.type_info
+    self.const_this = ThisCodec(this_type_codec, False)
+    self.mutable_this = ThisCodec(this_type_codec, True)
     self.members = members
     self.methods = methods
     self._template_basename = template_basename

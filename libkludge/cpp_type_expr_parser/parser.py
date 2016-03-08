@@ -4,12 +4,12 @@ from pyparsing import *
 class Parser:
 
   def _build_named(self, name):
-    type_info = self._alias_map.get(name)
-    if type_info:
-      return type_info.cpp.expr
+    expr = self._alias_name_to_expr.get(name)
+    if expr:
+      return expr
     return Named(name)
 
-  def __init__(self, alias_map):
+  def __init__(self, alias_name_to_expr):
     self.tok_ast = Literal("*").suppress()
     self.tok_amp = Literal("&").suppress()
     self.tok_colon_colon = Literal("::").suppress()
@@ -37,7 +37,7 @@ class Parser:
       Word(alphas+"_", alphanums+"_"),
       ]).setParseAction(lambda s,l,t: self._build_named(t[0]))
 
-    self._alias_map = alias_map
+    self._alias_name_to_expr = alias_name_to_expr
 
     self.ty_void = self.key_void.setParseAction(lambda s,l,t: Void())
     self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: Bool())

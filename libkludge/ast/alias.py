@@ -9,8 +9,8 @@ class Alias(Decl):
     include_filename,
     location,
     desc,
-    new_type_spec,
-    old_type_spec,
+    new_type_info,
+    old_type_info,
     ):
     Decl.__init__(
         self,
@@ -19,8 +19,8 @@ class Alias(Decl):
         location,
         "Type alias '%s'" % desc
         )
-    self.new_type = new_type_spec
-    self.old_type = old_type_spec
+    self.new_type_info = new_type_info
+    self.old_type_info = old_type_info
 
   def jinja_stream(self, jinjenv, lang):
-    return jinjenv.get_template('alias.template.' + lang).stream(alias = self)
+    return jinjenv.get_template('ast/builtin/alias.template.' + lang).stream(decl = self)

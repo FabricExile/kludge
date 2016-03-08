@@ -1,0 +1,30 @@
+{######################################################################}
+{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
+{######################################################################}
+
+{% extends "ast/builtin/decl.template.kl" %}
+{% block body %}
+struct {{decl.this_type_info.kl.name.compound}} {
+  private Data cpp_ptr;
+};
+
+  {% for member in decl.members %}
+    {% if member.is_public %}
+{{member.result.type_info.kl.name.compound}} {{decl.this_type_info.kl.name.compound}}.GET_{{member.name}}() = "{{decl.this_type_info.kl.name.compound}}_GET_{{member.name}}";
+{{decl.this_type_info.kl.name.compound}}.SET_{{member.name}}!({{member.param.type_info.kl.name.base}} {{member.name}}{{member.param.type_info.kl.name.suffix}}) = "{{decl.this_type_info.kl.name.compound}}_SET_{{member.name}}";
+
+    {% endif %}
+  {% endfor %}
+
+  {% for method in decl.methods %}
+    {% if method.result %}
+{{method.result.type_info.kl.name.compound}}
+    {% endif %}
+{{decl.this_type_info.kl.name.compound}}.{{method.name}}(
+    {% for param in method.params %}
+    {{param.render_kl()}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{decl.this_type_info.kl.name.compound}}_{{method.name}}";
+
+  {% endfor %}
+{% endblock body %}

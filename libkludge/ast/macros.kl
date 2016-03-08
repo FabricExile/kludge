@@ -1,0 +1,5 @@
+{% macro kl_param_list(params) %}
+  {% for param in params %}
+{{param.render_kl()}}{{"," if not loop.last else ""}}
+  {% endfor %}
+{% endmacro %}

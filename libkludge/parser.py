@@ -7,12 +7,11 @@ from kl2edk import KLStruct, Method, KLParam, TypesManager
 
 import clang_wrapper
 import ast
-from gen_spec import GenSpec
 from type_mgr import TypeMgr
 from value_name import ValueName
 from member import Member
 from instance_method import InstanceMethod
-from codecs import build_wrapped_ptr_codecs, build_in_place_struct_codecs
+from types import InPlaceStructSelector, WrappedPtrSelector
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -114,11 +113,31 @@ class Parser:
         self.jinjenv = jinja2.Environment(
             trim_blocks=True,
             lstrip_blocks=True,
-            loader=jinja2.PackageLoader('__main__', 'templates'),
+            loader=jinja2.PrefixLoader({
+                "protocols": jinja2.PrefixLoader({
+                    "conv": jinja2.PrefixLoader({
+                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/conv'),
+                        }),
+                    "result": jinja2.PrefixLoader({
+                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/result'),
+                        }),
+                    "param": jinja2.PrefixLoader({
+                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/param'),
+                        }),
+                    "self": jinja2.PrefixLoader({
+                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/self'),
+                        }),
+                    }),
+                "types": jinja2.PrefixLoader({
+                    "builtin": jinja2.PackageLoader('__main__', 'libkludge/types'),
+                    }),
+                "ast": jinja2.PrefixLoader({
+                    "builtin": jinja2.PackageLoader('__main__', 'libkludge/ast'),
+                    }),
+                }),
             undefined = jinja2.StrictUndefined,
             )
-        GenSpec.jinjenv = self.jinjenv
-        self.type_mgr = TypeMgr()
+        self.type_mgr = TypeMgr(self.jinjenv)
         self.edk_decls = ast.DeclSet()
 
     def init(self, ext_name, clang_opts):
@@ -948,51 +967,50 @@ fabricBuildEnv.SharedLibrary(
 
         members = [
             Member(
-                self.type_mgr.get_type_info(clang_member.type).make_codec(ValueName(clang_member.displayname)),
-                clang_member.access_specifier == AccessSpecifier.PUBLIC
+                self.type_mgr.get_dqtc(clang_member.type).type_codec,
+                clang_member.displayname,
+                clang_member.access_specifier == AccessSpecifier.PUBLIC,
                 )
             for clang_member in clang_members
             ]
 
+        can_in_place = all(member and member.type.is_in_place for member in members)
+        if can_in_place:
+            self.type_mgr.add_selector(InPlaceStructSelector(self.jinjenv, class_name))
+        else:
+            self.type_mgr.add_selector(WrappedPtrSelector(self.jinjenv, class_name))
+
+        this_type_codec = self.type_mgr.get_dqtc(class_name).type_codec
+
         instance_methods = [
-            InstanceMethod(self.type_mgr, clang_instance_method)
+            InstanceMethod(self.type_mgr, this_type_codec, clang_instance_method)
             for clang_instance_method in clang_instance_methods
             ]
 
-        can_in_place = all(member and member.codec.is_in_place for member in members)
         if can_in_place:
-            self.type_mgr.add_codecs(
-                build_in_place_struct_codecs(class_name)
-                )
-            self_type_info = self.type_mgr.get_type_info("const " + class_name + " &")
             self.edk_decls.add(
                 ast.Wrapping(
                     self.ext_name,
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    self.type_mgr,
-                    class_name,
+                    this_type_codec,
                     members,
                     instance_methods,
-                    "in_place_struct_decl",
+                    "ast/builtin/in_place_struct_decl",
                     )
                 )
         else:
-            self.type_mgr.add_codecs(
-                build_wrapped_ptr_codecs(class_name)
-                )
             self.edk_decls.add(
                 ast.Wrapping(
                     self.ext_name,
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    self.type_mgr,
-                    class_name,
+                    this_type_codec,
                     members,
                     instance_methods,
-                    "wrapped_ptr_decl",
+                    "ast/builtin/wrapped_ptr_decl",
                     )
                 )
 
@@ -1006,16 +1024,16 @@ fabricBuildEnv.SharedLibrary(
         new_cpp_type_name = cursor.type.spelling
         old_cpp_type_name = cursor.underlying_typedef_type.spelling
         print "%sTYPEDEF_DECL %s -> %s" % (indent, new_cpp_type_name, old_cpp_type_name)
-        new_type_spec, old_type_spec = self.type_mgr.add_type_alias(new_cpp_type_name, old_cpp_type_name)
-        if new_type_spec and old_type_spec:
+        new_type_info, old_type_info = self.type_mgr.add_type_alias(new_cpp_type_name, old_cpp_type_name)
+        if new_type_info and old_type_info:
             self.edk_decls.add(
                 ast.Alias(
                     self.ext_name,
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    new_type_spec,
-                    old_type_spec,
+                    new_type_info,
+                    old_type_info,
                     )
                 )
 
@@ -1042,7 +1060,7 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     self.get_nested_name(cursor),
-                    self.type_mgr.get_type_info(cursor.result_type),
+                    self.type_mgr.get_dqtc(cursor.result_type),
                     self.type_mgr.convert_clang_params(clang_params),
                     )
                 )
@@ -1181,7 +1199,7 @@ fabricBuildEnv.SharedLibrary(
             self.output_cpp(kl_type, snippets['cpp'])
 
     def jinja_stream(self, lang):
-        return self.jinjenv.get_template("template." + lang).stream(
+        return self.jinjenv.get_template("ast/builtin/template." + lang).stream(
             ext_name = self.ext_name,
             gen_decl_streams = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),
             )

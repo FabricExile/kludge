@@ -1,4 +1,4 @@
-import jinja2, os, sys, optparse
+import jinja2, os, sys, optparse, json
 
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
@@ -12,6 +12,7 @@ from value_name import ValueName
 from member import Member
 from instance_method import InstanceMethod
 from types import InPlaceStructSelector, WrappedPtrSelector
+from config import *
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -88,73 +89,22 @@ class Parser:
     }
 
     def __init__(self):
-        self.clang_args = [
-            '-x',
-            'c++',
-        ]
-
-        self.classes = {}
-        self.symbol_names = set()
-
-        self.wrapper_templates = {}
-        self.kl_type_mappings = {
-            'float': KLTypeMapping('Float32', 'float'),
-            }
-        self.skip_methods = []
-        self.cpp_ext_header_pre = ""
-        self.cpp_ext_header_post = ""
-    	self.cpp_enter = ""
-        self.cpp_leave = ""
-
-        self.known_types = set(['Data', 'String'])
-        for t in Parser.basic_type_map:
-            self.known_types.add(Parser.basic_type_map[t])
-
-        self.jinjenv = jinja2.Environment(
-            trim_blocks=True,
-            lstrip_blocks=True,
-            loader=jinja2.PrefixLoader({
-                "protocols": jinja2.PrefixLoader({
-                    "conv": jinja2.PrefixLoader({
-                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/conv'),
-                        }),
-                    "result": jinja2.PrefixLoader({
-                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/result'),
-                        }),
-                    "param": jinja2.PrefixLoader({
-                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/param'),
-                        }),
-                    "self": jinja2.PrefixLoader({
-                        "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/self'),
-                        }),
-                    }),
-                "types": jinja2.PrefixLoader({
-                    "builtin": jinja2.PackageLoader('__main__', 'libkludge/types'),
-                    }),
-                "ast": jinja2.PrefixLoader({
-                    "builtin": jinja2.PackageLoader('__main__', 'libkludge/ast'),
-                    }),
-                }),
-            undefined = jinja2.StrictUndefined,
-            )
-        self.type_mgr = TypeMgr(self.jinjenv)
         self.edk_decls = ast.DeclSet()
 
-    def init(self, ext_name, clang_opts):
-        self.ext_name = ext_name
-        self.types_manager = TypesManager(ext_name)
-        self.clang_args.extend(clang_opts)
-
     def main(self):
+        self.config = create_default_config()
+
         try:
             opt_parser = optparse.OptionParser(
-                usage="%prog [options] <EXTNAME> <input.h> [<input2.h> ...]",
+                usage="""
+%prog [options] <EXTNAME> [<input1.h> <input2.h> ...]
+OR %prog -c <config file>""",
                 description="KLUDGE: C++-to-KL wrap-o-matic",
                 )
             opt_parser.add_option(
                 '-o', '--outdir',
                 action='store',
-                default='.',
+                default=self.config['outdir'],
                 dest='outdir',
                 metavar='OUTDIR',
                 help="output directory",
@@ -162,43 +112,82 @@ class Parser:
             opt_parser.add_option(
                 '-b', '--basename',
                 action='store',
-                default='',
+                default=self.config['basename'],
                 dest='basename',
                 metavar='BASENAME',
                 help="output OUTDIR/BASENAME.{kl,cpp} (defaults to EXTNAME)",
                 )
             opt_parser.add_option(
-                '-p', '--pass',
+                '--clang_opt',
                 action='append',
                 dest='clang_opts',
                 metavar='CLANGOPT',
-                help="pass option to clang++ (can be used multiple times)",
+                help="pass additional option to clang++ (can be used multiple times)",
+                )
+            opt_parser.add_option(
+                '-c', '--config',
+                action='store',
+                default='',
+                dest='config',
+                metavar='CONFIG.json',
+                help="load options from CONFIG in JSON format",
                 )
             (opts, args) = opt_parser.parse_args()
-            if len(args) < 2:
-                raise Exception("At least one input file is required")
         except Exception as e:
             print "Error: %s" % str(e)
             print "Run '%s --help' for usage" % sys.argv[0]
             sys.exit(1)
 
-        extname = args[0]
+        if opts.config:
+            with open(opts.config) as fh:
+                 self.config = json.load(fh)
+
+        if len(args) > 0:
+            self.config['extname'] = args[0]
+            for i in range(1, len(args)):
+                self.config['infiles'].append(args[i])
+
         if len(opts.basename) > 0:
-            basename = opts.basename
-        else:
-            basename = extname
+            self.config['basename'] = opts.basename
 
-        if not opts.clang_opts:
-            opts.clang_opts = []
+        if opts.clang_opts:
+            self.config["clang_opts"].extend(opts.clang_opts)
 
-        self.init(extname, opts.clang_opts)
-        for i in range(1, len(args)):
-            self.parse(args[i])
-        self.output(
-            os.path.join(opts.outdir, basename + '.kl'),
-            os.path.join(opts.outdir, basename + '.cpp'),
+        if opts.outdir:
+            self.config['outdir'] = opts.outdir
+
+        if not self.config['extname']:
+            print "Usage error: You must specify the extension name"
+            print "Use --help for detailed usage information"
+            return
+        if not self.config['infiles']:
+            print "Usage error: You must provide at least one input file"
+            print "Use --help for detailed usage information"
+            return
+        if not 'basename' in self.config:
+            self.config['basename'] = self.config['extname']
+
+        print "Using configuration:"
+        json.dump(
+            self.config,
+            sys.stdout,
+            sort_keys=True,
+            indent=2,
+            separators=(',', ': '),
             )
-        with open(os.path.join(opts.outdir, 'SConstruct'), "w") as fh:
+        sys.stdout.write("\n")
+
+        self.jinjenv = create_jinjenv(self.config)
+        self.type_mgr = TypeMgr(self.jinjenv)
+
+        for infile in self.config['infiles']:
+            self.parse(infile)
+
+        self.output(
+            os.path.join(self.config['outdir'], self.config['basename'] + '.kl'),
+            os.path.join(self.config['outdir'], self.config['basename'] + '.cpp'),
+            )
+        with open(os.path.join(self.config['outdir'], 'SConstruct'), "w") as fh:
             fh.write("""
 #
 # Copyright 2010-2015 Fabric Software Inc. All rights reserved.
@@ -225,8 +214,8 @@ fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),
   [basename + '.cpp']
   )
-""" % (extname, basename))
-        with open(os.path.join(opts.outdir, extname+'.fpm.json'), "w") as fh:
+""" % (self.config['extname'], self.config['basename']))
+        with open(os.path.join(opts.outdir, self.config['extname']+'.fpm.json'), "w") as fh:
             fh.write("""
 {
 "libs": "%s",
@@ -234,7 +223,7 @@ fabricBuildEnv.SharedLibrary(
 "actual.kl"
 ],
 }
-""" % extname)
+""" % self.config['extname'])
 
     # def get_kl_type(self, clang_type):
     #     canon_type = clang_type.get_canonical()
@@ -414,7 +403,7 @@ fabricBuildEnv.SharedLibrary(
             method_name = kl_class_name + '__ge'
         elif method_name == '>':
             method_name = kl_class_name + '__gt'
-        symbol_name = self.ext_name + '_' + method_name.replace('.', '_')
+        symbol_name = self.config['extname'] + '_' + method_name.replace('.', '_')
         if symbol_name in self.symbol_names:
             try_name = symbol_name
             i = 0
@@ -996,7 +985,7 @@ fabricBuildEnv.SharedLibrary(
         if can_in_place:
             self.edk_decls.add(
                 ast.Wrapping(
-                    self.ext_name,
+                    self.config['extname'],
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
@@ -1009,7 +998,7 @@ fabricBuildEnv.SharedLibrary(
         else:
             self.edk_decls.add(
                 ast.Wrapping(
-                    self.ext_name,
+                    self.config['extname'],
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
@@ -1034,7 +1023,7 @@ fabricBuildEnv.SharedLibrary(
         if new_type_info and old_type_info:
             self.edk_decls.add(
                 ast.Alias(
-                    self.ext_name,
+                    self.config['extname'],
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
@@ -1061,7 +1050,7 @@ fabricBuildEnv.SharedLibrary(
 
             self.edk_decls.add(
                 ast.Func(
-                    self.ext_name,
+                    self.config['extname'],
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
@@ -1110,7 +1099,7 @@ fabricBuildEnv.SharedLibrary(
         clang_index = clang.cindex.Index.create()
         unit = clang_index.parse(
             unit_filename,
-            self.clang_args,
+            self.config['clang_opts'],
             None,
             clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
             # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
@@ -1208,7 +1197,7 @@ fabricBuildEnv.SharedLibrary(
 
     def jinja_stream(self, lang):
         return self.jinjenv.get_template("ast/builtin/template." + lang).stream(
-            ext_name = self.ext_name,
+            ext_name = self.config['extname'],
             gen_decl_streams = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),
             )
     
@@ -1217,24 +1206,24 @@ fabricBuildEnv.SharedLibrary(
         output_kl_filename,
         output_cpp_filename,
         ):
-        # prune types without full definitions
-        for kl_type_name in self.types_manager.types:
-            kl_struct = self.types_manager.types[kl_type_name]
-            methods = []
-            for m in kl_struct.methods:
-                remove = False
-                for p in m.params:
-                    if not p.kl_type_name in self.known_types:
-                        remove = True
+        # # prune types without full definitions
+        # for kl_type_name in self.types_manager.types:
+        #     kl_struct = self.types_manager.types[kl_type_name]
+        #     methods = []
+        #     for m in kl_struct.methods:
+        #         remove = False
+        #         for p in m.params:
+        #             if not p.kl_type_name in self.known_types:
+        #                 remove = True
 
-                if m.ret_type_name and not m.ret_type_name.replace(
-                    '[]', '') in self.known_types:
-                    remove = True
+        #         if m.ret_type_name and not m.ret_type_name.replace(
+        #             '[]', '') in self.known_types:
+        #             remove = True
 
-                if not remove:
-                    methods.append(m)
+        #         if not remove:
+        #             methods.append(m)
 
-            kl_struct.methods = methods
+        #     kl_struct.methods = methods
 
         self.jinja_stream('kl').dump(output_kl_filename)
         self.jinja_stream('cpp').dump(output_cpp_filename)

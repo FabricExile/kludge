@@ -51,15 +51,32 @@ class Type:
       return copy
 
   def get_desc(self):
-    result = self.get_unqualified_desc()
+    lhs, rhs = self.build_desc()
+    return lhs + rhs
+
+  @staticmethod
+  def maybe_bracket_desc(lhs, rhs):
+    if rhs and not rhs.startswith(")"):
+      lhs = lhs + "("
+      rhs = ")" + rhs
+    return lhs, rhs
+
+  def build_desc(self):
+    lhs, rhs = self.build_unqualified_desc()
     if self.is_const:
-      result += " const"
+      lhs, rhs = self.maybe_bracket_desc(lhs, rhs)
+      if lhs and not lhs.endswith(" "):
+        lhs += " "
+      lhs += "const"
     if self.is_volatile:
-      result += " volatile"
-    return result
+      lhs, rhs = self.maybe_bracket_desc(lhs, rhs)
+      if lhs and not lhs.endswith(" "):
+        lhs += " "
+      lhs += "volatile"
+    return lhs, rhs
 
   @abc.abstractmethod
-  def get_unqualified_desc(self):
+  def build_unqualified_desc(self):
     pass
 
   def get_undq_type_expr_and_dq(self):
@@ -102,8 +119,8 @@ class Void(Direct):
   def __init__(self):
     Direct.__init__(self)
 
-  def get_unqualified_desc(self):
-    return "void"
+  def build_unqualified_desc(self):
+    return "void", ""
 
   def __copy__(self):
     return Void()
@@ -113,8 +130,8 @@ class Bool(Direct):
   def __init__(self):
     Direct.__init__(self)
 
-  def get_unqualified_desc(self):
-    return "bool"
+  def build_unqualified_desc(self):
+    return "bool", ""
 
   def __copy__(self):
     return Bool()
@@ -138,12 +155,11 @@ class Integer(Numeric):
     self.is_signed = True
     return self
 
-  def get_unqualified_desc(self):
-    result = ""
+  def build_unqualified_desc(self):
     if not self.is_signed:
-      result = "unsigned "
-    result += self.get_signed_desc()
-    return result
+      return "unsigned " + self.get_signed_desc(), ""
+    else:
+      return self.get_signed_desc(), ""
 
   @abc.abstractmethod
   def get_signed_desc(self):
@@ -218,8 +234,8 @@ class Float(FloatingPoint):
   def __init__(self):
     FloatingPoint.__init__(self)
 
-  def get_unqualified_desc(self):
-    return "float"
+  def build_unqualified_desc(self):
+    return "float", ""
 
   def __copy__(self):
     return Float()
@@ -229,8 +245,8 @@ class Double(FloatingPoint):
   def __init__(self):
     FloatingPoint.__init__(self)
 
-  def get_unqualified_desc(self):
-    return "double"
+  def build_unqualified_desc(self):
+    return "double", ""
 
   def __copy__(self):
     return Double()
@@ -241,8 +257,8 @@ class Named(Direct):
     Direct.__init__(self)
     self.name = name
 
-  def get_unqualified_desc(self):
-    return self.name
+  def build_unqualified_desc(self):
+    return self.name, ""
 
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
@@ -258,8 +274,10 @@ class FixedArrayOf(Direct):
     self.element = element
     self.size = size
 
-  def get_unqualified_desc(self):
-    return "%s[%u]" % (self.element.get_desc(), self.size)
+  def build_unqualified_desc(self):
+    lhs, rhs = self.element.build_desc()
+    rhs = "[%u]%s" % (self.size, rhs)
+    return lhs, rhs
 
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
@@ -276,11 +294,12 @@ class Template(Direct):
     self.name = name
     self.params = params
 
-  def get_unqualified_desc(self):
-    return self.name + "< " + ", ".join(map(
+  def build_unqualified_desc(self):
+    lhs = self.name + "< " + ", ".join(map(
       lambda param: param.get_desc(),
       self.params
       )) + " >"
+    return lhs, ""
 
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
@@ -305,8 +324,13 @@ class PointerTo(Indirect):
   def __init__(self, pointee):
     Indirect.__init__(self, pointee)
 
-  def get_unqualified_desc(self):
-    return self.pointee.get_desc() + " *"
+  def build_unqualified_desc(self):
+    lhs, rhs = self.pointee.build_desc()
+    lhs, rhs = self.maybe_bracket_desc(lhs, rhs)
+    if lhs and not lhs.endswith(" "):
+      lhs += " "
+    lhs += "*"
+    return lhs, rhs
 
   def __copy__(self):
     return PointerTo(self.pointee)
@@ -316,8 +340,13 @@ class ReferenceTo(Indirect):
   def __init__(self, pointee):
     Indirect.__init__(self, pointee)
 
-  def get_unqualified_desc(self):
-    return self.pointee.get_desc() + " &"
+  def build_unqualified_desc(self):
+    lhs, rhs = self.pointee.build_desc()
+    lhs, rhs = self.maybe_bracket_desc(lhs, rhs)
+    if lhs and not lhs.endswith(" "):
+      lhs += " "
+    lhs += "&"
+    return lhs, rhs
 
   def __copy__(self):
     return ReferenceTo(self.pointee)

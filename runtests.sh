@@ -13,6 +13,7 @@ for d in tests/*; do
 
   INPUTS=$(ls $d/*.hpp $d/*.h | sort)
 
+  MAYBE_CONFIG=
   [ -f "$d/config.json" ] && MAYBE_CONFIG="--config=$d/config.json"
 
   ./kludge \

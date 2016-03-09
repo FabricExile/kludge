@@ -7,7 +7,7 @@
 {% block body %}
 namespace Fabric { namespace EDK { namespace KL {
 
-typedef {{decl.this_type_info.lib.name}} {{decl.this_type_info.edk.name.local}};
+typedef {{decl.this_type_info.lib.name.base}} {{decl.this_type_info.edk.name.local}}{{decl.this_type_info.lib.name.suffix}};
 
 } } }
 

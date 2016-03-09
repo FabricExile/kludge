@@ -8,7 +8,7 @@
 namespace Fabric { namespace EDK { namespace KL {
 
 struct {{decl.this_type_info.edk.name.local}} {
-  ::{{decl.this_type_info.lib.name}} *cpp_ptr;
+  ::{{decl.this_type_info.lib.name.base}} *cpp_ptr{{decl.this_type_info.lib.name.suffix}};
 };
 
 } } }

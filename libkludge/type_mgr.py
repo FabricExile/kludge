@@ -27,6 +27,7 @@ class TypeMgr:
     self.add_selector(VoidPtrSelector(jinjenv))
     self.add_selector(SimpleSelector(jinjenv))
     self.add_selector(StdStringSelector(jinjenv))
+    self.add_selector(FixedArraySelector(jinjenv))
     self.add_selector(StdVectorSelector(jinjenv))
     self.add_selector(StdMapSelector(jinjenv))
 

@@ -28,11 +28,23 @@ class EDKTypeInfo:
   def __init__(self, name_toplevel, name_local):
     self.name = EDKTypeName(name_toplevel, name_local)
 
+class LibTypeName:
+
+  def __init__(self, base, suffix):
+    self.base = base
+    self.suffix = suffix
+
+  @property
+  def compound(self):
+    return self.base + self.suffix
+  
+
 class LibTypeInfo:
 
   def __init__(self, expr):
-    self.name = expr.get_desc()
     self.expr = expr
+    base, suffix = expr.build_desc()
+    self.name = LibTypeName(base, suffix)
 
 class TypeInfo:
 

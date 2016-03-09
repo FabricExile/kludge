@@ -162,6 +162,6 @@ if __name__ == "__main__":
     try:
       r = str(p.parse(e))
     except Exception as ex:
-      r = "ERROR"
+      r = "ERROR (%s)" % ex
       # r += str(ex)
     print "%s -> %s" % (e, r)

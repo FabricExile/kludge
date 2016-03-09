@@ -799,7 +799,6 @@ fabricBuildEnv.SharedLibrary(
         self.parse_record_decl(include_filename, indent, cursor)
 
     def parse_record_decl(self, include_filename, indent, cursor):
-        print cursor.type.get_canonical().spelling
         class_name = cursor.spelling
 
         clang_members = []

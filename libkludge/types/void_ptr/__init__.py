@@ -36,9 +36,7 @@ class MutableVoidPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_base = "Data",
-      kl_suffix = "",
-      edk = "::Fabric::EDK::KL::Data",
+      name = "Data",
       lib_expr = mutable_cpp_type_expr,
       )
 

@@ -11,9 +11,12 @@ for d in tests/*; do
     [ -f "$d/skip" ] && continue
   fi
 
-  INPUTS=$(ls $d/*.hpp | sort)
+  INPUTS=$(ls $d/*.hpp $d/*.h | sort)
+
+  [ -f "$d/config.json" ] && MAYBE_CONFIG="--config=$d/config.json"
 
   ./kludge \
+    $MAYBE_CONFIG \
     --outdir=$d \
     --basename=actual \
     $EXTNAME \

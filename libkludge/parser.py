@@ -140,7 +140,7 @@ OR %prog -c <config file>""",
 
         if opts.config:
             with open(opts.config) as fh:
-                 self.config = json.load(fh)
+                 self.config.update(json.load(fh))
 
         if len(args) > 0:
             self.config['extname'] = args[0]

@@ -9,13 +9,15 @@ class Parser:
       return expr
     return Named(name)
 
-  def __init__(self, alias_name_to_expr):
+  def __init__(self, alias_name_to_expr = {}):
     self.tok_ast = Literal("*").suppress()
     self.tok_amp = Literal("&").suppress()
     self.tok_colon_colon = Literal("::").suppress()
     self.tok_langle = Literal("<").suppress()
     self.tok_rangle = Literal(">").suppress()
     self.tok_comma = Literal(",").suppress()
+    self.tok_lparen = Literal("[").suppress()
+    self.tok_rparen = Literal("]").suppress()
 
     self.key_void = Keyword("void")
     self.key_bool = Keyword("bool")
@@ -36,6 +38,7 @@ class Parser:
       NotAny(self.key_volatile),
       Word(alphas+"_", alphanums+"_"),
       ]).setParseAction(lambda s,l,t: self._build_named(t[0]))
+    self.number = Word(nums).setParseAction(lambda s,l,t: int(t[0]))
 
     self._alias_name_to_expr = alias_name_to_expr
 
@@ -105,11 +108,14 @@ class Parser:
       return PointerTo(te)
     def make_reference(te):
       return ReferenceTo(te)
+    def make_fixed_array_of(num):
+      return lambda te: FixedArrayOf(te, num)
     self.ty_post_qualified_NO_LEFT_REC << MatchFirst([
       (self.key_const.setParseAction(lambda s,l,t: make_const) + self.ty_post_qualified_NO_LEFT_REC),
       (self.key_volatile.setParseAction(lambda s,l,t: make_volatile) + self.ty_post_qualified_NO_LEFT_REC),
       (self.tok_ast.setParseAction(lambda s,l,t: make_pointer) + self.ty_post_qualified_NO_LEFT_REC),
       (self.tok_amp.setParseAction(lambda s,l,t: make_reference) + self.ty_post_qualified_NO_LEFT_REC),
+      ((self.tok_lparen + self.number + self.tok_rparen).setParseAction(lambda s,l,t: make_fixed_array_of(t[0])) + self.ty_post_qualified_NO_LEFT_REC),
       Empty(),
       ])
     def make_post_qualified(s, l, t):
@@ -144,6 +150,10 @@ if __name__ == "__main__":
     "std::vector<std::string>",
     "some::nested<template::expr<int, another>, yet::another<const volatile void *>>",
     "const std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > &",
+    "int[2]",
+    "float[4][4]",
+    "std::vector<std::string[2]>[5]",
+    # error cases
     "const",
     "volatile",
     "int int",

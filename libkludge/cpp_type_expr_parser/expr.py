@@ -251,6 +251,24 @@ class Named(Direct):
   def __copy__(self):
     return Named(self.name)
 
+class FixedArrayOf(Direct):
+
+  def __init__(self, element, size):
+    Direct.__init__(self)
+    self.element = element
+    self.size = size
+
+  def get_unqualified_desc(self):
+    return "%s[%u]" % (self.element.get_desc(), self.size)
+
+  def __eq__(self, other):
+    return Direct.__eq__(self, other) \
+      and self.element == other.element \
+      and self.size == other.size
+
+  def __copy__(self):
+    return FixedArrayOf(self.element, self.size)
+
 class Template(Direct):
 
   def __init__(self, name, params):

@@ -9,7 +9,7 @@ from libkludge.cpp_type_expr_parser import *
 
 class WrappedPtrTypeInfo(TypeInfo):
 
-  is_in_place = True
+  can_in_place = True
 
   def __init__(self, jinjenv, name, undq_cpp_type_expr):
     TypeInfo.__init__(

@@ -36,7 +36,7 @@ class LibTypeInfo:
 
 class TypeInfo:
 
-  is_in_place = False
+  can_in_place = False
 
   def __init__(
     self,

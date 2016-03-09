@@ -11,8 +11,10 @@ struct {{decl.this_type_info.kl.name.compound}} {
   {% for member in decl.members %}
     {% if member.is_public %}
 {{member.result.type_info.kl.name.compound}} {{decl.this_type_info.kl.name.compound}}.GET_{{member.name}}() = "{{decl.this_type_info.kl.name.compound}}_GET_{{member.name}}";
+      {% if member.is_settable %}
 {{decl.this_type_info.kl.name.compound}}.SET_{{member.name}}!({{member.param.type_info.kl.name.base}} {{member.name}}{{member.param.type_info.kl.name.suffix}}) = "{{decl.this_type_info.kl.name.compound}}_SET_{{member.name}}";
-
+      {% endif %}
+      
     {% endif %}
   {% endfor %}
 

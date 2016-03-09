@@ -11,14 +11,27 @@ class Member:
 
   def __init__(
     self,
-    type_info,
+    dqti,
     name,
     is_public,
     ):
-    self.type_info = type_info
+    self.dqti = dqti
     self.name = name
     self.is_public = is_public
 
-    dqti = DirQualTypeInfo(dir_qual.direct, type_info)
     self.result = ResultCodec(dqti)
     self.param = ParamCodec(dqti, name)
+
+  @property
+  def type_info(self):
+    return self.dqti.type_info
+
+  @property
+  def can_in_place(self):
+    return self.dqti.can_in_place
+
+  @property
+  def is_settable(self):
+    return self.dqti.type_info.lib.expr.is_mutable \
+      and ( self.dqti.dir_qual.is_direct \
+        or self.dqti.dir_qual.is_mutable_indirect )

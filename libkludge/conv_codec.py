@@ -9,8 +9,8 @@ class ConvCodec:
   def __init__(self, dqti, cpp_value_name):
     self.type_info = dqti.type_info
     self.value_name = cpp_value_name
-    self.is_mutable = dqti.dir_qual.is_mutable
-    self.lib_is_pointer = dqti.dir_qual.is_pointer
+    self.is_mutable_indirect = dqti.dir_qual.is_mutable_indirect
+    self.is_pointer = dqti.dir_qual.is_pointer
     self.child = []
     for i in range(0, len(self.type_info.child_dqtis)):
       self.child.append(
@@ -22,21 +22,21 @@ class ConvCodec:
   
   @property
   def reference_prefix(self):
-    if self.is_mutable:
+    if self.is_mutable_indirect:
       return "&"
     else:
       return "const &"
   
   @property
-  def make_pointer_prefix(self):
-    if self.lib_is_pointer:
+  def take_pointer_prefix(self):
+    if self.is_pointer:
       return "&"
     else:
       return ""
   
   @property
-  def undo_pointer_prefix(self):
-    if self.lib_is_pointer:
+  def deref_pointer_prefix(self):
+    if self.is_pointer:
       return "*"
     else:
       return ""

@@ -81,4 +81,15 @@ std::vector<Class> ReturnClassVec() {
   return result;
 }
 
+struct StructWithIndirectTypeThatCanInPlace {
+  StructWithIndirectTypeThatCanInPlace( float const &x )
+    : floatValue( x ) {}
+  float const &floatValue;
+};
+
+StructWithIndirectTypeThatCanInPlace ReturnStructWithIndirectTypeThatCanInPlace() {
+  static float x = 5.76;
+  return StructWithIndirectTypeThatCanInPlace( x );
+}
+
 #endif

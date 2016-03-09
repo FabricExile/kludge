@@ -24,4 +24,8 @@ operator entry() {
   report("value.exportValues(...): floatValue = " + floatValue);
   report("value.exportValues(...): stringValue = " + stringValue);
   report("value.exportValues(...): intValue = " + intValue);
+
+  StructWithIndirectTypeThatCanInPlace st =
+    ReturnStructWithIndirectTypeThatCanInPlace();
+  report("st.GET_floatValue() = " + st.GET_floatValue());
 }

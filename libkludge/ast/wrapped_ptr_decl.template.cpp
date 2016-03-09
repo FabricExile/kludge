@@ -33,7 +33,8 @@ FABRIC_EXT_EXPORT
     {{member.result.render_indirect_lib_to_edk() | indent(4) }}
     {{ member.result.render_direct_return_edk() | indent(4) }}
 }
-    
+
+        {% if member.is_settable %}
 FABRIC_EXT_EXPORT
 void
 {{decl.this_type_info.kl.name.compound}}_SET_{{member.name}}(
@@ -46,7 +47,8 @@ void
     {{decl.this_value_name.edk}}.cpp_ptr->{{member.name}} =
         {{ member.param.render_lib() }};
 }
-    
+        
+        {% endif %}
     {% endif %}
 {% endfor %}
 

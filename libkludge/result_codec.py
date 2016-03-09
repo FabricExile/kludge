@@ -20,12 +20,12 @@ class ResultCodec:
     return self.conv.reference_prefix
   
   @property
-  def make_pointer_prefix(self):
-    return self.conv.make_pointer_prefix
+  def take_pointer_prefix(self):
+    return self.conv.take_pointer_prefix
   
   @property
-  def undo_pointer_prefix(self):
-    return self.conv.undo_pointer_prefix
+  def deref_pointer_prefix(self):
+    return self.conv.deref_pointer_prefix
 
   def _render(self, obj, lang):
     return self.conv.type_info._render("result", obj, lang, {

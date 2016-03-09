@@ -16,20 +16,20 @@ class ParamCodec:
     return self.conv.type_info
 
   @property
-  def is_mutable(self):
-    return self.conv.is_mutable
+  def is_mutable_indirect(self):
+    return self.conv.is_mutable_indirect
   
   @property
   def reference_prefix(self):
     return self.conv.reference_prefix
   
   @property
-  def make_pointer_prefix(self):
-    return self.conv.make_pointer_prefix
+  def take_pointer_prefix(self):
+    return self.conv.take_pointer_prefix
   
   @property
-  def undo_pointer_prefix(self):
-    return self.conv.undo_pointer_prefix
+  def deref_pointer_prefix(self):
+    return self.conv.deref_pointer_prefix
 
   def _render(self, obj, lang):
     return self.type_info._render("param", obj, lang, {

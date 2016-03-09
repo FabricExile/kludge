@@ -803,7 +803,13 @@ fabricBuildEnv.SharedLibrary(
 
     def parse_CLASS_DECL(self, include_filename, indent, cursor):
         print "%sCLASS_DECL %s" % (indent, cursor.displayname)
+        self.parse_record_decl(include_filename, indent, cursor)
 
+    def parse_STRUCT_DECL(self, include_filename, indent, cursor):
+        print "%sSTRUCT_DECL %s" % (indent, cursor.displayname)
+        self.parse_record_decl(include_filename, indent, cursor)
+
+    def parse_record_decl(self, include_filename, indent, cursor):
         print cursor.type.get_canonical().spelling
         class_name = cursor.spelling
 
@@ -967,14 +973,14 @@ fabricBuildEnv.SharedLibrary(
 
         members = [
             Member(
-                self.type_mgr.get_dqti(clang_member.type).type_info,
+                self.type_mgr.get_dqti(clang_member.type),
                 clang_member.displayname,
                 clang_member.access_specifier == AccessSpecifier.PUBLIC,
                 )
             for clang_member in clang_members
             ]
 
-        can_in_place = all(member and member.type_info.is_in_place for member in members)
+        can_in_place = all(member and member.can_in_place for member in members)
         if can_in_place:
             self.type_mgr.add_selector(InPlaceStructSelector(self.jinjenv, class_name))
         else:
@@ -1087,6 +1093,8 @@ fabricBuildEnv.SharedLibrary(
             self.parse_TYPEDEF_DECL(include_filename, indent, cursor)
         elif cursor_kind == CursorKind.CLASS_DECL:
             self.parse_CLASS_DECL(include_filename, indent, cursor)
+        elif cursor_kind == CursorKind.STRUCT_DECL:
+            self.parse_STRUCT_DECL(include_filename, indent, cursor)
         elif cursor_kind == CursorKind.FUNCTION_DECL:
             self.parse_FUNCTION_DECL(include_filename, indent, cursor)
         else:

@@ -9,7 +9,7 @@ class Wrapping(Decl):
     include_filename,
     location,
     desc,
-    this_type_codec,
+    this_type_info,
     members,
     methods,
     template_basename,
@@ -22,9 +22,9 @@ class Wrapping(Decl):
         desc,
         )
     self.this_value_name = this_cpp_value_name
-    self.this_type_info = this_type_codec.type_info
-    self.const_this = ThisCodec(this_type_codec, False)
-    self.mutable_this = ThisCodec(this_type_codec, True)
+    self.this_type_info = this_type_info
+    self.const_this = ThisCodec(this_type_info, False)
+    self.mutable_this = ThisCodec(this_type_info, True)
     self.members = members
     self.methods = methods
     self._template_basename = template_basename

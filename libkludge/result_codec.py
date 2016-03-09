@@ -7,9 +7,9 @@ from value_name import result_cpp_value_name
 
 class ResultCodec:
 
-  def __init__(self, dqtc):
+  def __init__(self, dqti):
     self.value_name = result_cpp_value_name
-    self.conv = ConvCodec(dqtc, result_cpp_value_name)
+    self.conv = ConvCodec(dqti, result_cpp_value_name)
 
   @property
   def type_info(self):
@@ -28,7 +28,7 @@ class ResultCodec:
     return self.conv.undo_pointer_prefix
 
   def _render(self, obj, lang):
-    return self.conv.type._render("result", obj, lang, {
+    return self.conv.type_info._render("result", obj, lang, {
       "result": self,
       })
 

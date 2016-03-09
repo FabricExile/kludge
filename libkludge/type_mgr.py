@@ -6,7 +6,7 @@ from types import *
 import cpp_type_expr_parser
 from value_name import ValueName
 from type_info import TypeInfo
-from dir_qual_type_codec import DirQualTypeCodec
+from dir_qual_type_info import DirQualTypeInfo
 from param_codec import ParamCodec
 import clang.cindex
 from cpp_type_expr_parser import Named
@@ -18,7 +18,7 @@ class TypeMgr:
 
     self._alias_name_to_expr = {}
 
-    self._cpp_type_name_to_dqtc = {}
+    self._cpp_type_name_to_dqti = {}
     self._cpp_type_expr_parser = cpp_type_expr_parser.Parser(self._alias_name_to_expr)
 
     # Order is very important here!
@@ -33,14 +33,15 @@ class TypeMgr:
   def add_selector(self, codec):
     self._selectors.append(codec)
 
-  def add_dqtc(self, cpp_type_name, dqtc):
-    self._cpp_type_name_to_dqtc[cpp_type_name] = dqtc
+  def add_dqti(self, cpp_type_name, dqti):
+    self._cpp_type_name_to_dqti[cpp_type_name] = dqti
 
   def add_type_alias(self, new_cpp_type_name, old_cpp_type_name):
-    old_dqtc = self.maybe_get_dqtc(old_cpp_type_name)
-    if old_dqtc:
-      old_type_info = old_dqtc.type_info
+    old_dqti = self.maybe_get_dqti(old_cpp_type_name)
+    if old_dqti:
+      old_type_info = old_dqti.type_info
       new_type_info = TypeInfo(
+        old_type_info.jinjenv,
         lib_expr = Named(new_cpp_type_name),
         name = new_cpp_type_name,
         )
@@ -64,14 +65,14 @@ class TypeMgr:
       raise Exception("unexpected argument type")
     return cpp_type_name, cpp_type_expr
 
-  def maybe_get_dqtc(self, value):
+  def maybe_get_dqti(self, value):
     cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
     if not cpp_type_name:
       return None
 
-    dqtc = self._cpp_type_name_to_dqtc.get(cpp_type_name)
-    if dqtc:
-      return dqtc
+    dqti = self._cpp_type_name_to_dqti.get(cpp_type_name)
+    if dqti:
+      return dqti
 
     if not cpp_type_expr:
       try:
@@ -82,21 +83,21 @@ class TypeMgr:
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
 
     for selector in self._selectors:
-      dqtc = selector.maybe_create_dqtc(self, cpp_type_expr)
-      if dqtc:
-        self.add_dqtc(cpp_type_name, dqtc)
-        return dqtc
+      dqti = selector.maybe_create_dqti(self, cpp_type_expr)
+      if dqti:
+        self.add_dqti(cpp_type_name, dqti)
+        return dqti
 
-  def get_dqtc(self, value):
-    dqtc = self.maybe_get_dqtc(value)
-    if dqtc:
-      return dqtc
+  def get_dqti(self, value):
+    dqti = self.maybe_get_dqti(value)
+    if dqti:
+      return dqti
 
     cpp_type_name, cpp_type_expr = TypeMgr.parse_value(value)
     raise Exception(cpp_type_name + ": no EDK type association found")
 
   def convert_clang_params(self, clang_params):
     def mapper(clang_param):
-      dqtc = self.get_dqtc(clang_param.clang_type)
-      return ParamCodec(dqtc, clang_param.name)
+      dqti = self.get_dqti(clang_param.clang_type)
+      return ParamCodec(dqti, clang_param.name)
     return map(mapper, clang_params)

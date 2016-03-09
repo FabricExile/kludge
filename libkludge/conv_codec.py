@@ -6,23 +6,19 @@ from value_name import ValueName
 
 class ConvCodec:
 
-  def __init__(self, dqtc, name):
-    self.type = dqtc.type_codec
-    self.value_name = name
-    self.is_mutable = dqtc.dir_qual.is_mutable
-    self.lib_is_pointer = dqtc.dir_qual.is_pointer
+  def __init__(self, dqti, cpp_value_name):
+    self.type_info = dqti.type_info
+    self.value_name = cpp_value_name
+    self.is_mutable = dqti.dir_qual.is_mutable
+    self.lib_is_pointer = dqti.dir_qual.is_pointer
     self.child = []
-    for i in range(0, len(self.type.child_dqtcs)):
+    for i in range(0, len(self.type_info.child_dqtis)):
       self.child.append(
         ConvCodec(
-          self.type.child_dqtcs[i],
-          name.child(i)
+          self.type_info.child_dqtis[i],
+          cpp_value_name.child(i)
           )
         )
-
-  @property
-  def type_info(self):
-    return self.type.type_info
   
   @property
   def reference_prefix(self):
@@ -60,7 +56,7 @@ class ConvCodec:
       return "_KLUDGE_LIB_" + name
 
   def _render(self, obj):
-    return self.type._render("conv", obj, "cpp", {
+    return self.type_info._render("conv", obj, "cpp", {
       "conv": self,
       })
 

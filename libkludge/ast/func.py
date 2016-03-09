@@ -10,7 +10,7 @@ class Func(Decl):
     location,
     desc,
     nested_function_name,
-    result_dqtc,
+    result_dqti,
     param_codecs,
     ):
     Decl.__init__(
@@ -22,8 +22,8 @@ class Func(Decl):
       )
 
     self._nested_function_name = nested_function_name
-    if result_dqtc:
-      self.result_codec = ResultCodec(result_dqtc)
+    if result_dqti:
+      self.result_codec = ResultCodec(result_dqti)
     else:
       self.result_codec = None
     self.params = param_codecs

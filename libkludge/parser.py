@@ -967,23 +967,23 @@ fabricBuildEnv.SharedLibrary(
 
         members = [
             Member(
-                self.type_mgr.get_dqtc(clang_member.type).type_codec,
+                self.type_mgr.get_dqti(clang_member.type).type_info,
                 clang_member.displayname,
                 clang_member.access_specifier == AccessSpecifier.PUBLIC,
                 )
             for clang_member in clang_members
             ]
 
-        can_in_place = all(member and member.type.is_in_place for member in members)
+        can_in_place = all(member and member.type_info.is_in_place for member in members)
         if can_in_place:
             self.type_mgr.add_selector(InPlaceStructSelector(self.jinjenv, class_name))
         else:
             self.type_mgr.add_selector(WrappedPtrSelector(self.jinjenv, class_name))
 
-        this_type_codec = self.type_mgr.get_dqtc(class_name).type_codec
+        this_type_info = self.type_mgr.get_dqti(class_name).type_info
 
         instance_methods = [
-            InstanceMethod(self.type_mgr, this_type_codec, clang_instance_method)
+            InstanceMethod(self.type_mgr, this_type_info, clang_instance_method)
             for clang_instance_method in clang_instance_methods
             ]
 
@@ -994,7 +994,7 @@ fabricBuildEnv.SharedLibrary(
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    this_type_codec,
+                    this_type_info,
                     members,
                     instance_methods,
                     "ast/builtin/in_place_struct_decl",
@@ -1007,7 +1007,7 @@ fabricBuildEnv.SharedLibrary(
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    this_type_codec,
+                    this_type_info,
                     members,
                     instance_methods,
                     "ast/builtin/wrapped_ptr_decl",
@@ -1060,7 +1060,7 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     self.get_nested_name(cursor),
-                    self.type_mgr.get_dqtc(cursor.result_type),
+                    self.type_mgr.get_dqti(cursor.result_type),
                     self.type_mgr.convert_clang_params(clang_params),
                     )
                 )

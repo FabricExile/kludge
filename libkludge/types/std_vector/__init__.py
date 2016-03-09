@@ -2,29 +2,26 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-from libkludge.type_codec import TypeCodec
 from libkludge.type_info import TypeInfo
 from libkludge.selector import Selector
-from libkludge.dir_qual_type_codec import DirQualTypeCodec
+from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
 
-class StdVectorTypeCodec(TypeCodec):
+class StdVectorTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, undq_cpp_type_expr, element_dqtc):
-    TypeCodec.__init__(
+  def __init__(self, jinjenv, undq_cpp_type_expr, element_dqti):
+    TypeInfo.__init__(
       self,
       jinjenv,
-      TypeInfo(
-        kl_name_base = element_dqtc.type_info.kl.name.base,
-        kl_name_suffix = "[]" + element_dqtc.type_info.kl.name.suffix,
-        edk_name_toplevel = "::Fabric::EDK::KL::VariableArray< " + element_dqtc.type_info.edk.name.toplevel + " >",
-        lib_expr = undq_cpp_type_expr,
-        ),
-      [element_dqtc]
+      kl_name_base = element_dqti.type_info.kl.name.base,
+      kl_name_suffix = "[]" + element_dqti.type_info.kl.name.suffix,
+      edk_name_toplevel = "::Fabric::EDK::KL::VariableArray< " + element_dqti.type_info.edk.name.toplevel + " >",
+      lib_expr = undq_cpp_type_expr,
+      child_dqtis = [element_dqti]
       )
 
   def build_codec_lookup_rules(self):
-    rules = TypeCodec.build_codec_lookup_rules(self)
+    rules = TypeInfo.build_codec_lookup_rules(self)
     rules["conv"]["*"] = "types/builtin/std_vector/conv"
     return rules
 
@@ -33,17 +30,17 @@ class StdVectorSelector(Selector):
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
 
-  def maybe_create_dqtc(self, type_mgr, cpp_type_expr):
+  def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Template) \
       and cpp_type_expr.name == "std::vector" \
       and len(cpp_type_expr.params) == 1:
-      element_dqtc = type_mgr.get_dqtc(cpp_type_expr.params[0])
-      return DirQualTypeCodec(
+      element_dqti = type_mgr.get_dqti(cpp_type_expr.params[0])
+      return DirQualTypeInfo(
         dir_qual.direct,
-        StdVectorTypeCodec(
+        StdVectorTypeInfo(
           self.jinjenv,
           cpp_type_expr.make_unqualified(),
-          element_dqtc,
+          element_dqti,
           )
         )
     if isinstance(cpp_type_expr, ReferenceTo) \
@@ -51,12 +48,12 @@ class StdVectorSelector(Selector):
       and cpp_type_expr.pointee.is_const \
       and cpp_type_expr.pointee.name == "std::vector" \
       and len(cpp_type_expr.pointee.params) == 1:
-      element_dqtc = type_mgr.get_dqtc(cpp_type_expr.pointee.params[0])
-      return DirQualTypeCodec(
+      element_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.params[0])
+      return DirQualTypeInfo(
         dir_qual.const_reference,
-        StdVectorTypeCodec(
+        StdVectorTypeInfo(
           self.jinjenv,
           cpp_type_expr.pointee.make_unqualified(),
-          element_dqtc,
+          element_dqti,
           )
         )

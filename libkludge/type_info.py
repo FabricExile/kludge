@@ -36,14 +36,18 @@ class LibTypeInfo:
 
 class TypeInfo:
 
+  is_in_place = False
+
   def __init__(
     self,
+    jinjenv,
     lib_expr,
     name = None,
     edk_name_toplevel = None,
     edk_name_local = None,
     kl_name_base = None,
     kl_name_suffix = None,
+    child_dqtis = [],
     ):
     if kl_name_base:
       self.kl = KLTypeInfo(kl_name_base, kl_name_suffix)
@@ -54,3 +58,35 @@ class TypeInfo:
     else:
       self.edk = EDKTypeInfo("::Fabric::EDK::KL::" + name, name)
     self.lib = LibTypeInfo(lib_expr)
+    self.jinjenv = jinjenv
+    self.child_dqtis = child_dqtis
+    self._codec_lookup_rules = None
+
+  def build_codec_lookup_rules(self):
+    return {
+      "conv": {"*": "protocols/conv/builtin/default"},
+      "result": {"*": "protocols/result/builtin/indirect"},
+      "param": {"*": "protocols/param/builtin/default"},
+      "self": {"*": "protocols/self/builtin/default"},
+      }
+
+  def _resolve_proto_dir(self, proto, obj):
+    if not self._codec_lookup_rules:
+      self._codec_lookup_rules = self.build_codec_lookup_rules()
+    proto_dict = self._codec_lookup_rules.get(proto)
+    if proto_dict:
+      obj_dir = proto_dict.get(obj)
+      if obj_dir:
+        return obj_dir
+      default_obj_dir = proto_dict.get("*")
+      if default_obj_dir:
+        return default_obj_dir
+    raise Exception("Unable to resolve proto='%s', obj='%s' in codec_lookup_rules = '%s'" % (proto, obj, str(self._codec_lookup_rules)))
+
+  def _render(self, proto, obj, lang, env):
+    template_path = "%s/%s.%s" % (self._resolve_proto_dir(proto, obj), obj, lang)
+    # print "template_path = " + template_path
+    content = self.jinjenv.get_template(template_path).render(env).strip()
+    if content:
+      content = "// %s\n%s" % (template_path, content)
+    return content

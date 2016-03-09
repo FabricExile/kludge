@@ -7,9 +7,9 @@ from value_name import ValueName
 
 class ParamCodec:
 
-  def __init__(self, dqtc, name):
+  def __init__(self, dqti, name):
     self.value_name = ValueName(name)
-    self.conv = ConvCodec(dqtc, self.value_name.cpp)
+    self.conv = ConvCodec(dqti, self.value_name.cpp)
 
   @property
   def type_info(self):
@@ -32,7 +32,7 @@ class ParamCodec:
     return self.conv.undo_pointer_prefix
 
   def _render(self, obj, lang):
-    return self.conv.type._render("param", obj, lang, {
+    return self.type_info._render("param", obj, lang, {
       "param": self,
       })
 

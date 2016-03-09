@@ -807,6 +807,7 @@ fabricBuildEnv.SharedLibrary(
 
         for child in cursor.get_children():
             if child.kind == CursorKind.FIELD_DECL:
+                print "%s  FIELD_DECL %s" % (indent, child.displayname)
                 clang_members.append(child)
                 continue
 
@@ -823,6 +824,7 @@ fabricBuildEnv.SharedLibrary(
             #     kl_type.parent = parent_class_name
 
             if child.kind == CursorKind.CXX_METHOD:
+                print "%s  CXX_METHOD %s" % (indent, child.displayname)
                 if child.is_static_method():
                     clang_static_methods.append(child)
                 elif child.spelling.startswith("operator"):
@@ -959,14 +961,14 @@ fabricBuildEnv.SharedLibrary(
 
                 # kl_type.methods.append(method)
 
-        members = [
-            Member(
+        members = []
+        for clang_member in clang_members:
+            member = Member(
                 self.type_mgr.get_dqti(clang_member.type),
                 clang_member.displayname,
                 clang_member.access_specifier == AccessSpecifier.PUBLIC,
                 )
-            for clang_member in clang_members
-            ]
+            members.append(member)
 
         can_in_place = all(member and member.can_in_place for member in members)
         if can_in_place:

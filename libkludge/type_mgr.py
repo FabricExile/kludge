@@ -79,7 +79,8 @@ class TypeMgr:
       try:
         cpp_type_expr = self._cpp_type_expr_parser.parse(cpp_type_name)
       except Exception as e:
-        raise Exception(cpp_type_name + ": malformed C++ type expression (%s)" % str(e))
+        print "Warning: " + cpp_type_name + ": unhandled C++ type expression"
+        return None
 
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
 

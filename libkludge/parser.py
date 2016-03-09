@@ -102,12 +102,20 @@ OR %prog -c <config file>""",
                 description="KLUDGE: C++-to-KL wrap-o-matic",
                 )
             opt_parser.add_option(
+                '-c', '--config',
+                action='store',
+                default='',
+                dest='config',
+                metavar='CONFIG.json',
+                help="load options from CONFIG.json in JSON format",
+                )
+            opt_parser.add_option(
                 '-o', '--outdir',
                 action='store',
                 default=self.config['outdir'],
                 dest='outdir',
                 metavar='OUTDIR',
-                help="output directory",
+                help="output directory (defaults to %s)" % self.config['outdir'],
                 )
             opt_parser.add_option(
                 '-b', '--basename',
@@ -123,14 +131,6 @@ OR %prog -c <config file>""",
                 dest='clang_opts',
                 metavar='CLANGOPT',
                 help="pass additional option to clang++ (can be used multiple times)",
-                )
-            opt_parser.add_option(
-                '-c', '--config',
-                action='store',
-                default='',
-                dest='config',
-                metavar='CONFIG.json',
-                help="load options from CONFIG in JSON format",
                 )
             (opts, args) = opt_parser.parse_args()
         except Exception as e:

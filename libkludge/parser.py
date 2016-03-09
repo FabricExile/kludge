@@ -1017,6 +1017,8 @@ fabricBuildEnv.SharedLibrary(
     def parse_TYPEDEF_DECL(self, include_filename, indent, cursor):
         new_cpp_type_name = cursor.type.spelling
         old_cpp_type_name = cursor.underlying_typedef_type.spelling
+        if old_cpp_type_name.startswith("struct "):
+            old_cpp_type_name = old_cpp_type_name[7:]
         print "%sTYPEDEF_DECL %s -> %s" % (indent, new_cpp_type_name, old_cpp_type_name)
         new_type_info, old_type_info = self.type_mgr.add_type_alias(new_cpp_type_name, old_cpp_type_name)
         if new_type_info and old_type_info:

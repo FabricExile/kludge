@@ -36,12 +36,10 @@ class MutableVoidPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      TypeName(
-        kl_base = "Data",
-        kl_suffix = "",
-        edk = "::Fabric::EDK::KL::Data",
-        lib_expr = mutable_cpp_type_expr,
-        )
+      kl_base = "Data",
+      kl_suffix = "",
+      edk = "::Fabric::EDK::KL::Data",
+      lib_expr = mutable_cpp_type_expr,
       )
 
   def build_codec_lookup_rules(self):

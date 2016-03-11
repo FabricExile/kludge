@@ -40,10 +40,11 @@ class TypeMgr:
     print "Adding type conversion: %s -> %s" % (cpp_type_name, dqti.get_desc())
     self._cpp_type_name_to_dqti[cpp_type_name] = dqti
 
-  def add_type_alias(self, new_cpp_type_name, old_cpp_type_name):
-    old_dqti = self.maybe_get_dqti(old_cpp_type_name)
+  def add_type_alias(self, nested_new_cpp_type_name, nested_old_cpp_type_name):
+    old_dqti = self.maybe_get_dqti(nested_old_cpp_type_name)
     if old_dqti:
       old_type_info = old_dqti.type_info
+      new_cpp_type_name = "::".join(nested_new_cpp_type_name)
       new_type_info = TypeInfo(
         old_type_info.jinjenv,
         lib_expr = Named(new_cpp_type_name),

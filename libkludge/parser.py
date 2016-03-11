@@ -967,7 +967,9 @@ fabricBuildEnv.SharedLibrary(
         members = []
         for clang_member in clang_members:
             member = Member(
-                self.type_mgr.get_dqti(self.get_nested_type_name(clang_member.type)),
+                self.type_mgr.get_dqti(
+                    self.namespace_mgr.get_nested_type_name(current_namespace_path, clang_member.type)
+                    ),
                 clang_member.displayname,
                 clang_member.access_specifier == AccessSpecifier.PUBLIC,
                 )
@@ -992,7 +994,13 @@ fabricBuildEnv.SharedLibrary(
         this_type_info = self.type_mgr.get_dqti(nested_record_name).type_info
 
         instance_methods = [
-            InstanceMethod(self.type_mgr, this_type_info, clang_instance_method)
+            InstanceMethod(
+                self.type_mgr,
+                self.namespace_mgr,
+                current_namespace_path,
+                this_type_info,
+                clang_instance_method,
+                )
             for clang_instance_method in clang_instance_methods
             ]
 

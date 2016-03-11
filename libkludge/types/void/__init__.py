@@ -14,7 +14,7 @@ class VoidTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      name = "",
+      nested_name = [],
       lib_expr = Void(),
       )
 

@@ -1,0 +1,6 @@
+require Namespaces;
+
+operator entry() {
+  FooNS_BarNS_BarType bt = FooNS_ReturnBarType();
+  report("bt = " + bt.GET_str());
+}

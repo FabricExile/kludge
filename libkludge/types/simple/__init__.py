@@ -12,7 +12,7 @@ class SimpleTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      name = type_name_kl,
+      nested_name = [type_name_kl],
       lib_expr = undq_cpp_type_expr,
       )
 

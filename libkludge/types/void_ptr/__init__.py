@@ -18,7 +18,7 @@ class ConstVoidPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      name = "Data",
+      nested_name = ["Data"],
       lib_expr = const_cpp_type_expr,
       )
 
@@ -36,7 +36,7 @@ class MutableVoidPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      name = "Data",
+      nested_name = ["Data"],
       lib_expr = mutable_cpp_type_expr,
       )
 

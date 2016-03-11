@@ -794,16 +794,18 @@ fabricBuildEnv.SharedLibrary(
             self.dump_cursor(childIndent, childCursor)
 
     def parse_CLASS_DECL(self, include_filename, indent, current_namespace_path, cursor):
-        nested_class_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.spelling)
+        nested_class_name = current_namespace_path + [cursor.spelling]
         print "%sCLASS_DECL %s" % (indent, "::".join(nested_class_name))
         self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_class_name)
 
     def parse_STRUCT_DECL(self, include_filename, indent, current_namespace_path, cursor):
-        nested_struct_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.spelling)
+        nested_struct_name = current_namespace_path + [cursor.spelling]
         print "%sSTRUCT_DECL %s" % (indent, "::".join(nested_struct_name))
         self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_struct_name)
 
     def parse_record_decl(self, include_filename, indent, current_namespace_path, cursor, nested_record_name):
+        self.namespace_mgr.add_type_decl(current_namespace_path, cursor)
+
         clang_members = []
         clang_static_methods = []
         clang_instance_methods = []
@@ -1079,6 +1081,7 @@ fabricBuildEnv.SharedLibrary(
                 param_index += 1
 
             nested_result_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.result_type)
+            print "nested_result_type_name = " + str(nested_result_type_name)
 
             self.edk_decls.add(
                 ast.Func(
@@ -1109,7 +1112,8 @@ fabricBuildEnv.SharedLibrary(
                 current_namespace_path,
                 nested_namespace_name,
                 )
-            self.parse_children(include_filename, indent, nested_namespace_path, cursor)
+            print "%sNAMESPACE %s" % (indent, "::".join(nested_namespace_path))
+            self.parse_children(include_filename, indent + "  ", nested_namespace_path, cursor)
         elif cursor_kind == CursorKind.UNEXPOSED_DECL:
             self.parse_children(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.MACRO_INSTANTIATION:

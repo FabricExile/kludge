@@ -13,7 +13,7 @@ class CStringTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      name = "String",
+      nested_name = ["String"],
       lib_expr = undq_cpp_type_expr,
       )
 

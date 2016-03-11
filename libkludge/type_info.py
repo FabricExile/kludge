@@ -54,7 +54,7 @@ class TypeInfo:
     self,
     jinjenv,
     lib_expr,
-    name = None,
+    nested_name = None,
     edk_name_toplevel = None,
     edk_name_local = None,
     kl_name_base = None,
@@ -64,11 +64,11 @@ class TypeInfo:
     if kl_name_base:
       self.kl = KLTypeInfo(kl_name_base, kl_name_suffix)
     else:
-      self.kl = KLTypeInfo(name, "")
+      self.kl = KLTypeInfo("_".join(nested_name), "")
     if edk_name_toplevel:
       self.edk = EDKTypeInfo(edk_name_toplevel, edk_name_local)
     else:
-      self.edk = EDKTypeInfo("::Fabric::EDK::KL::" + name, name)
+      self.edk = EDKTypeInfo("::Fabric::EDK::KL::" + "_".join(nested_name), "_".join(nested_name))
     self.lib = LibTypeInfo(lib_expr)
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis

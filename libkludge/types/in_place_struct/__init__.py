@@ -7,11 +7,11 @@ class InPlaceStructTypeInfo(TypeInfo):
 
   can_in_place = True
 
-  def __init__(self, jinjenv, name, undq_cpp_type_expr):
+  def __init__(self, jinjenv, nested_name, undq_cpp_type_expr):
     TypeInfo.__init__(
       self,
       jinjenv,
-      name = name,
+      nested_name = nested_name,
       lib_expr = undq_cpp_type_expr,
       )
 
@@ -24,12 +24,13 @@ class InPlaceStructTypeInfo(TypeInfo):
 
 class InPlaceStructSelector(Selector):
 
-  def __init__(self, jinjenv, nested_cpp_type_name):
+  def __init__(self, jinjenv, nested_name):
     Selector.__init__(self, jinjenv)
-    self.cpp_type_name = "::".join(nested_cpp_type_name)
+    self.nested_name = nested_name
+    self.cpp_type_name = "::".join(nested_name)
 
   def get_desc(self):
-    return "InPlaceStruct:%s" % self.cpp_type_name
+    return "InPlaceStruct:%s" % str(self.nested_name)
     
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Named) \
@@ -38,7 +39,7 @@ class InPlaceStructSelector(Selector):
         dir_qual.direct,
         InPlaceStructTypeInfo(
           self.jinjenv,
-          self.cpp_type_name,
+          self.nested_name,
           cpp_type_expr.make_unqualified()
           )
         )
@@ -53,7 +54,7 @@ class InPlaceStructSelector(Selector):
         dq,
         InPlaceStructTypeInfo(
           self.jinjenv,
-          self.cpp_type_name,
+          self.nested_name,
           cpp_type_expr.pointee.make_unqualified()
           )
         )
@@ -68,7 +69,7 @@ class InPlaceStructSelector(Selector):
         dq,
         InPlaceStructTypeInfo(
           self.jinjenv,
-          self.cpp_type_name,
+          self.nested_name,
           cpp_type_expr.pointee.make_unqualified()
           )
         )

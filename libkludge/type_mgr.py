@@ -48,7 +48,7 @@ class TypeMgr:
       new_type_info = TypeInfo(
         old_type_info.jinjenv,
         lib_expr = Named(new_cpp_type_name),
-        name = new_cpp_type_name,
+        nested_name = nested_new_cpp_type_name,
         )
       self._alias_name_to_expr[new_cpp_type_name] = old_type_info.lib.expr
       return new_type_info, old_type_info

@@ -1,4 +1,4 @@
-import jinja2, os, sys, optparse, json
+import jinja2, os, sys, optparse, json, re
 
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
@@ -93,6 +93,25 @@ class Parser:
     def __init__(self):
         self.edk_decls = ast.DeclSet()
 
+    envvar_re = re.compile("\\${[A-Za-z_]+}")
+
+    @classmethod
+    def expand_envvars(cls, string_value):
+        while True:
+            match_object = cls.envvar_re.match(string_value)
+            if not match_object:
+                break
+            try:
+                envvar_name = string_value[match_object.start(0)+2:match_object.end(0)-1]
+                envvar_value = os.environ[envvar_name]
+            except Exception, e:
+                raise Exception("Missing environment variable " + envvar_name)
+            string_value = \
+                  string_value[:match_object.start(0)] \
+                + envvar_value \
+                + string_value[match_object.end(0):]
+        return string_value
+
     def main(self):
         self.config = create_default_config()
 
@@ -184,7 +203,7 @@ OR %prog -c <config file>""",
         self.namespace_mgr = NamespaceMgr()
 
         for infile in self.config['infiles']:
-            self.parse(infile)
+            self.parse(self.expand_envvars(infile))
 
         self.output(
             os.path.join(self.config['outdir'], self.config['basename'] + '.kl'),
@@ -1081,7 +1100,6 @@ fabricBuildEnv.SharedLibrary(
                 param_index += 1
 
             nested_result_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.result_type)
-            print "nested_result_type_name = " + str(nested_result_type_name)
 
             self.edk_decls.add(
                 ast.Func(
@@ -1101,6 +1119,11 @@ fabricBuildEnv.SharedLibrary(
         CursorKind.MACRO_DEFINITION,
         CursorKind.INCLUSION_DIRECTIVE,
         ]
+
+    def print_children(self, indent, cursor):
+        print "%s%s %s" % (indent, cursor.kind, cursor.displayname)
+        for child in cursor.get_children():
+            self.print_children(indent+"  ", child)
 
     def parse_cursor(self, include_filename, indent, current_namespace_path, cursor):
         cursor_kind = cursor.kind
@@ -1126,8 +1149,12 @@ fabricBuildEnv.SharedLibrary(
             self.parse_STRUCT_DECL(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.FUNCTION_DECL:
             self.parse_FUNCTION_DECL(include_filename, indent, current_namespace_path, cursor)
+        elif cursor_kind == CursorKind.USING_DIRECTIVE:
+            for child in cursor.get_children():
+                if child.kind == CursorKind.NAMESPACE_REF:
+                    self.namespace_mgr.add_using_namespace(current_namespace_path, cursor.spelling.split("::"))
         else:
-            print "%sUnhandled %s" % (indent, cursor_kind)
+            print "%sUnhandled %s at %s:%d" % (indent, cursor_kind, cursor.location.file, cursor.location.line)
 
     def parse_children(self, include_filename, childIndent, current_namespace_path, cursor):
         for childCursor in cursor.get_children():

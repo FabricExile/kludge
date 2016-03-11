@@ -10,25 +10,47 @@ class Namespace:
     self.parent_namespace = parent_namespace
     self.path = path
     self.members = {}
+    self.others = []
 
   def maybe_get_child_namespace(self, child_namespace_path):
     namespace = self
     for i in range(0, len(child_namespace_path)):
-      namespace_value = namespace.members.get(child_namespace_path[i])
+      child_namespace_path_component = child_namespace_path[i]
+      namespace_value = namespace.members.get(child_namespace_path_component)
+      if not namespace_value:
+        for other in self.others:
+          namespace_value = other.members.get(child_namespace_path_component)
+          if namespace_value:
+            break
       if isinstance(namespace_value, Namespace):
         namespace = namespace_value
       else:
         return None
     return namespace
 
-  def maybe_find_clang_type_decl(self, child_namespace_member_path):
-    first_namespace_member = self.members.get(child_namespace_member_path[0])
+  def maybe_resolve_child_namespace(self, child_namespace_path):
+    namespace = self
+    while namespace:
+      child_namespace = namespace.maybe_get_child_namespace(child_namespace_path)
+      if child_namespace:
+        return child_namespace
+      namespace = namespace.parent_namespace
+    return None
+
+  def maybe_find_clang_type_decl(self, child_namespace_path):
+    child_namespace_path_component = child_namespace_path[0]
+    first_namespace_member = self.members.get(child_namespace_path_component)
+    if not first_namespace_member:
+      for other in self.others:
+        first_namespace_member = other.members.get(child_namespace_path_component)
+        if first_namespace_member:
+          break
     if not first_namespace_member:
       return None
-    elif len(child_namespace_member_path) > 1:
+    elif len(child_namespace_path) > 1:
       if not isinstance(first_namespace_member, Namespace):
         return None
-      return first_namespace_member.maybe_find_clang_type_decl(child_namespace_member_path[1:])
+      return first_namespace_member.maybe_find_clang_type_decl(child_namespace_path[1:])
     else:
       if isinstance(first_namespace_member, Namespace):
         return None
@@ -68,7 +90,10 @@ class NamespaceMgr:
 
   def add_using_namespace(self, namespace_path, import_namespace_path):
     namespace = self._resolve_namespace(namespace_path)
-    import_namespace = self._resolve_namespace(import_namespace)
+    import_namespace = namespace.maybe_resolve_child_namespace(import_namespace_path)
+    if not import_namespace:
+      raise Exception("Failed to resolve namespace '%s' inside namespace '%s'" % ("::".join(import_namespace_path), "::".join(namespace_path)))
+    namespace.others.append(import_namespace)
 
   def get_nested_type_name(self, current_namespace_path, value):
     current_namespace = self._resolve_namespace(current_namespace_path)

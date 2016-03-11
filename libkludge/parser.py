@@ -5,14 +5,16 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from kl2edk import KLStruct, Method, KLParam, TypesManager
 
-import clang_wrapper
 import ast
 from type_mgr import TypeMgr
 from value_name import ValueName
 from member import Member
 from instance_method import InstanceMethod
 from types import InPlaceStructSelector, WrappedPtrSelector
+from param_codec import ParamCodec
 from config import *
+import clang_helpers
+from namespace_mgr import NamespaceMgr
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -179,6 +181,7 @@ OR %prog -c <config file>""",
 
         self.jinjenv = create_jinjenv(self.config)
         self.type_mgr = TypeMgr(self.jinjenv)
+        self.namespace_mgr = NamespaceMgr()
 
         for infile in self.config['infiles']:
             self.parse(infile)
@@ -790,17 +793,17 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.dump_cursor(childIndent, childCursor)
 
-    def parse_CLASS_DECL(self, include_filename, indent, cursor):
-        print "%sCLASS_DECL %s" % (indent, cursor.displayname)
-        self.parse_record_decl(include_filename, indent, cursor)
+    def parse_CLASS_DECL(self, include_filename, indent, current_namespace_path, cursor):
+        nested_class_name = self.namespace_mgr.get_nested_type_name(cursor.spelling)
+        print "%sCLASS_DECL %s" % (indent, "::".join(nested_class_name))
+        self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_class_name)
 
-    def parse_STRUCT_DECL(self, include_filename, indent, cursor):
-        print "%sSTRUCT_DECL %s" % (indent, cursor.displayname)
-        self.parse_record_decl(include_filename, indent, cursor)
+    def parse_STRUCT_DECL(self, include_filename, indent, current_namespace_path, cursor):
+        nested_struct_name = self.namespace_mgr.get_nested_type_name(cursor.spelling)
+        print "%sSTRUCT_DECL %s" % (indent, "::".join(nested_struct_name))
+        self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_struct_name)
 
-    def parse_record_decl(self, include_filename, indent, cursor):
-        class_name = cursor.spelling
-
+    def parse_record_decl(self, include_filename, indent, current_namespace_path, cursor, nested_record_name):
         clang_members = []
         clang_static_methods = []
         clang_instance_methods = []
@@ -964,7 +967,7 @@ fabricBuildEnv.SharedLibrary(
         members = []
         for clang_member in clang_members:
             member = Member(
-                self.type_mgr.get_dqti(clang_member.type),
+                self.type_mgr.get_dqti(self.get_nested_type_name(clang_member.type)),
                 clang_member.displayname,
                 clang_member.access_specifier == AccessSpecifier.PUBLIC,
                 )
@@ -972,11 +975,21 @@ fabricBuildEnv.SharedLibrary(
 
         can_in_place = all(member and member.can_in_place for member in members)
         if can_in_place:
-            self.type_mgr.add_selector(InPlaceStructSelector(self.jinjenv, class_name))
+            self.type_mgr.add_selector(
+                InPlaceStructSelector(
+                    self.jinjenv,
+                    nested_record_name,
+                    )
+                )
         else:
-            self.type_mgr.add_selector(WrappedPtrSelector(self.jinjenv, class_name))
+            self.type_mgr.add_selector(
+                WrappedPtrSelector(
+                    self.jinjenv,
+                    nested_record_name,
+                    )
+                )
 
-        this_type_info = self.type_mgr.get_dqti(class_name).type_info
+        this_type_info = self.type_mgr.get_dqti(nested_record_name).type_info
 
         instance_methods = [
             InstanceMethod(self.type_mgr, this_type_info, clang_instance_method)
@@ -1010,19 +1023,21 @@ fabricBuildEnv.SharedLibrary(
                     )
                 )
 
-    def parse_MACRO_INSTANTIATION(self, include_filename, indent, cursor):
+    def parse_MACRO_INSTANTIATION(self, include_filename, indent, current_namespace_path, cursor):
         print dir(cursor)
         self.dump_cursor(indent, cursor)
         print indent + ".get_definition() ->"
         self.dump_cursor(indent + ' ', cursor.get_definition())
 
-    def parse_TYPEDEF_DECL(self, include_filename, indent, cursor):
+    def parse_TYPEDEF_DECL(self, include_filename, indent, current_namespace_path, cursor):
         new_cpp_type_name = cursor.type.spelling
+        nested_new_cpp_type_name = current_namespace_path + [new_cpp_type_name]
         old_cpp_type_name = cursor.underlying_typedef_type.spelling
         if old_cpp_type_name.startswith("struct "):
             old_cpp_type_name = old_cpp_type_name[7:]
-        print "%sTYPEDEF_DECL %s -> %s" % (indent, new_cpp_type_name, old_cpp_type_name)
-        new_type_info, old_type_info = self.type_mgr.add_type_alias(new_cpp_type_name, old_cpp_type_name)
+        nested_old_cpp_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, old_cpp_type_name)
+        print "%sTYPEDEF_DECL %s -> %s" % (indent, "::".join(nested_new_cpp_type_name), "::".join(nested_old_cpp_type_name))
+        new_type_info, old_type_info = self.type_mgr.add_type_alias(nested_new_cpp_type_name, nested_old_cpp_type_name)
         if new_type_info and old_type_info:
             self.edk_decls.add(
                 ast.Alias(
@@ -1035,21 +1050,27 @@ fabricBuildEnv.SharedLibrary(
                     )
                 )
 
-    def parse_FUNCTION_DECL(self, include_filename, indent, cursor):
-        print "%sFUNCTION_DECL %s" % (indent, cursor.displayname)
+    def parse_FUNCTION_DECL(self, include_filename, indent, current_namespace_path, cursor):
+        nested_name = current_namespace_path + [cursor.spelling]
+        print "%sFUNCTION_DECL %s" % (indent, "::".join(nested_name))
 
         if True:
         # try:
             param_index = 1
-            clang_params = []
+            params = []
             for param_cursor in cursor.get_children():
                 if param_cursor.kind == CursorKind.PARM_DECL:
                     param_name = param_cursor.spelling
                     if len(param_name) == 0:
                         param_name = "_param_%u" % param_index
-                    param_clang_type = param_cursor.type
-                    clang_params.append(clang_wrapper.ClangParam(param_name, param_clang_type))
+                    nested_param_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, param_cursor.type)
+                    params.append(ParamCodec(
+                        self.type_mgr.get_dqti(nested_param_type_name),
+                        param_name,
+                        ))
                 param_index += 1
+
+            nested_result_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.result_type)
 
             self.edk_decls.add(
                 ast.Func(
@@ -1057,9 +1078,9 @@ fabricBuildEnv.SharedLibrary(
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    self.get_nested_name(cursor),
-                    self.type_mgr.get_dqti(cursor.result_type),
-                    self.type_mgr.convert_clang_params(clang_params),
+                    nested_name,
+                    self.type_mgr.get_dqti(nested_result_type_name),
+                    params,
                     )
                 )
         # except Exception as e:
@@ -1070,31 +1091,35 @@ fabricBuildEnv.SharedLibrary(
         CursorKind.INCLUSION_DIRECTIVE,
         ]
 
-    def parse_cursor(self, include_filename, indent, cursor):
+    def parse_cursor(self, include_filename, indent, current_namespace_path, cursor):
         cursor_kind = cursor.kind
         if cursor_kind in Parser.ignored_cursor_kinds:
             pass
-        elif cursor_kind in [
-            CursorKind.NAMESPACE,
-            CursorKind.UNEXPOSED_DECL,
-            ]:
-            self.parse_children(include_filename, indent, cursor)
+        elif cursor_kind == CursorKind.NAMESPACE:
+            nested_namespace_name = cursor.spelling
+            nested_namespace_path = self.namespace_mgr.add_nested_namespace(
+                current_namespace_path,
+                nested_namespace_name,
+                )
+            self.parse_children(include_filename, indent, nested_namespace_path, cursor)
+        elif cursor_kind == CursorKind.UNEXPOSED_DECL:
+            self.parse_children(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.MACRO_INSTANTIATION:
-            self.parse_MACRO_INSTANTIATION(include_filename, indent, cursor)
+            self.parse_MACRO_INSTANTIATION(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.TYPEDEF_DECL:
-            self.parse_TYPEDEF_DECL(include_filename, indent, cursor)
+            self.parse_TYPEDEF_DECL(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.CLASS_DECL:
-            self.parse_CLASS_DECL(include_filename, indent, cursor)
+            self.parse_CLASS_DECL(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.STRUCT_DECL:
-            self.parse_STRUCT_DECL(include_filename, indent, cursor)
+            self.parse_STRUCT_DECL(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.FUNCTION_DECL:
-            self.parse_FUNCTION_DECL(include_filename, indent, cursor)
+            self.parse_FUNCTION_DECL(include_filename, indent, current_namespace_path, cursor)
         else:
             print "%sUnhandled %s" % (indent, cursor_kind)
 
-    def parse_children(self, include_filename, childIndent, cursor):
+    def parse_children(self, include_filename, childIndent, current_namespace_path, cursor):
         for childCursor in cursor.get_children():
-            self.parse_cursor(include_filename, childIndent, childCursor)
+            self.parse_cursor(include_filename, childIndent, current_namespace_path, childCursor)
 
     def parse(self, unit_filename):
         print "parsing unit: %s" % unit_filename
@@ -1118,7 +1143,7 @@ fabricBuildEnv.SharedLibrary(
             for cursor in unit.cursor.get_children():
                 if hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
                     continue
-                self.parse_cursor(unit_filename, "", cursor)
+                self.parse_cursor(unit_filename, "", [], cursor)
 
     def output_kl_type(
         self,

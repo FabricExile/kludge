@@ -51,6 +51,9 @@ class VoidPtrSelector(Selector):
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
 
+  def get_desc(self):
+    return "VoidPtr"
+
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if cpp_type_expr == const_cpp_type_expr:
       return DirQualTypeInfo(

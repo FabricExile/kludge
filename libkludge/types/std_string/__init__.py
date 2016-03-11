@@ -25,12 +25,19 @@ class StdStringTypeInfo(TypeInfo):
 
 class StdStringSelector(Selector):
 
+  cpp_type_names = [
+    "std::string",
+    ]
+
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
 
+  def get_desc(self):
+    return "StdString"
+
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Named) \
-      and cpp_type_expr.name == "std::string":
+      and cpp_type_expr.name in self.cpp_type_names:
       return DirQualTypeInfo(
         dir_qual.direct,
         StdStringTypeInfo(
@@ -40,7 +47,7 @@ class StdStringSelector(Selector):
         )
     if isinstance(cpp_type_expr, PointerTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and cpp_type_expr.pointee.name == "std::string":
+      and cpp_type_expr.pointee.name in self.cpp_type_names:
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_pointer
       else:
@@ -54,7 +61,7 @@ class StdStringSelector(Selector):
         )
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and cpp_type_expr.pointee.name == "std::string":
+      and cpp_type_expr.pointee.name in self.cpp_type_names:
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_reference
       else:

@@ -1,5 +1,5 @@
-#ifndef _StdVector_hpp
-#define _StdVector_hpp
+#ifndef _StdMap_hpp
+#define _StdMap_hpp
 
 #include <string>
 #include <map>

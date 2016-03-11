@@ -74,6 +74,9 @@ class TypeInfo:
     self.child_dqtis = child_dqtis
     self._codec_lookup_rules = None
 
+  def get_desc(self):
+    return self.kl.name.compound
+    
   def build_codec_lookup_rules(self):
     return {
       "conv": {"*": "protocols/conv/builtin/default"},

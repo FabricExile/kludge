@@ -78,6 +78,9 @@ class SimpleSelector(Selector):
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
 
+  def get_desc(self):
+    return "Simple"
+  
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Direct):
       undq_cpp_type_expr = cpp_type_expr.make_unqualified()

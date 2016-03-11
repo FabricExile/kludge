@@ -26,6 +26,9 @@ class StdMapSelector(Selector):
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
 
+  def get_desc(self):
+    return "StdMap"
+  
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Template) \
       and cpp_type_expr.name == "std::map" \

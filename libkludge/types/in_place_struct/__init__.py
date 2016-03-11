@@ -24,10 +24,13 @@ class InPlaceStructTypeInfo(TypeInfo):
 
 class InPlaceStructSelector(Selector):
 
-  def __init__(self, jinjenv, cpp_type_name):
+  def __init__(self, jinjenv, nested_cpp_type_name):
     Selector.__init__(self, jinjenv)
-    self.cpp_type_name = cpp_type_name
+    self.cpp_type_name = "::".join(nested_cpp_type_name)
 
+  def get_desc(self):
+    return "InPlaceStruct:%s" % self.cpp_type_name
+    
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Named) \
       and cpp_type_expr.name == self.cpp_type_name:

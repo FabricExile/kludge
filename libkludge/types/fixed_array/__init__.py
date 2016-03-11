@@ -31,6 +31,9 @@ class FixedArraySelector(Selector):
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
 
+  def get_desc(self):
+    return "FixedArray"
+    
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, FixedArrayOf):
       element_dqti = type_mgr.get_dqti(cpp_type_expr.element)

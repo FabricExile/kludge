@@ -794,12 +794,12 @@ fabricBuildEnv.SharedLibrary(
             self.dump_cursor(childIndent, childCursor)
 
     def parse_CLASS_DECL(self, include_filename, indent, current_namespace_path, cursor):
-        nested_class_name = self.namespace_mgr.get_nested_type_name(cursor.spelling)
+        nested_class_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.spelling)
         print "%sCLASS_DECL %s" % (indent, "::".join(nested_class_name))
         self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_class_name)
 
     def parse_STRUCT_DECL(self, include_filename, indent, current_namespace_path, cursor):
-        nested_struct_name = self.namespace_mgr.get_nested_type_name(cursor.spelling)
+        nested_struct_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.spelling)
         print "%sSTRUCT_DECL %s" % (indent, "::".join(nested_struct_name))
         self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_struct_name)
 

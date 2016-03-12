@@ -1067,20 +1067,24 @@ fabricBuildEnv.SharedLibrary(
         old_cpp_type_name = cursor.underlying_typedef_type.spelling
         if old_cpp_type_name.startswith("struct "):
             old_cpp_type_name = old_cpp_type_name[7:]
-        old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
-        print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
-        new_type_info, old_type_info = self.type_mgr.add_type_alias(new_nested_name, new_cpp_type_expr, old_cpp_type_expr)
-        if new_type_info and old_type_info:
-            self.edk_decls.add(
-                ast.Alias(
-                    self.config['extname'],
-                    include_filename,
-                    self.get_location(cursor.location),
-                    cursor.displayname,
-                    new_type_info,
-                    old_type_info,
+        try:
+            old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
+            print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
+            new_type_info, old_type_info = self.type_mgr.add_type_alias(new_nested_name, new_cpp_type_expr, old_cpp_type_expr)
+            if new_type_info and old_type_info:
+                self.edk_decls.add(
+                    ast.Alias(
+                        self.config['extname'],
+                        include_filename,
+                        self.get_location(cursor.location),
+                        cursor.displayname,
+                        new_type_info,
+                        old_type_info,
+                        )
                     )
-                )
+        except Exception as e:
+            print "Warning: ignored typedef at %s:%d" % (cursor.location.file, cursor.location.line)
+            print "  Reason: %s" % e
 
     def parse_FUNCTION_DECL(self, include_filename, indent, current_namespace_path, cursor):
         nested_name = current_namespace_path + [cursor.spelling]

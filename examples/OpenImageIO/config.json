@@ -1,0 +1,7 @@
+{
+  "extname": "OIIO",
+  "infiles": [
+    "${OIIO_INCLUDE}/OpenImageIO/typedesc.h",
+    "${OIIO_INCLUDE}/OpenImageIO/imageio.h"
+    ]
+  }

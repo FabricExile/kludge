@@ -15,6 +15,7 @@ from param_codec import ParamCodec
 from config import *
 import clang_helpers
 from namespace_mgr import NamespaceMgr
+import cpp_type_expr_parser
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -200,7 +201,7 @@ OR %prog -c <config file>""",
 
         self.jinjenv = create_jinjenv(self.config)
         self.type_mgr = TypeMgr(self.jinjenv)
-        self.namespace_mgr = NamespaceMgr()
+        self.namespace_mgr = NamespaceMgr(self.type_mgr.create_cpp_type_expr_parser())
 
         for infile in self.config['infiles']:
             self.parse(self.expand_envvars(infile))
@@ -812,17 +813,17 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.dump_cursor(childIndent, childCursor)
 
-    def parse_CLASS_DECL(self, include_filename, indent, current_namespace_path, cursor):
-        nested_class_name = current_namespace_path + [cursor.spelling]
-        print "%sCLASS_DECL %s" % (indent, "::".join(nested_class_name))
-        self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_class_name)
+    def parse_record_decl(
+        self,
+        include_filename,
+        indent,
+        current_namespace_path,
+        cursor,
+        ):
+        nested_name = current_namespace_path + [cursor.spelling]
+        cpp_type_expr = cpp_type_expr_parser.Named("::".join(nested_name))
+        print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
 
-    def parse_STRUCT_DECL(self, include_filename, indent, current_namespace_path, cursor):
-        nested_struct_name = current_namespace_path + [cursor.spelling]
-        print "%sSTRUCT_DECL %s" % (indent, "::".join(nested_struct_name))
-        self.parse_record_decl(include_filename, indent, current_namespace_path, cursor, nested_struct_name)
-
-    def parse_record_decl(self, include_filename, indent, current_namespace_path, cursor, nested_record_name):
         self.namespace_mgr.add_type_decl(current_namespace_path, cursor)
 
         clang_members = []
@@ -987,10 +988,9 @@ fabricBuildEnv.SharedLibrary(
 
         members = []
         for clang_member in clang_members:
+            member_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, clang_member.type)
             member = Member(
-                self.type_mgr.get_dqti(
-                    self.namespace_mgr.get_nested_type_name(current_namespace_path, clang_member.type)
-                    ),
+                self.type_mgr.get_dqti(member_cpp_type_expr),
                 clang_member.displayname,
                 clang_member.access_specifier == AccessSpecifier.PUBLIC,
                 )
@@ -1001,18 +1001,20 @@ fabricBuildEnv.SharedLibrary(
             self.type_mgr.add_selector(
                 InPlaceStructSelector(
                     self.jinjenv,
-                    nested_record_name,
+                    nested_name,
+                    cpp_type_expr,
                     )
                 )
         else:
             self.type_mgr.add_selector(
                 WrappedPtrSelector(
                     self.jinjenv,
-                    nested_record_name,
+                    nested_name,
+                    cpp_type_expr,
                     )
                 )
 
-        this_type_info = self.type_mgr.get_dqti(nested_record_name).type_info
+        this_type_info = self.type_mgr.get_dqti(cpp_type_expr).type_info
 
         instance_methods = [
             InstanceMethod(
@@ -1060,13 +1062,14 @@ fabricBuildEnv.SharedLibrary(
 
     def parse_TYPEDEF_DECL(self, include_filename, indent, current_namespace_path, cursor):
         new_cpp_type_name = cursor.type.spelling
-        nested_new_cpp_type_name = current_namespace_path + [new_cpp_type_name]
+        new_nested_name = current_namespace_path + [new_cpp_type_name]
+        new_cpp_type_expr = cpp_type_expr_parser.Named("::".join(new_nested_name))
         old_cpp_type_name = cursor.underlying_typedef_type.spelling
         if old_cpp_type_name.startswith("struct "):
             old_cpp_type_name = old_cpp_type_name[7:]
-        nested_old_cpp_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, old_cpp_type_name)
-        print "%sTYPEDEF_DECL %s -> %s" % (indent, "::".join(nested_new_cpp_type_name), "::".join(nested_old_cpp_type_name))
-        new_type_info, old_type_info = self.type_mgr.add_type_alias(nested_new_cpp_type_name, nested_old_cpp_type_name)
+        old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
+        print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
+        new_type_info, old_type_info = self.type_mgr.add_type_alias(new_nested_name, new_cpp_type_expr, old_cpp_type_expr)
         if new_type_info and old_type_info:
             self.edk_decls.add(
                 ast.Alias(
@@ -1092,14 +1095,14 @@ fabricBuildEnv.SharedLibrary(
                     param_name = param_cursor.spelling
                     if len(param_name) == 0:
                         param_name = "_param_%u" % param_index
-                    nested_param_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, param_cursor.type)
+                    param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_cursor.type)
                     params.append(ParamCodec(
-                        self.type_mgr.get_dqti(nested_param_type_name),
+                        self.type_mgr.get_dqti(param_cpp_type_expr),
                         param_name,
                         ))
                 param_index += 1
 
-            nested_result_type_name = self.namespace_mgr.get_nested_type_name(current_namespace_path, cursor.result_type)
+            result_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, cursor.result_type)
 
             self.edk_decls.add(
                 ast.Func(
@@ -1108,7 +1111,7 @@ fabricBuildEnv.SharedLibrary(
                     self.get_location(cursor.location),
                     cursor.displayname,
                     nested_name,
-                    self.type_mgr.get_dqti(nested_result_type_name),
+                    self.type_mgr.get_dqti(result_cpp_type_expr),
                     params,
                     )
                 )
@@ -1143,16 +1146,14 @@ fabricBuildEnv.SharedLibrary(
             self.parse_MACRO_INSTANTIATION(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.TYPEDEF_DECL:
             self.parse_TYPEDEF_DECL(include_filename, indent, current_namespace_path, cursor)
-        elif cursor_kind == CursorKind.CLASS_DECL:
-            self.parse_CLASS_DECL(include_filename, indent, current_namespace_path, cursor)
-        elif cursor_kind == CursorKind.STRUCT_DECL:
-            self.parse_STRUCT_DECL(include_filename, indent, current_namespace_path, cursor)
+        elif cursor_kind == CursorKind.CLASS_DECL or cursor_kind == CursorKind.STRUCT_DECL:
+            self.parse_record_decl(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.FUNCTION_DECL:
             self.parse_FUNCTION_DECL(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.USING_DIRECTIVE:
             for child in cursor.get_children():
                 if child.kind == CursorKind.NAMESPACE_REF:
-                    self.namespace_mgr.add_using_namespace(current_namespace_path, cursor.spelling.split("::"))
+                    self.namespace_mgr.add_using_namespace(current_namespace_path, child.spelling.split("::"))
         else:
             print "%sUnhandled %s at %s:%d" % (indent, cursor_kind, cursor.location.file, cursor.location.line)
 

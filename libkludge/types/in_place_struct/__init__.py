@@ -24,10 +24,10 @@ class InPlaceStructTypeInfo(TypeInfo):
 
 class InPlaceStructSelector(Selector):
 
-  def __init__(self, jinjenv, nested_name):
+  def __init__(self, jinjenv, nested_name, cpp_type_expr):
     Selector.__init__(self, jinjenv)
     self.nested_name = nested_name
-    self.cpp_type_name = "::".join(nested_name)
+    self.cpp_type_name = str(cpp_type_expr)
 
   def get_desc(self):
     return "InPlaceStruct:%s" % str(self.nested_name)

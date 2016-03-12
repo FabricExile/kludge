@@ -3,6 +3,7 @@
 #
 
 import clang
+from cpp_type_expr_parser import *
 
 class Namespace:
 
@@ -64,11 +65,12 @@ class Namespace:
 
 class NamespaceMgr:
 
-  def __init__(self):
+  def __init__(self, cpp_type_expr_parser):
     # [pzion 20160311] Each member in the namespace is either a Clang cursor that is the
     # definition of the type (or typedef/using; if there is no definition, it's the declaration),
     # or a dict in the case that it's a nested namespace
     self.root_namespace = Namespace(None, [])
+    self.cpp_type_expr_parser = cpp_type_expr_parser
 
   def _resolve_namespace(self, namespace_path):
     namespace = self.root_namespace.maybe_get_child_namespace(namespace_path)
@@ -94,7 +96,23 @@ class NamespaceMgr:
       raise Exception("Failed to resolve namespace '%s' inside namespace '%s'" % ("::".join(import_namespace_path), "::".join(namespace_path)))
     namespace.usings.append(import_namespace)
 
-  def get_nested_type_name(self, current_namespace_path, value):
+  def globalize_simple_cpp_type_name(self, current_namespace_path, type_name):
+    nested_type_name = type_name.split("::")
+    current_namespace = self._resolve_namespace(current_namespace_path)
+    while current_namespace:        
+      clang_type_decl = current_namespace.maybe_find_clang_type_decl(nested_type_name)
+      if clang_type_decl:
+        nested_type_name = current_namespace.path + nested_type_name
+        break
+      current_namespace = current_namespace.parent_namespace
+    return "::".join(nested_type_name)
+
+  def globalize_cpp_type_expr(self, current_namespace_path, cpp_type_expr):
+    def globalize_name(name):
+      return self.globalize_simple_cpp_type_name(current_namespace_path, name)
+    cpp_type_expr.tranform_names(globalize_name)
+
+  def resolve_cpp_type_expr(self, current_namespace_path, value):
     current_namespace = self._resolve_namespace(current_namespace_path)
     if isinstance(value, clang.cindex.Type):
       type_name = value.spelling
@@ -102,10 +120,7 @@ class NamespaceMgr:
       type_name = value
     else:
       raise Exception("unexpected value type")
-    nested_type_name = type_name.split("::")
-    while current_namespace:        
-      clang_type_decl = current_namespace.maybe_find_clang_type_decl(nested_type_name)
-      if clang_type_decl:
-        return current_namespace.path + nested_type_name
-      current_namespace = current_namespace.parent_namespace
-    return nested_type_name
+    cpp_type_expr = self.cpp_type_expr_parser.parse(type_name)
+    self.globalize_cpp_type_expr(current_namespace_path, cpp_type_expr)
+    return cpp_type_expr
+

@@ -99,6 +99,9 @@ class Type:
 
     return (undq_cpp_type_expr, DirQual(direction, qualifier))
 
+  def tranform_names(self, cb):
+    pass
+
   def __str__(self):
     return self.get_desc()
 
@@ -260,6 +263,9 @@ class Named(Direct):
   def build_unqualified_desc(self):
     return self.name, ""
 
+  def tranform_names(self, cb):
+    self.name = cb(self.name)
+
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
       and self.name == other.name
@@ -279,6 +285,9 @@ class FixedArrayOf(Direct):
     rhs = "[%u]%s" % (self.size, rhs)
     return lhs, rhs
 
+  def tranform_names(self, cb):
+    self.element.tranform_names(cb)
+
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
       and self.element == other.element \
@@ -293,6 +302,11 @@ class Template(Direct):
     Direct.__init__(self)
     self.name = name
     self.params = params
+
+  def tranform_names(self, cb):
+    self.name = cb(self.name)
+    for i in range(0, len(self.params)):
+      self.params[i].tranform_names(cb)
 
   def build_unqualified_desc(self):
     lhs = self.name + "< " + ", ".join(map(
@@ -314,6 +328,9 @@ class Indirect(Type):
   def __init__(self, pointee):
     Type.__init__(self)
     self.pointee = pointee
+
+  def tranform_names(self, cb):
+    self.pointee.tranform_names(cb)
 
   def __eq__(self, other):
     return Type.__eq__(self, other) \

@@ -19,6 +19,4 @@ operator entry() {
   report("ReturnSecondSecond(b) = " + ReturnSecondSecond(b));
 
   report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
-
-  report("ReturnDoublePtrArray() = " + ReturnDoublePtrArray());
 }

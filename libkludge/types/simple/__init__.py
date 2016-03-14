@@ -24,28 +24,28 @@ class SimpleTypeInfo(TypeInfo):
 
 class SimpleSelector(Selector):
 
-  boolean_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "Boolean", undq_cpp_type_expr)
-  sint8_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "SInt8", undq_cpp_type_expr)
-  uint8_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "UInt8", undq_cpp_type_expr)
-  sint16_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "SInt16", undq_cpp_type_expr)
-  uint16_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "UInt16", undq_cpp_type_expr)
-  sint32_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "SInt32", undq_cpp_type_expr)
-  uint32_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "UInt32", undq_cpp_type_expr)
-  sint64_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "SInt64", undq_cpp_type_expr)
-  uint64_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "UInt64", undq_cpp_type_expr)
-  float32_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "Float32", undq_cpp_type_expr)
-  float64_type_info_gen = lambda jinjenv, undq_cpp_type_expr: \
-    SimpleTypeInfo(jinjenv, "Float64", undq_cpp_type_expr)
+  boolean_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "Boolean", Bool())
+  sint8_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "SInt8", Named("int8_t"))
+  uint8_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "UInt8", Named("uint8_t"))
+  sint16_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "SInt16", Named("int16_t"))
+  uint16_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "UInt16", Named("uint16_t"))
+  sint32_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "SInt32", Named("int32_t"))
+  uint32_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "UInt32", Named("uint32_t"))
+  sint64_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "SInt64", Named("int64_t"))
+  uint64_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "UInt64", Named("uint64_t"))
+  float32_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "Float32", Float())
+  float64_type_info_gen = lambda jinjenv: \
+    SimpleTypeInfo(jinjenv, "Float64", Double())
 
   type_name_lib_undq_to_simple_type_info_gen = {
     "bool": boolean_type_info_gen,
@@ -90,21 +90,21 @@ class SimpleSelector(Selector):
       if simple_type_info_gen:
         return DirQualTypeInfo(
           dir_qual.direct,
-          simple_type_info_gen(self.jinjenv, undq_cpp_type_expr)
+          simple_type_info_gen(self.jinjenv)
           )
-    if isinstance(cpp_type_expr, PointerTo) \
-      and isinstance(cpp_type_expr.pointee, Direct):
-      undq_cpp_type_expr = cpp_type_expr.pointee.make_unqualified()
-      simple_type_info_gen = self.type_name_lib_undq_to_simple_type_info_gen.get(undq_cpp_type_expr.get_desc())
-      if simple_type_info_gen:
-        if cpp_type_expr.pointee.is_const:
-          dq = dir_qual.const_pointer
-        else:
-          dq = dir_qual.mutable_pointer
-        return DirQualTypeInfo(
-          dq,
-          simple_type_info_gen(self.jinjenv, undq_cpp_type_expr)
-          )
+    # if isinstance(cpp_type_expr, PointerTo) \
+    #   and isinstance(cpp_type_expr.pointee, Direct):
+    #   undq_cpp_type_expr = cpp_type_expr.pointee.make_unqualified()
+    #   simple_type_info_gen = self.type_name_lib_undq_to_simple_type_info_gen.get(undq_cpp_type_expr.get_desc())
+    #   if simple_type_info_gen:
+    #     if cpp_type_expr.pointee.is_const:
+    #       dq = dir_qual.const_pointer
+    #     else:
+    #       dq = dir_qual.mutable_pointer
+    #     return DirQualTypeInfo(
+    #       dq,
+    #       simple_type_info_gen(self.jinjenv)
+    #       )
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Direct):
       undq_cpp_type_expr = cpp_type_expr.pointee.make_unqualified()
@@ -116,5 +116,5 @@ class SimpleSelector(Selector):
           dq = dir_qual.mutable_reference
         return DirQualTypeInfo(
           dq,
-          simple_type_info_gen(self.jinjenv, undq_cpp_type_expr)
+          simple_type_info_gen(self.jinjenv)
           )

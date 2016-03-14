@@ -34,14 +34,4 @@ inline std::vector< std::vector<std::string> > ReturnStringArrayArray()
   return a;
 }
 
-inline std::vector<double *> ReturnDoublePtrArray()
-{
-  std::vector<double *> result;
-  static double pi = 3.14;
-  result.push_back(&pi);
-  result.push_back(&pi);
-  result.push_back(&pi);
-  return result;
-}
-
 #endif

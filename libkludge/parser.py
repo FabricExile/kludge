@@ -828,6 +828,7 @@ fabricBuildEnv.SharedLibrary(
             print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
 
             self.namespace_mgr.add_type(current_namespace_path, cursor.displayname, cpp_type_expr)
+            cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
             self.namespace_mgr.add_nested_namespace(current_namespace_path, cursor.displayname)
 
             clang_members = []

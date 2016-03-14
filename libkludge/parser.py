@@ -186,7 +186,7 @@ OR %prog -c <config file>""",
             print "Usage error: You must provide at least one input file"
             print "Use --help for detailed usage information"
             return
-        if not 'basename' in self.config:
+        if not self.config.get('basename'):
             self.config['basename'] = self.config['extname']
 
         print "Using configuration:"
@@ -210,7 +210,9 @@ OR %prog -c <config file>""",
             os.path.join(self.config['outdir'], self.config['basename'] + '.kl'),
             os.path.join(self.config['outdir'], self.config['basename'] + '.cpp'),
             )
-        with open(os.path.join(self.config['outdir'], 'SConstruct'), "w") as fh:
+        sconstruct_filename = os.path.join(self.config['outdir'], 'SConstruct')
+        print "Writing %s" % sconstruct_filename
+        with open(sconstruct_filename, "w") as fh:
             fh.write("""
 #
 # Copyright 2010-2015 Fabric Software Inc. All rights reserved.
@@ -996,17 +998,23 @@ fabricBuildEnv.SharedLibrary(
 
                 # kl_type.methods.append(method)
 
+        can_in_place = True
         members = []
         for clang_member in clang_members:
-            member_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, clang_member.type)
-            member = Member(
-                self.type_mgr.get_dqti(member_cpp_type_expr),
-                clang_member.displayname,
-                clang_member.access_specifier == AccessSpecifier.PUBLIC,
-                )
-            members.append(member)
+            try:
+                member_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, clang_member.type)
+                member = Member(
+                    self.type_mgr.get_dqti(member_cpp_type_expr),
+                    clang_member.displayname,
+                    clang_member.access_specifier == AccessSpecifier.PUBLIC,
+                    )
+                if not member.can_in_place:
+                    can_in_place = False
+                members.append(member)
+            except Exception as e:
+                print "Warning: member at %s:%d" % (clang_member.location.file, clang_member.location.line)
+                print "  Reason: %s" % e
 
-        can_in_place = all(member and member.can_in_place for member in members)
         if can_in_place:
             self.type_mgr.add_selector(
                 InPlaceStructSelector(
@@ -1104,8 +1112,7 @@ fabricBuildEnv.SharedLibrary(
         nested_name = current_namespace_path + [cursor.spelling]
         print "%sFUNCTION_DECL %s" % (indent, "::".join(nested_name))
 
-        if True:
-        # try:
+        try:
             param_index = 1
             params = []
             for param_cursor in cursor.get_children():
@@ -1133,8 +1140,9 @@ fabricBuildEnv.SharedLibrary(
                     params,
                     )
                 )
-        # except Exception as e:
-        #     print "%s Unable to wrap function: %s" % (indent, str(e))
+        except Exception as e:
+            print "Warning: ignored function at %s:%d" % (cursor.location.file, cursor.location.line)
+            print "  Reason: %s" % e
 
     ignored_cursor_kinds = [
         CursorKind.MACRO_DEFINITION,
@@ -1311,5 +1319,8 @@ fabricBuildEnv.SharedLibrary(
 
         #     kl_struct.methods = methods
 
+        print "Writing %s" % output_kl_filename
         self.jinja_stream('kl').dump(output_kl_filename)
+
+        print "Writing %s" % output_cpp_filename
         self.jinja_stream('cpp').dump(output_cpp_filename)

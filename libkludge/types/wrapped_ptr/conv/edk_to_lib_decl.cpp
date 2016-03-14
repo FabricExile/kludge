@@ -3,4 +3,4 @@
 {######################################################################}
 
 {{conv.type_info.lib.name.base}} {{conv.value_name.edk}}{{conv.type_info.lib.name.suffix}};
-{{conv.conv.render_edk_to_lib(conv.value_name)}}
+{{conv.render_edk_to_lib()}}

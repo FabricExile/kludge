@@ -1058,16 +1058,21 @@ fabricBuildEnv.SharedLibrary(
 
             this_type_info = self.type_mgr.get_dqti(cpp_type_expr).type_info
 
+            existing_method_edk_symbol_names = set()
             instance_methods = []
             for clang_instance_method in clang_instance_methods:
                 try:
-                    instance_methods.append(InstanceMethod(
+                    instance_method = InstanceMethod(
                         self.type_mgr,
                         self.namespace_mgr,
                         record_namespace_path,
                         this_type_info,
                         clang_instance_method,
-                        ))
+                        )
+                    if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
+                        raise Exception("instance method with name EDK symbol name already exists")
+                    existing_method_edk_symbol_names.add(instance_method.edk_symbol_name)
+                    instance_methods.append(instance_method)
                 except Exception as e:
                     print "Warning: ignored method at %s:%d" % (clang_instance_method.location.file, clang_instance_method.location.line)
                     print "  Reason: %s" % e

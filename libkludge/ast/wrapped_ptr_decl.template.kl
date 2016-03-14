@@ -32,7 +32,7 @@ struct {{decl.this_type_info.kl.name.compound}} {
     {% endif %}
 {{decl.this_type_info.kl.name.compound}}.{{method.name}}(
     {% for param in method.params %}
-    {{param.render_kl()}}{{"," if not loop.last else ""}}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{method.edk_symbol_name}}";
 //////////////////////////////////////////////////////////////////////////////

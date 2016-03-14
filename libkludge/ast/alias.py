@@ -9,7 +9,7 @@ class Alias(Decl):
     include_filename,
     location,
     desc,
-    new_type_info,
+    new_kl_type_name,
     old_type_info,
     ):
     Decl.__init__(
@@ -19,7 +19,7 @@ class Alias(Decl):
         location,
         "Type alias '%s'" % desc
         )
-    self.new_type_info = new_type_info
+    self.new_kl_type_name = new_kl_type_name
     self.old_type_info = old_type_info
 
   def jinja_stream(self, jinjenv, lang):

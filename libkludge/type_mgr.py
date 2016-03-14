@@ -17,8 +17,6 @@ class TypeMgr:
   def __init__(self, jinjenv):
     self._selectors = []
 
-    self._alias_name_to_expr = {}
-
     self._cpp_type_name_to_dqti = {}
 
     # Order is very important here!
@@ -31,9 +29,6 @@ class TypeMgr:
     self.add_selector(StdVectorSelector(jinjenv))
     self.add_selector(StdMapSelector(jinjenv))
 
-  def create_cpp_type_expr_parser(self):
-    return cpp_type_expr_parser.Parser(self._alias_name_to_expr)
-
   def add_selector(self, codec):
     print "Registered conversion selector: %s" % codec.get_desc()
     self._selectors.append(codec)
@@ -41,20 +36,6 @@ class TypeMgr:
   def add_dqti(self, cpp_type_name, dqti):
     print "Adding type conversion: %s -> %s" % (cpp_type_name, dqti.get_desc())
     self._cpp_type_name_to_dqti[cpp_type_name] = dqti
-
-  def add_type_alias(self, new_nested_name, new_cpp_type_expr, old_cpp_type_expr):
-    old_dqti = self.maybe_get_dqti(old_cpp_type_expr)
-    if old_dqti:
-      old_type_info = old_dqti.type_info
-      new_type_info = TypeInfo(
-        old_type_info.jinjenv,
-        lib_expr = new_cpp_type_expr,
-        nested_name = new_nested_name,
-        )
-      self._alias_name_to_expr[str(new_cpp_type_expr)] = old_type_info.lib.expr
-      return new_type_info, old_type_info
-    else:
-      return None, None
 
   def maybe_get_dqti(self, cpp_type_expr):
     cpp_type_name = str(cpp_type_expr)

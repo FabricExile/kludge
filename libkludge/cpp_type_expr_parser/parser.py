@@ -4,12 +4,12 @@ from pyparsing import *
 class Parser:
 
   def _build_named(self, name):
-    expr = self._alias_name_to_expr.get(name)
+    expr = self._maybe_lookup_cpp_type_expr_cb(name)
     if expr:
       return expr
     return Named(name)
 
-  def __init__(self, alias_name_to_expr = {}):
+  def __init__(self, maybe_lookup_cpp_type_expr_cb):
     self.tok_ast = Literal("*").suppress()
     self.tok_amp = Literal("&").suppress()
     self.tok_colon_colon = Literal("::").suppress()
@@ -40,7 +40,7 @@ class Parser:
       ]).setParseAction(lambda s,l,t: self._build_named(t[0]))
     self.number = Word(nums).setParseAction(lambda s,l,t: int(t[0]))
 
-    self._alias_name_to_expr = alias_name_to_expr
+    self._maybe_lookup_cpp_type_expr_cb = maybe_lookup_cpp_type_expr_cb
 
     self.ty_void = self.key_void.setParseAction(lambda s,l,t: Void())
     self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: Bool())

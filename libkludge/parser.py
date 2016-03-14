@@ -200,8 +200,8 @@ OR %prog -c <config file>""",
         sys.stdout.write("\n")
 
         self.jinjenv = create_jinjenv(self.config)
+        self.namespace_mgr = NamespaceMgr()
         self.type_mgr = TypeMgr(self.jinjenv)
-        self.namespace_mgr = NamespaceMgr(self.type_mgr.create_cpp_type_expr_parser())
 
         for infile in self.config['infiles']:
             self.parse(self.expand_envvars(infile))
@@ -824,7 +824,7 @@ fabricBuildEnv.SharedLibrary(
         cpp_type_expr = cpp_type_expr_parser.Named("::".join(nested_name))
         print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
 
-        self.namespace_mgr.add_type_decl(current_namespace_path, cursor)
+        self.namespace_mgr.add_type(current_namespace_path, cursor.spelling, cpp_type_expr)
 
         clang_members = []
         clang_static_methods = []
@@ -1070,18 +1070,19 @@ fabricBuildEnv.SharedLibrary(
         try:
             old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
             print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
-            new_type_info, old_type_info = self.type_mgr.add_type_alias(new_nested_name, new_cpp_type_expr, old_cpp_type_expr)
-            if new_type_info and old_type_info:
-                self.edk_decls.add(
-                    ast.Alias(
-                        self.config['extname'],
-                        include_filename,
-                        self.get_location(cursor.location),
-                        cursor.displayname,
-                        new_type_info,
-                        old_type_info,
-                        )
+            new_cpp_type_expr = self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, old_cpp_type_expr)
+            old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
+            new_kl_type_name = "_".join(new_nested_name)
+            self.edk_decls.add(
+                ast.Alias(
+                    self.config['extname'],
+                    include_filename,
+                    self.get_location(cursor.location),
+                    cursor.displayname,
+                    new_kl_type_name,
+                    old_type_info,
                     )
+                )
         except Exception as e:
             print "Warning: ignored typedef at %s:%d" % (cursor.location.file, cursor.location.line)
             print "  Reason: %s" % e

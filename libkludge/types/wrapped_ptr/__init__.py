@@ -30,14 +30,14 @@ class WrappedPtrSelector(Selector):
   def __init__(self, jinjenv, nested_name, cpp_type_expr):
     Selector.__init__(self, jinjenv)
     self.nested_name = nested_name
-    self.cpp_type_expr = str(cpp_type_expr)
+    self.cpp_type_name = str(cpp_type_expr)
 
   def get_desc(self):
     return "WrappedPtr:%s" % str(self.nested_name)
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Named) \
-      and cpp_type_expr.name == self.cpp_type_expr:
+      and cpp_type_expr.name == self.cpp_type_name:
       return DirQualTypeInfo(
         dir_qual.direct,
         WrappedPtrTypeInfo(

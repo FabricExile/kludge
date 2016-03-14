@@ -66,6 +66,7 @@ class SimpleSelector(Selector):
     "unsigned long long": uint64_type_info_gen,
     "uint64_t": uint64_type_info_gen,
     "size_t": uint64_type_info_gen,
+    "ptrdiff_t": uint64_type_info_gen,
     "float": float32_type_info_gen,
     "double": float64_type_info_gen,
     #######################################################################

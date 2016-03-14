@@ -19,6 +19,14 @@ struct {{decl.this_type_info.kl.name.compound}} {
   {% endfor %}
 
   {% for method in decl.methods %}
+//////////////////////////////////////////////////////////////////////////////
+//
+// KLUDGE EDK
+// Description: {{ method.desc }}
+// C++ Source Location: {{ method.location }}
+//
+//////////////////////////////////////////////////////////////////////////////
+//
     {% if method.result %}
 {{method.result.type_info.kl.name.compound}}
     {% endif %}
@@ -26,7 +34,8 @@ struct {{decl.this_type_info.kl.name.compound}} {
     {% for param in method.params %}
     {{param.render_kl()}}{{"," if not loop.last else ""}}
     {% endfor %}
-    ) = "{{decl.this_type_info.kl.name.compound}}_{{method.name}}";
+    ) = "{{method.edk_symbol_name}}";
+//////////////////////////////////////////////////////////////////////////////
 
   {% endfor %}
 {% endblock body %}

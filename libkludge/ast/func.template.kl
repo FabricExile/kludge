@@ -8,5 +8,5 @@
 {{ decl.result_codec.render_type_kl() }}
 {{ decl.name_kl() }}(
     {{ macros.kl_param_list(decl.params) | indent(4) }}
-    ) = "{{ decl.name_edk() }}";
+    ) = "{{decl.edk_symbol_name}}";
 {% endblock body %}

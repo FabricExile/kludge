@@ -1,3 +1,7 @@
+#
+# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+#
+
 from decl import Decl
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec

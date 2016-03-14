@@ -12,9 +12,17 @@ typedef ::{{decl.this_type_info.lib.name.base}} {{decl.this_type_info.edk.name.l
 } } }
 
 {% for method in decl.methods %}
+//////////////////////////////////////////////////////////////////////////////
+//
+// KLUDGE EDK
+// Description: {{ method.desc }}
+// C++ Source Location: {{ method.location }}
+//
+//////////////////////////////////////////////////////////////////////////////
+//
 FABRIC_EXT_EXPORT
 {{method.result.render_direct_type_edk()}}
-{{decl.this_type_info.kl.name.compound}}_{{method.name}}(
+{{method.edk_symbol_name}}(
     {{macros.edk_param_list(method.result, method.this, method.params) | indent(4)}}
     )
 {
@@ -24,5 +32,7 @@ FABRIC_EXT_EXPORT
             );
     {{macros.cpp_call_post(method.result, method.params) | indent(4)}}
 }
+//////////////////////////////////////////////////////////////////////////////
+
 {% endfor %}
 {% endblock body %}

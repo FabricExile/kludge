@@ -1,11 +1,21 @@
 {
   "extname": "OIIO",
   "infiles": [
-    "${OIIO_INCLUDE}/OpenImageIO/typedesc.h"
+    "${OIIO_DIR}/include/OpenImageIO/typedesc.h",
+    "${OIIO_DIR}/include/OpenImageIO/ustring.h"
     ],
   "ignored_infiles": [
-    "${OIIO_INCLUDE}/OpenImageIO/ustring.h",
-    "${OIIO_INCLUDE}/OpenImageIO/paramlist.h",
-    "${OIIO_INCLUDE}/OpenImageIO/imageio.h"
+    "${OIIO_DIR}/include/OpenImageIO/paramlist.h",
+    "${OIIO_DIR}/include/OpenImageIO/imageio.h"
+    ],
+  "libpath": [
+    "${OIIO_DIR}/lib",
+    "${BOOST_DIR}/lib",
+    "${OPENEXR_DIR}/lib"
+    ],
+  "libs": [
+    "OpenImageIO",
+    "boost_system",
+    "IlmImfUtil-2_2"
     ]
   }

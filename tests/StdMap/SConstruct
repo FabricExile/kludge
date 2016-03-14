@@ -7,6 +7,8 @@ import os, sys
 
 extname = 'StdMap'
 basename = 'actual'
+libpath = []
+libs = []
 
 try:
   fabricPath = os.environ['FABRIC_DIR']
@@ -19,6 +21,8 @@ Import('fabricBuildEnv')
 
 fabricBuildEnv.Append(CPPPATH = ["../.."])
 fabricBuildEnv.Append(CXXFLAGS = ["-g"])
+fabricBuildEnv.Append(LIBPATH = libpath)
+fabricBuildEnv.Append(LIBS = libs)
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),

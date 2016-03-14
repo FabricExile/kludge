@@ -1,9 +1,14 @@
+#
+# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+#
+
 import clang
 from clang.cindex import CursorKind, TypeKind
 from value_name import ValueName
 from result_codec import ResultCodec
 from this_codec import ThisCodec
 from param_codec import ParamCodec
+import hashlib
 
 class InstanceMethod:
 
@@ -16,6 +21,8 @@ class InstanceMethod:
     clang_instance_method,
     ):
     self.name = clang_instance_method.spelling
+    self.desc = "Instance method '%s'" % clang_instance_method.displayname
+    self.location = "%s:%s" % (clang_instance_method.location.file, clang_instance_method.location.line)
 
     result_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, clang_instance_method.result_type.spelling)
     self.result = ResultCodec(
@@ -33,3 +40,8 @@ class InstanceMethod:
               type_mgr.get_dqti(param_cpp_type_expr),
               child.spelling
               ))
+
+    h = hashlib.md5()
+    for param in self.params:
+      h.update(param.type_info.edk.name.toplevel)
+    self.edk_symbol_name = "_".join([this_type_info.kl.name.compound, self.name, h.hexdigest()])

@@ -1,3 +1,7 @@
+#
+# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+#
+
 import jinja2, os, sys, optparse, json, re
 
 import clang
@@ -93,6 +97,7 @@ class Parser:
 
     def __init__(self):
         self.edk_decls = ast.DeclSet()
+        self.existing_edk_symbol_names = set()
 
     envvar_re = re.compile("\\${[A-Za-z_]+}")
 
@@ -222,6 +227,8 @@ import os, sys
 
 extname = '%s'
 basename = '%s'
+libpath = [%s]
+libs = [%s]
 
 try:
   fabricPath = os.environ['FABRIC_DIR']
@@ -234,13 +241,28 @@ Import('fabricBuildEnv')
 
 fabricBuildEnv.Append(CPPPATH = ["../.."])
 fabricBuildEnv.Append(CXXFLAGS = ["-g"])
+fabricBuildEnv.Append(LIBPATH = libpath)
+fabricBuildEnv.Append(LIBS = libs)
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),
   [basename + '.cpp']
   )
-""" % (self.config['extname'], self.config['basename']))
-        with open(os.path.join(opts.outdir, self.config['extname']+'.fpm.json'), "w") as fh:
+""" % (
+    self.config['extname'],
+    self.config['basename'],
+    ", ".join(map(
+        lambda libdir: "'%s'" % self.expand_envvars(libdir),
+        self.config.get('libpath', [])
+        )),
+    ", ".join(map(
+        lambda libname: "'%s'" % libname,
+        self.config.get('libs', [])
+        )),
+    ))
+        fpmFilename = os.path.join(opts.outdir, self.config['extname']+'.fpm.json')
+        print "Writing %s" % fpmFilename
+        with open(fpmFilename, "w") as fh:
             fh.write("""
 {
 "libs": "%s",
@@ -1134,17 +1156,19 @@ fabricBuildEnv.SharedLibrary(
 
             result_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, cursor.result_type)
 
-            self.edk_decls.add(
-                ast.Func(
-                    self.config['extname'],
-                    include_filename,
-                    self.get_location(cursor.location),
-                    cursor.displayname,
-                    nested_name,
-                    self.type_mgr.get_dqti(result_cpp_type_expr),
-                    params,
-                    )
+            func = ast.Func(
+                self.config['extname'],
+                include_filename,
+                self.get_location(cursor.location),
+                cursor.displayname,
+                nested_name,
+                self.type_mgr.get_dqti(result_cpp_type_expr),
+                params,
                 )
+            if func.edk_symbol_name in self.existing_edk_symbol_names:
+                raise Exception("identical EDK symbol already exists")
+            self.existing_edk_symbol_names.add(func.edk_symbol_name)
+            self.edk_decls.add(func)
         except Exception as e:
             print "Warning: ignored function at %s:%d" % (cursor.location.file, cursor.location.line)
             print "  Reason: %s" % e

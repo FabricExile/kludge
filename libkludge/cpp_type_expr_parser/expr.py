@@ -293,6 +293,10 @@ class FixedArrayOf(Direct):
       and self.element == other.element \
       and self.size == other.size
 
+  @property
+  def range(self):
+    return range(0, self.size)
+
   def __copy__(self):
     return FixedArrayOf(self.element, self.size)
 

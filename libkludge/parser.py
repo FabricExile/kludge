@@ -820,8 +820,8 @@ fabricBuildEnv.SharedLibrary(
         current_namespace_path,
         cursor,
         ):
-        nested_name = current_namespace_path + [cursor.spelling]
-        cpp_type_expr = cpp_type_expr_parser.Named("::".join(nested_name))
+        record_namespace_path = current_namespace_path + [cursor.spelling]
+        cpp_type_expr = cpp_type_expr_parser.Named("::".join(record_namespace_path))
         print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
 
         self.namespace_mgr.add_type(current_namespace_path, cursor.spelling, cpp_type_expr)
@@ -836,7 +836,7 @@ fabricBuildEnv.SharedLibrary(
                 self.parse_TYPEDEF_DECL(
                     include_filename,
                     indent+"  ",
-                    nested_name,
+                    record_namespace_path,
                     child,
                     )
                 continue
@@ -998,7 +998,7 @@ fabricBuildEnv.SharedLibrary(
 
         members = []
         for clang_member in clang_members:
-            member_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, clang_member.type)
+            member_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, clang_member.type)
             member = Member(
                 self.type_mgr.get_dqti(member_cpp_type_expr),
                 clang_member.displayname,
@@ -1011,7 +1011,7 @@ fabricBuildEnv.SharedLibrary(
             self.type_mgr.add_selector(
                 InPlaceStructSelector(
                     self.jinjenv,
-                    nested_name,
+                    record_namespace_path,
                     cpp_type_expr,
                     )
                 )
@@ -1019,7 +1019,7 @@ fabricBuildEnv.SharedLibrary(
             self.type_mgr.add_selector(
                 WrappedPtrSelector(
                     self.jinjenv,
-                    nested_name,
+                    record_namespace_path,
                     cpp_type_expr,
                     )
                 )
@@ -1032,7 +1032,7 @@ fabricBuildEnv.SharedLibrary(
                 instance_methods.append(InstanceMethod(
                     self.type_mgr,
                     self.namespace_mgr,
-                    current_namespace_path,
+                    record_namespace_path,
                     this_type_info,
                     clang_instance_method,
                     ))
@@ -1083,16 +1083,16 @@ fabricBuildEnv.SharedLibrary(
         try:
             old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
             print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
-            new_cpp_type_expr = self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, old_cpp_type_expr)
+            self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
             old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
-            new_kl_type_name = "_".join(new_nested_name)
+            self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
             self.edk_decls.add(
                 ast.Alias(
                     self.config['extname'],
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    new_kl_type_name,
+                    "_".join(new_nested_name),
                     old_type_info,
                     )
                 )

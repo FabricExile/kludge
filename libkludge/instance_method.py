@@ -18,6 +18,7 @@ class InstanceMethod:
     self.name = clang_instance_method.spelling
 
     result_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, clang_instance_method.result_type.spelling)
+    print "result_cpp_type_expr = %s" % str(result_cpp_type_expr)
     self.result = ResultCodec(
       type_mgr.get_dqti(result_cpp_type_expr)
       )

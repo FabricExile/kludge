@@ -17,6 +17,7 @@ class TypeMgr:
   def __init__(self, jinjenv):
     self._selectors = []
 
+    self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
     self._cpp_type_name_to_dqti = {}
 
     # Order is very important here!
@@ -33,12 +34,20 @@ class TypeMgr:
     print "Registered conversion selector: %s" % codec.get_desc()
     self._selectors.append(codec)
 
+  def add_alias(self, new_cpp_type_expr, old_cpp_type_expr):
+    self._alias_new_cpp_type_name_to_old_cpp_type_expr[str(new_cpp_type_expr)] = old_cpp_type_expr
+
   def add_dqti(self, cpp_type_name, dqti):
     print "Adding type conversion: %s -> %s" % (cpp_type_name, dqti.get_desc())
     self._cpp_type_name_to_dqti[cpp_type_name] = dqti
 
   def maybe_get_dqti(self, cpp_type_expr):
-    cpp_type_name = str(cpp_type_expr)
+    while True:
+      cpp_type_name = str(cpp_type_expr)
+      alias_cpp_type_expr = self._alias_new_cpp_type_name_to_old_cpp_type_expr.get(cpp_type_name)
+      if not alias_cpp_type_expr:
+        break
+      cpp_type_expr = alias_cpp_type_expr
 
     dqti = self._cpp_type_name_to_dqti.get(cpp_type_name)
     if dqti:

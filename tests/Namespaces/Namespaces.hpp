@@ -8,7 +8,9 @@ namespace FooNS {
 namespace BarNS {
 
 struct BarType {
+  typedef size_t size;
   std::string str;
+  size getSize() const { return str.size(); }
 };
 
 } // namespace BarNS

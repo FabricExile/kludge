@@ -88,7 +88,6 @@ class NamespaceMgr:
   def add_type(self, namespace_path, type_name, cpp_type_expr):
     namespace = self._resolve_namespace(namespace_path)
     namespace.cpp_type_exprs.setdefault(type_name, cpp_type_expr)
-    return Named("::".join(namespace_path + [type_name]))
 
   def add_using_namespace(self, namespace_path, import_namespace_path):
     namespace = self._resolve_namespace(namespace_path)

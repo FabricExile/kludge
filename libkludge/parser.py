@@ -825,12 +825,22 @@ fabricBuildEnv.SharedLibrary(
         print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
 
         self.namespace_mgr.add_type(current_namespace_path, cursor.spelling, cpp_type_expr)
+        self.namespace_mgr.add_nested_namespace(current_namespace_path, cursor.spelling)
 
         clang_members = []
         clang_static_methods = []
         clang_instance_methods = []
 
         for child in cursor.get_children():
+            if child.kind == CursorKind.TYPEDEF_DECL:
+                self.parse_TYPEDEF_DECL(
+                    include_filename,
+                    indent+"  ",
+                    nested_name,
+                    child,
+                    )
+                continue
+
             if child.kind == CursorKind.FIELD_DECL:
                 print "%s  FIELD_DECL %s" % (indent, child.displayname)
                 clang_members.append(child)
@@ -1016,16 +1026,19 @@ fabricBuildEnv.SharedLibrary(
 
         this_type_info = self.type_mgr.get_dqti(cpp_type_expr).type_info
 
-        instance_methods = [
-            InstanceMethod(
-                self.type_mgr,
-                self.namespace_mgr,
-                current_namespace_path,
-                this_type_info,
-                clang_instance_method,
-                )
-            for clang_instance_method in clang_instance_methods
-            ]
+        instance_methods = []
+        for clang_instance_method in clang_instance_methods:
+            try:
+                instance_methods.append(InstanceMethod(
+                    self.type_mgr,
+                    self.namespace_mgr,
+                    current_namespace_path,
+                    this_type_info,
+                    clang_instance_method,
+                    ))
+            except Exception as e:
+                print "Warning: ignored method at %s:%d" % (clang_instance_method.location.file, clang_instance_method.location.line)
+                print "  Reason: %s" % e
 
         if can_in_place:
             self.edk_decls.add(

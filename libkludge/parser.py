@@ -227,6 +227,7 @@ import os, sys
 
 extname = '%s'
 basename = '%s'
+cpppath = [%s]
 libpath = [%s]
 libs = [%s]
 
@@ -241,6 +242,7 @@ Import('fabricBuildEnv')
 
 fabricBuildEnv.Append(CPPPATH = ["../.."])
 fabricBuildEnv.Append(CXXFLAGS = ["-g"])
+fabricBuildEnv.Append(CPPPATH = cpppath)
 fabricBuildEnv.Append(LIBPATH = libpath)
 fabricBuildEnv.Append(LIBS = libs)
 
@@ -251,6 +253,10 @@ fabricBuildEnv.SharedLibrary(
 """ % (
     self.config['extname'],
     self.config['basename'],
+    ", ".join(map(
+        lambda cppdir: "'%s'" % self.expand_envvars(cppdir),
+        self.config.get('cpppath', [])
+        )),
     ", ".join(map(
         lambda libdir: "'%s'" % self.expand_envvars(libdir),
         self.config.get('libpath', [])
@@ -1222,12 +1228,18 @@ fabricBuildEnv.SharedLibrary(
             self.parse_cursor(include_filename, childIndent, current_namespace_path, childCursor)
 
     def parse(self, unit_filename):
-        print "parsing unit: %s" % unit_filename
+        print "Parsing C++ source file: %s" % unit_filename
+
+        clang_opts = self.config['clang_opts']
+        cpppath = self.config.get('cpppath', [])
+        for cppdir in cpppath:
+            clang_opts.extend(["-I", self.expand_envvars(cppdir)])
+        print "  using Clang opts: %s" % " ".join(clang_opts)
 
         clang_index = clang.cindex.Index.create()
         unit = clang_index.parse(
             unit_filename,
-            self.config['clang_opts'],
+            clang_opts,
             None,
             clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
             # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD

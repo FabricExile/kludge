@@ -1,0 +1,5 @@
+*.cpp
+*.kl
+*.fpm.json
+*.os
+SConstruct

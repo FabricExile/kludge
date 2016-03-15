@@ -1,0 +1,17 @@
+{
+  "extname": "Bullet",
+  "cpppath": [
+    "${BULLET_DIR}/include/bullet"
+    ],
+  "infiles": [
+    "${BULLET_DIR}/include/bullet/btBulletDynamicsCommon.h"
+    ],
+  "libpath": [
+    "${BULLET_DIR}/lib"
+    ],
+  "libs": [
+    "BulletDynamics",
+    "LinearMath",
+    "MiniCL"
+    ]
+  }

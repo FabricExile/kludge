@@ -18,6 +18,24 @@ struct {{decl.this_type_info.kl.name.compound}} {
     {% endif %}
   {% endfor %}
 
+  {% for constructor in decl.constructors %}
+//////////////////////////////////////////////////////////////////////////////
+//
+// KLUDGE EDK
+// Description: {{ constructor.desc }}
+// C++ Source Location: {{ constructor.location }}
+//
+//////////////////////////////////////////////////////////////////////////////
+//
+{{decl.this_type_info.kl.name.compound}}(
+    {% for param in constructor.params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{constructor.edk_symbol_name}}";
+//////////////////////////////////////////////////////////////////////////////
+
+  {% endfor %}
+
   {% for method in decl.methods %}
 //////////////////////////////////////////////////////////////////////////////
 //

@@ -52,6 +52,31 @@ void
     {% endif %}
 {% endfor %}
 
+{% for constructor in decl.constructors %}
+//////////////////////////////////////////////////////////////////////////////
+//
+// KLUDGE EDK
+// Description: {{ constructor.desc }}
+// C++ Source Location: {{ constructor.location }}
+//
+//////////////////////////////////////////////////////////////////////////////
+//
+FABRIC_EXT_EXPORT
+void
+{{constructor.edk_symbol_name}}(
+    {{macros.edk_param_list(constructor.result, constructor.this, constructor.params) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(constructor.result, constructor.params) | indent(4)}}
+    {{decl.this_value_name.edk}}.cpp_ptr = new {{constructor.name}}(
+        {{macros.cpp_call_args(constructor.params) | indent(8)}}
+        );
+    {{macros.cpp_call_post(constructor.result, constructor.params) | indent(4)}}
+}
+//////////////////////////////////////////////////////////////////////////////
+
+{% endfor %}
+
 {% for method in decl.methods %}
 //////////////////////////////////////////////////////////////////////////////
 //

@@ -16,6 +16,7 @@ class Wrapping(Decl):
     this_type_info,
     members,
     methods,
+    constructors,
     template_basename,
     ):
     Decl.__init__(
@@ -31,6 +32,7 @@ class Wrapping(Decl):
     self.mutable_this = ThisCodec(this_type_info, True)
     self.members = members
     self.methods = methods
+    self.constructors = constructors
     self._template_basename = template_basename
 
   def jinja_stream(self, jinjenv, lang):

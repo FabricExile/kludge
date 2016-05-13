@@ -13,6 +13,7 @@ import ast
 from type_mgr import TypeMgr
 from value_name import ValueName
 from member import Member
+from constructor import Constructor
 from instance_method import InstanceMethod
 from types import InPlaceStructSelector, WrappedPtrSelector
 from param_codec import ParamCodec
@@ -862,6 +863,7 @@ fabricBuildEnv.SharedLibrary(
             clang_members = []
             clang_static_methods = []
             clang_instance_methods = []
+            clang_constructors = []
 
             for child in cursor.get_children():
                 if child.kind == CursorKind.TYPEDEF_DECL:
@@ -898,6 +900,10 @@ fabricBuildEnv.SharedLibrary(
                         pass
                     else:
                         clang_instance_methods.append(child)
+                    continue
+                elif child.kind == CursorKind.CONSTRUCTOR:
+                    print "%s  CONSTRUCTOR %s" % (indent, child.displayname)
+                    clang_constructors.append(child)
                     continue
 
                     # result_type_info = self.type_mgr.get_type_info(child.result_type)
@@ -1042,6 +1048,7 @@ fabricBuildEnv.SharedLibrary(
                         can_in_place = False
                     members.append(member)
                 except Exception as e:
+                    can_in_place = False
                     print "Warning: member at %s:%d" % (clang_member.location.file, clang_member.location.line)
                     print "  Reason: %s" % e
 
@@ -1083,6 +1090,24 @@ fabricBuildEnv.SharedLibrary(
                     print "Warning: ignored method at %s:%d" % (clang_instance_method.location.file, clang_instance_method.location.line)
                     print "  Reason: %s" % e
 
+            constructors = []
+            for clang_constructor in clang_constructors:
+                try:
+                    constructor = Constructor(
+                        self.type_mgr,
+                        self.namespace_mgr,
+                        record_namespace_path,
+                        this_type_info,
+                        clang_constructor,
+                        )
+                    if constructor.edk_symbol_name in existing_method_edk_symbol_names:
+                        raise Exception("instance method with name EDK symbol name already exists")
+                    existing_method_edk_symbol_names.add(constructor.edk_symbol_name)
+                    constructors.append(constructor)
+                except Exception as e:
+                    print "Warning: ignored constructor at %s:%d" % (clang_constructor.location.file, clang_constructor.location.line)
+                    print "  Reason: %s" % e
+
             if can_in_place:
                 self.edk_decls.add(
                     ast.Wrapping(
@@ -1093,6 +1118,7 @@ fabricBuildEnv.SharedLibrary(
                         this_type_info,
                         members,
                         instance_methods,
+                        constructors,
                         "ast/builtin/in_place_struct_decl",
                         )
                     )
@@ -1106,6 +1132,7 @@ fabricBuildEnv.SharedLibrary(
                         this_type_info,
                         members,
                         instance_methods,
+                        constructors,
                         "ast/builtin/wrapped_ptr_decl",
                         )
                     )

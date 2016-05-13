@@ -28,4 +28,16 @@ operator entry() {
   StructWithIndirectTypeThatCanInPlace st =
     ReturnStructWithIndirectTypeThatCanInPlace();
   report("st.GET_floatValue() = " + st.GET_floatValue());
+
+  Class constructor1(1.1, 'myString', 123);
+  constructor1.exportValues(floatValue, stringValue, intValue);
+  report("value.exportValues(...): floatValue = " + floatValue);
+  report("value.exportValues(...): stringValue = " + stringValue);
+  report("value.exportValues(...): intValue = " + intValue);
+
+  Class constructor2(constructor1);
+  constructor2.exportValues(floatValue, stringValue, intValue);
+  report("value.exportValues(...): floatValue = " + floatValue);
+  report("value.exportValues(...): stringValue = " + stringValue);
+  report("value.exportValues(...): intValue = " + intValue);
 }

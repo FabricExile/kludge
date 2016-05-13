@@ -1,10 +1,12 @@
 {
   "extname": "Bullet",
   "cpppath": [
-    "${BULLET_DIR}/include/bullet"
+    "${BULLET_DIR}/include"
     ],
   "infiles": [
-    "${BULLET_DIR}/include/bullet/btBulletDynamicsCommon.h"
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftBody.h",
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftBodyInternals.h",
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftBodySolvers.h"
     ],
   "libpath": [
     "${BULLET_DIR}/lib"

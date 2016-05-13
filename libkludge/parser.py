@@ -873,6 +873,7 @@ fabricBuildEnv.SharedLibrary(
             clang_members = []
             clang_instance_methods = []
             clang_constructors = []
+            type_is_pure_virtual = False
 
             for child in cursor.get_children():
                 if child.kind == CursorKind.TYPEDEF_DECL:
@@ -906,6 +907,9 @@ fabricBuildEnv.SharedLibrary(
                     if child.is_static_method():
                         print "%s    ->is static" % (indent)
                         self.parse_FUNCTION_DECL(include_filename, indent, class_namespace_path, child)
+                    elif clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
+                        print "%s    ->is pure virtual" % (indent)
+                        type_is_pure_virtual = True
                     elif child.spelling.startswith("operator"):
                         pass
                     else:
@@ -1101,23 +1105,24 @@ fabricBuildEnv.SharedLibrary(
                     print "  Reason: %s" % e
 
             constructors = []
-            for clang_constructor in clang_constructors:
-                try:
-                    constructor = Constructor(
-                        self.type_mgr,
-                        self.namespace_mgr,
-                        record_namespace_path,
-                        this_type_info,
-                        clang_constructor,
-                        )
-                    if constructor.edk_symbol_name in existing_method_edk_symbol_names:
-                        raise Exception("instance method with name EDK symbol name already exists")
-                    existing_method_edk_symbol_names.add(constructor.edk_symbol_name)
-                    constructors.append(constructor)
-                except Exception as e:
-                    print "Warning: ignored constructor at %s:%d" % (clang_constructor.location.file, clang_constructor.location.line)
-                    print "  Reason: %s" % e
-
+            if not type_is_pure_virtual:
+                for clang_constructor in clang_constructors:
+                    try:
+                        constructor = Constructor(
+                            self.type_mgr,
+                            self.namespace_mgr,
+                            record_namespace_path,
+                            this_type_info,
+                            clang_constructor,
+                            )
+                        if constructor.edk_symbol_name in existing_method_edk_symbol_names:
+                            raise Exception("instance method with name EDK symbol name already exists")
+                        existing_method_edk_symbol_names.add(constructor.edk_symbol_name)
+                        constructors.append(constructor)
+                    except Exception as e:
+                        print "Warning: ignored constructor at %s:%d" % (clang_constructor.location.file, clang_constructor.location.line)
+                        print "  Reason: %s" % e
+  
             if can_in_place:
                 self.edk_decls.add(
                     ast.Wrapping(

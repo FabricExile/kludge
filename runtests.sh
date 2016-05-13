@@ -3,6 +3,10 @@
 set -ve
 
 for d in tests/*; do
+
+  if [ ! -d "$d" ]; then
+    continue
+  fi
   
   EXTNAME=$(basename $d)
   if [ -n "$1" ]; then

@@ -1,0 +1,1 @@
+- for pure virtual functions create constructor that throws exception

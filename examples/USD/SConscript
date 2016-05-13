@@ -1,0 +1,84 @@
+#
+# Copyright 2010-2015 Fabric Software Inc. All rights reserved.
+#
+
+import os
+Import('parentEnv')
+
+usdInstallRoot = os.environ['USD_INSTALL_ROOT']
+fabricDir = os.environ['FABRIC_DIR']
+
+env = parentEnv.CloneSubStage('USD')
+
+env.Append(CXXFLAGS=[
+  '-Wall',
+  '-Wunused',
+  '-Wunused-parameter',
+  '-Wno-import',
+  '-Wpointer-arith',
+  '-Wcast-align',
+  '-Wno-unknown-pragmas',
+  '-Wno-missing-braces',
+  '-Wno-deprecated',
+  '-Wno-deprecated-declarations',
+  '-Wno-unused-parameter',
+  '-Wno-sign-compare',
+  '-Wno-unused-local-typedefs',
+  '-Wunused',
+  '-Wno-non-template-friend',
+  '-Wno-unused-but-set-variable',
+  ])
+
+env.Append(CXXFLAGS=[
+  '-fpermissive',
+  '-ftemplate-depth-250',
+  '-fvisibility-inlines-hidden',
+  '-fmessage-length=0',
+  '-fPIC',
+  '-m64',
+  '-momit-leaf-frame-pointer',
+  '-mfpmath=sse',
+  '-fno-strict-aliasing',
+  '-std=c++11',
+  ])
+
+env.Append(CPPDEFINES=[
+  'BUILD_OPTLEVEL_OPT',
+  'BUILD_COMPONENT_SRC_PREFIX=\\"amber/\\"',
+  'GL_GLEXT_PROTOTYPES',
+  'GLX_GLXEXT_PROTOTYPES',
+  ])
+
+env.Append(CPPPATH=[
+  fabricDir+'/include',
+  usdInstallRoot+'/include/gcc4-fixes',
+  usdInstallRoot+'/include',
+  '/usr/include/python2.7',
+  '/usr/local/include/python2.7',
+  '/usr/include/OpenEXR/',
+  '/opt/ubuntu/usr/include/OpenEXR/',
+  '/opt/pixar/usd-vfx2015/include',
+  '.',
+  ])
+
+env.Append(LIBPATH=[
+  usdInstallRoot+'/lib',
+  '/opt/pixar/usd-vfx2015/lib',
+  ])
+env.Append(LIBS=[
+  'usdGeom',
+  'usd',
+  'sdf',
+  'tf',
+  ])
+
+# [andrew 20150521] can't use static linking as USD depends on libstdc++
+if '-static-libstdc++' in env['LINKFLAGS']:
+    env['LINKFLAGS'].remove('-static-libstdc++')
+if '-static-libgcc' in env['LINKFLAGS']:
+    env['LINKFLAGS'].remove('-static-libgcc')
+ 
+usdExt = env.FabricExt('USD', env.Glob('*.cpp') + env.Glob('*.kl'))
+Export('usdExt')
+Alias('usdExt', usdExt)
+Return('usdExt')

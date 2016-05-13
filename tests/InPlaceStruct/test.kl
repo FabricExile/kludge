@@ -7,4 +7,9 @@ operator entry() {
   value = ReturnClass();
   report("value.intValue = " + value.intValue);
   report("value.getDesc() = " + value.getDesc());
+  Class constructor1(1, 2.2);
+  report("constructor1.getDesc() = " + constructor1.getDesc());
+  Class constructor2(constructor1);
+  report("constructor2.getDesc() = " + constructor2.getDesc());
+  report("Class::GetStaticFloat() = " + Class_GetStaticFloat());
 }

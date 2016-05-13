@@ -242,7 +242,7 @@ except:
 SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
 Import('fabricBuildEnv')
 
-fabricBuildEnv.Append(CPPPATH = ["../.."])
+fabricBuildEnv.Append(CPPPATH = ["../..", "."])
 fabricBuildEnv.Append(CXXFLAGS = cxxflags)
 fabricBuildEnv.Append(CPPPATH = cpppath)
 fabricBuildEnv.Append(LIBPATH = libpath)
@@ -868,10 +868,9 @@ fabricBuildEnv.SharedLibrary(
 
             self.namespace_mgr.add_type(current_namespace_path, cursor.displayname, cpp_type_expr)
             cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
-            self.namespace_mgr.add_nested_namespace(current_namespace_path, cursor.displayname)
+            class_namespace_path = self.namespace_mgr.add_nested_namespace(current_namespace_path, cursor.displayname)
 
             clang_members = []
-            clang_static_methods = []
             clang_instance_methods = []
             clang_constructors = []
 
@@ -905,7 +904,8 @@ fabricBuildEnv.SharedLibrary(
                 if child.kind == CursorKind.CXX_METHOD:
                     print "%s  CXX_METHOD %s" % (indent, child.displayname)
                     if child.is_static_method():
-                        clang_static_methods.append(child)
+                        print "%s    ->is static" % (indent)
+                        self.parse_FUNCTION_DECL(include_filename, indent, class_namespace_path, child)
                     elif child.spelling.startswith("operator"):
                         pass
                     else:

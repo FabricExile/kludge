@@ -5,7 +5,13 @@
     "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/path.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/layer.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/usd/timeCode.h",
-    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/attribute.h"
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/attribute.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/relationship.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/property.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/prim.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/stage.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usdGeom/mesh.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usdGeom/xform.h"
     ],
   "cpppath": [
     "${USD_INSTALL_ROOT}/include",

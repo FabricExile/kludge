@@ -32,6 +32,8 @@ public:
     return std::string( buf );
   }
 
+  static float GetStaticFloat() { return 3.3; }
+
 protected:
 
   float protectedMethod() { return floatValue; }

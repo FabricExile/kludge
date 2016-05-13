@@ -7,6 +7,8 @@ import os, sys
 
 extname = 'Namespaces'
 basename = 'actual'
+cxxflags = ["-g", '-x', 'c++']
+cpppath = []
 libpath = []
 libs = []
 
@@ -19,8 +21,9 @@ except:
 SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
 Import('fabricBuildEnv')
 
-fabricBuildEnv.Append(CPPPATH = ["../.."])
-fabricBuildEnv.Append(CXXFLAGS = ["-g"])
+fabricBuildEnv.Append(CPPPATH = ["../..", "."])
+fabricBuildEnv.Append(CXXFLAGS = cxxflags)
+fabricBuildEnv.Append(CPPPATH = cpppath)
 fabricBuildEnv.Append(LIBPATH = libpath)
 fabricBuildEnv.Append(LIBS = libs)
 

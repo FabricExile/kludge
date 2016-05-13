@@ -1,1 +1,2 @@
+- fix PureC unit test, issues compiling with C standard
 - for pure virtual functions create constructor that throws exception

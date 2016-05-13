@@ -33,13 +33,18 @@ class InstanceMethod:
     self.this = ThisCodec(this_type_info, is_mutable)
 
     self.params = []
+    param_num = 0
     for child in clang_instance_method.get_children():
         if child.kind == CursorKind.PARM_DECL:
+            param_name = child.spelling
+            if not param_name:
+                param_name = 'arg'+str(param_num)
             param_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, child.type.spelling)
             self.params.append(ParamCodec(
               type_mgr.get_dqti(param_cpp_type_expr),
-              child.spelling
+              param_name
               ))
+            param_num += 1
 
     h = hashlib.md5()
     for param in self.params:

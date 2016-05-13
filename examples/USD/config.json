@@ -1,7 +1,11 @@
 {
   "extname": "USD",
   "infiles": [
-    "${USD_INSTALL_ROOT}/include/pxr/base/tf/token.h"
+    "${USD_INSTALL_ROOT}/include/pxr/base/tf/token.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/path.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/layer.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/timeCode.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/attribute.h"
     ],
   "cpppath": [
     "${USD_INSTALL_ROOT}/include",

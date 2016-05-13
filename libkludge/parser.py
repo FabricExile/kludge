@@ -228,6 +228,7 @@ import os, sys
 
 extname = '%s'
 basename = '%s'
+cxxflags = ["-g", %s]
 cpppath = [%s]
 libpath = [%s]
 libs = [%s]
@@ -242,7 +243,7 @@ SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
 Import('fabricBuildEnv')
 
 fabricBuildEnv.Append(CPPPATH = ["../.."])
-fabricBuildEnv.Append(CXXFLAGS = ["-g"])
+fabricBuildEnv.Append(CXXFLAGS = cxxflags)
 fabricBuildEnv.Append(CPPPATH = cpppath)
 fabricBuildEnv.Append(LIBPATH = libpath)
 fabricBuildEnv.Append(LIBS = libs)
@@ -254,6 +255,10 @@ fabricBuildEnv.SharedLibrary(
 """ % (
     self.config['extname'],
     self.config['basename'],
+    ", ".join(map(
+        lambda opt: "'%s'" % self.expand_envvars(opt),
+        self.config.get('clang_opts', [])
+        )),
     ", ".join(map(
         lambda cppdir: "'%s'" % self.expand_envvars(cppdir),
         self.config.get('cpppath', [])
@@ -592,39 +597,39 @@ fabricBuildEnv.SharedLibrary(
                        (name, name, )]
         return '\n'.join(output)
 
-    def parse_type_decl(self, header, indent, cursor, typemap):
-        # no children -> forward declaration
-        if len(list(cursor.get_children())) < 1:
-            print "%s-> no children" % indent
-            return
-
-        cpp_desired_type_name = self.get_qualified_spelling(cursor, "::")
-        if cpp_desired_type_name in self.kl_type_mappings:
-            kl_type_mapping = self.kl_type_mappings[cpp_desired_type_name]
-        else:
-            kl_type_mapping = KLTypeMapping(
-                self.get_qualified_spelling(cursor, "_"),
-                "::" + cpp_desired_type_name,
-                )
-            self.kl_type_mappings[cpp_desired_type_name] = kl_type_mapping
-            self.known_types.add(kl_type_mapping.kl_type_name)
-
-        kl_type = KLStruct(
-            kl_type_mapping.kl_type_name,
-            kl_type_mapping.cpp_type_name,
-            )
-        kl_type.codegen.cpp_base_type = kl_type_mapping.cpp_type_name
-        kl_type.codegen.header = header
-
-        self.parse_type_decl_children(
-            " "+indent,
-            cursor,
-            typemap,
-            kl_type,
-            kl_type_mapping.kl_type_name,
-            )
-
-        self.types_manager.types[kl_type_mapping.kl_type_name] = kl_type
+#    def parse_type_decl(self, header, indent, cursor, typemap):
+#        # no children -> forward declaration
+#        if len(list(cursor.get_children())) < 1:
+#            print "%s-> no children" % indent
+#            return
+#
+#        cpp_desired_type_name = self.get_qualified_spelling(cursor, "::")
+#        if cpp_desired_type_name in self.kl_type_mappings:
+#            kl_type_mapping = self.kl_type_mappings[cpp_desired_type_name]
+#        else:
+#            kl_type_mapping = KLTypeMapping(
+#                self.get_qualified_spelling(cursor, "_"),
+#                "::" + cpp_desired_type_name,
+#                )
+#            self.kl_type_mappings[cpp_desired_type_name] = kl_type_mapping
+#            self.known_types.add(kl_type_mapping.kl_type_name)
+#
+#        kl_type = KLStruct(
+#            kl_type_mapping.kl_type_name,
+#            kl_type_mapping.cpp_type_name,
+#            )
+#        kl_type.codegen.cpp_base_type = kl_type_mapping.cpp_type_name
+#        kl_type.codegen.header = header
+#
+#        self.parse_type_decl_children(
+#            " "+indent,
+#            cursor,
+#            typemap,
+#            kl_type,
+#            kl_type_mapping.kl_type_name,
+#            )
+#
+#        self.types_manager.types[kl_type_mapping.kl_type_name] = kl_type
 
     @staticmethod
     def print_skipping(function, reason):
@@ -659,170 +664,170 @@ fabricBuildEnv.SharedLibrary(
         
         return param_name, param_kl_type, param_kl_usage
 
-    def parse_type_decl_children(
-        self,
-        child_indent,
-        cursor,
-        typemap,
-        kl_type,
-        kl_class_name,
-        include_constructors=True
-        ):
-        for child in cursor.get_children():
-            print "%sparse_CLASS_DECL_children %s" % (child_indent, str(child.kind))
-
-            if child.access_specifier != AccessSpecifier.PUBLIC:
-                continue
-
-            is_method = False
-
-            if child.kind == CursorKind.CXX_BASE_SPECIFIER:
-                cpp_class_name = self.parse_CLASS_DECL(
-                    child_indent,
-                    child.get_definition(),
-                    child.get_definition().location.file.name
-                    )
-                parent_class_name = self.get_kl_class_name(cpp_class_name)
-                kl_type.parent = parent_class_name
-
-            elif child.kind in [
-                CursorKind.CXX_METHOD,
-                CursorKind.CONSTRUCTOR,
-                CursorKind.DESTRUCTOR,
-                CursorKind.FUNCTION_TEMPLATE,
-                ]:
-                is_method = True
-                if clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
-                    kl_type.codegen.is_abstract = True
-
-            if is_method:
-                try:
-                    result_kl_type = self.parse_clang_type(child.result_type)
-                except Exception as e:
-                    self.print_skipping(
-                        child.displayname,
-                        "child result type '%s' is not defined" % child.result_type.spelling
-                        )
-                    continue
-
-                # if child.spelling in self.skip_methods:
-                #     self.print_skipping(
-                #         child.displayname,
-                #         "method is in skip list"
-                #         )
-                #     continue
-
-                # if self.abort_on_type(result_kl_type):
-                #     self.print_skipping(
-                #         child.displayname,
-                #         "result type '%s' is in abort list" % result_kl_type
-                #         )
-                #     continue
-
-                this_usage = 'in'
-                if not child.is_static_method():
-                    if not child.kind == CursorKind.DESTRUCTOR and not child.kind == CursorKind.CONSTRUCTOR:
-                        this_usage = 'in' if child.type.spelling.endswith(
-                            'const') else 'io'
-                method = Method(child.spelling, result_kl_type, this_usage,
-                                'public')
-                method.codegen.cpp_qual_ret_type = self.get_cpp_qual_type_name(
-                    child.result_type)
-                method.codegen.cpp_base_ret_type = self.get_cpp_base_type_name(
-                    child.result_type)
-
-                if result_kl_type == 'Data':
-                    continue
-
-                operator = None
-                if child.kind == CursorKind.DESTRUCTOR:
-                    # destructor will be run by the KL destructor in C++
-                    continue
-                elif child.kind == CursorKind.CONSTRUCTOR:
-                    if not include_constructors:
-                        continue
-                    method_name = child.spelling
-                    method.codegen.is_constructor = True
-                    num_params = 0
-                    for p in child.get_children():
-                        if p.kind == CursorKind.PARM_DECL:
-                            num_params += 1
-                    if num_params == 0:
-                        kl_type.codegen.has_empty_constructor = True
-                else:
-                    if child.is_static_method():
-                        method_name = kl_class_name + '_' + child.spelling
-                        method.codegen.is_static = True
-                        namespace = self.get_namespace(child)
-                        if namespace:
-                            namespace = '::'.join(namespace)
-                        method.codegen.cpp_function = namespace
-                    else:
-                        if child.spelling.startswith('operator'):
-                            operator = child.spelling[len('operator'):]
-                            if operator not in ['<', '<=', '==', '!=', '>=',
-                                                '>']:
-                                self.print_skipping(
-                                    child.displayname,
-                                    "operator %s is unsupported" % operator
-                                    )
-                                continue
-                            method_name = operator
-                            method.codegen.cpp_function = child.spelling
-                        else:
-                            method_name = kl_class_name + '.' + child.spelling
-                            method.codegen.cpp_function = child.spelling
-
-                method.codegen.kl_full_name = method_name
-
-                i = 0
-                skip = False
-                for p in child.get_children():
-                    if p.kind == CursorKind.PARM_DECL:
-                        # has_default_value = False
-                        # invalid_type = False
-                        # try:
-                        #     kl_type = self.get_kl_type(p.type)
-                        # except Exception as _e:
-                        #     invalid_type = True
-                        # if invalid_type or self.abort_on_type(kl_type):
-                        #     for pc in p.get_children():
-                        #         # if it has a default value we'll try to go on from here
-                        #         if pc.kind in [
-                        #             CursorKind.UNEXPOSED_EXPR,
-                        #             CursorKind.INTEGER_LITERAL,
-                        #             CursorKind.FLOATING_LITERAL,
-                        #             CursorKind.STRING_LITERAL,
-                        #             CursorKind.CXX_BOOL_LITERAL_EXPR,
-                        #             CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
-                        #             CursorKind.DECL_REF_EXPR
-                        #         ]:
-                        #             has_default_value = True
-                        #             break
-                        #     if has_default_value:
-                        #         break
-                        #     skip = True
-                        #     break
-                        name, kl_type, kl_usage = self.parse_clang_param(p)
-                        param = KLParam(name, kl_type, kl_usage)
-                        param.codegen.cpp_qual_type = kl_type.cpp_type_name
-                        param.codegen.cpp_base_type = kl_type.cpp_type_name
-                        method.params.append(param)
-                        i += 1
-
-                if skip:
-                    self.print_skipping(
-                        child.displayname,
-                        "unsupported default value"
-                        )
-                    continue
-
-                symbol_name = self.get_symbol_name(kl_class_name, method_name)
-                method.symbol = symbol_name
-                method.codegen.is_operator = operator
-
-                kl_type.methods.append(method)
-
+#    def parse_type_decl_children(
+#        self,
+#        child_indent,
+#        cursor,
+#        typemap,
+#        kl_type,
+#        kl_class_name,
+#        include_constructors=True
+#        ):
+#        for child in cursor.get_children():
+#            print "%sparse_CLASS_DECL_children %s" % (child_indent, str(child.kind))
+#
+#            if child.access_specifier != AccessSpecifier.PUBLIC:
+#                continue
+#
+#            is_method = False
+#
+#            if child.kind == CursorKind.CXX_BASE_SPECIFIER:
+#                cpp_class_name = self.parse_CLASS_DECL(
+#                    child_indent,
+#                    child.get_definition(),
+#                    child.get_definition().location.file.name
+#                    )
+#                parent_class_name = self.get_kl_class_name(cpp_class_name)
+#                kl_type.parent = parent_class_name
+#
+#            elif child.kind in [
+#                CursorKind.CXX_METHOD,
+#                CursorKind.CONSTRUCTOR,
+#                CursorKind.DESTRUCTOR,
+#                CursorKind.FUNCTION_TEMPLATE,
+#                ]:
+#                is_method = True
+#                if clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
+#                    kl_type.codegen.is_abstract = True
+#
+#            if is_method:
+#                try:
+#                    result_kl_type = self.parse_clang_type(child.result_type)
+#                except Exception as e:
+#                    self.print_skipping(
+#                        child.displayname,
+#                        "child result type '%s' is not defined" % child.result_type.spelling
+#                        )
+#                    continue
+#
+#                # if child.spelling in self.skip_methods:
+#                #     self.print_skipping(
+#                #         child.displayname,
+#                #         "method is in skip list"
+#                #         )
+#                #     continue
+#
+#                # if self.abort_on_type(result_kl_type):
+#                #     self.print_skipping(
+#                #         child.displayname,
+#                #         "result type '%s' is in abort list" % result_kl_type
+#                #         )
+#                #     continue
+#
+#                this_usage = 'in'
+#                if not child.is_static_method():
+#                    if not child.kind == CursorKind.DESTRUCTOR and not child.kind == CursorKind.CONSTRUCTOR:
+#                        this_usage = 'in' if child.type.spelling.endswith(
+#                            'const') else 'io'
+#                method = Method(child.spelling, result_kl_type, this_usage,
+#                                'public')
+#                method.codegen.cpp_qual_ret_type = self.get_cpp_qual_type_name(
+#                    child.result_type)
+#                method.codegen.cpp_base_ret_type = self.get_cpp_base_type_name(
+#                    child.result_type)
+#
+#                if result_kl_type == 'Data':
+#                    continue
+#
+#                operator = None
+#                if child.kind == CursorKind.DESTRUCTOR:
+#                    # destructor will be run by the KL destructor in C++
+#                    continue
+#                elif child.kind == CursorKind.CONSTRUCTOR:
+#                    if not include_constructors:
+#                        continue
+#                    method_name = child.spelling
+#                    method.codegen.is_constructor = True
+#                    num_params = 0
+#                    for p in child.get_children():
+#                        if p.kind == CursorKind.PARM_DECL:
+#                            num_params += 1
+#                    if num_params == 0:
+#                        kl_type.codegen.has_empty_constructor = True
+#                else:
+#                    if child.is_static_method():
+#                        method_name = kl_class_name + '_' + child.spelling
+#                        method.codegen.is_static = True
+#                        namespace = self.get_namespace(child)
+#                        if namespace:
+#                            namespace = '::'.join(namespace)
+#                        method.codegen.cpp_function = namespace
+#                    else:
+#                        if child.spelling.startswith('operator'):
+#                            operator = child.spelling[len('operator'):]
+#                            if operator not in ['<', '<=', '==', '!=', '>=',
+#                                                '>']:
+#                                self.print_skipping(
+#                                    child.displayname,
+#                                    "operator %s is unsupported" % operator
+#                                    )
+#                                continue
+#                            method_name = operator
+#                            method.codegen.cpp_function = child.spelling
+#                        else:
+#                            method_name = kl_class_name + '.' + child.spelling
+#                            method.codegen.cpp_function = child.spelling
+#
+#                method.codegen.kl_full_name = method_name
+#
+#                i = 0
+#                skip = False
+#                for p in child.get_children():
+#                    if p.kind == CursorKind.PARM_DECL:
+#                        # has_default_value = False
+#                        # invalid_type = False
+#                        # try:
+#                        #     kl_type = self.get_kl_type(p.type)
+#                        # except Exception as _e:
+#                        #     invalid_type = True
+#                        # if invalid_type or self.abort_on_type(kl_type):
+#                        #     for pc in p.get_children():
+#                        #         # if it has a default value we'll try to go on from here
+#                        #         if pc.kind in [
+#                        #             CursorKind.UNEXPOSED_EXPR,
+#                        #             CursorKind.INTEGER_LITERAL,
+#                        #             CursorKind.FLOATING_LITERAL,
+#                        #             CursorKind.STRING_LITERAL,
+#                        #             CursorKind.CXX_BOOL_LITERAL_EXPR,
+#                        #             CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
+#                        #             CursorKind.DECL_REF_EXPR
+#                        #         ]:
+#                        #             has_default_value = True
+#                        #             break
+#                        #     if has_default_value:
+#                        #         break
+#                        #     skip = True
+#                        #     break
+#                        name, kl_type, kl_usage = self.parse_clang_param(p)
+#                        param = KLParam(name, kl_type, kl_usage)
+#                        param.codegen.cpp_qual_type = kl_type.cpp_type_name
+#                        param.codegen.cpp_base_type = kl_type.cpp_type_name
+#                        method.params.append(param)
+#                        i += 1
+#
+#                if skip:
+#                    self.print_skipping(
+#                        child.displayname,
+#                        "unsupported default value"
+#                        )
+#                    continue
+#
+#                symbol_name = self.get_symbol_name(kl_class_name, method_name)
+#                method.symbol = symbol_name
+#                method.codegen.is_operator = operator
+#
+#                kl_type.methods.append(method)
+#
     def output_cpp(
         self,
         kl_type,
@@ -851,6 +856,11 @@ fabricBuildEnv.SharedLibrary(
         current_namespace_path,
         cursor,
         ):
+        # no children -> forward declaration
+        if len(list(cursor.get_children())) < 1:
+            print "%s-> no children" % indent
+            return
+
         record_namespace_path = current_namespace_path + [cursor.displayname]
         try:
             cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cursor.displayname)

@@ -1,2 +1,5 @@
-- fix PureC unit test, issues compiling with C standard
-- for pure virtual functions create constructor that throws exception
+- PureC unit test, fix issues compiling with C standard
+- for pure virtual types create constructor that throws exception
+- clang import to never use system version
+- inheritance support for InPlace types (vtable pointer)
+- unit test output or in-test value verification + throw

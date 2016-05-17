@@ -5,6 +5,7 @@
     "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/path.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/layer.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/usd/timeCode.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/object.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/usd/attribute.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/usd/relationship.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/usd/property.h",

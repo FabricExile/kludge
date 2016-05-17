@@ -868,12 +868,14 @@ fabricBuildEnv.SharedLibrary(
 
             self.namespace_mgr.add_type(current_namespace_path, cursor.displayname, cpp_type_expr)
             cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
-            class_namespace_path = self.namespace_mgr.add_nested_namespace(current_namespace_path, cursor.displayname)
+            self.namespace_mgr.add_nested_namespace(current_namespace_path, cursor.displayname)
 
             clang_members = []
             clang_instance_methods = []
             clang_constructors = []
+            clang_base_classes = []
             type_is_pure_virtual = False
+            type_has_vtable = False
 
             for child in cursor.get_children():
                 if child.kind == CursorKind.TYPEDEF_DECL:
@@ -893,20 +895,16 @@ fabricBuildEnv.SharedLibrary(
                 if child.access_specifier != AccessSpecifier.PUBLIC:
                     continue
 
-                # if child.kind == CursorKind.CXX_BASE_SPECIFIER:
-                #     cpp_class_name = self.parse_CLASS_DECL(
-                #         child_indent,
-                #         child.get_definition(),
-                #         child.get_definition().location.file.name
-                #         )
-                #     parent_class_name = self.get_kl_class_name(cpp_class_name)
-                #     kl_type.parent = parent_class_name
-
-                if child.kind == CursorKind.CXX_METHOD:
+                if child.kind == CursorKind.CXX_BASE_SPECIFIER:
+                    clang_base_classes.append(child)
+                elif child.kind == CursorKind.CXX_METHOD:
                     print "%s  CXX_METHOD %s" % (indent, child.displayname)
+                    if clang.cindex.conf.lib.clang_CXXMethod_isVirtual(child):
+                        type_has_vtable = True
+
                     if child.is_static_method():
                         print "%s    ->is static" % (indent)
-                        self.parse_FUNCTION_DECL(include_filename, indent, class_namespace_path, child)
+                        self.parse_FUNCTION_DECL(include_filename, indent, record_namespace_path, child)
                     elif clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
                         print "%s    ->is pure virtual" % (indent)
                         type_is_pure_virtual = True
@@ -1066,6 +1064,9 @@ fabricBuildEnv.SharedLibrary(
                     print "Warning: member at %s:%d" % (clang_member.location.file, clang_member.location.line)
                     print "  Reason: %s" % e
 
+            # [andrew 20160517] FIXME disabling in-place until we can handle the vtable
+            can_in_place = False
+
             if can_in_place:
                 self.type_mgr.add_selector(
                     InPlaceStructSelector(
@@ -1122,7 +1123,19 @@ fabricBuildEnv.SharedLibrary(
                     except Exception as e:
                         print "Warning: ignored constructor at %s:%d" % (clang_constructor.location.file, clang_constructor.location.line)
                         print "  Reason: %s" % e
-  
+
+            base_classes = []
+            for clang_base_class in clang_base_classes:
+                self.parse_record_decl(clang_base_class.location.file.name, indent,
+                        current_namespace_path, clang_base_class)
+                base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
+                        current_namespace_path, clang_base_class.type)
+                base_classes.append(self.type_mgr.get_dqti(base_class_cpp_type_expr))
+
+            # [andrew 20160517] FIXME this would be fine with objects + interfaces but not structs
+            if len(base_classes) > 1:
+                raise Exception("type has more than one base class")
+
             if can_in_place:
                 self.edk_decls.add(
                     ast.Wrapping(
@@ -1134,6 +1147,7 @@ fabricBuildEnv.SharedLibrary(
                         members,
                         instance_methods,
                         constructors,
+                        base_classes,
                         "ast/builtin/in_place_struct_decl",
                         )
                     )
@@ -1148,6 +1162,7 @@ fabricBuildEnv.SharedLibrary(
                         members,
                         instance_methods,
                         constructors,
+                        base_classes,
                         "ast/builtin/wrapped_ptr_decl",
                         )
                     )

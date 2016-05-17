@@ -836,7 +836,8 @@ fabricBuildEnv.SharedLibrary(
         clang_index = clang.cindex.Index.create()
         unit = clang_index.parse(
             unit_filename,
-            clang_opts,
+            # [andrew 20160517] FIXME this must be due to paths on my system
+            clang_opts + ["-I", self.expand_envvars('${LLVM_PATH}/lib/clang/3.8.0/include')],
             None,
             clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
             # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD

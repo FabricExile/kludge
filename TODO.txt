@@ -3,3 +3,4 @@
 - clang import to never use system version
 - inheritance support for InPlace types (vtable pointer)
 - unit test output or in-test value verification + throw
+- fix extra -I on clang_index.parse() for clang 3.8.0 includes

@@ -1,6 +1,7 @@
-LLVM_PATH="/build/llvm-3.8/build"
+# libclang
+export LLVM_PATH="/build/llvm-3.8/build"
 export PATH="$PATH:$LLVM_PATH/bin"
-export PYTHONPATH="$PYTHONPATH:$LLVM_PATH/lib/python"
+export PYTHONPATH="$PYTHONPATH:$LLVM_PATH/../tools/clang/bindings/python"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LLVM_PATH/lib"
 
 # Bullet

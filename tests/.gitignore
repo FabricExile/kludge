@@ -3,3 +3,4 @@ actual.*
 *.dylib
 *.so
 *.dll
+SConstruct

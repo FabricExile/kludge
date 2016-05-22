@@ -2,6 +2,8 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
+from symbol_helpers import replace_invalid_chars
+
 class KLTypeName:
 
   def __init__(self, base, suffix):
@@ -65,11 +67,15 @@ class TypeInfo:
     if kl_name_base:
       self.kl = KLTypeInfo(kl_name_base, kl_name_suffix)
     else:
-      self.kl = KLTypeInfo("_".join(nested_name), "")
+      kl_name = "_".join(nested_name)
+      kl_name = replace_invalid_chars(kl_name)
+      self.kl = KLTypeInfo(kl_name, "")
     if edk_name_toplevel:
       self.edk = EDKTypeInfo(edk_name_toplevel, edk_name_local)
     else:
-      self.edk = EDKTypeInfo("::Fabric::EDK::KL::" + "_".join(nested_name), "_".join(nested_name))
+      edk_name = "_".join(nested_name)
+      edk_name = replace_invalid_chars(edk_name)
+      self.edk = EDKTypeInfo("::Fabric::EDK::KL::" + edk_name, edk_name)
     self.lib = LibTypeInfo(lib_expr)
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis
@@ -106,3 +112,4 @@ class TypeInfo:
     if content:
       content = "// %s\n%s" % (template_path, content)
     return content
+

@@ -363,6 +363,7 @@ fabricBuildEnv.SharedLibrary(
         if semantic_parent and semantic_parent.kind in [
             CursorKind.NAMESPACE,
             CursorKind.CLASS_DECL,
+            CursorKind.CLASS_TEMPLATE,
             CursorKind.STRUCT_DECL,
             ]:
             result = Parser.get_nested_name(semantic_parent)
@@ -382,6 +383,7 @@ fabricBuildEnv.SharedLibrary(
             if semantic_parent.kind in [
                 CursorKind.NAMESPACE,
                 CursorKind.CLASS_DECL,
+                CursorKind.CLASS_TEMPLATE,
                 CursorKind.STRUCT_DECL,
                 ]:
                 return Parser.get_qualified_spelling(semantic_parent, separator) + separator + cursor.spelling
@@ -400,20 +402,25 @@ fabricBuildEnv.SharedLibrary(
         indent,
         current_namespace_path,
         cursor,
+        template_param_types = [],
+        cpp_specialized_type_name = None
         ):
         # no children -> forward declaration
         if len(list(cursor.get_children())) < 1:
-            print "%s-> no children" % indent
+            print "%s-> forward declaration" % indent
             return
 
-        record_namespace_path = current_namespace_path + [cursor.displayname]
+        if not cpp_specialized_type_name:
+            cpp_specialized_type_name = cursor.displayname
+        
+        record_namespace_path = current_namespace_path + [cpp_specialized_type_name]
         try:
-            cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cursor.displayname)
+            cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cpp_specialized_type_name)
             print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
 
-            self.namespace_mgr.add_type(current_namespace_path, cursor.displayname, cpp_type_expr)
+            self.namespace_mgr.add_type(current_namespace_path, cpp_specialized_type_name, cpp_type_expr)
             cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
-            self.namespace_mgr.add_nested_namespace(current_namespace_path, cursor.displayname)
+            self.namespace_mgr.add_nested_namespace(current_namespace_path, cpp_specialized_type_name)
 
             clang_members = []
             clang_instance_methods = []
@@ -421,6 +428,7 @@ fabricBuildEnv.SharedLibrary(
             clang_base_classes = []
             type_is_pure_virtual = False
             type_has_vtable = False
+            template_parameters = []
 
             for child in cursor.get_children():
                 if child.kind == CursorKind.TYPEDEF_DECL:
@@ -430,6 +438,11 @@ fabricBuildEnv.SharedLibrary(
                         record_namespace_path,
                         child,
                         )
+                    continue
+
+                if child.kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
+                    print "%s  TEMPLATE_TYPE_PARAMETER %s" % (indent, child.displayname)
+                    template_parameters.append(child)
                     continue
 
                 if child.kind == CursorKind.FIELD_DECL:
@@ -591,11 +604,33 @@ fabricBuildEnv.SharedLibrary(
 
                     # kl_type.methods.append(method)
 
+            if len(template_parameters) != len(template_param_types):
+                raise Exception("number of template parameters doesn't match expected number")
+
+            template_param_type_map = {}
+            for i in range(len(template_parameters)):
+                template_param = template_parameters[i].type
+                param_type = template_param_types[i]
+                template_param_type_map[template_param.spelling] = param_type
+
             can_in_place = True
             members = []
             for clang_member in clang_members:
                 try:
-                    member_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, clang_member.type)
+                    member_type = clang_member.type
+                    for child in clang_member.get_children():
+                        if child.kind == CursorKind.TYPE_REF:
+                            if child.get_definition().kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
+                                member_type = template_param_type_map[child.displayname]
+                        elif child.kind == CursorKind.TEMPLATE_REF:
+                            # FIXME
+                            raise Exception("no support for templated members yet")
+                        elif child.kind == CursorKind.NAMESPACE_REF:
+                            pass
+                        else:
+                            raise Exception("unexpected member child kind: "+str(child.kind))
+
+                    member_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, member_type)
                     member = Member(
                         self.type_mgr.get_dqti(member_cpp_type_expr),
                         clang_member.displayname,
@@ -687,7 +722,7 @@ fabricBuildEnv.SharedLibrary(
                         self.config['extname'],
                         include_filename,
                         self.get_location(cursor.location),
-                        cursor.displayname,
+                        cpp_specialized_type_name,
                         this_type_info,
                         members,
                         instance_methods,
@@ -702,7 +737,7 @@ fabricBuildEnv.SharedLibrary(
                         self.config['extname'],
                         include_filename,
                         self.get_location(cursor.location),
-                        cursor.displayname,
+                        cpp_specialized_type_name,
                         this_type_info,
                         members,
                         instance_methods,
@@ -722,15 +757,35 @@ fabricBuildEnv.SharedLibrary(
         self.dump_cursor(indent + ' ', cursor.get_definition())
 
     def parse_TYPEDEF_DECL(self, include_filename, indent, current_namespace_path, cursor):
+        underlying_type = cursor.underlying_typedef_type
         new_cpp_type_name = cursor.type.spelling
         new_nested_name = current_namespace_path + [new_cpp_type_name]
         new_cpp_type_expr = cpp_type_expr_parser.Named("::".join(new_nested_name))
-        old_cpp_type_name = cursor.underlying_typedef_type.spelling
+        old_cpp_type_name = underlying_type.spelling
         if old_cpp_type_name.startswith("struct "):
             old_cpp_type_name = old_cpp_type_name[7:]
         try:
             old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
             print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
+
+            num_template_args = underlying_type.get_num_template_arguments()
+            if num_template_args > 0:
+                template_class = None
+                template_args = []
+                for i in range(num_template_args):
+                    template_args += [underlying_type.get_template_argument_as_type(i)]
+                for child in cursor.get_children():
+                    if child.kind == CursorKind.TEMPLATE_REF:
+                        if template_class:
+                            raise Exception("more than one TEMPLATE_REF found: "+str(child.displayname))
+                        template_class = child.get_definition()
+                    elif child.kind == CursorKind.TYPE_REF:
+                        pass
+                    else:
+                        raise Exception("unexpected child kind: "+str(child.kind))
+
+                self.parse_record_decl(include_filename, indent, current_namespace_path, template_class, template_args, underlying_type.spelling)
+
             self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
             old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
             self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
@@ -811,6 +866,9 @@ fabricBuildEnv.SharedLibrary(
             self.parse_TYPEDEF_DECL(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.CLASS_DECL or cursor_kind == CursorKind.STRUCT_DECL:
             self.parse_record_decl(include_filename, indent, current_namespace_path, cursor)
+        elif cursor_kind == CursorKind.CLASS_TEMPLATE:
+            # [andrew 20160519] ignore the template itself, only deal with specializations
+            pass
         elif cursor_kind == CursorKind.FUNCTION_DECL:
             self.parse_FUNCTION_DECL(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.USING_DIRECTIVE:
@@ -837,7 +895,7 @@ fabricBuildEnv.SharedLibrary(
         unit = clang_index.parse(
             unit_filename,
             # [andrew 20160517] FIXME this must be due to paths on my system
-            clang_opts + ["-I", self.expand_envvars('${LLVM_PATH}/lib/clang/3.8.0/include')],
+            clang_opts + ["-I", self.expand_envvars('${LLVM_PATH}/lib/clang/3.9.0/include')],
             None,
             clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
             # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
@@ -866,25 +924,6 @@ fabricBuildEnv.SharedLibrary(
         output_kl_filename,
         output_cpp_filename,
         ):
-        # # prune types without full definitions
-        # for kl_type_name in self.types_manager.types:
-        #     kl_struct = self.types_manager.types[kl_type_name]
-        #     methods = []
-        #     for m in kl_struct.methods:
-        #         remove = False
-        #         for p in m.params:
-        #             if not p.kl_type_name in self.known_types:
-        #                 remove = True
-
-        #         if m.ret_type_name and not m.ret_type_name.replace(
-        #             '[]', '') in self.known_types:
-        #             remove = True
-
-        #         if not remove:
-        #             methods.append(m)
-
-        #     kl_struct.methods = methods
-
         print "Writing %s" % output_kl_filename
         self.jinja_stream('kl').dump(output_kl_filename)
 

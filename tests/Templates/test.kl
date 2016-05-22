@@ -1,0 +1,8 @@
+require Templates;
+
+operator entry()
+{
+  Template32 t;
+  report(t);
+}
+

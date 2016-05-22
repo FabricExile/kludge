@@ -1,7 +1,6 @@
 {
   "clang_opts": [
-    "-x",
-    "c",
+    "-x", "c++",
     "-DFABRIC_EDK_NO_STL"
     ]
   }

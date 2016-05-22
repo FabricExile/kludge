@@ -3,7 +3,7 @@
 
 namespace TestNameSpace {
 
-template<typename Ty>
+template<typename Ty, typename Ty2>
 class Complex
 {
 public:
@@ -39,10 +39,20 @@ public:
 private:
 
   Ty m_re, m_im;
+  Ty2 m_other;
+  bool m_nontemplate;
 };
 
-typedef Complex<float> Complex32;
+typedef Complex<float, int> Complex32;
 // typedef Complex<double> Complex64;
+
+/*
+class A
+{
+public:
+  Complex<double, bool> foo;
+};
+*/
 
 }
 

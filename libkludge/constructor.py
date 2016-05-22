@@ -7,6 +7,7 @@ from value_name import ValueName
 from result_codec import ResultCodec
 from this_codec import ThisCodec
 from param_codec import ParamCodec
+from symbol_helpers import replace_invalid_chars
 import hashlib
 
 class Constructor:
@@ -34,6 +35,10 @@ class Constructor:
     self.params = []
     for child in clang_instance_method.get_children():
         if child.kind == CursorKind.PARM_DECL:
+            type_ref = None
+            for subchild in child.get_children():
+                if subchild.kind == CursorKind.TYPE_REF:
+                    type_ref = subchild
             param_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, child.type.spelling)
             self.params.append(ParamCodec(
               type_mgr.get_dqti(param_cpp_type_expr),
@@ -44,3 +49,4 @@ class Constructor:
     for param in self.params:
       h.update(param.type_info.edk.name.toplevel)
     self.edk_symbol_name = "_".join([this_type_info.kl.name.compound, self.name, h.hexdigest()])
+    self.edk_symbol_name = replace_invalid_chars(self.edk_symbol_name)

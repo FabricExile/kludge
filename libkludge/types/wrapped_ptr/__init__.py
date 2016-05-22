@@ -36,8 +36,8 @@ class WrappedPtrSelector(Selector):
     return "WrappedPtr:%s" % str(self.nested_name)
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    if isinstance(cpp_type_expr, Named) \
-      and cpp_type_expr.name == self.cpp_type_name:
+    if (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
+      and str(cpp_type_expr) == self.cpp_type_name:
       return DirQualTypeInfo(
         dir_qual.direct,
         WrappedPtrTypeInfo(
@@ -47,9 +47,9 @@ class WrappedPtrSelector(Selector):
           )
         )
     if isinstance(cpp_type_expr, ReferenceTo) \
-      and isinstance(cpp_type_expr.pointee, Named) \
+      and (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
       and cpp_type_expr.pointee.is_const \
-      and cpp_type_expr.pointee.name == self.cpp_type_name:
+      and str(cpp_type_expr.pointee) == self.cpp_type_name:
       return DirQualTypeInfo(
         dir_qual.const_reference,
         WrappedPtrTypeInfo(

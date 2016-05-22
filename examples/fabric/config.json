@@ -1,0 +1,16 @@
+{
+  "extname": "fabric",
+  "clang_opts": [
+    "-x", "c++",
+    "-DFEC_SHARED"
+    ],
+  "infiles": [
+    "${FABRIC_DIR}/include/FabricCore.h"
+    ],
+  "libpath": [
+    "${FABRIC_DIR}/lib"
+    ],
+  "libs": [
+    "FabricCore"
+    ]
+  }

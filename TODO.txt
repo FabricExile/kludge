@@ -4,3 +4,8 @@
 - inheritance support for InPlace types (vtable pointer)
 - unit test output or in-test value verification + throw
 - fix extra -I on clang_index.parse() for clang 3.8.0 includes
+- file issue re: FabricEDK.h and Pure C
+- what does 'require Fabric;' do?
+- hardcoded 'actual.kl' in .fpm.json file
+- missing namespace for 'new 's in fabric example
+- exception handling, or exception-like (USD) handling

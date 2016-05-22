@@ -8,6 +8,7 @@ from value_name import ValueName
 from result_codec import ResultCodec
 from this_codec import ThisCodec
 from param_codec import ParamCodec
+from symbol_helpers import replace_invalid_chars
 import hashlib
 
 class InstanceMethod:
@@ -50,3 +51,4 @@ class InstanceMethod:
     for param in self.params:
       h.update(param.type_info.edk.name.toplevel)
     self.edk_symbol_name = "_".join([this_type_info.kl.name.compound, self.name, h.hexdigest()])
+    self.edk_symbol_name = replace_invalid_chars(self.edk_symbol_name)

@@ -623,8 +623,24 @@ fabricBuildEnv.SharedLibrary(
                             if child.get_definition().kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
                                 member_type = template_param_type_map[child.displayname]
                         elif child.kind == CursorKind.TEMPLATE_REF:
-                            # FIXME
-                            raise Exception("no support for templated members yet")
+                            underlying_type = cursor.underlying_typedef_type
+                            num_template_args = underlying_type.get_num_template_arguments()
+                            if num_template_args > 0:
+                                template_class = None
+                                template_args = []
+                                for i in range(num_template_args):
+                                    template_args += [underlying_type.get_template_argument_as_type(i)]
+                                for child in cursor.get_children():
+                                    if child.kind == CursorKind.TEMPLATE_REF:
+                                        if template_class:
+                                            raise Exception("more than one TEMPLATE_REF found: "+str(child.displayname))
+                                        template_class = child.get_definition()
+                                    elif child.kind == CursorKind.TYPE_REF:
+                                        pass
+                                    else:
+                                        raise Exception("unexpected child kind: "+str(child.kind))
+                                self.parse_record_decl(include_filename, indent, current_namespace_path,
+                                        template_class, template_args, underlying_type.spelling)
                         elif child.kind == CursorKind.NAMESPACE_REF:
                             pass
                         else:

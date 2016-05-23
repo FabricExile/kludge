@@ -23,14 +23,20 @@ private:
 };
 
 typedef Template<float, int> Template32;
-// typedef Template<double> Template64;
+typedef Template<bool, double> TemplateBool;
 
-/*
 class InlineType
 {
 public:
-  Template<double, bool> foo;
+  InlineType() : m_foo( 5 ) {}
+
+  int getFooRe()
+  {
+    return m_foo.re();
+  }
+
+private:
+  Template<int, int> m_foo;
 };
-*/
 
 #endif

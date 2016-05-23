@@ -2,7 +2,13 @@ require Templates;
 
 operator entry()
 {
-  Template32 t(1.2);
-  report(t.re());
+  Template32 t1(1.2);
+  report(t1.re());
+
+  TemplateBool t2(false);
+  report(t2.re());
+
+  InlineType i1();
+  report(i1.getFooRe());
 }
 

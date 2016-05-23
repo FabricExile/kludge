@@ -9,3 +9,4 @@
 - hardcoded 'actual.kl' in .fpm.json file
 - missing namespace for 'new 's in fabric example
 - exception handling, or exception-like (USD) handling
+- must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)

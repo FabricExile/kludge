@@ -20,12 +20,18 @@ class InstanceMethod:
     current_namespace_path,
     this_type_info,
     clang_instance_method,
+    template_param_type_map,
     ):
     self.name = clang_instance_method.spelling
     self.desc = "Instance method '%s'" % clang_instance_method.displayname
     self.location = "%s:%s" % (clang_instance_method.location.file, clang_instance_method.location.line)
 
-    result_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, clang_instance_method.result_type.spelling)
+    result_type = clang_instance_method.result_type
+    result_resolved_type = template_param_type_map.get(result_type.spelling, None)
+    if result_resolved_type:
+      result_type = result_resolved_type
+
+    result_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, result_type.spelling)
     self.result = ResultCodec(
       type_mgr.get_dqti(result_cpp_type_expr)
       )
@@ -40,7 +46,13 @@ class InstanceMethod:
             param_name = child.spelling
             if not param_name:
                 param_name = 'arg'+str(param_num)
-            param_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, child.type.spelling)
+
+            param_type = child.type
+            param_resolved_type = template_param_type_map.get(param_type.spelling, None)
+            if param_resolved_type:
+              param_type = param_resolved_type
+
+            param_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
             self.params.append(ParamCodec(
               type_mgr.get_dqti(param_cpp_type_expr),
               param_name

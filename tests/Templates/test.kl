@@ -2,7 +2,7 @@ require Templates;
 
 operator entry()
 {
-  Template32 t;
-  report(t);
+  Template32 t(1.2);
+  report(t.re());
 }
 

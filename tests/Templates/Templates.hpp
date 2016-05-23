@@ -10,9 +10,6 @@ public:
   Template( Ty re )
     : m_re( re )
     {}
-  Template( Template const &that )
-    : m_re( that.m_re )
-    {}
   ~Template() {}
 
   Ty re()

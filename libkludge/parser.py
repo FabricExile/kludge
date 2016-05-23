@@ -676,6 +676,7 @@ fabricBuildEnv.SharedLibrary(
                         record_namespace_path,
                         this_type_info,
                         clang_instance_method,
+                        template_param_type_map,
                         )
                     if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
                         raise Exception("instance method with name EDK symbol name already exists")
@@ -695,6 +696,8 @@ fabricBuildEnv.SharedLibrary(
                             record_namespace_path,
                             this_type_info,
                             clang_constructor,
+                            cpp_specialized_type_name,
+                            template_param_type_map,
                             )
                         if constructor.edk_symbol_name in existing_method_edk_symbol_names:
                             raise Exception("instance method with name EDK symbol name already exists")

@@ -2,4 +2,5 @@
 *.kl
 *.fpm.json
 *.os
+*.so
 SConstruct

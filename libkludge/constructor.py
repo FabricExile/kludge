@@ -19,8 +19,10 @@ class Constructor:
     current_namespace_path,
     this_type_info,
     clang_instance_method,
+    constructor_name,
+    template_param_type_map,
     ):
-    self.name = clang_instance_method.spelling
+    self.name = constructor_name
     self.desc = "Constructor '%s'" % clang_instance_method.displayname
     self.location = "%s:%s" % (clang_instance_method.location.file, clang_instance_method.location.line)
 
@@ -35,11 +37,11 @@ class Constructor:
     self.params = []
     for child in clang_instance_method.get_children():
         if child.kind == CursorKind.PARM_DECL:
-            type_ref = None
-            for subchild in child.get_children():
-                if subchild.kind == CursorKind.TYPE_REF:
-                    type_ref = subchild
-            param_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, child.type.spelling)
+            param_type = child.type
+            param_resolved_type = template_param_type_map.get(param_type.spelling, None)
+            if param_resolved_type:
+              param_type = param_resolved_type
+            param_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
             self.params.append(ParamCodec(
               type_mgr.get_dqti(param_cpp_type_expr),
               child.spelling

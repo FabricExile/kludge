@@ -7,8 +7,6 @@ import jinja2, os, sys, optparse, json, re
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
-from kl2edk import KLStruct, Method, KLParam, TypesManager
-
 import ast
 from type_mgr import TypeMgr
 from value_name import ValueName
@@ -284,53 +282,6 @@ fabricBuildEnv.SharedLibrary(
 }
 """ % (self.config['extname'], self.config['basename']))
 
-    # def get_kl_type(self, clang_type):
-    #     canon_type = clang_type.get_canonical()
-    #     base_name = canon_type.spelling
-    #     if canon_type.is_const_qualified():
-    #         base_name = base_name[len('const '):]
-    #     kl_type = None
-    #     is_array = False
-
-    #     if canon_type.kind == TypeKind.LVALUEREFERENCE:
-    #         kl_type = self.get_kl_type(canon_type.get_pointee())
-
-    #     elif canon_type.kind == TypeKind.POINTER:
-    #         if canon_type.get_pointee().kind == TypeKind.VOID:
-    #             return "Data"
-    #         if canon_type.get_pointee().kind in [TypeKind.CHAR_S,
-    #                                              TypeKind.SCHAR]:
-    #             return "String"
-    #         kl_type = self.get_kl_type(canon_type.get_pointee())
-
-    #     elif canon_type.kind == TypeKind.UNEXPOSED or canon_type.kind == TypeKind.RECORD:
-    #         kl_type = base_name
-    #         if kl_type.startswith('std::vector<'):
-    #             is_array = True
-    #             kl_type = kl_type[len('std::vector<'):kl_type.find(',')]
-    #         if kl_type in self.cpp_type_to_kl_mappings:
-    #             kl_type = self.cpp_type_to_kl_mappings[kl_type]
-
-    #     elif canon_type.kind == TypeKind.TYPEDEF:
-    #         kl_type = self.get_kl_type(canon_type.get_canonical())
-
-    #     elif canon_type.kind == TypeKind.VOID:
-    #         return None
-
-    #     if not kl_type:
-    #         kl_type = Parser.basic_type_map[canon_type.kind]
-
-    #     if not kl_type:
-    #         raise Exception('no KL type for ' + str(canon_type.spelling) + ' ('
-    #                         + str(canon_type.kind) + ')')
-
-    #     kl_type = self.get_kl_class_name(kl_type)
-
-    #     if is_array:
-    #         kl_type += '[]'
-
-    #     return kl_type
-
     @staticmethod
     def print_diag(diag):
         msg = 'compile '
@@ -396,6 +347,21 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.dump_cursor(childIndent, childCursor)
 
+    def maybe_parse_dependent_record_decl(self, indent, namespace_path, decl):
+        # FIXME [andrew 20160524]
+        if decl.kind != CursorKind.CLASS_DECL or decl.kind == CursorKind.STRUCT_DECL:
+            return
+
+        if not decl.location.file:
+            return
+        
+        if decl.location.file.name.startswith('/') and \
+                not decl.location.file.name.startswith('/build/kludge') and \
+                not decl.location.file.name.startswith('/opt/pixar'):
+            return
+
+        self.parse_record_decl(decl.location.file.name, indent, namespace_path, decl)
+
     def parse_record_decl(
         self,
         include_filename,
@@ -417,6 +383,10 @@ fabricBuildEnv.SharedLibrary(
         try:
             cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cpp_specialized_type_name)
             print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
+
+            if self.type_mgr.maybe_get_dqti(cpp_type_expr):
+                print "%s-> skipping because type already exists" % indent
+                return
 
             self.namespace_mgr.add_type(current_namespace_path, cpp_specialized_type_name, cpp_type_expr)
             cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
@@ -454,7 +424,8 @@ fabricBuildEnv.SharedLibrary(
                     continue
 
                 if child.kind == CursorKind.CXX_BASE_SPECIFIER:
-                    clang_base_classes.append(child)
+                    print "%s  CXX_BASE_SPECIFIER %s" % (indent, child.displayname)
+                    clang_base_classes.append(child.get_definition())
                 elif child.kind == CursorKind.CXX_METHOD:
                     print "%s  CXX_METHOD %s" % (indent, child.displayname)
                     if clang.cindex.conf.lib.clang_CXXMethod_isVirtual(child):
@@ -686,12 +657,42 @@ fabricBuildEnv.SharedLibrary(
             instance_methods = []
             for clang_instance_method in clang_instance_methods:
                 try:
+                    params = []
+                    param_num = 0
+                    for child in clang_instance_method.get_children():
+                        if child.kind == CursorKind.PARM_DECL:
+                            param_name = child.spelling
+                            if not param_name:
+                                param_name = 'arg'+str(param_num)
+
+                            param_type = child.type
+                            param_resolved_type = template_param_type_map.get(param_type.spelling, None)
+                            if param_resolved_type:
+                                param_type = param_resolved_type
+
+                            param_def = param_type.get_declaration()
+                            self.maybe_parse_dependent_record_decl(indent, current_namespace_path, param_def)
+
+                            param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
+                            params.append(ParamCodec(
+                              self.type_mgr.get_dqti(param_cpp_type_expr),
+                              param_name
+                              ))
+                            param_num += 1
+
+
+                    result_type = clang_instance_method.result_type
+                    if result_type:
+                        result_def = result_type.get_declaration()
+                        self.maybe_parse_dependent_record_decl(indent, current_namespace_path, result_def)
+
                     instance_method = InstanceMethod(
                         self.type_mgr,
                         self.namespace_mgr,
                         record_namespace_path,
                         this_type_info,
                         clang_instance_method,
+                        params,
                         template_param_type_map,
                         )
                     if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
@@ -706,6 +707,23 @@ fabricBuildEnv.SharedLibrary(
             if not type_is_pure_virtual:
                 for clang_constructor in clang_constructors:
                     try:
+                        params = []
+                        for child in clang_constructor.get_children():
+                            if child.kind == CursorKind.PARM_DECL:
+                                param_type = child.type
+                                param_resolved_type = template_param_type_map.get(param_type.spelling, None)
+                                if param_resolved_type:
+                                    param_type = param_resolved_type
+
+                                param_def = param_type.get_declaration()
+                                self.maybe_parse_dependent_record_decl(indent, current_namespace_path, param_def)
+
+                                param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
+                                params.append(ParamCodec(
+                                  self.type_mgr.get_dqti(param_cpp_type_expr),
+                                  child.spelling
+                                  ))
+
                         constructor = Constructor(
                             self.type_mgr,
                             self.namespace_mgr,
@@ -713,6 +731,7 @@ fabricBuildEnv.SharedLibrary(
                             this_type_info,
                             clang_constructor,
                             cpp_specialized_type_name,
+                            params,
                             template_param_type_map,
                             )
                         if constructor.edk_symbol_name in existing_method_edk_symbol_names:
@@ -725,8 +744,7 @@ fabricBuildEnv.SharedLibrary(
 
             base_classes = []
             for clang_base_class in clang_base_classes:
-                self.parse_record_decl(clang_base_class.location.file.name, indent,
-                        current_namespace_path, clang_base_class)
+                self.maybe_parse_dependent_record_decl(indent, current_namespace_path, clang_base_class)
                 base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
                         current_namespace_path, clang_base_class.type)
                 base_classes.append(self.type_mgr.get_dqti(base_class_cpp_type_expr))

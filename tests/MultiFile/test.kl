@@ -1,0 +1,19 @@
+require MultiFile;
+
+operator entry() {
+  MultiParent p(5);
+  report('p.getA() = '+p.getA());
+  report('p.getSum() = '+p.getSum());
+
+  MultiChild c(1, 3);
+  report('c.getA() = '+c.getA());
+  report('c.getB() = '+c.getB());
+  report('c.getSum() = '+c.getSum());
+
+  report('c.getRet() = '+c.getRet());
+  MethodParm mp;
+  report('c.getParmA(mp) = '+c.getParmA(mp));
+
+  ConstructParam cp;
+  MultiChild cpc(cp);
+}

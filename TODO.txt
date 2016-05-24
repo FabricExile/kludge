@@ -9,3 +9,4 @@
 - missing namespace for 'new 's in fabric example
 - exception handling, or exception-like (USD) handling
 - must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)
+- code duplication for params between Function, Constructor, InstanceMethod

@@ -279,10 +279,10 @@ fabricBuildEnv.SharedLibrary(
 {
 "libs": "%s",
 "code": [
-"actual.kl"
+"%s.kl"
 ],
 }
-""" % self.config['extname'])
+""" % (self.config['extname'], self.config['basename']))
 
     # def get_kl_type(self, clang_type):
     #     canon_type = clang_type.get_canonical()

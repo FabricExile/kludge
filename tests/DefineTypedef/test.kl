@@ -1,0 +1,8 @@
+require DefineTypedef;
+
+operator entry()
+{
+  BaseTypePtr tp;
+  GlobalFunction(tp);
+}
+

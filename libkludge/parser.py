@@ -348,19 +348,19 @@ fabricBuildEnv.SharedLibrary(
             self.dump_cursor(childIndent, childCursor)
 
     def maybe_parse_dependent_record_decl(self, indent, namespace_path, decl):
-        # FIXME [andrew 20160524]
-        if decl.kind != CursorKind.CLASS_DECL or decl.kind == CursorKind.STRUCT_DECL:
-            return
-
         if not decl.location.file:
             return
         
+        # FIXME [andrew 20160524] hardcoded paths
         if decl.location.file.name.startswith('/') and \
                 not decl.location.file.name.startswith('/build/kludge') and \
                 not decl.location.file.name.startswith('/opt/pixar'):
             return
 
-        self.parse_record_decl(decl.location.file.name, indent, namespace_path, decl)
+        if decl.kind == CursorKind.CLASS_DECL or decl.kind == CursorKind.STRUCT_DECL:
+            self.parse_record_decl(decl.location.file.name, indent, namespace_path, decl)
+        elif decl.kind == CursorKind.TYPEDEF_DECL:
+            self.parse_TYPEDEF_DECL(decl.location.file.name, indent, namespace_path, decl)
 
     def parse_record_decl(
         self,
@@ -799,8 +799,8 @@ fabricBuildEnv.SharedLibrary(
         new_nested_name = current_namespace_path + [new_cpp_type_name]
         new_cpp_type_expr = cpp_type_expr_parser.Named("::".join(new_nested_name))
         old_cpp_type_name = underlying_type.spelling
-        if old_cpp_type_name.startswith("struct "):
-            old_cpp_type_name = old_cpp_type_name[7:]
+        old_cpp_type_name = old_cpp_type_name.replace("struct ", "")
+        old_cpp_type_name = old_cpp_type_name.replace("class ", "")
         try:
             old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
             print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
@@ -853,6 +853,10 @@ fabricBuildEnv.SharedLibrary(
                     if len(param_name) == 0:
                         param_name = "_param_%u" % param_index
                     param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_cursor.type)
+
+                    param_def = param_cursor.type.get_declaration()
+                    self.maybe_parse_dependent_record_decl(indent, current_namespace_path, param_def)
+
                     params.append(ParamCodec(
                         self.type_mgr.get_dqti(param_cpp_type_expr),
                         param_name,

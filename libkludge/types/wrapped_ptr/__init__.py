@@ -46,15 +46,34 @@ class WrappedPtrSelector(Selector):
           cpp_type_expr.make_unqualified()
           )
         )
-    if isinstance(cpp_type_expr, ReferenceTo) \
-      and (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
-      and cpp_type_expr.pointee.is_const \
-      and str(cpp_type_expr.pointee) == self.cpp_type_name:
+    if isinstance(cpp_type_expr, PointerTo) \
+      and (isinstance(cpp_type_expr.pointee, Named) or isinstance(cpp_type_expr.pointee, Template))\
+      and cpp_type_expr.pointee.name == self.cpp_type_name:
+      if cpp_type_expr.pointee.is_const:
+        dq = dir_qual.const_pointer
+      else:
+        dq = dir_qual.mutable_pointer
       return DirQualTypeInfo(
-        dir_qual.const_reference,
+        dq,
         WrappedPtrTypeInfo(
           self.jinjenv,
           self.nested_name,
           cpp_type_expr.pointee.make_unqualified()
           )
         )
+    if isinstance(cpp_type_expr, ReferenceTo) \
+      and (isinstance(cpp_type_expr.pointee, Named) or isinstance(cpp_type_expr.pointee, Template))\
+      and cpp_type_expr.pointee.name == self.cpp_type_name:
+      if cpp_type_expr.pointee.is_const:
+        dq = dir_qual.const_reference
+      else:
+        dq = dir_qual.mutable_reference
+      return DirQualTypeInfo(
+        dq,
+        WrappedPtrTypeInfo(
+          self.jinjenv,
+          self.nested_name,
+          cpp_type_expr.pointee.make_unqualified()
+          )
+        )
+

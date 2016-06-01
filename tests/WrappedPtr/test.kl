@@ -40,4 +40,9 @@ operator entry() {
   report("value.exportValues(...): floatValue = " + floatValue);
   report("value.exportValues(...): stringValue = " + stringValue);
   report("value.exportValues(...): intValue = " + intValue);
+
+  Class c3(2.2, 'otherString', 456);
+  Class_PrintValues(c3);
+  c3.changeValues(constructor2);
+  Class_PrintValues(c3);
 }

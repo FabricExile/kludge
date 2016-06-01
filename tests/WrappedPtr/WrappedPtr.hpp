@@ -33,6 +33,19 @@ public:
     return *this;
   }
 
+  static void PrintValues( Class const &that )
+  {
+    printf("%.2f %s %d\n", that.floatValue, that.stringValue.c_str(),
+           that.pri_intValue);
+  }
+
+  void changeValues( Class &that )
+  {
+    floatValue = that.floatValue;
+    stringValue = that.stringValue;
+    pri_intValue = that.pri_intValue;
+  }
+
   std::string const &publicMethod() { return stringValue; }
 
   std::string getDesc() const {

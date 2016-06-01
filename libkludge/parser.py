@@ -373,7 +373,7 @@ fabricBuildEnv.SharedLibrary(
         ):
         # no children -> forward declaration
         if len(list(cursor.get_children())) < 1:
-            print "%s-> forward declaration" % indent
+            print "%s%s-> forward declaration" % (indent, cursor.displayname)
             return
 
         if not cpp_specialized_type_name:
@@ -382,7 +382,7 @@ fabricBuildEnv.SharedLibrary(
         record_namespace_path = current_namespace_path + [cpp_specialized_type_name]
         try:
             cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cpp_specialized_type_name)
-            print "%s%s %s" % (indent, str(cursor.kind), str(cpp_type_expr))
+            print "%s<RECORD>_DECL %s" % (indent, str(cpp_type_expr))
 
             if self.type_mgr.maybe_get_dqti(cpp_type_expr):
                 print "%s-> skipping because type already exists" % indent
@@ -396,6 +396,8 @@ fabricBuildEnv.SharedLibrary(
             clang_instance_methods = []
             clang_constructors = []
             clang_base_classes = []
+            clang_nested_types = []
+            clang_static_functions = []
             type_is_pure_virtual = False
             type_has_vtable = False
             template_parameters = []
@@ -414,8 +416,7 @@ fabricBuildEnv.SharedLibrary(
                     print "%s  TEMPLATE_TYPE_PARAMETER %s" % (indent, child.displayname)
                     template_parameters.append(child)
                     continue
-
-                if child.kind == CursorKind.FIELD_DECL:
+                elif child.kind == CursorKind.FIELD_DECL:
                     print "%s  FIELD_DECL %s" % (indent, child.displayname)
                     clang_members.append(child)
                     continue
@@ -433,7 +434,7 @@ fabricBuildEnv.SharedLibrary(
 
                     if child.is_static_method():
                         print "%s    ->is static" % (indent)
-                        self.parse_FUNCTION_DECL(include_filename, indent, record_namespace_path, child)
+                        clang_static_functions.append(child)
                     elif clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
                         print "%s    ->is pure virtual" % (indent)
                         type_is_pure_virtual = True
@@ -445,6 +446,10 @@ fabricBuildEnv.SharedLibrary(
                 elif child.kind == CursorKind.CONSTRUCTOR:
                     print "%s  CONSTRUCTOR %s" % (indent, child.displayname)
                     clang_constructors.append(child)
+                    continue
+                elif child.kind == CursorKind.CLASS_DECL or child.kind == CursorKind.STRUCT_DECL:
+                    print "%s  nested <RECORD>_DECL %s" % (indent, child.displayname)
+                    clang_nested_types.append(child)
                     continue
 
                     # result_type_info = self.type_mgr.get_type_info(child.result_type)
@@ -610,7 +615,7 @@ fabricBuildEnv.SharedLibrary(
                                         pass
                                     else:
                                         raise Exception("unexpected child kind: "+str(child.kind))
-                                self.parse_record_decl(include_filename, indent, current_namespace_path,
+                                self.parse_record_decl(include_filename, indent+"  ", current_namespace_path,
                                         template_class, template_args, underlying_type.spelling)
                         elif child.kind == CursorKind.NAMESPACE_REF:
                             pass
@@ -653,6 +658,12 @@ fabricBuildEnv.SharedLibrary(
 
             this_type_info = self.type_mgr.get_dqti(cpp_type_expr).type_info
 
+            # [andrew 20160601] FIXME nested types are only instantiated
+            # if used in methods until we add this
+            #for nested_type in clang_nested_types:
+            #    self.parse_record_decl(include_filename, indent+"  ", record_namespace_path,
+            #            nested_type)
+
             existing_method_edk_symbol_names = set()
             instance_methods = []
             for clang_instance_method in clang_instance_methods:
@@ -671,9 +682,9 @@ fabricBuildEnv.SharedLibrary(
                                 param_type = param_resolved_type
 
                             param_def = param_type.get_declaration()
-                            self.maybe_parse_dependent_record_decl(indent, current_namespace_path, param_def)
+                            self.maybe_parse_dependent_record_decl(indent, record_namespace_path, param_def)
 
-                            param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
+                            param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, param_type.spelling)
                             params.append(ParamCodec(
                               self.type_mgr.get_dqti(param_cpp_type_expr),
                               param_name
@@ -684,7 +695,7 @@ fabricBuildEnv.SharedLibrary(
                     result_type = clang_instance_method.result_type
                     if result_type:
                         result_def = result_type.get_declaration()
-                        self.maybe_parse_dependent_record_decl(indent, current_namespace_path, result_def)
+                        self.maybe_parse_dependent_record_decl(indent, record_namespace_path, result_def)
 
                     instance_method = InstanceMethod(
                         self.type_mgr,
@@ -783,6 +794,10 @@ fabricBuildEnv.SharedLibrary(
                         "ast/builtin/wrapped_ptr_decl",
                         )
                     )
+
+            for static_function in clang_static_functions:
+                self.parse_FUNCTION_DECL(include_filename, indent,
+                        record_namespace_path, static_function)
         except Exception as e:
             print "Warning: ignored type at %s:%d" % (cursor.location.file, cursor.location.line)
             print "  Reason: %s" % e

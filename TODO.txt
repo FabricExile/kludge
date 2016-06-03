@@ -10,3 +10,4 @@
 - exception handling, or exception-like (USD) handling
 - must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)
 - code duplication for params between Function, Constructor, InstanceMethod
+- uncomment typedef in Namespaces.hpp

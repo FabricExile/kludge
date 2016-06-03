@@ -347,7 +347,7 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.dump_cursor(childIndent, childCursor)
 
-    def maybe_parse_dependent_record_decl(self, indent, namespace_path, decl):
+    def maybe_parse_dependent_record_decl(self, indent, decl):
         if not decl.location.file:
             return
         
@@ -357,10 +357,20 @@ fabricBuildEnv.SharedLibrary(
                 not decl.location.file.name.startswith('/opt/pixar'):
             return
 
+        decl_namespace = self.get_cursor_namespace_path(decl)
+
         if decl.kind == CursorKind.CLASS_DECL or decl.kind == CursorKind.STRUCT_DECL:
-            self.parse_record_decl(decl.location.file.name, indent, namespace_path, decl)
+            self.parse_record_decl(decl.location.file.name, indent, decl_namespace, decl)
         elif decl.kind == CursorKind.TYPEDEF_DECL:
-            self.parse_TYPEDEF_DECL(decl.location.file.name, indent, namespace_path, decl)
+            self.parse_TYPEDEF_DECL(decl.location.file.name, indent, decl_namespace, decl)
+
+    def get_cursor_namespace_path(self, cursor):
+        namespace_path = []
+        current = cursor.semantic_parent
+        while current.kind != CursorKind.TRANSLATION_UNIT:
+            namespace_path = [current.spelling] + namespace_path
+            current = current.semantic_parent
+        return namespace_path
 
     def parse_record_decl(
         self,
@@ -384,12 +394,13 @@ fabricBuildEnv.SharedLibrary(
             cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cpp_specialized_type_name)
             print "%s<RECORD>_DECL %s" % (indent, str(cpp_type_expr))
 
-            if self.type_mgr.maybe_get_dqti(cpp_type_expr):
-                print "%s-> skipping because type already exists" % indent
-                return
-
             self.namespace_mgr.add_type(current_namespace_path, cpp_specialized_type_name, cpp_type_expr)
             cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
+
+            if self.type_mgr.maybe_get_dqti(cpp_type_expr):
+                print "%s  -> skipping because type already exists" % indent
+                return
+
             self.namespace_mgr.add_nested_namespace(current_namespace_path, cpp_specialized_type_name)
 
             clang_members = []
@@ -658,11 +669,9 @@ fabricBuildEnv.SharedLibrary(
 
             this_type_info = self.type_mgr.get_dqti(cpp_type_expr).type_info
 
-            # [andrew 20160601] FIXME nested types are only instantiated
-            # if used in methods until we add this
-            #for nested_type in clang_nested_types:
-            #    self.parse_record_decl(include_filename, indent+"  ", record_namespace_path,
-            #            nested_type)
+            for nested_type in clang_nested_types:
+                self.parse_record_decl(include_filename, indent+"  ", record_namespace_path,
+                        nested_type)
 
             existing_method_edk_symbol_names = set()
             instance_methods = []
@@ -682,7 +691,7 @@ fabricBuildEnv.SharedLibrary(
                                 param_type = param_resolved_type
 
                             param_def = param_type.get_declaration()
-                            self.maybe_parse_dependent_record_decl(indent, record_namespace_path, param_def)
+                            self.maybe_parse_dependent_record_decl(indent, param_def)
 
                             param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, param_type.spelling)
                             params.append(ParamCodec(
@@ -695,7 +704,7 @@ fabricBuildEnv.SharedLibrary(
                     result_type = clang_instance_method.result_type
                     if result_type:
                         result_def = result_type.get_declaration()
-                        self.maybe_parse_dependent_record_decl(indent, record_namespace_path, result_def)
+                        self.maybe_parse_dependent_record_decl(indent, result_def)
 
                     instance_method = InstanceMethod(
                         self.type_mgr,
@@ -727,7 +736,7 @@ fabricBuildEnv.SharedLibrary(
                                     param_type = param_resolved_type
 
                                 param_def = param_type.get_declaration()
-                                self.maybe_parse_dependent_record_decl(indent, current_namespace_path, param_def)
+                                self.maybe_parse_dependent_record_decl(indent, param_def)
 
                                 param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
                                 params.append(ParamCodec(
@@ -755,7 +764,7 @@ fabricBuildEnv.SharedLibrary(
 
             base_classes = []
             for clang_base_class in clang_base_classes:
-                self.maybe_parse_dependent_record_decl(indent, current_namespace_path, clang_base_class)
+                self.maybe_parse_dependent_record_decl(indent, clang_base_class)
                 base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
                         current_namespace_path, clang_base_class.type)
                 base_classes.append(self.type_mgr.get_dqti(base_class_cpp_type_expr))
@@ -870,7 +879,7 @@ fabricBuildEnv.SharedLibrary(
                     param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_cursor.type)
 
                     param_def = param_cursor.type.get_declaration()
-                    self.maybe_parse_dependent_record_decl(indent, current_namespace_path, param_def)
+                    self.maybe_parse_dependent_record_decl(indent, param_def)
 
                     params.append(ParamCodec(
                         self.type_mgr.get_dqti(param_cpp_type_expr),

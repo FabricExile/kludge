@@ -5,4 +5,8 @@ operator entry() {
   report("alias_value = " + alias_value);
 
   report("ReturnAliasValue() = " + ReturnAliasValue());
+
+  TakeAliasType(alias_value);
+  TakeAliasTypeRef(alias_value);
+  TakeAliasTypeConstRef(alias_value);
 }

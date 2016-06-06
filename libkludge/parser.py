@@ -350,10 +350,10 @@ fabricBuildEnv.SharedLibrary(
     def maybe_parse_dependent_record_decl(self, indent, decl):
         if not decl.location.file:
             return
-        
+       
         # FIXME [andrew 20160524] hardcoded paths
         if decl.location.file.name.startswith('/') and \
-                not decl.location.file.name.startswith('/build/kludge') and \
+                not decl.location.file.name.startswith('/build') and \
                 not decl.location.file.name.startswith('/opt/pixar'):
             return
 

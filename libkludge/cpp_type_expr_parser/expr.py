@@ -146,9 +146,9 @@ class Numeric(Direct):
 
 class Integer(Numeric):
 
-  def __init__(self):
+  def __init__(self, is_signed=True):
     Numeric.__init__(self)
-    self.is_signed = True
+    self.is_signed = is_signed
 
   def make_unsigned(self):
     self.is_signed = False
@@ -174,58 +174,58 @@ class Integer(Numeric):
 
 class Char(Integer):
 
-  def __init__(self):
-    Integer.__init__(self)
+  def __init__(self, is_signed=True):
+    Integer.__init__(self, is_signed)
 
   def get_signed_desc(self):
     return "char"
 
   def __copy__(self):
-    return Char()
+    return Char(self.is_signed)
 
 class Short(Integer):
 
-  def __init__(self):
-    Integer.__init__(self)
+  def __init__(self, is_signed=True):
+    Integer.__init__(self, is_signed)
 
   def get_signed_desc(self):
     return "short"
 
   def __copy__(self):
-    return Short()
+    return Short(self.is_signed)
 
 class Int(Integer):
 
-  def __init__(self):
-    Integer.__init__(self)
+  def __init__(self, is_signed=True):
+    Integer.__init__(self, is_signed)
 
   def get_signed_desc(self):
     return "int"
 
   def __copy__(self):
-    return Int()
+    return Int(self.is_signed)
 
 class Long(Integer):
 
-  def __init__(self):
-    Integer.__init__(self)
+  def __init__(self, is_signed=True):
+    Integer.__init__(self, is_signed)
 
   def get_signed_desc(self):
     return "long"
 
   def __copy__(self):
-    return Long()
+    return Long(self.is_signed)
 
 class LongLong(Integer):
 
-  def __init__(self):
-    Integer.__init__(self)
+  def __init__(self, is_signed=True):
+    Integer.__init__(self, is_signed)
 
   def get_signed_desc(self):
     return "long long"
 
   def __copy__(self):
-    return LongLong()
+    return LongLong(self.is_signed)
 
 class FloatingPoint(Numeric):
 

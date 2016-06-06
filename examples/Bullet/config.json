@@ -4,7 +4,8 @@
     "${BULLET_DIR}/include"
     ],
   "infiles": [
-    "${BULLET_DIR}/include/LinearMath/btVector3.h"
+    "${BULLET_DIR}/include/LinearMath/btVector3.h",
+    "${BULLET_DIR}/include/btBulletDynamicsCommon.h"
     ],
   "libpath": [
     "${BULLET_DIR}/lib"

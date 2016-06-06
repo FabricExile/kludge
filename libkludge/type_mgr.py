@@ -10,7 +10,7 @@ from dir_qual_type_info import DirQualTypeInfo
 from param_codec import ParamCodec
 import clang.cindex
 import clang_helpers
-from cpp_type_expr_parser import Named
+from cpp_type_expr_parser import *
 
 class TypeMgr:
 
@@ -42,12 +42,29 @@ class TypeMgr:
     self._cpp_type_name_to_dqti[cpp_type_name] = dqti
 
   def maybe_get_dqti(self, cpp_type_expr):
+    orig_type_expr = cpp_type_expr
+    if isinstance(cpp_type_expr, ReferenceTo) or \
+            isinstance(cpp_type_expr, PointerTo):
+        cpp_type_expr = cpp_type_expr.pointee
+    if cpp_type_expr.is_const:
+        cpp_type_expr = cpp_type_expr.make_unqualified()
+
     while True:
       cpp_type_name = str(cpp_type_expr)
       alias_cpp_type_expr = self._alias_new_cpp_type_name_to_old_cpp_type_expr.get(cpp_type_name)
       if not alias_cpp_type_expr:
         break
       cpp_type_expr = alias_cpp_type_expr
+
+    if orig_type_expr.is_const:
+        cpp_type_expr = cpp_type_expr.make_const()
+    if isinstance(orig_type_expr, ReferenceTo) or \
+            isinstance(orig_type_expr, PointerTo):
+        if orig_type_expr.pointee.is_const:
+            cpp_type_expr = cpp_type_expr.make_const()
+        orig_type_expr.pointee = cpp_type_expr
+        cpp_type_expr = orig_type_expr
+    cpp_type_name = str(cpp_type_expr)
 
     dqti = self._cpp_type_name_to_dqti.get(cpp_type_name)
     if dqti:

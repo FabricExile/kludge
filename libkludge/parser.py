@@ -400,6 +400,7 @@ fabricBuildEnv.SharedLibrary(
             if self.type_mgr.maybe_get_dqti(cpp_type_expr):
                 print "%s  -> skipping because type already exists" % indent
                 return
+            print "%s<RECORD>_DECL %s" % (indent, str(cpp_type_expr))
 
             self.namespace_mgr.add_nested_namespace(current_namespace_path, cpp_specialized_type_name)
 
@@ -626,7 +627,9 @@ fabricBuildEnv.SharedLibrary(
                                         pass
                                     else:
                                         raise Exception("unexpected child kind: "+str(child.kind))
-                                self.parse_record_decl(include_filename, indent+"  ", current_namespace_path,
+
+                                template_namespace = self.get_cursor_namespace_path(template_class)
+                                self.parse_record_decl(include_filename, indent+"  ", template_namespace,
                                         template_class, template_args, underlying_type.spelling)
                         elif child.kind == CursorKind.NAMESPACE_REF:
                             pass
@@ -845,7 +848,8 @@ fabricBuildEnv.SharedLibrary(
                     else:
                         raise Exception("unexpected child kind: "+str(child.kind))
 
-                self.parse_record_decl(include_filename, indent, current_namespace_path, template_class, template_args, underlying_type.spelling)
+                template_namespace = self.get_cursor_namespace_path(template_class)
+                self.parse_record_decl(include_filename, indent, template_namespace, template_class, template_args, underlying_type.spelling)
 
             self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
             old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info

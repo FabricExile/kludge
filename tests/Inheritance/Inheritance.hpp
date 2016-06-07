@@ -41,5 +41,25 @@ public:
   virtual int getAPlusFive() { return a + 5; }
 };
 
+class AbstractParent
+{
+public:
+  virtual void doNothing() = 0;
+};
+
+class AbstractChild : public AbstractParent
+{
+public:
+  void doMoreNothing() {}
+};
+
+class NotAbstract : public AbstractChild
+{
+public:
+  virtual void doNothing() {}
+  //AbstractParent getParent() { return *this; }
+};
+
+void TakesAbstract( AbstractParent *p ) {}
 
 #endif

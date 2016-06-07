@@ -16,4 +16,11 @@ operator entry() {
     throw ("Data size mismatch!");
   report('nc.dataSize() = '+nc.dataSize());
   report('nc.getA() = '+nc.getAPlusFive());
+
+  NotAbstract na();
+  AbstractParent ap(na);
+  AbstractChild ac(na);
+  TakesAbstract(na);
+  TakesAbstract(ac);
+  TakesAbstract(ap);
 }

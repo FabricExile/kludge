@@ -444,14 +444,14 @@ fabricBuildEnv.SharedLibrary(
                     if clang.cindex.conf.lib.clang_CXXMethod_isVirtual(child):
                         type_has_vtable = True
 
-                    if child.is_static_method():
+                    if child.spelling.startswith("operator"):
+                        print "%s    ->is operator (FIXME)" % (indent)
+                    elif child.is_static_method():
                         print "%s    ->is static" % (indent)
                         clang_static_functions.append(child)
                     elif clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
                         print "%s    ->is pure virtual" % (indent)
                         type_is_pure_virtual = True
-                    elif child.spelling.startswith("operator"):
-                        pass
                     else:
                         clang_instance_methods.append(child)
                     continue
@@ -873,6 +873,9 @@ fabricBuildEnv.SharedLibrary(
         print "%sFUNCTION_DECL %s" % (indent, "::".join(nested_name))
 
         try:
+            if cursor.spelling.startswith("operator"):
+                raise Exception("function is operator (FIXME)")
+
             param_index = 1
             params = []
             for param_cursor in cursor.get_children():

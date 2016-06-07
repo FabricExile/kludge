@@ -5,7 +5,10 @@
     ],
   "infiles": [
     "${BULLET_DIR}/include/LinearMath/btVector3.h",
-    "${BULLET_DIR}/include/btBulletDynamicsCommon.h"
+    "${BULLET_DIR}/include/btBulletDynamicsCommon.h",
+    "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h",
+    "${BULLET_DIR}/include/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h",
+    "${BULLET_DIR}/include/BulletCollision/CollisionDispatch/btCollisionDispatcher.h"
     ],
   "libpath": [
     "${BULLET_DIR}/lib"

@@ -11,3 +11,5 @@
 - must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)
 - code duplication for params between Function, Constructor, InstanceMethod
 - uncomment typedef in Namespaces.hpp
+- fix Inheritance with abstract return value
+- fix very ambiguous object ownership in types/wrapped_ptr/conv/lib_to_edk.cpp

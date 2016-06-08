@@ -58,7 +58,6 @@ public:
 class NotAbstract : public AbstractChild
 {
 public:
-  NotAbstract() {}
   virtual void doNothing() { printf("AbstractChild: donothing\n"); }
   AbstractChild *getChild() { return this; }
   AbstractParent *getParent() { return this; }

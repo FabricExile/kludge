@@ -410,11 +410,14 @@ fabricBuildEnv.SharedLibrary(
             clang_members = []
             clang_instance_methods = []
             clang_constructors = []
+            has_default_constructor = False
             clang_base_classes = []
             clang_nested_types = []
             clang_static_functions = []
-            type_is_abstract = cursor.is_abstract_type()
-            type_has_vtable = False
+            is_abstract = cursor.is_abstract_type()
+            if is_abstract:
+                print "%s  -> is abstract" % (indent)
+            has_vtable = False
             template_parameters = []
 
             for child in cursor.get_children():
@@ -445,17 +448,16 @@ fabricBuildEnv.SharedLibrary(
                 elif child.kind == CursorKind.CXX_METHOD:
                     print "%s  CXX_METHOD %s" % (indent, child.displayname)
                     if clang.cindex.conf.lib.clang_CXXMethod_isVirtual(child):
-                        type_has_vtable = True
+                        has_vtable = True
 
                     if child.spelling.startswith("operator"):
                         print "%s    ->is operator (FIXME)" % (indent)
                     elif child.is_static_method():
                         print "%s    ->is static" % (indent)
                         clang_static_functions.append(child)
-                    elif clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
-                        print "%s    ->is pure virtual" % (indent)
-                        clang_instance_methods.append(child)
                     else:
+                        if clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
+                            print "%s    ->is pure virtual" % (indent)
                         clang_instance_methods.append(child)
                     continue
                 elif child.kind == CursorKind.CONSTRUCTOR:
@@ -670,7 +672,7 @@ fabricBuildEnv.SharedLibrary(
                         self.jinjenv,
                         record_namespace_path,
                         cpp_type_expr,
-                        type_is_abstract,
+                        is_abstract,
                         )
                     )
 
@@ -730,11 +732,14 @@ fabricBuildEnv.SharedLibrary(
                     existing_method_edk_symbol_names.add(instance_method.edk_symbol_name)
                     instance_methods.append(instance_method)
                 except Exception as e:
-                    print "Warning: ignored method at %s:%d" % (clang_instance_method.location.file, clang_instance_method.location.line)
+                    print "Warning: ignored method '%s' at %s:%d" % (
+                            clang_instance_method.spelling,
+                            clang_instance_method.location.file,
+                            clang_instance_method.location.line)
                     print "  Reason: %s" % e
 
             constructors = []
-            if not type_is_abstract:
+            if not is_abstract:
                 for clang_constructor in clang_constructors:
                     try:
                         params = []
@@ -754,12 +759,15 @@ fabricBuildEnv.SharedLibrary(
                                   child.spelling
                                   ))
 
+                        if len(params) == 0:
+                            has_default_constructor = True
+
                         constructor = Constructor(
                             self.type_mgr,
                             self.namespace_mgr,
                             record_namespace_path,
                             this_type_info,
-                            clang_constructor,
+                            clang_constructor.location,
                             cpp_specialized_type_name,
                             params,
                             template_param_type_map,
@@ -770,6 +778,28 @@ fabricBuildEnv.SharedLibrary(
                         constructors.append(constructor)
                     except Exception as e:
                         print "Warning: ignored constructor at %s:%d" % (clang_constructor.location.file, clang_constructor.location.line)
+                        print "  Reason: %s" % e
+
+                if not has_default_constructor and len(constructors) == 0:
+                    print "%s  -> adding default constructor" % (indent)
+
+                    try:
+                        constructor = Constructor(
+                            self.type_mgr,
+                            self.namespace_mgr,
+                            record_namespace_path,
+                            this_type_info,
+                            None,
+                            cpp_specialized_type_name,
+                            [],
+                            template_param_type_map,
+                            )
+                        if constructor.edk_symbol_name in existing_method_edk_symbol_names:
+                            raise Exception("instance method with name EDK symbol name already exists")
+                        existing_method_edk_symbol_names.add(constructor.edk_symbol_name)
+                        constructors.append(constructor)
+                    except Exception as e:
+                        print "Warning: ignored manual default constructor"
                         print "  Reason: %s" % e
 
             base_classes = []

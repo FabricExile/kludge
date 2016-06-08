@@ -18,21 +18,25 @@ class Constructor:
     namespace_mgr,
     current_namespace_path,
     this_type_info,
-    clang_instance_method,
+    location,
     constructor_name,
     params,
     template_param_type_map,
     ):
     self.name = constructor_name
-    self.desc = "Constructor '%s'" % clang_instance_method.displayname
-    self.location = "%s:%s" % (clang_instance_method.location.file, clang_instance_method.location.line)
+    self.desc = "Constructor '%s'" % constructor_name
+    if location:
+      self.location = "%s:%s" % (location.file, location.line)
+    else:
+      self.location = ""
 
-    result_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, clang_instance_method.result_type.spelling)
+    result_type_name = "void"
+    result_cpp_type_expr = namespace_mgr.resolve_cpp_type_expr(current_namespace_path, result_type_name)
     self.result = ResultCodec(
       type_mgr.get_dqti(result_cpp_type_expr)
       )
 
-    is_mutable = not clang_instance_method.type.spelling.endswith('const')
+    is_mutable = True
     self.this = ThisCodec(this_type_info, is_mutable)
 
     self.params = params

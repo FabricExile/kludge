@@ -6,10 +6,14 @@
 - fix extra -I on clang_index.parse() for clang 3.8.0 includes
 - file issue re: FabricEDK.h and Pure C
 - what does 'require Fabric;' do?
-- missing namespace for 'new 's in fabric example
 - exception handling, or exception-like (USD) handling
-- must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)
 - code duplication for params between Function, Constructor, InstanceMethod
 - uncomment typedef in Namespaces.hpp
-- fix Inheritance with abstract return value
 - fix very ambiguous object ownership in types/wrapped_ptr/conv/lib_to_edk.cpp
+- need to make header ordering unimportant
+- no default constructor created if have other constructors, need empty constructor that throws KL exception or someting like that
+
+--
+X fix Inheritance with abstract return value
+X missing namespace for 'new 's in fabric example
+X must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)

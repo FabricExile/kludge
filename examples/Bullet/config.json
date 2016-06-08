@@ -8,13 +8,38 @@
     "${BULLET_DIR}/include/btBulletDynamicsCommon.h",
     "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h",
     "${BULLET_DIR}/include/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h",
-    "${BULLET_DIR}/include/BulletCollision/CollisionDispatch/btCollisionDispatcher.h"
+    "${BULLET_DIR}/include/BulletCollision/CollisionDispatch/btCollisionDispatcher.h",
+    "${BULLET_DIR}/include/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h",
+    "${BULLET_DIR}/include/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h",
+    "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btCollisionShape.h",
+    "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btStaticPlaneShape.h",
+    "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btSphereShape.h",
+    "${BULLET_DIR}/include/LinearMath/btTransform.h",
+    "${BULLET_DIR}/include/LinearMath/btDefaultMotionState.h",
+    "${BULLET_DIR}/include/BulletDynamics/Dynamics/btRigidBody.h"
     ],
   "libpath": [
     "${BULLET_DIR}/lib"
     ],
   "libs": [
     "BulletDynamics",
+    "BulletSoftBody",
+    "BulletCollision",
     "LinearMath"
+    ],
+  "ignore_methods": [
+    "getCollisionConfiguration",
+    "getCollisionShape",
+    "getRootCollisionShape",
+    "getMotionState",
+    "getBroadphase",
+    "getDispatcher",
+    "getConstraintSolver"
+    ],
+  "ignore_types": [
+    "ClosestRayResultCallback",
+    "AllHitsRayResultCallback",
+    "ClosestConvexResultCallback",
+    "RayResultCallback"
     ]
   }

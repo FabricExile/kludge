@@ -68,7 +68,7 @@ void
     )
 {
     {{macros.cpp_call_pre(constructor.result, constructor.params) | indent(4)}}
-    {{decl.this_value_name.edk}}.cpp_ptr = new {{constructor.name}}(
+    {{decl.this_value_name.edk}}.cpp_ptr = new ::{{constructor.this.type_info.lib.name.base}}(
         {{macros.cpp_call_args(constructor.params) | indent(8)}}
         );
     {{macros.cpp_call_post(constructor.result, constructor.params) | indent(4)}}

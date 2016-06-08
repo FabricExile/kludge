@@ -20,6 +20,8 @@ struct BarType {
 
   struct SubType
   {
+    SubType() {}
+
     int a;
     enum Enum
     {

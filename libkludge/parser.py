@@ -381,7 +381,10 @@ fabricBuildEnv.SharedLibrary(
         template_param_types = [],
         cpp_specialized_type_name = None
         ):
-        # no children -> forward declaration
+        if cursor.displayname in self.config.get('ignore_types', []):
+            print "Ignoring <RECORD>_DECL at %s:%d by user request" % (cursor.location.file, cursor.location.line)
+            return
+
         if len(list(cursor.get_children())) < 1:
             print "%s%s-> forward declaration" % (indent, cursor.displayname)
             return
@@ -679,6 +682,9 @@ fabricBuildEnv.SharedLibrary(
             existing_method_edk_symbol_names = set()
             instance_methods = []
             for clang_instance_method in clang_instance_methods:
+                if clang_instance_method.spelling in self.config.get('ignore_methods', []):
+                    print "Ignoring method at %s:%d by user request" % (clang_instance_method.location.file, clang_instance_method.location.line)
+                    continue
                 try:
                     params = []
                     param_num = 0

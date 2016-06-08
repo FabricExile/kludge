@@ -413,7 +413,7 @@ fabricBuildEnv.SharedLibrary(
             clang_base_classes = []
             clang_nested_types = []
             clang_static_functions = []
-            type_is_pure_virtual = False
+            type_is_abstract = cursor.is_abstract_type()
             type_has_vtable = False
             template_parameters = []
 
@@ -454,7 +454,7 @@ fabricBuildEnv.SharedLibrary(
                         clang_static_functions.append(child)
                     elif clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(child):
                         print "%s    ->is pure virtual" % (indent)
-                        type_is_pure_virtual = True
+                        clang_instance_methods.append(child)
                     else:
                         clang_instance_methods.append(child)
                     continue
@@ -670,6 +670,7 @@ fabricBuildEnv.SharedLibrary(
                         self.jinjenv,
                         record_namespace_path,
                         cpp_type_expr,
+                        type_is_abstract,
                         )
                     )
 
@@ -733,7 +734,7 @@ fabricBuildEnv.SharedLibrary(
                     print "  Reason: %s" % e
 
             constructors = []
-            if not type_is_pure_virtual:
+            if not type_is_abstract:
                 for clang_constructor in clang_constructors:
                     try:
                         params = []
@@ -776,7 +777,8 @@ fabricBuildEnv.SharedLibrary(
                 self.maybe_parse_dependent_record_decl(indent, clang_base_class)
                 base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
                         current_namespace_path, clang_base_class.type)
-                base_classes.append(self.type_mgr.get_dqti(base_class_cpp_type_expr))
+                base_class_dqti = self.type_mgr.get_dqti(base_class_cpp_type_expr)
+                base_classes.append(base_class_dqti)
 
             # [andrew 20160517] FIXME this would be fine with objects + interfaces but not structs
             if len(base_classes) > 1:

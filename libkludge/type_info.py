@@ -48,6 +48,11 @@ class LibTypeInfo:
     self.expr = expr
     base, suffix = expr.build_desc()
     self.name = LibTypeName(base, suffix)
+    self.is_abstract = False
+
+  @property
+  def var_as_pointer(self):
+    return self.is_abstract
 
 class TypeInfo:
 

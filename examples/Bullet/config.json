@@ -28,13 +28,6 @@
     "LinearMath"
     ],
   "ignore_methods": [
-    "getCollisionConfiguration",
-    "getCollisionShape",
-    "getRootCollisionShape",
-    "getMotionState",
-    "getBroadphase",
-    "getDispatcher",
-    "getConstraintSolver"
     ],
   "ignore_types": [
     "ClosestRayResultCallback",

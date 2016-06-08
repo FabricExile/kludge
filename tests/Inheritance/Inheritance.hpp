@@ -1,6 +1,8 @@
 #ifndef _Inheritance_HPP
 #define _Inheritance_HPP
 
+#include <stdio.h>
+
 class SimpleParent
 {
 public:
@@ -56,8 +58,10 @@ public:
 class NotAbstract : public AbstractChild
 {
 public:
-  virtual void doNothing() {}
-  //AbstractParent getParent() { return *this; }
+  NotAbstract() {}
+  virtual void doNothing() { printf("AbstractChild: donothing\n"); }
+  AbstractChild *getChild() { return this; }
+  AbstractParent *getParent() { return this; }
 };
 
 void TakesAbstract( AbstractParent *p ) {}

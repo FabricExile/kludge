@@ -18,8 +18,13 @@ operator entry() {
   report('nc.getA() = '+nc.getAPlusFive());
 
   NotAbstract na();
+  na.doNothing();
   AbstractParent ap(na);
+  ap.doNothing();
   AbstractChild ac(na);
+  ac.doNothing();
+  AbstractChild ac2 = na.getChild();
+  AbstractParent ap2 = na.getParent();
   TakesAbstract(na);
   TakesAbstract(ac);
   TakesAbstract(ap);

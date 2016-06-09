@@ -1,5 +1,5 @@
 {
-  "extname": "Bullet",
+  "extname": "NewBullet",
   "cpppath": [
     "${BULLET_DIR}/include"
     ],
@@ -16,7 +16,8 @@
     "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btStaticPlaneShape.h",
     "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btSphereShape.h",
     "${BULLET_DIR}/include/BulletDynamics/Dynamics/btRigidBody.h",
-    "${BULLET_DIR}/include/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
+    "${BULLET_DIR}/include/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h",
+    "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h"
     ],
   "libpath": [
     "${BULLET_DIR}/lib"

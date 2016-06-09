@@ -6,7 +6,7 @@ export PYTHONPATH="$PYTHONPATH:$LLVM_PATH/../tools/clang/bindings/python"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LLVM_PATH/lib"
 
 # Bullet
-export BULLET_DIR=/build/arbus/ThirdParty/PreBuilt/Linux/x86_64/Release/bullet/2.78
+export BULLET_DIR=/build/arbus/ThirdParty/PreBuilt/Linux/x86_64/Debug/bullet/2.78
 
 # USD
 export USD_INSTALL_ROOT=/opt/pixar/usd

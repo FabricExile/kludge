@@ -34,6 +34,9 @@ class LibTypeName:
 
   def __init__(self, base, suffix):
     self.base = base
+    # FIXME
+    #self.base = self.base.replace('<', '< ::')
+    #self.base = self.base.replace(',', ', ::')
     self.suffix = suffix
 
   @property
@@ -49,10 +52,11 @@ class LibTypeInfo:
     base, suffix = expr.build_desc()
     self.name = LibTypeName(base, suffix)
     self.is_abstract = False
+    self.no_copy_constructor = False
 
   @property
   def var_as_pointer(self):
-    return self.is_abstract
+    return self.is_abstract or self.no_copy_constructor
 
 class TypeInfo:
 

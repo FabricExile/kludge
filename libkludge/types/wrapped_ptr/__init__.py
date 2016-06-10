@@ -11,7 +11,7 @@ class WrappedPtrTypeInfo(TypeInfo):
 
   can_in_place = True
 
-  def __init__(self, jinjenv, nested_name, undq_cpp_type_expr, is_abstract):
+  def __init__(self, jinjenv, nested_name, undq_cpp_type_expr, is_abstract, no_copy_constructor):
     TypeInfo.__init__(
       self,
       jinjenv,
@@ -19,6 +19,7 @@ class WrappedPtrTypeInfo(TypeInfo):
       lib_expr = undq_cpp_type_expr,
       )
     self.lib.is_abstract = is_abstract
+    self.lib.no_copy_constructor = no_copy_constructor
 
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)
@@ -28,11 +29,12 @@ class WrappedPtrTypeInfo(TypeInfo):
 
 class WrappedPtrSelector(Selector):
 
-  def __init__(self, jinjenv, nested_name, cpp_type_expr, is_abstract):
+  def __init__(self, jinjenv, nested_name, cpp_type_expr, is_abstract, no_copy_constructor):
     Selector.__init__(self, jinjenv)
     self.nested_name = nested_name
     self.cpp_type_name = str(cpp_type_expr)
     self.is_abstract = is_abstract
+    self.no_copy_constructor = no_copy_constructor
 
   def get_desc(self):
     return "WrappedPtr:%s" % str(self.nested_name)
@@ -47,6 +49,7 @@ class WrappedPtrSelector(Selector):
           self.nested_name,
           cpp_type_expr.make_unqualified(),
           self.is_abstract,
+          self.no_copy_constructor,
           )
         )
     if isinstance(cpp_type_expr, PointerTo) \
@@ -63,6 +66,7 @@ class WrappedPtrSelector(Selector):
           self.nested_name,
           cpp_type_expr.pointee.make_unqualified(),
           self.is_abstract,
+          self.no_copy_constructor,
           )
         )
     if isinstance(cpp_type_expr, ReferenceTo) \
@@ -79,6 +83,7 @@ class WrappedPtrSelector(Selector):
           self.nested_name,
           cpp_type_expr.pointee.make_unqualified(),
           self.is_abstract,
+          self.no_copy_constructor,
           )
         )
 

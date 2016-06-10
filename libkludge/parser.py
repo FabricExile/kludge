@@ -347,14 +347,21 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.dump_cursor(childIndent, childCursor)
 
-    def maybe_parse_dependent_record_decl(self, indent, decl):
-        if not decl.location.file:
-            return
+    def should_parse_file(self, include_file):
+        if not include_file:
+            return False
        
         # FIXME [andrew 20160524] hardcoded paths
-        if decl.location.file.name.startswith('/') and \
-                not decl.location.file.name.startswith('/build') and \
-                not decl.location.file.name.startswith('/opt/pixar'):
+        if include_file.name.startswith('/') and \
+                not include_file.name.startswith('/build') and \
+                not include_file.name.startswith('/home/andrew') and \
+                not include_file.name.startswith('/opt/pixar'):
+            return False
+
+        return True
+
+    def maybe_parse_dependent_record_decl(self, indent, decl):
+        if not self.should_parse_file(decl.location.file):
             return
 
         decl_namespace = self.get_cursor_namespace_path(decl)
@@ -411,12 +418,14 @@ fabricBuildEnv.SharedLibrary(
             clang_instance_methods = []
             clang_constructors = []
             has_default_constructor = False
+            has_private_default_constructor = False
             clang_base_classes = []
             clang_nested_types = []
             clang_static_functions = []
             is_abstract = cursor.is_abstract_type()
             if is_abstract:
                 print "%s  -> is abstract" % (indent)
+            no_copy_constructor = False
             has_vtable = False
             template_parameters = []
 
@@ -438,6 +447,13 @@ fabricBuildEnv.SharedLibrary(
                     print "%s  FIELD_DECL %s" % (indent, child.displayname)
                     clang_members.append(child)
                     continue
+
+                if child.kind == CursorKind.CONSTRUCTOR and \
+                      child.access_specifier != AccessSpecifier.PUBLIC:
+                    print "%s  private CONSTRUCTOR %s" % (indent, child.displayname)
+                    has_private_default_constructor = True
+                    if child.is_copy_constructor():
+                        no_copy_constructor = True
 
                 if child.access_specifier != AccessSpecifier.PUBLIC:
                     continue
@@ -673,6 +689,7 @@ fabricBuildEnv.SharedLibrary(
                         record_namespace_path,
                         cpp_type_expr,
                         is_abstract,
+                        no_copy_constructor,
                         )
                     )
 
@@ -743,6 +760,7 @@ fabricBuildEnv.SharedLibrary(
                 for clang_constructor in clang_constructors:
                     try:
                         params = []
+                        param_num = 0
                         for child in clang_constructor.get_children():
                             if child.kind == CursorKind.PARM_DECL:
                                 param_type = child.type
@@ -753,10 +771,15 @@ fabricBuildEnv.SharedLibrary(
                                 param_def = param_type.get_declaration()
                                 self.maybe_parse_dependent_record_decl(indent, param_def)
 
+                                param_name = child.spelling
+                                if not param_name:
+                                    param_name = 'arg'+str(param_num)
+                                param_num += 1
+
                                 param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
                                 params.append(ParamCodec(
                                   self.type_mgr.get_dqti(param_cpp_type_expr),
-                                  child.spelling
+                                  param_name
                                   ))
 
                         if len(params) == 0:
@@ -780,7 +803,7 @@ fabricBuildEnv.SharedLibrary(
                         print "Warning: ignored constructor at %s:%d" % (clang_constructor.location.file, clang_constructor.location.line)
                         print "  Reason: %s" % e
 
-                if not has_default_constructor and len(constructors) == 0:
+                if not has_default_constructor and len(clang_constructors) == 0 and not has_private_default_constructor:
                     print "%s  -> adding default constructor" % (indent)
 
                     try:
@@ -968,6 +991,10 @@ fabricBuildEnv.SharedLibrary(
                 )
             print "%sNAMESPACE %s" % (indent, "::".join(nested_namespace_path))
             self.parse_children(include_filename, indent + "  ", nested_namespace_path, cursor)
+        elif cursor_kind == CursorKind.NAMESPACE_ALIAS:
+            print '*******************************************************'
+            self.dump_cursor('  ', cursor)
+            print '*******************************************************'
         elif cursor_kind == CursorKind.UNEXPOSED_DECL:
             self.parse_children(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.MACRO_INSTANTIATION:
@@ -1019,7 +1046,8 @@ fabricBuildEnv.SharedLibrary(
             print 'skipping unit: ' + unit.spelling
         else:
             for cursor in unit.cursor.get_children():
-                if hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
+                if not self.should_parse_file(cursor.location.file):
+                #if hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
                     continue
                 self.parse_cursor(unit_filename, "", [], cursor)
 

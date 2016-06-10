@@ -11,7 +11,7 @@
     "/usr/include/python2.7",
     "/usr/include/OpenEXR",
     "/opt/pixar/usd-vfx2015/include",
-    "/build/trunk-llvm/build/lib/clang/3.9.0/include/"
+    "/build/fabric-llvm/build/lib/clang/3.9.0/include"
     ],
   "libpath": [
     "${USD_INSTALL_ROOT}/lib",

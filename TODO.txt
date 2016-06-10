@@ -1,19 +1,30 @@
 - PureC unit test, fix issues compiling with C standard
-- for pure virtual types create constructor that throws exception
 - clang import to never use system version
 - inheritance support for InPlace types (vtable pointer)
 - unit test output or in-test value verification + throw
 - fix extra -I on clang_index.parse() for clang 3.8.0 includes
 - file issue re: FabricEDK.h and Pure C
-- what does 'require Fabric;' do?
 - exception handling, or exception-like (USD) handling
 - code duplication for params between Function, Constructor, InstanceMethod
-- uncomment typedef in Namespaces.hpp
 - fix very ambiguous object ownership in types/wrapped_ptr/conv/lib_to_edk.cpp
 - need to make header ordering unimportant
+- aliases created multiple times in .kl file
 - no default constructor created if have other constructors, need empty constructor that throws KL exception or someting like that
+- possible handling for function default values (make multiple KL functions)
+- don't parse other headers in two places, either top-level or on-demand not both
+- find and fix all FIXME hacks
+- add support for all operator types (+/*/etc.)
+- consolidate template handling code
+
+Inheritance:
+- for abstract types create constructor that throws exception
+
+Namespaces:
+- namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)
+- uncomment typedef in Namespaces.hpp
 
 --
 X fix Inheritance with abstract return value
 X missing namespace for 'new 's in fabric example
 X must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)
+X what does 'require Fabric;' do?

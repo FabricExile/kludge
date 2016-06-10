@@ -1,12 +1,13 @@
 # libclang
 #export LLVM_PATH="/build/llvm-3.8/build"
-export LLVM_PATH="/build/trunk-llvm/build"
+export LLVM_PATH="/build/fabric-llvm/build"
 export PATH="$PATH:$LLVM_PATH/bin"
 export PYTHONPATH="$PYTHONPATH:$LLVM_PATH/../tools/clang/bindings/python"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LLVM_PATH/lib"
 
 # Bullet
-export BULLET_DIR=/build/arbus/ThirdParty/PreBuilt/Linux/x86_64/Debug/bullet/2.78
+#export BULLET_DIR=/build/arbus/ThirdParty/PreBuilt/Linux/x86_64/Debug/bullet/2.78
+export BULLET_DIR=/home/andrew/foo/bullet
 
 # USD
 export USD_INSTALL_ROOT=/opt/pixar/usd

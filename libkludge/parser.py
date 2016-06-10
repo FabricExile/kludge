@@ -379,6 +379,56 @@ fabricBuildEnv.SharedLibrary(
             current = current.semantic_parent
         return namespace_path
 
+    def collect_params(self, indent, cursor, current_namespace_path, template_param_type_map):
+        params = []
+        param_configs = []
+        param_num = 0
+        try:
+            for child in cursor.get_children():
+                if child.kind == CursorKind.PARM_DECL:
+                    has_default_value = False
+                    for pc in child.get_children():
+                        if pc.kind in [
+                            CursorKind.UNEXPOSED_EXPR,
+                            CursorKind.INTEGER_LITERAL,
+                            CursorKind.FLOATING_LITERAL,
+                            CursorKind.STRING_LITERAL,
+                            CursorKind.CXX_BOOL_LITERAL_EXPR,
+                            CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
+                            CursorKind.DECL_REF_EXPR,
+                            CursorKind.BINARY_OPERATOR
+                            ]:
+                            has_default_value = True
+                            break
+
+                    param_type = child.type
+                    param_resolved_type = template_param_type_map.get(param_type.spelling, None)
+                    if param_resolved_type:
+                        param_type = param_resolved_type
+
+                    param_def = param_type.get_declaration()
+                    self.maybe_parse_dependent_record_decl(indent, param_def)
+
+                    param_name = child.spelling
+                    if not param_name:
+                        param_name = 'arg'+str(param_num)
+                    param_num += 1
+
+                    if has_default_value:
+                        param_configs.append(list(params))
+
+                    param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
+                    params.append(ParamCodec(
+                      self.type_mgr.get_dqti(param_cpp_type_expr),
+                      param_name
+                      ))
+            param_configs.append(params)
+        except Exception as e:
+            print "Warning: ignored one constructor at %s:%d" % (cursor.location.file, cursor.location.line)
+            print "  Reason: %s" % e
+
+        return param_configs
+
     def parse_record_decl(
         self,
         include_filename,
@@ -706,48 +756,27 @@ fabricBuildEnv.SharedLibrary(
                     print "Ignoring method at %s:%d by user request" % (clang_instance_method.location.file, clang_instance_method.location.line)
                     continue
                 try:
-                    params = []
-                    param_num = 0
-                    for child in clang_instance_method.get_children():
-                        if child.kind == CursorKind.PARM_DECL:
-                            param_name = child.spelling
-                            if not param_name:
-                                param_name = 'arg'+str(param_num)
-
-                            param_type = child.type
-                            param_resolved_type = template_param_type_map.get(param_type.spelling, None)
-                            if param_resolved_type:
-                                param_type = param_resolved_type
-
-                            param_def = param_type.get_declaration()
-                            self.maybe_parse_dependent_record_decl(indent, param_def)
-
-                            param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(record_namespace_path, param_type.spelling)
-                            params.append(ParamCodec(
-                              self.type_mgr.get_dqti(param_cpp_type_expr),
-                              param_name
-                              ))
-                            param_num += 1
-
+                    param_configs = self.collect_params(indent+'  ', clang_instance_method, current_namespace_path, template_param_type_map)
 
                     result_type = clang_instance_method.result_type
                     if result_type:
                         result_def = result_type.get_declaration()
                         self.maybe_parse_dependent_record_decl(indent, result_def)
 
-                    instance_method = InstanceMethod(
-                        self.type_mgr,
-                        self.namespace_mgr,
-                        record_namespace_path,
-                        this_type_info,
-                        clang_instance_method,
-                        params,
-                        template_param_type_map,
-                        )
-                    if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
-                        raise Exception("instance method with name EDK symbol name already exists")
-                    existing_method_edk_symbol_names.add(instance_method.edk_symbol_name)
-                    instance_methods.append(instance_method)
+                    for param_config in param_configs:
+                        instance_method = InstanceMethod(
+                            self.type_mgr,
+                            self.namespace_mgr,
+                            record_namespace_path,
+                            this_type_info,
+                            clang_instance_method,
+                            param_config,
+                            template_param_type_map,
+                            )
+                        if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
+                            raise Exception("instance method with name EDK symbol name already exists")
+                        existing_method_edk_symbol_names.add(instance_method.edk_symbol_name)
+                        instance_methods.append(instance_method)
                 except Exception as e:
                     print "Warning: ignored method '%s' at %s:%d" % (
                             clang_instance_method.spelling,
@@ -759,46 +788,27 @@ fabricBuildEnv.SharedLibrary(
             if not is_abstract:
                 for clang_constructor in clang_constructors:
                     try:
-                        params = []
-                        param_num = 0
-                        for child in clang_constructor.get_children():
-                            if child.kind == CursorKind.PARM_DECL:
-                                param_type = child.type
-                                param_resolved_type = template_param_type_map.get(param_type.spelling, None)
-                                if param_resolved_type:
-                                    param_type = param_resolved_type
+                        param_configs = self.collect_params(indent+'  ', clang_constructor, current_namespace_path, template_param_type_map)
 
-                                param_def = param_type.get_declaration()
-                                self.maybe_parse_dependent_record_decl(indent, param_def)
+                        for param_config in param_configs:
+                            constructor = Constructor(
+                                self.type_mgr,
+                                self.namespace_mgr,
+                                record_namespace_path,
+                                this_type_info,
+                                clang_constructor.location,
+                                cpp_specialized_type_name,
+                                param_config,
+                                template_param_type_map,
+                                )
 
-                                param_name = child.spelling
-                                if not param_name:
-                                    param_name = 'arg'+str(param_num)
-                                param_num += 1
+                            if len(param_config) == 0:
+                                has_default_constructor = True
 
-                                param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
-                                params.append(ParamCodec(
-                                  self.type_mgr.get_dqti(param_cpp_type_expr),
-                                  param_name
-                                  ))
-
-                        if len(params) == 0:
-                            has_default_constructor = True
-
-                        constructor = Constructor(
-                            self.type_mgr,
-                            self.namespace_mgr,
-                            record_namespace_path,
-                            this_type_info,
-                            clang_constructor.location,
-                            cpp_specialized_type_name,
-                            params,
-                            template_param_type_map,
-                            )
-                        if constructor.edk_symbol_name in existing_method_edk_symbol_names:
-                            raise Exception("instance method with name EDK symbol name already exists")
-                        existing_method_edk_symbol_names.add(constructor.edk_symbol_name)
-                        constructors.append(constructor)
+                            if constructor.edk_symbol_name in existing_method_edk_symbol_names:
+                                raise Exception("instance method with name EDK symbol name already exists")
+                            existing_method_edk_symbol_names.add(constructor.edk_symbol_name)
+                            constructors.append(constructor)
                     except Exception as e:
                         print "Warning: ignored constructor at %s:%d" % (clang_constructor.location.file, clang_constructor.location.line)
                         print "  Reason: %s" % e
@@ -1046,8 +1056,8 @@ fabricBuildEnv.SharedLibrary(
             print 'skipping unit: ' + unit.spelling
         else:
             for cursor in unit.cursor.get_children():
-                if not self.should_parse_file(cursor.location.file):
-                #if hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
+                #if not self.should_parse_file(cursor.location.file):
+                if hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
                     continue
                 self.parse_cursor(unit_filename, "", [], cursor)
 

@@ -15,6 +15,7 @@
 - find and fix all FIXME hacks
 - add support for all operator types (+/*/etc.)
 - consolidate template handling code
+- how to handle forward declarations
 
 Inheritance:
 - for abstract types create constructor that throws exception

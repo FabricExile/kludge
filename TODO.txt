@@ -5,20 +5,14 @@
 - fix extra -I on clang_index.parse() for clang 3.8.0 includes
 - file issue re: FabricEDK.h and Pure C
 - exception handling, or exception-like (USD) handling
-- code duplication for params between Function, Constructor, InstanceMethod
 - fix very ambiguous object ownership in types/wrapped_ptr/conv/lib_to_edk.cpp
 - need to make header ordering unimportant
 - aliases created multiple times in .kl file
-- no default constructor created if have other constructors, need empty constructor that throws KL exception or someting like that
-- possible handling for function default values (make multiple KL functions)
 - don't parse other headers in two places, either top-level or on-demand not both
 - find and fix all FIXME hacks
 - add support for all operator types (+/*/etc.)
 - consolidate template handling code
 - how to handle forward declarations
-
-Inheritance:
-- for abstract types create constructor that throws exception
 
 Namespaces:
 - namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)
@@ -29,3 +23,7 @@ X fix Inheritance with abstract return value
 X missing namespace for 'new 's in fabric example
 X must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)
 X what does 'require Fabric;' do?
+X no default constructor created if have other constructors, need empty constructor that throws KL exception or someting like that
+X possible handling for function default values (make multiple KL functions)
+X for abstract types create constructor that throws exception
+X code duplication for params between Function, Constructor, InstanceMethod

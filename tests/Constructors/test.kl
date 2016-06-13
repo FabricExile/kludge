@@ -1,0 +1,9 @@
+require Constructors;
+
+operator entry()
+{
+  MyClass m1(5);
+  report(m1.getA());
+  MyClass m2;
+  report(m2.getA());
+}

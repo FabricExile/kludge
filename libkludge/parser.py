@@ -387,20 +387,21 @@ fabricBuildEnv.SharedLibrary(
             for child in cursor.get_children():
                 if child.kind == CursorKind.PARM_DECL:
                     has_default_value = False
-                    for pc in child.get_children():
-                        if pc.kind in [
-                            CursorKind.UNEXPOSED_EXPR,
-                            CursorKind.INTEGER_LITERAL,
-                            CursorKind.FLOATING_LITERAL,
-                            CursorKind.STRING_LITERAL,
-                            CursorKind.CXX_BOOL_LITERAL_EXPR,
-                            CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
-                            CursorKind.DECL_REF_EXPR,
-                            # bit of a hack but this could be e.g. "=1.0/6.0"
-                            CursorKind.BINARY_OPERATOR
-                            ]:
-                            has_default_value = True
-                            break
+                    if child.type.kind != TypeKind.CONSTANTARRAY:
+                        for pc in child.get_children():
+                            if pc.kind in [
+                                CursorKind.UNEXPOSED_EXPR,
+                                CursorKind.INTEGER_LITERAL,
+                                CursorKind.FLOATING_LITERAL,
+                                CursorKind.STRING_LITERAL,
+                                CursorKind.CXX_BOOL_LITERAL_EXPR,
+                                CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
+                                CursorKind.DECL_REF_EXPR,
+                                # bit of a hack but this could be e.g. "=1.0/6.0"
+                                CursorKind.BINARY_OPERATOR
+                                ]:
+                                has_default_value = True
+                                break
 
                     param_type = child.type
                     param_resolved_type = template_param_type_map.get(param_type.spelling, None)
@@ -956,39 +957,26 @@ fabricBuildEnv.SharedLibrary(
             if cursor.spelling.startswith("operator"):
                 raise Exception("function is operator (FIXME)")
 
-            param_index = 1
-            params = []
-            for param_cursor in cursor.get_children():
-                if param_cursor.kind == CursorKind.PARM_DECL:
-                    param_name = param_cursor.spelling
-                    if len(param_name) == 0:
-                        param_name = "_param_%u" % param_index
-                    param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_cursor.type)
-
-                    param_def = param_cursor.type.get_declaration()
-                    self.maybe_parse_dependent_record_decl(indent, param_def)
-
-                    params.append(ParamCodec(
-                        self.type_mgr.get_dqti(param_cpp_type_expr),
-                        param_name,
-                        ))
-                param_index += 1
+            param_configs = self.collect_params(indent+'  ', cursor,
+                    current_namespace_path, {})
 
             result_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, cursor.result_type)
 
-            func = ast.Func(
-                self.config['extname'],
-                include_filename,
-                self.get_location(cursor.location),
-                cursor.displayname,
-                nested_name,
-                self.type_mgr.get_dqti(result_cpp_type_expr),
-                params,
-                )
-            if func.edk_symbol_name in self.existing_edk_symbol_names:
-                raise Exception("identical EDK symbol already exists")
-            self.existing_edk_symbol_names.add(func.edk_symbol_name)
-            self.edk_decls.add(func)
+            for param_config in param_configs:
+                print cursor.spelling + ' PARAM_CONFIG:'+str(param_config)
+                func = ast.Func(
+                    self.config['extname'],
+                    include_filename,
+                    self.get_location(cursor.location),
+                    cursor.displayname,
+                    nested_name,
+                    self.type_mgr.get_dqti(result_cpp_type_expr),
+                    param_config,
+                    )
+                if func.edk_symbol_name in self.existing_edk_symbol_names:
+                    raise Exception("identical EDK symbol already exists")
+                self.existing_edk_symbol_names.add(func.edk_symbol_name)
+                self.edk_decls.add(func)
         except Exception as e:
             print "Warning: ignored function at %s:%d" % (cursor.location.file, cursor.location.line)
             print "  Reason: %s" % e

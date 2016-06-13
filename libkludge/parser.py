@@ -382,8 +382,8 @@ fabricBuildEnv.SharedLibrary(
     def collect_params(self, indent, cursor, current_namespace_path, template_param_type_map):
         params = []
         param_configs = []
-        param_num = 0
         try:
+            param_num = 0
             for child in cursor.get_children():
                 if child.kind == CursorKind.PARM_DECL:
                     has_default_value = False
@@ -396,6 +396,7 @@ fabricBuildEnv.SharedLibrary(
                             CursorKind.CXX_BOOL_LITERAL_EXPR,
                             CursorKind.CXX_NULL_PTR_LITERAL_EXPR,
                             CursorKind.DECL_REF_EXPR,
+                            # bit of a hack but this could be e.g. "=1.0/6.0"
                             CursorKind.BINARY_OPERATOR
                             ]:
                             has_default_value = True
@@ -469,6 +470,7 @@ fabricBuildEnv.SharedLibrary(
             clang_constructors = []
             has_default_constructor = False
             has_private_default_constructor = False
+            block_empty_kl_constructor = False
             clang_base_classes = []
             clang_nested_types = []
             clang_static_functions = []
@@ -835,6 +837,11 @@ fabricBuildEnv.SharedLibrary(
                         print "Warning: ignored manual default constructor"
                         print "  Reason: %s" % e
 
+            # this type cannot be instantiated without parameters (or at all)
+            if is_abstract or (not has_default_constructor and len(clang_constructors) > 0):
+                print "%s  -> blocking default construction of type" % (indent)
+                block_empty_kl_constructor = True
+
             base_classes = []
             for clang_base_class in clang_base_classes:
                 self.maybe_parse_dependent_record_decl(indent, clang_base_class)
@@ -859,6 +866,7 @@ fabricBuildEnv.SharedLibrary(
                         instance_methods,
                         constructors,
                         base_classes,
+                        block_empty_kl_constructor,
                         "ast/builtin/in_place_struct_decl",
                         )
                     )
@@ -874,6 +882,7 @@ fabricBuildEnv.SharedLibrary(
                         instance_methods,
                         constructors,
                         base_classes,
+                        block_empty_kl_constructor,
                         "ast/builtin/wrapped_ptr_decl",
                         )
                     )

@@ -36,7 +36,6 @@ operator entry()
   dynamicsWorld.addRigidBody(fallRigidBody);
 
   for (Integer i = 0; i < 300; i++) {
-    //dynamicsWorld.stepSimulation(1 / 60.0, 10, 1 / 60.0);
     dynamicsWorld.stepSimulation(1 / 60.0, 10);
 
     btTransform trans;

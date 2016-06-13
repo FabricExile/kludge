@@ -52,6 +52,15 @@ void
     {% endif %}
 {% endfor %}
 
+{% if decl.block_empty_kl_constructor %}
+FABRIC_EXT_EXPORT
+void
+{{decl.this_type_info.kl.name.compound}}_block_empty_constructor()
+{
+  ::Fabric::EDK::throwException( "no empty constructor for {{decl.this_type_info.kl.name.compound}}" );
+}
+{% endif %}
+
 {% for constructor in decl.constructors %}
 //////////////////////////////////////////////////////////////////////////////
 //

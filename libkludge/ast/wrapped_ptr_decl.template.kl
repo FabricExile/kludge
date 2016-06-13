@@ -24,6 +24,11 @@ struct {{decl.this_type_info.kl.name.compound}}
     {% endif %}
   {% endfor %}
 
+{% if decl.block_empty_kl_constructor %}
+{{decl.this_type_info.kl.name.compound}}() =
+  "{{decl.this_type_info.kl.name.compound}}_block_empty_constructor";
+{% endif %}
+
   {% for constructor in decl.constructors %}
 //////////////////////////////////////////////////////////////////////////////
 //

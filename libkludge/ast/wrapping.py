@@ -18,6 +18,7 @@ class Wrapping(Decl):
     methods,
     constructors,
     base_classes,
+    block_empty_kl_constructor,
     template_basename,
     ):
     Decl.__init__(
@@ -35,6 +36,7 @@ class Wrapping(Decl):
     self.methods = methods
     self.constructors = constructors
     self.base_classes = base_classes
+    self.block_empty_kl_constructor = block_empty_kl_constructor
     self._template_basename = template_basename
 
   def jinja_stream(self, jinjenv, lang):

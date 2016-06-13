@@ -34,6 +34,9 @@ class TypeMgr:
     print "Registered conversion selector: %s" % codec.get_desc()
     self._selectors.append(codec)
 
+  def has_alias(self, new_cpp_type_expr):
+    return self._alias_new_cpp_type_name_to_old_cpp_type_expr.has_key(str(new_cpp_type_expr))
+
   def add_alias(self, new_cpp_type_expr, old_cpp_type_expr):
     self._alias_new_cpp_type_name_to_old_cpp_type_expr[str(new_cpp_type_expr)] = old_cpp_type_expr
 

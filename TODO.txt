@@ -7,7 +7,6 @@
 - exception handling, or exception-like (USD) handling
 - fix very ambiguous object ownership in types/wrapped_ptr/conv/lib_to_edk.cpp
 - need to make header ordering unimportant
-- aliases created multiple times in .kl file
 - don't parse other headers in two places, either top-level or on-demand not both
 - find and fix all FIXME hacks
 - add support for all operator types (+/*/etc.)
@@ -27,3 +26,4 @@ X no default constructor created if have other constructors, need empty construc
 X possible handling for function default values (make multiple KL functions)
 X for abstract types create constructor that throws exception
 X code duplication for params between Function, Constructor, InstanceMethod
+X aliases created multiple times in .kl file

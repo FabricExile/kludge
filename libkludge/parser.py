@@ -906,6 +906,10 @@ fabricBuildEnv.SharedLibrary(
         new_cpp_type_name = cursor.type.spelling
         new_nested_name = current_namespace_path + [new_cpp_type_name]
         new_cpp_type_expr = cpp_type_expr_parser.Named("::".join(new_nested_name))
+
+        if self.type_mgr.has_alias(new_cpp_type_expr):
+            return
+
         old_cpp_type_name = underlying_type.spelling
         old_cpp_type_name = old_cpp_type_name.replace("struct ", "")
         old_cpp_type_name = old_cpp_type_name.replace("class ", "")

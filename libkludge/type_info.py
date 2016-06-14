@@ -34,9 +34,6 @@ class LibTypeName:
 
   def __init__(self, base, suffix):
     self.base = base
-    # FIXME
-    self.base = self.base.replace('<', '< ::')
-    self.base = self.base.replace(',', ', ::')
     self.suffix = suffix
 
   @property

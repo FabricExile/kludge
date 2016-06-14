@@ -39,4 +39,20 @@ private:
   Template<int, int> m_foo;
 };
 
+struct MyType1
+{
+  int a;
+};
+
+namespace Myspace
+{
+  struct MyType2
+  {
+    int a;
+  };
+
+  typedef Template<MyType1, int> MyspaceType1;
+  typedef Template<MyType2, int> MyspaceType2;
+}
+
 #endif

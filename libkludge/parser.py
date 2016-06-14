@@ -933,8 +933,21 @@ fabricBuildEnv.SharedLibrary(
                     else:
                         raise Exception("unexpected child kind: "+str(child.kind))
 
+                specialized_name = underlying_type.spelling.split('<', 1)[0]
+                specialized_name += '<'
+                first = True
+                for arg in template_args:
+                    if not first:
+                        specialized_name += ', '
+                    first = False
+                    resolved_type = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, arg.spelling)
+                    if arg.kind == TypeKind.RECORD:
+                        specialized_name += '::'
+                    specialized_name += str(resolved_type)
+                specialized_name += '>'
                 template_namespace = self.get_cursor_namespace_path(template_class)
-                self.parse_record_decl(include_filename, indent, template_namespace, template_class, template_args, underlying_type.spelling)
+                self.parse_record_decl(include_filename, indent, template_namespace, template_class, template_args, specialized_name)
+                old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, specialized_name)
 
             self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
             old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
@@ -967,7 +980,6 @@ fabricBuildEnv.SharedLibrary(
             result_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, cursor.result_type)
 
             for param_config in param_configs:
-                print cursor.spelling + ' PARAM_CONFIG:'+str(param_config)
                 func = ast.Func(
                     self.config['extname'],
                     include_filename,

@@ -685,26 +685,11 @@ fabricBuildEnv.SharedLibrary(
                             if child.get_definition().kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
                                 member_type = template_param_type_map[child.displayname]
                         elif child.kind == CursorKind.TEMPLATE_REF:
-                            underlying_type = cursor.underlying_typedef_type
+                            underlying_type = clang_member.type
                             num_template_args = underlying_type.get_num_template_arguments()
                             if num_template_args > 0:
-                                template_class = None
-                                template_args = []
-                                for i in range(num_template_args):
-                                    template_args += [underlying_type.get_template_argument_as_type(i)]
-                                for child in cursor.get_children():
-                                    if child.kind == CursorKind.TEMPLATE_REF:
-                                        if template_class:
-                                            raise Exception("more than one TEMPLATE_REF found: "+str(child.displayname))
-                                        template_class = child.get_definition()
-                                    elif child.kind == CursorKind.TYPE_REF:
-                                        pass
-                                    else:
-                                        raise Exception("unexpected child kind: "+str(child.kind))
-
-                                template_namespace = self.get_cursor_namespace_path(template_class)
-                                self.parse_record_decl(include_filename, indent+"  ", template_namespace,
-                                        template_class, template_args, underlying_type.spelling)
+                                self.resolve_template_specialization(indent, include_filename,
+                                        current_namespace_path, underlying_type, clang_member)
                         elif child.kind == CursorKind.NAMESPACE_REF:
                             pass
                         else:
@@ -901,6 +886,41 @@ fabricBuildEnv.SharedLibrary(
         print indent + ".get_definition() ->"
         self.dump_cursor(indent + ' ', cursor.get_definition())
 
+    def resolve_template_specialization(self, indent, include_filename, current_namespace_path, underlying_type, cursor):
+        template_class = None
+        template_args = []
+        for i in range(underlying_type.get_num_template_arguments()):
+            template_args += [underlying_type.get_template_argument_as_type(i)]
+        for child in cursor.get_children():
+            if child.kind == CursorKind.TEMPLATE_REF:
+                if template_class:
+                    raise Exception("more than one TEMPLATE_REF found: "+str(child.displayname))
+                template_class = child.get_definition()
+            elif child.kind == CursorKind.TYPE_REF:
+                pass
+            else:
+                raise Exception("unexpected child kind: "+str(child.kind))
+
+        specialized_name = underlying_type.spelling.split('<', 1)[0]
+        specialized_name += '<'
+        first = True
+        for arg in template_args:
+            #arg_def = arg.get_declaration()
+            #self.maybe_parse_dependent_record_decl(indent, arg_def)
+            if not first:
+                specialized_name += ', '
+            first = False
+            resolved_type = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, arg.spelling)
+            if arg.kind == TypeKind.POINTER:
+                raise Exception('FIXME pointer type unhandled here')
+            #if arg.kind == TypeKind.RECORD:
+            #    specialized_name += '::'
+            specialized_name += str(resolved_type)
+        specialized_name += '>'
+        template_namespace = self.get_cursor_namespace_path(template_class)
+        self.parse_record_decl(include_filename, indent, template_namespace, template_class, template_args, specialized_name)
+        return self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, specialized_name)
+
     def parse_TYPEDEF_DECL(self, include_filename, indent, current_namespace_path, cursor):
         underlying_type = cursor.underlying_typedef_type
         new_cpp_type_name = cursor.type.spelling
@@ -919,35 +939,8 @@ fabricBuildEnv.SharedLibrary(
 
             num_template_args = underlying_type.get_num_template_arguments()
             if num_template_args > 0:
-                template_class = None
-                template_args = []
-                for i in range(num_template_args):
-                    template_args += [underlying_type.get_template_argument_as_type(i)]
-                for child in cursor.get_children():
-                    if child.kind == CursorKind.TEMPLATE_REF:
-                        if template_class:
-                            raise Exception("more than one TEMPLATE_REF found: "+str(child.displayname))
-                        template_class = child.get_definition()
-                    elif child.kind == CursorKind.TYPE_REF:
-                        pass
-                    else:
-                        raise Exception("unexpected child kind: "+str(child.kind))
-
-                specialized_name = underlying_type.spelling.split('<', 1)[0]
-                specialized_name += '<'
-                first = True
-                for arg in template_args:
-                    if not first:
-                        specialized_name += ', '
-                    first = False
-                    resolved_type = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, arg.spelling)
-                    if arg.kind == TypeKind.RECORD:
-                        specialized_name += '::'
-                    specialized_name += str(resolved_type)
-                specialized_name += '>'
-                template_namespace = self.get_cursor_namespace_path(template_class)
-                self.parse_record_decl(include_filename, indent, template_namespace, template_class, template_args, specialized_name)
-                old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, specialized_name)
+                old_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
+                        current_namespace_path, underlying_type, cursor)
 
             self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
             old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info

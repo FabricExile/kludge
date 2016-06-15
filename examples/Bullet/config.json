@@ -38,7 +38,11 @@
     "contactTest",
     "contactPairTest",
     "convexSweepTest",
-    "objectQuerySingle"
+    "objectQuerySingle",
+
+    "remove",
+    "findBinarySearch",
+    "findLinearSearch"
     ],
   "ignore_types": [
     "ClosestRayResultCallback",

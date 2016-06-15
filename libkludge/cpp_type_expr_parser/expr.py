@@ -99,6 +99,18 @@ class Type:
 
     return (undq_cpp_type_expr, DirQual(direction, qualifier))
 
+  def get_as_dirqual(self, orig_type_expr):
+    cpp_type_expr = self
+    if orig_type_expr.is_const:
+        cpp_type_expr = cpp_type_expr.make_const()
+    if isinstance(orig_type_expr, ReferenceTo) or \
+            isinstance(orig_type_expr, PointerTo):
+        if orig_type_expr.pointee.is_const:
+            cpp_type_expr = cpp_type_expr.make_const()
+        orig_type_expr.pointee = cpp_type_expr
+        cpp_type_expr = orig_type_expr
+    return cpp_type_expr
+
   def tranform_names(self, cb):
     pass
 

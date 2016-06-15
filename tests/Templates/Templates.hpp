@@ -15,6 +15,9 @@ public:
   Ty re()
     { return m_re; }
 
+  Ty const &constRef()
+    { return m_re; }
+
 private:
 
   Ty m_re;

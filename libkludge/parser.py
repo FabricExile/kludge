@@ -15,6 +15,7 @@ from constructor import Constructor
 from instance_method import InstanceMethod
 from types import InPlaceStructSelector, WrappedPtrSelector
 from param_codec import ParamCodec
+from result_codec import ResultCodec
 from config import *
 import clang_helpers
 from namespace_mgr import NamespaceMgr
@@ -379,6 +380,26 @@ fabricBuildEnv.SharedLibrary(
             current = current.semantic_parent
         return namespace_path
 
+    def resolve_maybe_templated_cpp_expr(self, indent, current_namespace_path, clang_type, template_param_type_map): 
+        result_type = clang_type
+
+        cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
+                current_namespace_path, clang_type.spelling)
+        orig_cpp_type_expr = cpp_type_expr.__copy__()
+        undq_cpp_type_expr, _ = orig_cpp_type_expr.get_undq_type_expr_and_dq()
+        resolved_type = template_param_type_map.get(
+                str(undq_cpp_type_expr), None)
+        if resolved_type:
+            result_type = resolved_type
+            cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
+                    current_namespace_path, result_type.spelling)
+            cpp_type_expr = cpp_type_expr.get_as_dirqual(orig_cpp_type_expr)
+
+        result_def = result_type.get_declaration()
+        self.maybe_parse_dependent_record_decl(indent, result_def)
+
+        return cpp_type_expr
+
     def collect_params(self, indent, cursor, current_namespace_path, template_param_type_map):
         params = []
         param_configs = []
@@ -403,13 +424,9 @@ fabricBuildEnv.SharedLibrary(
                                 has_default_value = True
                                 break
 
-                    param_type = child.type
-                    param_resolved_type = template_param_type_map.get(param_type.spelling, None)
-                    if param_resolved_type:
-                        param_type = param_resolved_type
-
-                    param_def = param_type.get_declaration()
-                    self.maybe_parse_dependent_record_decl(indent, param_def)
+                    param_cpp_type_expr = self.resolve_maybe_templated_cpp_expr(
+                            indent, current_namespace_path, child.type,
+                            template_param_type_map)
 
                     param_name = child.spelling
                     if not param_name:
@@ -419,7 +436,6 @@ fabricBuildEnv.SharedLibrary(
                     if has_default_value:
                         param_configs.append(list(params))
 
-                    param_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, param_type.spelling)
                     params.append(ParamCodec(
                       self.type_mgr.get_dqti(param_cpp_type_expr),
                       param_name
@@ -750,9 +766,13 @@ fabricBuildEnv.SharedLibrary(
                     param_configs = self.collect_params(indent+'  ', clang_instance_method, current_namespace_path, template_param_type_map)
 
                     result_type = clang_instance_method.result_type
-                    if result_type:
-                        result_def = result_type.get_declaration()
-                        self.maybe_parse_dependent_record_decl(indent, result_def)
+                    result_cpp_type_expr = self.resolve_maybe_templated_cpp_expr(
+                            indent, record_namespace_path, result_type,
+                            template_param_type_map)
+
+                    result_codec = ResultCodec(
+                      self.type_mgr.get_dqti(result_cpp_type_expr)
+                      )
 
                     for param_config in param_configs:
                         instance_method = InstanceMethod(
@@ -761,8 +781,8 @@ fabricBuildEnv.SharedLibrary(
                             record_namespace_path,
                             this_type_info,
                             clang_instance_method,
+                            result_codec,
                             param_config,
-                            template_param_type_map,
                             )
                         if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
                             raise Exception("instance method with name EDK symbol name already exists")
@@ -790,7 +810,6 @@ fabricBuildEnv.SharedLibrary(
                                 clang_constructor.location,
                                 cpp_specialized_type_name,
                                 param_config,
-                                template_param_type_map,
                                 )
 
                             if len(param_config) == 0:
@@ -816,7 +835,6 @@ fabricBuildEnv.SharedLibrary(
                             None,
                             cpp_specialized_type_name,
                             [],
-                            template_param_type_map,
                             )
                         if constructor.edk_symbol_name in existing_method_edk_symbol_names:
                             raise Exception("instance method with name EDK symbol name already exists")

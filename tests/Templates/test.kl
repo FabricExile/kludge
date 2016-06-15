@@ -8,6 +8,8 @@ operator entry()
   TemplateBool t2(false);
   report(t2.re());
 
+  report(t2.constRef());
+
   InlineType i1();
   report(i1.getFooRe());
 

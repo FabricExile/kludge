@@ -21,7 +21,6 @@ class Constructor:
     location,
     constructor_name,
     params,
-    template_param_type_map,
     ):
     self.name = constructor_name
     self.desc = "Constructor '%s'" % constructor_name

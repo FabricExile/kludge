@@ -18,7 +18,10 @@
     "${BULLET_DIR}/include/BulletDynamics/Dynamics/btRigidBody.h",
     "${BULLET_DIR}/include/BulletSoftBody/btSoftBody.h",
     "${BULLET_DIR}/include/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h",
-    "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h"
+    "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h",
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftRigidCollisionAlgorithm.h",
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftSoftCollisionAlgorithm.h",
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftRigidDynamicsWorld.h"
     ],
   "libpath": [
     "${BULLET_DIR}/lib"
@@ -44,5 +47,8 @@
     "ConvexResultCallback",
     "RayResultCallback",
     "less"
+    ],
+  "no_copy_types": [
+    "btSoftBody"
     ]
   }

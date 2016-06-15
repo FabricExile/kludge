@@ -712,6 +712,9 @@ fabricBuildEnv.SharedLibrary(
             # [andrew 20160517] FIXME disabling in-place until we can handle the vtable
             can_in_place = False
 
+            if str(cpp_type_expr) in self.config.get('no_copy_types', []):
+                no_copy_constructor = True
+
             if can_in_place:
                 self.type_mgr.add_selector(
                     InPlaceStructSelector(
@@ -869,6 +872,7 @@ fabricBuildEnv.SharedLibrary(
                         constructors,
                         base_classes,
                         block_empty_kl_constructor,
+                        "ast/builtin/wrapped_ptr_type_decl",
                         "ast/builtin/wrapped_ptr_decl",
                         )
                     )

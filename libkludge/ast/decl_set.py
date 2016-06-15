@@ -7,7 +7,13 @@ class DeclSet:
     self._decls.append(decl)
 
   def jinja_streams(self, jinjenv, lang):
-    return map(
-      lambda decl: decl.jinja_stream(jinjenv, lang),
-      self._decls
-      )
+    types = []
+    funcs = []
+    for decl in self._decls:
+      t = decl.jinja_stream_types(jinjenv, lang)
+      if t:
+        types.append(t)
+      f = decl.jinja_stream_funcs(jinjenv, lang)
+      if f:
+        funcs.append(f)
+    return types + funcs

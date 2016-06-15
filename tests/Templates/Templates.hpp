@@ -51,7 +51,7 @@ namespace Myspace
     int a;
   };
 
-  typedef Template<MyType1, int> MyspaceType1;
+  //typedef Template<MyType1, int> MyspaceType1;
   typedef Template<MyType2, int> MyspaceType2;
 }
 

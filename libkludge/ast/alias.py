@@ -22,5 +22,5 @@ class Alias(Decl):
     self.new_kl_type_name = new_kl_type_name
     self.old_type_info = old_type_info
 
-  def jinja_stream(self, jinjenv, lang):
+  def jinja_stream_types(self, jinjenv, lang):
     return jinjenv.get_template('ast/builtin/alias.template.' + lang).stream(decl = self)

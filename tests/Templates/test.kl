@@ -11,7 +11,7 @@ operator entry()
   InlineType i1();
   report(i1.getFooRe());
 
-  Myspace_MyspaceType1 mst1;
+  //Myspace_MyspaceType1 mst1;
   Myspace_MyspaceType2 mst2;
 }
 

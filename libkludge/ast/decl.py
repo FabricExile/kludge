@@ -30,4 +30,7 @@ class Decl:
     return self._desc
 
   @abc.abstractmethod
-  def jinja_stream(self, jinjenv, lang): pass
+  def jinja_stream_types(self, jinjenv, lang): pass
+
+  @abc.abstractmethod
+  def jinja_stream_funcs(self, jinjenv, lang): pass

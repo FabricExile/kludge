@@ -10,8 +10,8 @@
 - don't parse other headers in two places, either top-level or on-demand not both
 - find and fix all FIXME hacks
 - add support for all operator types (+/*/etc.)
-- consolidate template handling code
 - how to handle forward declarations
+- fix template namespace issues (Template.hpp -> MyspaceType1)
 
 Namespaces:
 - namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)
@@ -27,3 +27,4 @@ X possible handling for function default values (make multiple KL functions)
 X for abstract types create constructor that throws exception
 X code duplication for params between Function, Constructor, InstanceMethod
 X aliases created multiple times in .kl file
+X consolidate template handling code

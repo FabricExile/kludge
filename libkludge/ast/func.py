@@ -46,5 +46,5 @@ class Func(Decl):
   def name_cpp(self):
     return "::" + "::".join(self._nested_function_name)
 
-  def jinja_stream(self, jinjenv, lang):
+  def jinja_stream_funcs(self, jinjenv, lang):
     return jinjenv.get_template('ast/builtin/func.template.' + lang).stream(decl = self)

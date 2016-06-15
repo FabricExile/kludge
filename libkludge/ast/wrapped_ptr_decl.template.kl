@@ -4,16 +4,6 @@
 
 {% extends "ast/builtin/decl.template.kl" %}
 {% block body %}
-struct {{decl.this_type_info.kl.name.compound}}
-{% if decl.base_classes %}
-  : {{decl.base_classes[0].type_info.kl.name.compound}}
-{
-{% else %}
-{
-  private Data cpp_ptr;
-{% endif %}
-};
-
   {% for member in decl.members %}
     {% if member.is_public %}
 {{member.result.type_info.kl.name.compound}} {{decl.this_type_info.kl.name.compound}}.GET_{{member.name}}() = "{{decl.this_type_info.kl.name.compound}}_GET_{{member.name}}";

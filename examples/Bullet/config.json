@@ -21,7 +21,10 @@
     "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h",
     "${BULLET_DIR}/include/BulletSoftBody/btSoftRigidCollisionAlgorithm.h",
     "${BULLET_DIR}/include/BulletSoftBody/btSoftSoftCollisionAlgorithm.h",
-    "${BULLET_DIR}/include/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftRigidDynamicsWorld.h",
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h",
+    "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btAxisSweep3.h",
+    "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btBoxShape.h"
     ],
   "libpath": [
     "${BULLET_DIR}/lib"
@@ -54,5 +57,8 @@
     ],
   "no_copy_types": [
     "btSoftBody"
+    ],
+  "kl_files": [
+    "Conversions.kl"
     ]
   }

@@ -58,4 +58,8 @@ namespace Myspace
   typedef Template<MyType2, int> MyspaceType2;
 }
 
+class DerivedTempl : public Template<int, double>
+{
+};
+
 #endif

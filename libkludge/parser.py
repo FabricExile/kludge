@@ -273,15 +273,18 @@ fabricBuildEnv.SharedLibrary(
     ))
         fpmFilename = os.path.join(opts.outdir, self.config['extname']+'.fpm.json')
         print "Writing %s" % fpmFilename
+        code = ['"%s.kl"' % (self.config['basename'])]
+        for kl_file in self.config.get('kl_files', []):
+            code.append('"'+kl_file+'"')
         with open(fpmFilename, "w") as fh:
             fh.write("""
 {
 "libs": "%s",
 "code": [
-"%s.kl"
+%s
 ],
 }
-""" % (self.config['extname'], self.config['basename']))
+""" % (self.config['extname'], ',\n'.join(code)))
 
     @staticmethod
     def print_diag(diag):
@@ -374,10 +377,11 @@ fabricBuildEnv.SharedLibrary(
 
     def get_cursor_namespace_path(self, cursor):
         namespace_path = []
-        current = cursor.semantic_parent
-        while current.kind != CursorKind.TRANSLATION_UNIT:
-            namespace_path = [current.spelling] + namespace_path
-            current = current.semantic_parent
+        if cursor:
+            current = cursor.semantic_parent
+            while current and current.kind != CursorKind.TRANSLATION_UNIT:
+                namespace_path = [current.spelling] + namespace_path
+                current = current.semantic_parent
         return namespace_path
 
     def resolve_maybe_templated_cpp_expr(self, indent, current_namespace_path, clang_type, template_param_type_map): 
@@ -529,7 +533,7 @@ fabricBuildEnv.SharedLibrary(
 
                 if child.kind == CursorKind.CXX_BASE_SPECIFIER:
                     print "%s  CXX_BASE_SPECIFIER %s" % (indent, child.displayname)
-                    clang_base_classes.append(child.get_definition())
+                    clang_base_classes.append(child)
                 elif child.kind == CursorKind.CXX_METHOD:
                     print "%s  CXX_METHOD %s" % (indent, child.displayname)
                     if clang.cindex.conf.lib.clang_CXXMethod_isVirtual(child):
@@ -851,9 +855,16 @@ fabricBuildEnv.SharedLibrary(
 
             base_classes = []
             for clang_base_class in clang_base_classes:
-                self.maybe_parse_dependent_record_decl(indent, clang_base_class)
-                base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
-                        current_namespace_path, clang_base_class.type)
+                underlying_type = clang_base_class.type
+                num_template_args = underlying_type.get_num_template_arguments()
+                if num_template_args > 0:
+                    base_class_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
+                            current_namespace_path, underlying_type, clang_base_class)
+                else:
+                    type_def = clang_base_class.get_definition()
+                    self.maybe_parse_dependent_record_decl(indent, type_def)
+                    base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
+                            current_namespace_path, type_def.type)
                 base_class_dqti = self.type_mgr.get_dqti(base_class_cpp_type_expr)
                 base_classes.append(base_class_dqti)
 
@@ -922,6 +933,9 @@ fabricBuildEnv.SharedLibrary(
                 pass
             else:
                 raise Exception("unexpected child kind: "+str(child.kind))
+
+        if not template_class:
+            raise Exception('template class not found')
 
         specialized_name = underlying_type.spelling.split('<', 1)[0]
         specialized_name += '<'

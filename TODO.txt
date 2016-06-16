@@ -12,6 +12,7 @@
 - add support for all operator types (+/*/etc.)
 - how to handle forward declarations
 - fix template namespace issues (Template.hpp -> MyspaceType1)
+- return values as refs/pointers should never create a new object
 
 Namespaces:
 - namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)

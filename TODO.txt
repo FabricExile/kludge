@@ -13,6 +13,7 @@
 - how to handle forward declarations
 - fix template namespace issues (Template.hpp -> MyspaceType1)
 - return values as refs/pointers should never create a new object
+- fix templates using different types of same class (e.g. Templ<Foo> and Templ<Foo*>)
 
 Namespaces:
 - namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)

@@ -62,4 +62,6 @@ class DerivedTempl : public Template<int, double>
 {
 };
 
+//void TakesTemplType(const Template &tmpl) {}
+
 #endif

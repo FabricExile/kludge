@@ -42,10 +42,10 @@
     "contactPairTest",
     "convexSweepTest",
     "objectQuerySingle",
-
     "remove",
     "findBinarySearch",
-    "findLinearSearch"
+    "findLinearSearch",
+    "getOverlappingPairUserCallback"
     ],
   "ignore_types": [
     "ClosestRayResultCallback",
@@ -53,6 +53,9 @@
     "ClosestConvexResultCallback",
     "ConvexResultCallback",
     "RayResultCallback",
+    "btAlignedObjectArray",
+    "btManifoldResult",
+    "Cluster",
     "less"
     ],
   "no_copy_types": [

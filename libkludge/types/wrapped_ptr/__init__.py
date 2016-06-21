@@ -52,38 +52,33 @@ class WrappedPtrSelector(Selector):
           self.no_copy_constructor,
           )
         )
-    if isinstance(cpp_type_expr, PointerTo) \
-      and (isinstance(cpp_type_expr.pointee, Named) or isinstance(cpp_type_expr.pointee, Template))\
-      and cpp_type_expr.pointee.name == self.cpp_type_name:
-      if cpp_type_expr.pointee.is_const:
-        dq = dir_qual.const_pointer
-      else:
-        dq = dir_qual.mutable_pointer
-      return DirQualTypeInfo(
-        dq,
-        WrappedPtrTypeInfo(
-          self.jinjenv,
-          self.nested_name,
-          cpp_type_expr.pointee.make_unqualified(),
-          self.is_abstract,
-          self.no_copy_constructor,
+
+    is_reference = isinstance(cpp_type_expr, ReferenceTo)
+    is_pointer = isinstance(cpp_type_expr, PointerTo)
+
+    if (is_pointer or is_reference) \
+      and (isinstance(cpp_type_expr.pointee, Named) or \
+        isinstance(cpp_type_expr.pointee, Template)):
+      undq_cpp_type_expr, _ = cpp_type_expr.pointee.get_undq_type_expr_and_dq()
+      if str(undq_cpp_type_expr) == self.cpp_type_name:
+        if is_pointer:
+          if cpp_type_expr.pointee.is_const:
+            dq = dir_qual.const_pointer
+          else:
+            dq = dir_qual.mutable_pointer
+        else:
+          if cpp_type_expr.pointee.is_const:
+            dq = dir_qual.const_reference
+          else:
+            dq = dir_qual.mutable_reference
+        return DirQualTypeInfo(
+          dq,
+          WrappedPtrTypeInfo(
+            self.jinjenv,
+            self.nested_name,
+            cpp_type_expr.pointee.make_unqualified(),
+            self.is_abstract,
+            self.no_copy_constructor,
+            )
           )
-        )
-    if isinstance(cpp_type_expr, ReferenceTo) \
-      and (isinstance(cpp_type_expr.pointee, Named) or isinstance(cpp_type_expr.pointee, Template))\
-      and cpp_type_expr.pointee.name == self.cpp_type_name:
-      if cpp_type_expr.pointee.is_const:
-        dq = dir_qual.const_reference
-      else:
-        dq = dir_qual.mutable_reference
-      return DirQualTypeInfo(
-        dq,
-        WrappedPtrTypeInfo(
-          self.jinjenv,
-          self.nested_name,
-          cpp_type_expr.pointee.make_unqualified(),
-          self.is_abstract,
-          self.no_copy_constructor,
-          )
-        )
 

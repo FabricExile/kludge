@@ -62,6 +62,23 @@ class DerivedTempl : public Template<int, double>
 {
 };
 
+class UsesTempl
+{
+public:
+  Template32 getTempl32()
+  {
+    Template32 t(3.14);
+    return t;
+  };
+
+  Template32 &getTempl32Ref()
+  {
+    static Template32 t(3.14);
+    return t;
+  };
+
+};
+
 //void TakesTemplType(const Template &tmpl) {}
 
 #endif

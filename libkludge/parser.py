@@ -467,7 +467,8 @@ fabricBuildEnv.SharedLibrary(
         cpp_specialized_type_name = None
         ):
         if cursor.displayname in self.config.get('ignore_types', []):
-            print "Ignoring <RECORD>_DECL at %s:%d by user request" % (cursor.location.file, cursor.location.line)
+            print "Ignoring <RECORD>_DECL '%s' at %s:%d by user request" % (
+                cursor.displayname, cursor.location.file, cursor.location.line)
             return
 
         if len(list(cursor.get_children())) < 1:
@@ -489,7 +490,6 @@ fabricBuildEnv.SharedLibrary(
             if str(undq_cpp_type_expr) in self.parsed_cpp_types: 
                 print "%s  -> skipping because type already exists" % indent
                 return
-            print 'DOING '+str(undq_cpp_type_expr)
             self.parsed_cpp_types.add(str(undq_cpp_type_expr))
 
             self.namespace_mgr.add_nested_namespace(current_namespace_path, cpp_specialized_type_name)

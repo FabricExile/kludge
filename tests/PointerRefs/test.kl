@@ -1,0 +1,27 @@
+require PointerRefs;
+
+operator entry()
+{
+  PointerRef p;
+
+  //report(p.getXRef());
+
+  SimpleClass s = p.getS();
+  s.setX(2);
+  if (s.getX() != 2)
+    throw "bad value: "+s.getX();
+
+  s = p.getSPtr();
+  if (s.getX() != 0)
+    throw "bad value: "+s.getX();
+  s.setX(3);
+
+  s = p.getSRef();
+  if (s.getX() != 3)
+    throw "bad value: "+s.getX();
+  s.setX(4);
+
+  s = p.getS();
+  if (s.getX() != 4)
+    throw "bad value: "+s.getX();
+}

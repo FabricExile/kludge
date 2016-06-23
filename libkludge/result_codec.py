@@ -9,6 +9,9 @@ class ResultCodec:
 
   def __init__(self, dqti):
     self.value_name = result_cpp_value_name
+    self.is_pointer = dqti.dir_qual.is_pointer
+    self.is_reference = dqti.dir_qual.is_reference
+    self.is_mutable_reference = dqti.dir_qual.is_mutable_reference
     self.conv = ConvCodec(dqti, result_cpp_value_name)
 
   @property

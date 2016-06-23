@@ -8,9 +8,9 @@ operator entry() {
   StdStringParams(
     "value",
     "constRef",
-    "constPtr",
-    mutableRef,
-    mutablePtr
+    //"constPtr",
+    mutableRef
+    //mutablePtr
     );
   report("After: mutableRef = " + mutableRef);
   report("After: mutablePtr = " + mutablePtr);

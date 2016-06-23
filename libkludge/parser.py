@@ -606,7 +606,10 @@ fabricBuildEnv.SharedLibrary(
                     members.append(member)
                 except Exception as e:
                     can_in_place = False
-                    print "Warning: member at %s:%d" % (clang_member.location.file, clang_member.location.line)
+                    print "Warning: member '%s' at %s:%d" % (
+                            clang_member.displayname,
+                            clang_member.location.file,
+                            clang_member.location.line)
                     print "  Reason: %s" % e
 
             # [andrew 20160517] FIXME disabling in-place until we can handle the vtable

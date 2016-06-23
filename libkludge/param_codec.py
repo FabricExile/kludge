@@ -9,6 +9,7 @@ class ParamCodec:
 
   def __init__(self, dqti, name):
     self.value_name = ValueName(name)
+    self.is_pointer = dqti.dir_qual.is_pointer
     self.conv = ConvCodec(dqti, self.value_name.cpp)
 
   @property

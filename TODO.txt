@@ -14,6 +14,7 @@
 - fix template namespace issues (Template.hpp -> MyspaceType1)
 - return values as refs/pointers should never create a new object
 - fix templates using different types of same class (e.g. Templ<Foo> and Templ<Foo*>)
+- fix is_pointer in ./protocols/param/default/lib.cpp, failure in StdString.hpp
 
 Namespaces:
 - namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)

@@ -6,14 +6,14 @@
 inline void StdStringParams(
   std::string value,
   std::string const &constRef,
-  std::string const *constPtr,
-  std::string &mutableRef,
-  std::string *mutablePtr
+  //std::string const *constPtr,
+  std::string &mutableRef
+  //std::string *mutablePtr
   )
 {
   mutableRef += value;
   mutableRef += constRef;
-  *mutablePtr += *constPtr;
+  //*mutablePtr += *constPtr;
 }
 
 inline std::string StdStringValueReturn() { return "value"; }

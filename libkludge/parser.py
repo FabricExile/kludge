@@ -582,7 +582,8 @@ fabricBuildEnv.SharedLibrary(
                     member_type = clang_member.type
                     for child in clang_member.get_children():
                         if child.kind == CursorKind.TYPE_REF:
-                            if child.get_definition().kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
+                            child_def = child.get_definition()
+                            if child_def and child_def.kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
                                 member_type = template_param_type_map[child.displayname]
                         elif child.kind == CursorKind.TEMPLATE_REF:
                             underlying_type = clang_member.type

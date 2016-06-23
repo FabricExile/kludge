@@ -53,4 +53,13 @@ public:
   }
 };
 
+class NullPointer
+{
+public:
+  NullPointer *getNull()
+  {
+    return 0;
+  }
+};
+
 #endif

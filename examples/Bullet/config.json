@@ -7,6 +7,7 @@
     "${BULLET_DIR}/include/LinearMath/btVector3.h",
     "${BULLET_DIR}/include/btBulletDynamicsCommon.h",
     "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btDispatcher.h",
+    "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h",
     "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h",
     "${BULLET_DIR}/include/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h",
     "${BULLET_DIR}/include/BulletCollision/CollisionDispatch/btCollisionDispatcher.h",
@@ -17,6 +18,7 @@
     "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btStaticPlaneShape.h",
     "${BULLET_DIR}/include/BulletCollision/CollisionShapes/btSphereShape.h",
     "${BULLET_DIR}/include/BulletDynamics/Dynamics/btRigidBody.h",
+    "${BULLET_DIR}/include/BulletSoftBody/btSoftBodySolvers.h",
     "${BULLET_DIR}/include/BulletSoftBody/btSoftBody.h",
     "${BULLET_DIR}/include/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h",
     "${BULLET_DIR}/include/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h",
@@ -63,6 +65,7 @@
     "btSoftBody"
     ],
   "kl_files": [
-    "Conversions.kl"
+    "Conversions.kl",
+    "Constants.kl"
     ]
   }

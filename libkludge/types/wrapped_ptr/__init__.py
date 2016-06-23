@@ -56,6 +56,12 @@ class WrappedPtrSelector(Selector):
     is_reference = isinstance(cpp_type_expr, ReferenceTo)
     is_pointer = isinstance(cpp_type_expr, PointerTo)
 
+    # FIXME special case, e.g. "Class * &" we drop to just "Class *"
+    if is_reference and isinstance(cpp_type_expr.pointee, PointerTo):
+      cpp_type_expr = cpp_type_expr.pointee
+      is_pointer = True
+      is_reference = False
+
     if (is_pointer or is_reference) \
       and (isinstance(cpp_type_expr.pointee, Named) or \
         isinstance(cpp_type_expr.pointee, Template)):

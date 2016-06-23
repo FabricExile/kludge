@@ -53,6 +53,15 @@ void
 }
 {% endif %}
 
+FABRIC_EXT_EXPORT
+::Fabric::EDK::KL::Boolean
+{{decl.this_type_info.kl.name.compound}}_is_null(
+  {{decl.const_this.render_param_edk()}}
+)
+{
+    return {{decl.this_value_name.edk}}.cpp_ptr == 0;
+}
+
 {% for constructor in decl.constructors %}
 //////////////////////////////////////////////////////////////////////////////
 //

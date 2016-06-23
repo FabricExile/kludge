@@ -21,7 +21,18 @@ operator entry()
     throw "bad value: "+s.getX();
   s.setX(4);
 
-  s = p.getS();
+  s = p.getSPtrRef();
   if (s.getX() != 4)
     throw "bad value: "+s.getX();
+  s.setX(5);
+
+  s = p.getS();
+  if (s.getX() != 5)
+    throw "bad value: "+s.getX();
+
+  NullPointer np;
+  report('np is: '+Boolean(np));
+  NullPointer next = np.getNull();
+  report('next is: '+Boolean(next));
+    
 }

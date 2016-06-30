@@ -47,9 +47,12 @@ void
 {% if decl.block_empty_kl_constructor %}
 FABRIC_EXT_EXPORT
 void
-{{decl.this_type_info.kl.name.compound}}_block_empty_constructor()
+{{decl.this_type_info.kl.name.compound}}_block_empty_constructor(
+  {{decl.mutable_this.render_param_edk()}}
+  )
 {
-  ::Fabric::EDK::throwException( "no empty constructor for {{decl.this_type_info.kl.name.compound}}" );
+  //::Fabric::EDK::throwException( "no empty constructor for {{decl.this_type_info.kl.name.compound}}" );
+  {{decl.this_value_name.edk}}.cpp_ptr = 0;
 }
 {% endif %}
 
@@ -57,9 +60,9 @@ FABRIC_EXT_EXPORT
 ::Fabric::EDK::KL::Boolean
 {{decl.this_type_info.kl.name.compound}}_is_null(
   {{decl.const_this.render_param_edk()}}
-)
+  )
 {
-    return {{decl.this_value_name.edk}}.cpp_ptr == 0;
+  return {{decl.this_value_name.edk}}.cpp_ptr == 0;
 }
 
 {% for constructor in decl.constructors %}

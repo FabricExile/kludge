@@ -30,10 +30,7 @@ Quat(btQuaternion that)
 
 btQuaternion(Quat that)
 {
-  this.setX(that.v.x);
-  this.setY(that.v.y);
-  this.setZ(that.v.z);
-  this.setW(that.w);
+  this = btQuaternion(that.v.x, that.v.y, that.v.z, that.w);
 }
 
 Xfo(btTransform that)
@@ -46,8 +43,7 @@ Xfo(btTransform that)
 btTransform(Xfo that)
 {
   btVector3 tr = that.tr;
-  this.setOrigin(tr);
   btQuaternion ori = that.ori;
-  this.setRotation(ori);
+  this = btTransform(ori, tr);
 }
 

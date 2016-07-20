@@ -1,0 +1,34 @@
+{
+  "extname": "NewAlembic",
+  "cpppath": [
+    "${ALEMBIC_DIR}/include",
+    "${ILMBASE_DIR}/include/OpenEXR",
+    "${HDF5_DIR}/include",
+    "${BOOST_DIR}/include"
+    ],
+  "infiles": [
+    "${ALEMBIC_DIR}/include/Alembic/Abc/All.h"
+    ],
+  "libpath": [
+    "${ALEMBIC_DIR}/lib",
+    "${ILMBASE_DIR}/lib",
+    "${HDF5_DIR}/lib",
+    "${BOOST_DIR}/lib"
+    ],
+  "libs": [
+    "AlembicOgawa",
+    "AlembicAbc",
+    "AlembicAbcCoreAbstract",
+    "AlembicAbcCoreHDF5",
+    "AlembicAbcCoreOgawa",
+    "AlembicAbcCoreFactory",
+    "AlembicAbcCollection",
+    "AlembicAbcGeom",
+    "AlembicAbcMaterial",
+    "AlembicUtil"
+    ],
+  "ignore_types": [
+    "PODTraits"
+    ],
+  "parse_includes": true
+  }

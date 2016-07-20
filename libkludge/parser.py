@@ -218,7 +218,7 @@ OR %prog -c <config file>""",
         self.type_mgr = TypeMgr(self.jinjenv)
 
         for infile in self.config['infiles']:
-            self.parse(self.expand_envvars(infile))
+            self.parse(self.expand_envvars(infile), self.config.get('parse_includes', False))
 
         self.output(
             os.path.join(self.config['outdir'], self.config['basename'] + '.kl'),
@@ -966,9 +966,11 @@ fabricBuildEnv.SharedLibrary(
             print "%sNAMESPACE %s" % (indent, "::".join(nested_namespace_path))
             self.parse_children(include_filename, indent + "  ", nested_namespace_path, cursor)
         elif cursor_kind == CursorKind.NAMESPACE_ALIAS:
-            print '*******************************************************'
-            self.dump_cursor('  ', cursor)
-            print '*******************************************************'
+            ns_alias_path = current_namespace_path + [cursor.displayname]
+            ns_path = []
+            for path in cursor.get_children():
+                ns_path += [path.displayname]
+            self.namespace_mgr.add_namespace_alias(ns_alias_path, ns_path)
         elif cursor_kind == CursorKind.UNEXPOSED_DECL:
             self.parse_children(include_filename, indent, current_namespace_path, cursor)
         elif cursor_kind == CursorKind.MACRO_INSTANTIATION:
@@ -993,7 +995,7 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.parse_cursor(include_filename, childIndent, current_namespace_path, childCursor)
 
-    def parse(self, unit_filename):
+    def parse(self, unit_filename, parse_includes):
         print "Parsing C++ source file: %s" % unit_filename
 
         clang_opts = self.config['clang_opts']
@@ -1020,8 +1022,9 @@ fabricBuildEnv.SharedLibrary(
             print 'skipping unit: ' + unit.spelling
         else:
             for cursor in unit.cursor.get_children():
-                #if not self.should_parse_file(cursor.location.file):
-                if hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
+                if not parse_includes and hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
+                    continue
+                if not self.should_parse_file(cursor.location.file):
                     continue
                 self.parse_cursor(unit_filename, "", [], cursor)
 

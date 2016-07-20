@@ -9,10 +9,13 @@ class Namespace:
 
   def __init__(self, parent_namespace, path):
     self.parent_namespace = parent_namespace
-    self.path = path
+    self.paths = [path]
     self.sub_namespaces = {}
     self.cpp_type_exprs = {}
     self.usings = []
+
+  def add_path(self, path):
+    self.paths += [path]
 
   def maybe_get_child_namespace(self, child_namespace_path):
     namespace = self
@@ -80,6 +83,12 @@ class NamespaceMgr:
       raise Exception("Failed to resolve namespace " + "::".join(namespace_path))
     return namespace
 
+  def add_namespace_alias(self, new_namespace_alias_path, old_namespace_path):
+    old_namespace = self._resolve_namespace(old_namespace_path)
+    old_namespace.add_path(new_namespace_alias_path)
+    new_namespace_parent = self._resolve_namespace(new_namespace_alias_path[:-1])
+    new_namespace_member = new_namespace_parent.sub_namespaces.setdefault(new_namespace_alias_path[-1], old_namespace)
+
   def add_nested_namespace(self, namespace_path, nested_namespace_name):
     namespace = self._resolve_namespace(namespace_path)
     namespace_member = namespace.sub_namespaces.setdefault(nested_namespace_name, Namespace(namespace, namespace_path + [nested_namespace_name]))
@@ -102,7 +111,7 @@ class NamespaceMgr:
     while current_namespace:        
       cpp_type_expr = current_namespace.maybe_find_cpp_type_expr(nested_type_name)
       if cpp_type_expr:
-        nested_type_name = current_namespace.path + nested_type_name
+        nested_type_name = current_namespace.paths[0] + nested_type_name
         break
       current_namespace = current_namespace.parent_namespace
     return "::".join(nested_type_name)

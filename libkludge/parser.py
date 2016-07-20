@@ -100,6 +100,14 @@ class Parser:
         self.existing_edk_symbol_names = set()
         self.parsed_cpp_types = set()
 
+        # stats
+        self.records_seen = 0
+        self.records_mapped = 0
+        self.methods_seen = 0
+        self.methods_mapped = 0
+        self.functions_seen = 0
+        self.functions_mapped = 0
+
     envvar_re = re.compile("\\${[A-Za-z_]+}")
 
     @classmethod
@@ -286,6 +294,12 @@ fabricBuildEnv.SharedLibrary(
 ],
 }
 """ % (self.config['extname'], ',\n'.join(code)))
+
+        print '---------------------------'
+        print 'Types mapped: '+str(self.records_mapped)+'/'+str(self.records_seen)
+        print 'Methods mapped: '+str(self.methods_mapped)+'/'+str(self.methods_seen)
+        print 'Functions mapped: '+str(self.functions_mapped)+'/'+str(self.functions_seen)
+        print '---------------------------'
 
     @staticmethod
     def print_diag(diag):
@@ -492,6 +506,8 @@ fabricBuildEnv.SharedLibrary(
                 return
             self.parsed_cpp_types.add(str(undq_cpp_type_expr))
 
+            self.records_seen += 1
+
             self.namespace_mgr.add_nested_namespace(current_namespace_path, cpp_specialized_type_name)
 
             clang_members = []
@@ -654,6 +670,8 @@ fabricBuildEnv.SharedLibrary(
                             clang_instance_method.location.line)
                     continue
                 try:
+                    self.methods_seen += 1
+
                     param_configs = self.collect_params(indent+'  ', clang_instance_method, current_namespace_path, template_param_type_map)
 
                     result_type = clang_instance_method.result_type
@@ -679,6 +697,9 @@ fabricBuildEnv.SharedLibrary(
                             raise Exception("instance method with name EDK symbol name already exists")
                         existing_method_edk_symbol_names.add(instance_method.edk_symbol_name)
                         instance_methods.append(instance_method)
+
+                    self.methods_mapped += 1
+
                 except Exception as e:
                     print "Warning: ignored method '%s' at %s:%d" % (
                             clang_instance_method.spelling,
@@ -690,6 +711,8 @@ fabricBuildEnv.SharedLibrary(
             if not is_abstract:
                 for clang_constructor in clang_constructors:
                     try:
+                        self.methods_seen += 1
+
                         param_configs = self.collect_params(indent+'  ', clang_constructor, current_namespace_path, template_param_type_map)
 
                         for param_config in param_configs:
@@ -710,6 +733,9 @@ fabricBuildEnv.SharedLibrary(
                                 raise Exception("instance method with name EDK symbol name already exists")
                             existing_method_edk_symbol_names.add(constructor.edk_symbol_name)
                             constructors.append(constructor)
+
+                        self.methods_mapped += 1
+
                     except Exception as e:
                         print "Warning: ignored constructor for '%s' at %s:%d" % (
                                 cpp_specialized_type_name, clang_constructor.location.file,
@@ -798,6 +824,9 @@ fabricBuildEnv.SharedLibrary(
             for static_function in clang_static_functions:
                 self.parse_FUNCTION_DECL(include_filename, indent,
                         record_namespace_path, static_function)
+
+            self.records_mapped += 1
+
         except Exception as e:
             print "Warning: ignored type '%s' at %s:%d" % (
                     cpp_specialized_type_name, cursor.location.file, cursor.location.line)
@@ -890,6 +919,8 @@ fabricBuildEnv.SharedLibrary(
             if cursor.spelling.startswith("operator"):
                 raise Exception("function is operator (FIXME)")
 
+            self.functions_seen += 1
+
             param_configs = self.collect_params(indent+'  ', cursor,
                     current_namespace_path, {})
 
@@ -909,6 +940,9 @@ fabricBuildEnv.SharedLibrary(
                     raise Exception("identical EDK symbol already exists")
                 self.existing_edk_symbol_names.add(func.edk_symbol_name)
                 self.edk_decls.add(func)
+
+            self.functions_mapped += 1
+
         except Exception as e:
             print "Warning: ignored function '%s' at %s:%d" % (
                     cursor.spelling, cursor.location.file, cursor.location.line)

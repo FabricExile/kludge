@@ -53,7 +53,9 @@ class LibTypeInfo:
 
   @property
   def var_as_pointer(self):
-    return self.is_abstract or self.no_copy_constructor
+    # FIXME [andrew 2016-07-20] required for Bullet
+    #return self.is_abstract or self.no_copy_constructor
+    return False
 
 class TypeInfo:
 

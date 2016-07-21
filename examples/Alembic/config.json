@@ -27,5 +27,8 @@
     "AlembicAbcMaterial",
     "AlembicUtil"
     ],
+  "ignore_types": [
+    "PODTraits"
+    ],
   "parse_includes": true
   }

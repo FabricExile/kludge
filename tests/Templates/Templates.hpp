@@ -18,6 +18,8 @@ public:
   Ty const &constRef()
     { return m_re; }
 
+  void takesTemplType(const Template &tmpl) {}
+
 private:
 
   Ty m_re;
@@ -102,7 +104,5 @@ public:
   };
 
 };
-
-//void TakesTemplType(const Template &tmpl) {}
 
 #endif

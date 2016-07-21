@@ -379,11 +379,12 @@ fabricBuildEnv.SharedLibrary(
 
         return True
 
-    def maybe_parse_dependent_record_decl(self, indent, decl):
+    def maybe_parse_dependent_record_decl(self, indent, decl, template_param_types = []):
         if decl.kind == TypeKind.LVALUEREFERENCE or decl.kind == TypeKind.POINTER:
-            underlying_decl = decl.get_pointee().get_declaration()
+            underlying_decl = decl.get_pointee()
         else:
-            underlying_decl = decl.get_declaration()
+            underlying_decl = decl
+        underlying_decl = underlying_decl.get_declaration()
 
         if not self.should_parse_file(underlying_decl.location.file):
             return
@@ -391,7 +392,7 @@ fabricBuildEnv.SharedLibrary(
         decl_namespace = self.get_cursor_namespace_path(underlying_decl)
 
         if underlying_decl.kind == CursorKind.CLASS_DECL or underlying_decl.kind == CursorKind.STRUCT_DECL:
-            self.parse_record_decl(underlying_decl.location.file.name, indent, decl_namespace, underlying_decl)
+            self.parse_record_decl(underlying_decl.location.file.name, indent, decl_namespace, underlying_decl, template_param_types)
         elif underlying_decl.kind == CursorKind.TYPEDEF_DECL:
             self.parse_TYPEDEF_DECL(underlying_decl.location.file.name, indent, decl_namespace, underlying_decl)
 
@@ -419,7 +420,7 @@ fabricBuildEnv.SharedLibrary(
                     current_namespace_path, result_type.spelling)
             cpp_type_expr = cpp_type_expr.get_as_dirqual(orig_cpp_type_expr)
 
-        self.maybe_parse_dependent_record_decl(indent, result_type)
+        self.maybe_parse_dependent_record_decl(indent, result_type, template_param_type_map)
 
         return cpp_type_expr
 
@@ -480,7 +481,8 @@ fabricBuildEnv.SharedLibrary(
         template_param_types = [],
         cpp_specialized_type_name = None
         ):
-        if cursor.displayname in self.config.get('ignore_types', []):
+        # if the ignore type is a template ignore anything derived from it
+        if cursor.displayname.split('<')[0] in self.config.get('ignore_types', []):
             print "Ignoring <RECORD>_DECL '%s' at %s:%d by user request" % (
                 cursor.displayname, cursor.location.file, cursor.location.line)
             return
@@ -777,7 +779,7 @@ fabricBuildEnv.SharedLibrary(
                             current_namespace_path, underlying_type, clang_base_class)
                 else:
                     type_def = clang_base_class.type
-                    self.maybe_parse_dependent_record_decl(indent, type_def)
+                    self.maybe_parse_dependent_record_decl(indent, type_def, template_param_type_map)
                     base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
                             current_namespace_path, type_def)
                 base_class_dqti = self.type_mgr.get_dqti(base_class_cpp_type_expr)

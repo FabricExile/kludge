@@ -22,5 +22,10 @@ operator entry()
   UsesTempl ut;
   report(ut.getTempl32().re());
   report(ut.getTempl32Ref().re());
+
+  Myspace_NSTemplate1 nt1(1.3);
+  report(nt1.re());
+  //NSTemplate2 nt2(1.3);
+  //report(nt2.re());
 }
 

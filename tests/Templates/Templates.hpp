@@ -54,9 +54,35 @@ namespace Myspace
     int a;
   };
 
-  //typedef Template<MyType1, int> MyspaceType1;
   typedef Template<MyType2, int> MyspaceType2;
+
+  // [FIXME] first param lives in a different namespace
+  //typedef Template<MyType1, int> MyspaceType1;
+
+  template<typename Ty>
+  class NSTemplate
+  {
+  public:
+
+    NSTemplate() {}
+    NSTemplate( Ty re )
+      : m_re( re )
+      {}
+    ~NSTemplate() {}
+
+    Ty re()
+      { return m_re; }
+
+  private:
+
+    Ty m_re;
+  };
+
+  typedef NSTemplate<int> NSTemplate1;
 }
+
+// [FIXME] template with explicit namespace
+//typedef Myspace::NSTemplate<int> NSTemplate2;
 
 class DerivedTempl : public Template<int, double>
 {

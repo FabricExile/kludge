@@ -497,7 +497,7 @@ fabricBuildEnv.SharedLibrary(
             cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cpp_specialized_type_name)
             print "%s<RECORD>_DECL %s" % (indent, str(cpp_type_expr))
 
-            self.namespace_mgr.add_type(current_namespace_path, cpp_specialized_type_name, cpp_type_expr)
+            self.namespace_mgr.add_type(current_namespace_path, str(cpp_type_expr), cpp_type_expr)
             cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
 
             undq_cpp_type_expr, _ = cpp_type_expr.get_undq_type_expr_and_dq()

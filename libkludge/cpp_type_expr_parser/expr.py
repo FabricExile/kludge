@@ -320,7 +320,11 @@ class Template(Direct):
     self.params = params
 
   def tranform_names(self, cb):
-    self.name = cb(self.name)
+    # [andrew 2016-07-21] we need to resolve the namespace of the specialized
+    # type here since the template may live in a different namespace
+    full_name, _ = self.build_unqualified_desc()
+    full_name = cb(full_name)
+    self.name = full_name.split('<')[0]
     for i in range(0, len(self.params)):
       self.params[i].tranform_names(cb)
 

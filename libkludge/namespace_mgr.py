@@ -106,7 +106,13 @@ class NamespaceMgr:
     namespace.usings.append(import_namespace)
 
   def globalize_simple_cpp_type_name(self, current_namespace_path, type_name):
-    nested_type_name = type_name.split("::")
+
+    # we want to resolve the namespace of the template type itself, not its params
+    template_type_name = type_name.split("<", 1)
+    nested_type_name = template_type_name[0].split("::")
+    if len(template_type_name) > 1:
+      nested_type_name[-1] += "<" + template_type_name[-1]
+
     current_namespace = self._resolve_namespace(current_namespace_path)
     while current_namespace:        
       cpp_type_expr = current_namespace.maybe_find_cpp_type_expr(nested_type_name)

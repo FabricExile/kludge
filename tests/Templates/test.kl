@@ -25,7 +25,9 @@ operator entry()
 
   Myspace_NSTemplate1 nt1(1.3);
   report(nt1.re());
-  //NSTemplate2 nt2(1.3);
-  //report(nt2.re());
+  Myspace_NSTemplate2 nt2();
+  report(nt2.re());
+  Myspace_NSTemplate3 nt3();
+  report(nt3.re());
 }
 

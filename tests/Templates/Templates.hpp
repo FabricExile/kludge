@@ -79,6 +79,8 @@ namespace Myspace
   };
 
   typedef NSTemplate<int> NSTemplate1;
+  typedef NSTemplate<MyType1> NSTemplate2;
+  typedef NSTemplate<MyType2> NSTemplate3;
 }
 
 // [FIXME] template with explicit namespace

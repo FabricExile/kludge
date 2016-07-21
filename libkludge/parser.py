@@ -453,7 +453,8 @@ fabricBuildEnv.SharedLibrary(
                             template_param_type_map)
 
                     param_name = child.spelling
-                    if not param_name:
+                    illegal_names = ['in', 'out', 'io']
+                    if not param_name or param_name in illegal_names:
                         param_name = 'arg'+str(param_num)
                     param_num += 1
 
@@ -914,6 +915,13 @@ fabricBuildEnv.SharedLibrary(
             print "  Reason: %s" % e
 
     def parse_FUNCTION_DECL(self, include_filename, indent, current_namespace_path, cursor):
+        if cursor.spelling in self.config.get('ignore_functions', []):
+            print "Ignoring function '%s' at %s:%d by user request" % (
+                    cursor.spelling,
+                    cursor.location.file,
+                    cursor.location.line)
+            return
+
         nested_name = current_namespace_path + [cursor.spelling]
         print "%sFUNCTION_DECL %s" % (indent, "::".join(nested_name))
 

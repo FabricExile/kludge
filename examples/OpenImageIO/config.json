@@ -7,9 +7,46 @@
     "${OIIO_DIR}/include/OpenImageIO/imageio.h"
     ],
   "libpath": [
-    "${OIIO_DIR}/lib"
+    "${OIIO_DIR}/lib",
+    "${TPDIR}/boost/1.55.0/lib",
+    "${TPDIR}/libpng/1.6.13/lib",
+    "${TPDIR}/openexr/2.2.0/lib",
+    "${TPDIR}/ilmbase/2.2.0/lib",
+    "${TPDIR}/libjpeg-turbo/1.3.1/lib",
+    "${TPDIR}/tiff/3.9.7/lib",
+    "${TPDIR}/giflib/5.0.6/lib"
     ],
   "libs": [
-    "OpenImageIO"
+    "OpenImageIO",
+    "boost_program_options",
+    "boost_date_time",
+    "boost_iostreams",
+    "boost_thread",
+    "boost_system",
+    "boost_filesystem",
+    "boost_regex",
+    "boost_chrono",
+    "png",
+    "IlmImf-2_2",
+    "Half",
+    "Iex-2_2",
+    "IexMath-2_2",
+    "IlmThread-2_2",
+    "Imath-2_2",
+    "jpeg",
+    "tiff",
+    "gif",
+    "freetype",
+    "pthread",
+    "dl",
+    "rt",
+    "z"
+    ],
+  "ignore_methods": [
+    "data",
+    "type"
+    ],
+  "ignore_functions": [
+    "auto_stride"
     ]
   }

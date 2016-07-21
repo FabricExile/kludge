@@ -36,6 +36,7 @@ class Parser:
     self.ident = And([
       NotAny(self.key_const),
       NotAny(self.key_volatile),
+      Optional(self.tok_colon_colon),
       Word(alphas+"_", alphanums+"_"),
       ]).setParseAction(lambda s,l,t: self._build_named(t[0]))
     self.number = Word(nums).setParseAction(lambda s,l,t: int(t[0]))

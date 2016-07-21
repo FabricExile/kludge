@@ -54,10 +54,8 @@ namespace Myspace
     int a;
   };
 
+  typedef Template<MyType1, int> MyspaceType1;
   typedef Template<MyType2, int> MyspaceType2;
-
-  // [FIXME] first param lives in a different namespace
-  //typedef Template<MyType1, int> MyspaceType1;
 
   template<typename Ty>
   class NSTemplate

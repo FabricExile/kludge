@@ -329,10 +329,15 @@ class Template(Direct):
       self.params[i].tranform_names(cb)
 
   def build_unqualified_desc(self):
-    lhs = self.name + "< " + ", ".join(map(
-      lambda param: param.get_desc(),
-      self.params
-      )) + " >"
+    descs = []
+    for param in self.params:
+      desc = ''
+      if isinstance(param, Named) or \
+          isinstance(param, Indirect) and isinstance(param.pointee, Named):
+        desc = '::'
+      desc += param.get_desc()
+      descs += [desc]
+    lhs = self.name + "< " + ", ".join(descs) + " >"
     return lhs, ""
 
   def __eq__(self, other):

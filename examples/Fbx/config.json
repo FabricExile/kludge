@@ -1,0 +1,36 @@
+{
+  "extname": "NewFbx",
+  "cpppath": [
+    "${FBX_DIR}/include"
+    ],
+  "infiles": [
+    "${FBX_DIR}/include/fbxsdk/core/arch/fbxtypes.h",
+    "${FBX_DIR}/include/fbxsdk/core/fbxmanager.h",
+    "${FBX_DIR}/include/fbxsdk/core/fbxstream.h"
+    ],
+  "libpath": [
+    "${FBX_DIR}/lib"
+    ],
+  "libs": [
+    "fbxsdk",
+    "pthread",
+    "dl"
+    ],
+  "clang_opts": [
+    "-x", "c++",
+    "-Wno-deprecated-declarations"
+    ],
+  "ignore_functions": [
+    "FbxTypeCopyStr",
+    "ForceTypeId",
+    "GetStaticTypeId"
+    ],
+  "ignore_methods": [
+    "FunctionCall",
+    "Ref"
+    ],
+  "ignore_types": [
+    "FbxArray"
+    ],
+  "parse_includes": true
+  }

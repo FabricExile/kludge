@@ -1,0 +1,9 @@
+require ForwardDeclare;
+
+operator entry()
+{
+  Forward f;
+  Other o;
+  o.takeForward(f);
+  TakeForward(f);
+}

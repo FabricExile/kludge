@@ -5,4 +5,5 @@ operator entry() {
   report("bt = " + bt.GET_str());
   report("bt.getSize() = " + bt.getSize());
   FooNS_BarNS_BarType_SubType st();
+  FooNS_BarNS_BarType_MySubTypeEnum ste();
 }

@@ -30,7 +30,7 @@ struct BarType {
     };
   };
 
-  //typedef MyTempl<SubType::Enum> MySubTypeEnum;
+  typedef MyTempl<SubType::Enum> MySubTypeEnum;
 
   void addSubType(SubType s) {}
 };

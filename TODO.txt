@@ -11,14 +11,9 @@
 - find and fix all FIXME hacks
 - add support for all operator types (+/*/etc.)
 - how to handle forward declarations
-- fix template namespace issues (Template.hpp -> MyspaceType1)
 - return values as refs/pointers should never create a new object
 - fix templates using different types of same class (e.g. Templ<Foo> and Templ<Foo*>)
 - fix is_pointer in ./protocols/param/default/lib.cpp, failure in StdString.hpp
-
-Namespaces:
-- namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)
-- uncomment typedef in Namespaces.hpp
 
 --
 X fix Inheritance with abstract return value
@@ -31,3 +26,6 @@ X for abstract types create constructor that throws exception
 X code duplication for params between Function, Constructor, InstanceMethod
 X aliases created multiple times in .kl file
 X consolidate template handling code
+X fix template namespace issues (Template.hpp -> MyspaceType1)
+X namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)
+X uncomment typedef in Namespaces.hpp

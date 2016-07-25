@@ -102,5 +102,5 @@
     "PODTraits",
     "limits"
     ],
-  "parse_includes": false
+  "parse_includes": true
   }

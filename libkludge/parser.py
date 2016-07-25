@@ -99,6 +99,7 @@ class Parser:
         self.edk_decls = ast.DeclSet()
         self.existing_edk_symbol_names = set()
         self.parsed_cpp_types = set()
+        self.parsed_cpp_functions = set()
 
         # stats
         self.records_seen = 0
@@ -294,6 +295,9 @@ fabricBuildEnv.SharedLibrary(
 ],
 }
 """ % (self.config['extname'], ',\n'.join(code)))
+
+        # FIXME [andrew 2016-07-22] these are missed in records_seen
+        self.records_seen += len(self.config.get('ignore_types', []))
 
         print '---------------------------'
         print 'Types mapped: '+str(self.records_mapped)+'/'+str(self.records_seen)
@@ -666,6 +670,8 @@ fabricBuildEnv.SharedLibrary(
             existing_method_edk_symbol_names = set()
             instance_methods = []
             for clang_instance_method in clang_instance_methods:
+                self.methods_seen += 1
+
                 if clang_instance_method.spelling in self.config.get('ignore_methods', []):
                     print "Ignoring method '%s' at %s:%d by user request" % (
                             clang_instance_method.spelling,
@@ -673,8 +679,6 @@ fabricBuildEnv.SharedLibrary(
                             clang_instance_method.location.line)
                     continue
                 try:
-                    self.methods_seen += 1
-
                     param_configs = self.collect_params(indent+'  ', clang_instance_method, current_namespace_path, template_param_type_map)
 
                     result_type = clang_instance_method.result_type
@@ -915,6 +919,17 @@ fabricBuildEnv.SharedLibrary(
             print "  Reason: %s" % e
 
     def parse_FUNCTION_DECL(self, include_filename, indent, current_namespace_path, cursor):
+        nested_name = current_namespace_path + [cursor.spelling]
+        cpp_function_name = "::".join(nested_name)
+        print "%sFUNCTION_DECL %s" % (indent, cpp_function_name)
+
+        if cpp_function_name in self.parsed_cpp_functions: 
+            print "%s  -> skipping because function already exists" % indent
+            return
+        self.parsed_cpp_functions.add(cpp_function_name)
+
+        self.functions_seen += 1
+
         if cursor.spelling in self.config.get('ignore_functions', []):
             print "Ignoring function '%s' at %s:%d by user request" % (
                     cursor.spelling,
@@ -922,14 +937,9 @@ fabricBuildEnv.SharedLibrary(
                     cursor.location.line)
             return
 
-        nested_name = current_namespace_path + [cursor.spelling]
-        print "%sFUNCTION_DECL %s" % (indent, "::".join(nested_name))
-
         try:
             if cursor.spelling.startswith("operator"):
                 raise Exception("function is operator (FIXME)")
-
-            self.functions_seen += 1
 
             param_configs = self.collect_params(indent+'  ', cursor,
                     current_namespace_path, {})

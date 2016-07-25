@@ -64,6 +64,7 @@
     "RayResultCallback",
     "btAlignedObjectArray",
     "btManifoldResult",
+    "btTriangleInfoMap",
     "Cluster",
     "less"
     ],
@@ -73,5 +74,6 @@
   "kl_files": [
     "Conversions.kl",
     "Constants.kl"
-    ]
+    ],
+  "parse_includes": true
   }

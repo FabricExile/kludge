@@ -4,7 +4,9 @@
     "${OIIO_DIR}/include/OpenImageIO/typedesc.h",
     "${OIIO_DIR}/include/OpenImageIO/ustring.h",
     "${OIIO_DIR}/include/OpenImageIO/paramlist.h",
-    "${OIIO_DIR}/include/OpenImageIO/imageio.h"
+    "${OIIO_DIR}/include/OpenImageIO/imageio.h",
+    "${OIIO_DIR}/include/OpenImageIO/imagebuf.h",
+    "${OIIO_DIR}/include/OpenImageIO/imagecache.h"
     ],
   "libpath": [
     "${OIIO_DIR}/lib",
@@ -48,5 +50,6 @@
     ],
   "ignore_functions": [
     "auto_stride"
-    ]
+    ],
+  "parse_includes": true
   }

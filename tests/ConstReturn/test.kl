@@ -1,0 +1,8 @@
+require ConstReturn;
+
+operator entry()
+{
+  MyClass m;
+  MyClass m2 = m.getConst();
+  MyClass m3 = GetMyClass();
+}

@@ -409,6 +409,14 @@ fabricBuildEnv.SharedLibrary(
                 current = current.semantic_parent
         return namespace_path
 
+    def resolve_maybe_templated_clang_type(self, current_namespace_path, type_name, template_param_type_map):
+        cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
+                current_namespace_path, type_name)
+        undq_cpp_type_expr, _ = cpp_type_expr.get_undq_type_expr_and_dq()
+        resolved_type = template_param_type_map.get(
+                str(undq_cpp_type_expr), None)
+        return resolved_type
+
     def resolve_maybe_templated_cpp_expr(self, indent, current_namespace_path, clang_type, template_param_type_map): 
         result_type = clang_type
 
@@ -476,6 +484,82 @@ fabricBuildEnv.SharedLibrary(
             print "  Reason: %s" % e
 
         return param_configs
+
+    def collect_instance_methods(self, indent, clang_instance_methods, existing_method_edk_symbol_names,
+            current_namespace_path, record_namespace_path, template_param_type_map, this_type_info, is_operator_arrow):
+
+        instance_methods = []
+        for clang_instance_method in clang_instance_methods:
+            self.methods_seen += 1
+
+            if clang_instance_method.spelling in self.config.get('ignore_methods', []):
+                print "Ignoring method '%s' at %s:%d by user request" % (
+                        clang_instance_method.spelling,
+                        clang_instance_method.location.file,
+                        clang_instance_method.location.line)
+                continue
+            try:
+                param_configs = self.collect_params(indent+'  ', clang_instance_method,
+                        current_namespace_path, template_param_type_map)
+
+                result_type = clang_instance_method.result_type
+                result_cpp_type_expr = self.resolve_maybe_templated_cpp_expr(
+                        indent, record_namespace_path, result_type,
+                        template_param_type_map)
+
+                result_codec = ResultCodec(
+                  self.type_mgr.get_dqti(result_cpp_type_expr)
+                  )
+
+                if clang_instance_method.spelling == "operator->":
+                    print "%s  FOUND operator->" % (indent)
+                    op_arrow_instance_methods = []
+                    result_cursor = self.resolve_maybe_templated_clang_type(current_namespace_path,
+                            result_type.spelling, template_param_type_map)
+                    for c in result_cursor.get_declaration().get_children():
+                        if c.kind == CursorKind.CXX_METHOD:
+                            print "%s    operator->: CXX_METHOD %s" % (indent, c.displayname)
+                            if c.is_static_method():
+                                print "%s    %s ->is static" % (indent, c.displayname)
+                                continue
+                            else:
+                                if clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(c):
+                                    print "%s    %s ->is pure virtual" % (indent, c.displayname)
+                                op_arrow_instance_methods.append(c)
+
+                    instance_methods += self.collect_instance_methods(indent, op_arrow_instance_methods,
+                            existing_method_edk_symbol_names, current_namespace_path,
+                            record_namespace_path, template_param_type_map, this_type_info, True)
+                elif clang_instance_method.spelling.startswith("operator"):
+                    print "%s    ->is operator (FIXME)" % (indent)
+                    continue
+                else:
+                    for param_config in param_configs:
+                        instance_method = InstanceMethod(
+                            self.type_mgr,
+                            self.namespace_mgr,
+                            record_namespace_path,
+                            this_type_info,
+                            clang_instance_method,
+                            result_codec,
+                            param_config,
+                            is_operator_arrow,
+                            )
+                        if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
+                            raise Exception("instance method with name EDK symbol name already exists")
+                        existing_method_edk_symbol_names.add(instance_method.edk_symbol_name)
+                        instance_methods.append(instance_method)
+
+                self.methods_mapped += 1
+
+            except Exception as e:
+                print "Warning: ignored method '%s' at %s:%d" % (
+                        clang_instance_method.spelling,
+                        clang_instance_method.location.file,
+                        clang_instance_method.location.line)
+                print "  Reason: %s" % e
+
+        return instance_methods
 
     def parse_record_decl(
         self,
@@ -570,9 +654,7 @@ fabricBuildEnv.SharedLibrary(
                     if clang.cindex.conf.lib.clang_CXXMethod_isVirtual(child):
                         has_vtable = True
 
-                    if child.spelling.startswith("operator"):
-                        print "%s    ->is operator (FIXME)" % (indent)
-                    elif child.is_static_method():
+                    if child.is_static_method():
                         print "%s    ->is static" % (indent)
                         clang_static_functions.append(child)
                     else:
@@ -668,51 +750,9 @@ fabricBuildEnv.SharedLibrary(
                         nested_type)
 
             existing_method_edk_symbol_names = set()
-            instance_methods = []
-            for clang_instance_method in clang_instance_methods:
-                self.methods_seen += 1
-
-                if clang_instance_method.spelling in self.config.get('ignore_methods', []):
-                    print "Ignoring method '%s' at %s:%d by user request" % (
-                            clang_instance_method.spelling,
-                            clang_instance_method.location.file,
-                            clang_instance_method.location.line)
-                    continue
-                try:
-                    param_configs = self.collect_params(indent+'  ', clang_instance_method, current_namespace_path, template_param_type_map)
-
-                    result_type = clang_instance_method.result_type
-                    result_cpp_type_expr = self.resolve_maybe_templated_cpp_expr(
-                            indent, record_namespace_path, result_type,
-                            template_param_type_map)
-
-                    result_codec = ResultCodec(
-                      self.type_mgr.get_dqti(result_cpp_type_expr)
-                      )
-
-                    for param_config in param_configs:
-                        instance_method = InstanceMethod(
-                            self.type_mgr,
-                            self.namespace_mgr,
-                            record_namespace_path,
-                            this_type_info,
-                            clang_instance_method,
-                            result_codec,
-                            param_config,
-                            )
-                        if instance_method.edk_symbol_name in existing_method_edk_symbol_names:
-                            raise Exception("instance method with name EDK symbol name already exists")
-                        existing_method_edk_symbol_names.add(instance_method.edk_symbol_name)
-                        instance_methods.append(instance_method)
-
-                    self.methods_mapped += 1
-
-                except Exception as e:
-                    print "Warning: ignored method '%s' at %s:%d" % (
-                            clang_instance_method.spelling,
-                            clang_instance_method.location.file,
-                            clang_instance_method.location.line)
-                    print "  Reason: %s" % e
+            instance_methods = self.collect_instance_methods(indent, clang_instance_methods,
+                    existing_method_edk_symbol_names, current_namespace_path,
+                    record_namespace_path, template_param_type_map, this_type_info, False)
 
             constructors = []
             if not is_abstract:

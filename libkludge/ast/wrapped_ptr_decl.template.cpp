@@ -106,7 +106,12 @@ FABRIC_EXT_EXPORT
     )
 {
     {{macros.cpp_call_pre(method.result, method.params) | indent(4)}}
+
+    {% if method.uses_operator_arrow %}
+        ( *{{decl.this_value_name.edk}}.cpp_ptr )->{{method.name}}(
+    {% else %}
         {{decl.this_value_name.edk}}.cpp_ptr->{{method.name}}(
+    {% endif %}
             {{macros.cpp_call_args(method.params) | indent(12)}}
             );
     {{macros.cpp_call_post(method.result, method.params) | indent(4)}}

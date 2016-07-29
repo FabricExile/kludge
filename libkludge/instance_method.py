@@ -22,6 +22,7 @@ class InstanceMethod:
     clang_instance_method,
     result,
     params,
+    uses_operator_arrow,
     ):
     self.name = clang_instance_method.spelling
     self.desc = "Instance method '%s'" % clang_instance_method.displayname
@@ -32,6 +33,7 @@ class InstanceMethod:
 
     self.result = result
     self.params = params
+    self.uses_operator_arrow = uses_operator_arrow
 
     h = hashlib.md5()
     for param in self.params:

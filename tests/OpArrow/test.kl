@@ -1,0 +1,8 @@
+require OpDeref;
+
+operator entry()
+{
+  MyTypePtr typePtr();
+  report('6='+typePtr.getSix());
+  report('5='+typePtr.getFive());
+}

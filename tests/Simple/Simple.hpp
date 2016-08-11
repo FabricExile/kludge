@@ -81,4 +81,10 @@ inline long SimpleObscure(
   long longVal
   ) { return signedShortVal + longVal; }
 
+inline long SimpleObscure(
+  signed short signedShortVal,
+  long longVal,
+  long long longLongVal
+  ) { return signedShortVal + longVal + longLongVal; }
+
 #endif

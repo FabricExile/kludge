@@ -989,10 +989,11 @@ fabricBuildEnv.SharedLibrary(
         cpp_function_name = "::".join(nested_name)
         print "%sFUNCTION_DECL %s" % (indent, cpp_function_name)
 
-        if cpp_function_name in self.parsed_cpp_functions: 
+        func_name_and_loc = ':'.join([cursor.spelling, str(cursor.location.file), str(cursor.location.line)])
+        if func_name_and_loc in self.parsed_cpp_functions: 
             print "%s  -> skipping because function already exists" % indent
             return
-        self.parsed_cpp_functions[cpp_function_name] = False
+        self.parsed_cpp_functions[func_name_and_loc] = False
 
         self.functions_seen += 1
 
@@ -1028,7 +1029,7 @@ fabricBuildEnv.SharedLibrary(
                 self.edk_decls.add(func)
 
             self.functions_mapped += 1
-            self.parsed_cpp_functions[cpp_function_name] = True
+            self.parsed_cpp_functions[func_name_and_loc] = True
 
         except Exception as e:
             print "Warning: ignored function '%s' at %s:%d" % (

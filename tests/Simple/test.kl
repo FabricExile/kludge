@@ -77,4 +77,5 @@ operator entry() {
   report("SimpleConstRefResult() = " + SimpleConstRefResult());
   report("SimpleMutableRefResult() = " + SimpleMutableRefResult());
   report("SimpleObscure(56, 89) = " + SimpleObscure(56, 89));
+  report("SimpleObscure(56, 89, 1) = " + SimpleObscure(56, 89, 1));
 }

@@ -100,8 +100,8 @@ class Parser:
     def __init__(self):
         self.edk_decls = ast.DeclSet()
         self.existing_edk_symbol_names = set()
-        self.parsed_cpp_types = set()
-        self.parsed_cpp_functions = set()
+        self.parsed_cpp_types = {}
+        self.parsed_cpp_functions = {}
 
         # stats
         self.records_seen = 0
@@ -606,7 +606,7 @@ fabricBuildEnv.SharedLibrary(
             if str(undq_cpp_type_expr) in self.parsed_cpp_types: 
                 print "%s  -> skipping because type already exists" % indent
                 return
-            self.parsed_cpp_types.add(str(undq_cpp_type_expr))
+            self.parsed_cpp_types[str(undq_cpp_type_expr)] = False
 
             self.records_seen += 1
 
@@ -733,6 +733,26 @@ fabricBuildEnv.SharedLibrary(
             if str(cpp_type_expr) in self.config.get('no_copy_types', []):
                 no_copy_constructor = True
 
+            base_classes = []
+            for clang_base_class in clang_base_classes:
+                underlying_type = clang_base_class.type
+                num_template_args = underlying_type.get_num_template_arguments()
+                if num_template_args > 0:
+                    base_class_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
+                            current_namespace_path, underlying_type, clang_base_class)
+                else:
+                    type_def = clang_base_class.type
+                    self.maybe_parse_dependent_record_decl(indent, type_def, template_param_type_map)
+                    base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
+                            current_namespace_path, type_def)
+                base_class_dqti = self.type_mgr.get_dqti(base_class_cpp_type_expr)
+                base_classes.append(base_class_dqti)
+
+            # [andrew 20160517] FIXME this would be fine with objects + interfaces but not structs
+            if len(base_classes) > 1:
+                print 'WARNING: ignoring all but the first base class: "'+str(base_classes[0].type_info.get_desc())+'"'
+                base_classes = [base_classes[0]]
+
             if can_in_place:
                 self.type_mgr.add_selector(
                     InPlaceStructSelector(
@@ -824,26 +844,6 @@ fabricBuildEnv.SharedLibrary(
                 print "%s  -> blocking default construction of type" % (indent)
                 block_empty_kl_constructor = True
 
-            base_classes = []
-            for clang_base_class in clang_base_classes:
-                underlying_type = clang_base_class.type
-                num_template_args = underlying_type.get_num_template_arguments()
-                if num_template_args > 0:
-                    base_class_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
-                            current_namespace_path, underlying_type, clang_base_class)
-                else:
-                    type_def = clang_base_class.type
-                    self.maybe_parse_dependent_record_decl(indent, type_def, template_param_type_map)
-                    base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
-                            current_namespace_path, type_def)
-                base_class_dqti = self.type_mgr.get_dqti(base_class_cpp_type_expr)
-                base_classes.append(base_class_dqti)
-
-            # [andrew 20160517] FIXME this would be fine with objects + interfaces but not structs
-            if len(base_classes) > 1:
-                print 'WARNING: ignoring all but the first base class: "'+str(base_classes[0].type_info.get_desc())+'"'
-                base_classes = [base_classes[0]]
-
             if can_in_place:
                 self.edk_decls.add(
                     ast.Wrapping(
@@ -883,6 +883,7 @@ fabricBuildEnv.SharedLibrary(
                         record_namespace_path, static_function)
 
             self.records_mapped += 1
+            self.parsed_cpp_types[str(undq_cpp_type_expr)] = True
 
         except Exception as e:
             print "Warning: ignored type '%s' at %s:%d" % (
@@ -906,6 +907,8 @@ fabricBuildEnv.SharedLibrary(
                     raise Exception("more than one TEMPLATE_REF found: "+str(child.displayname))
                 template_class = child.get_definition()
             elif child.kind == CursorKind.TYPE_REF:
+                pass
+            elif child.kind == CursorKind.NAMESPACE_REF:
                 pass
             else:
                 raise Exception("unexpected child kind: "+str(child.kind))
@@ -949,6 +952,17 @@ fabricBuildEnv.SharedLibrary(
             if num_template_args > 0:
                 old_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
                         current_namespace_path, underlying_type, cursor)
+            else:
+                self.maybe_parse_dependent_record_decl(indent, underlying_type)
+
+            undq_old_cpp_type_expr, _ = old_cpp_type_expr.get_undq_type_expr_and_dq()
+            is_named_or_template = isinstance(undq_old_cpp_type_expr, cpp_type_expr_parser.Named) or \
+                isinstance(undq_old_cpp_type_expr, cpp_type_expr_parser.Template)
+
+            if is_named_or_template and \
+                    not self.parsed_cpp_types.get(str(undq_old_cpp_type_expr), False) and \
+                    not self.type_mgr.has_alias(undq_old_cpp_type_expr):
+                raise Exception('type "'+str(undq_old_cpp_type_expr)+'" not mapped to KL')
 
             self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
             old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
@@ -978,7 +992,7 @@ fabricBuildEnv.SharedLibrary(
         if cpp_function_name in self.parsed_cpp_functions: 
             print "%s  -> skipping because function already exists" % indent
             return
-        self.parsed_cpp_functions.add(cpp_function_name)
+        self.parsed_cpp_functions[cpp_function_name] = False
 
         self.functions_seen += 1
 
@@ -1014,6 +1028,7 @@ fabricBuildEnv.SharedLibrary(
                 self.edk_decls.add(func)
 
             self.functions_mapped += 1
+            self.parsed_cpp_functions[cpp_function_name] = True
 
         except Exception as e:
             print "Warning: ignored function '%s' at %s:%d" % (

@@ -799,6 +799,28 @@ fabricBuildEnv.SharedLibrary(
                     existing_method_edk_symbol_names, current_namespace_path,
                     record_namespace_path, template_param_type_map, this_type_info, False)
 
+            if cursor.displayname.split('<')[0] in self.config.get('force_op_arrow', []):
+                print "%s  -> forcing addition of templated type methods" % (indent)
+                sub_type = template_param_types[0]
+                op_arrow_instance_methods = []
+                for c in sub_type.get_declaration().get_children():
+                    if c.kind == CursorKind.CXX_METHOD:
+                        print "%s    operator->: CXX_METHOD %s" % (indent, c.displayname)
+                        if c.access_specifier != AccessSpecifier.PUBLIC:
+                            print "%s    %s ->is private" % (indent, c.displayname)
+                            continue
+                        elif c.is_static_method():
+                            print "%s    %s ->is static" % (indent, c.displayname)
+                            continue
+                        else:
+                            if clang.cindex.conf.lib.clang_CXXMethod_isPureVirtual(c):
+                                print "%s    %s ->is pure virtual" % (indent, c.displayname)
+                            op_arrow_instance_methods.append(c)
+
+                instance_methods += self.collect_instance_methods(indent, op_arrow_instance_methods,
+                        existing_method_edk_symbol_names, current_namespace_path,
+                        record_namespace_path, template_param_type_map, this_type_info, True)
+
             constructors = []
             if not is_abstract:
                 for clang_constructor in clang_constructors:

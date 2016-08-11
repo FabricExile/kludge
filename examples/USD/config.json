@@ -6,15 +6,14 @@
     "${USD_INSTALL_ROOT}/include/pxr/usd/usd/common.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/path.h",
     "${USD_INSTALL_ROOT}/include/pxr/usd/sdf/layer.h",
-    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/timeCode.h"
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usd/stage.h"
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usd/attribute.h",
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usd/relationship.h",
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usd/property.h",
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usd/prim.h",
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usd/stage.h",
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usdGeom/mesh.h",
-    //"${USD_INSTALL_ROOT}/include/pxr/usd/usdGeom/xform.h"
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/timeCode.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/attribute.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/relationship.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/property.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/prim.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usd/stage.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usdGeom/mesh.h",
+    "${USD_INSTALL_ROOT}/include/pxr/usd/usdGeom/xform.h"
     ],
   "cpppath": [
     "${USD_INSTALL_ROOT}/include",
@@ -65,9 +64,15 @@
     "_Rep",
     "_TypeInfo",
     "PcpNodeRef",
-    "SdfTupleDimensions"
+    "SdfTupleDimensions",
+    // FIXME output issue with KL::FixedArray with these arrays
+    "GfMatrix3d",
+    "GfMatrix4d"
     ],
   "force_op_arrow": [
     "TfWeakPtr"
+    ],
+  "kl_files": [
+    "Conversions.kl"
     ]
   }

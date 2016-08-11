@@ -38,7 +38,9 @@ cxxflags = ["-g",
  '-I',
  '/usr/include/OpenEXR',
  '-I',
- '/opt/usd-deps/root/usr/include']
+ '/opt/usd-deps/root/usr/include',
+ '-Wno-deprecated',
+ ]
 cpppath = ['/opt/pixar/usd/include',
  '/opt/pixar/usd/include/gcc4-fixes',
  '/usr/include/python2.7',

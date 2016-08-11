@@ -1,0 +1,16 @@
+require Math;
+
+Vec3(GfVec3f that)
+{
+  //this = Vec3(that.getX(), that.getY(), that.getZ());
+}
+
+GfVec3f(Vec3 that)
+{
+  this = GfVec3f(that.x, that.y, that.z);
+}
+
+// FIXME add all the other conversions here
+
+TfWeakPtr__UsdStage__( TfRefPtr__UsdStage__ that ) = "TfWeakPtr__UsdStage___FROM_TfRefPtr__UsdStage__";
+

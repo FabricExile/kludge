@@ -390,17 +390,23 @@ fabricBuildEnv.SharedLibrary(
             underlying_decl = decl.get_pointee()
         else:
             underlying_decl = decl
-        underlying_decl = underlying_decl.get_declaration()
+        underlying_decl_cursor = underlying_decl.get_declaration()
 
-        if not self.should_parse_file(underlying_decl.location.file):
+        if not self.should_parse_file(underlying_decl_cursor.location.file):
             return
 
-        decl_namespace = self.get_cursor_namespace_path(underlying_decl)
+        decl_namespace = self.get_cursor_namespace_path(underlying_decl_cursor)
 
-        if underlying_decl.kind == CursorKind.CLASS_DECL or underlying_decl.kind == CursorKind.STRUCT_DECL:
-            self.parse_record_decl(underlying_decl.location.file.name, indent, decl_namespace, underlying_decl, template_param_types)
-        elif underlying_decl.kind == CursorKind.TYPEDEF_DECL:
-            self.parse_TYPEDEF_DECL(underlying_decl.location.file.name, indent, decl_namespace, underlying_decl)
+        if underlying_decl_cursor.kind == CursorKind.CLASS_DECL or underlying_decl_cursor.kind == CursorKind.STRUCT_DECL:
+            # FIXME [andrew 20160811] see tests/Templates/Template::takesTemplType() for an example of this
+            if underlying_decl.spelling.count('<') > underlying_decl_cursor.spelling.count('<'):
+                print 'WARNING: skipping templated type "'+str(underlying_decl.spelling)+ \
+                    '" as "'+str(underlying_decl_cursor.spelling)+'"'
+                return
+
+            self.parse_record_decl(underlying_decl_cursor.location.file.name, indent, decl_namespace, underlying_decl_cursor, template_param_types)
+        elif underlying_decl_cursor.kind == CursorKind.TYPEDEF_DECL:
+            self.parse_TYPEDEF_DECL(underlying_decl_cursor.location.file.name, indent, decl_namespace, underlying_decl_cursor)
 
     def get_cursor_namespace_path(self, cursor):
         namespace_path = []

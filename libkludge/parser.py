@@ -103,6 +103,11 @@ class Parser:
         self.parsed_cpp_types = {}
         self.parsed_cpp_functions = {}
 
+        # [andrew 20160811] parse functions after all types are registered
+        # FIXME same should probably be done for methods
+        self.queue_functions = True
+        self.queued_functions = []
+
         # stats
         self.records_seen = 0
         self.records_mapped = 0
@@ -222,6 +227,10 @@ OR %prog -c <config file>""",
 
         for infile in self.config['infiles']:
             self.parse(self.expand_envvars(infile), self.config.get('parse_includes', False))
+
+        self.queue_functions = False
+        for func in self.queued_functions:
+            self.parse_FUNCTION_DECL(func['inc'], '', func['ns'], func['cur'])
 
         self.output(
             os.path.join(self.config['outdir'], self.config['basename'] + '.kl'),
@@ -735,18 +744,25 @@ fabricBuildEnv.SharedLibrary(
 
             base_classes = []
             for clang_base_class in clang_base_classes:
-                underlying_type = clang_base_class.type
-                num_template_args = underlying_type.get_num_template_arguments()
-                if num_template_args > 0:
-                    base_class_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
-                            current_namespace_path, underlying_type, clang_base_class)
-                else:
-                    type_def = clang_base_class.type
-                    self.maybe_parse_dependent_record_decl(indent, type_def, template_param_type_map)
-                    base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
-                            current_namespace_path, type_def)
-                base_class_dqti = self.type_mgr.get_dqti(base_class_cpp_type_expr)
-                base_classes.append(base_class_dqti)
+                try:
+                    underlying_type = clang_base_class.type
+                    num_template_args = underlying_type.get_num_template_arguments()
+                    if num_template_args > 0:
+                        base_class_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
+                                current_namespace_path, underlying_type, clang_base_class)
+                    else:
+                        type_def = clang_base_class.type
+                        self.maybe_parse_dependent_record_decl(indent, type_def, template_param_type_map)
+                        base_class_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
+                                current_namespace_path, type_def)
+                    base_class_dqti = self.type_mgr.get_dqti(base_class_cpp_type_expr)
+                    base_classes.append(base_class_dqti)
+                except Exception as e:
+                    print "Warning: ignoring base class '%s' at %s:%d" % (
+                            clang_base_class.displayname,
+                            clang_base_class.location.file,
+                            clang_base_class.location.line)
+                    print "  Reason: %s" % e
 
             # [andrew 20160517] FIXME this would be fine with objects + interfaces but not structs
             if len(base_classes) > 1:
@@ -985,6 +1001,14 @@ fabricBuildEnv.SharedLibrary(
             print "  Reason: %s" % e
 
     def parse_FUNCTION_DECL(self, include_filename, indent, current_namespace_path, cursor):
+        if self.queue_functions:
+            self.queued_functions.append({
+                'inc': include_filename,
+                'ns': current_namespace_path,
+                'cur': cursor
+                })
+            return
+
         nested_name = current_namespace_path + [cursor.spelling]
         cpp_function_name = "::".join(nested_name)
         print "%sFUNCTION_DECL %s" % (indent, cpp_function_name)

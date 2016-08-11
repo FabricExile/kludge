@@ -2,7 +2,8 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import jinja2, os, sys, optparse, json, re
+import jinja2, os, sys, optparse, re
+import commentjson as json
 
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
@@ -20,6 +21,7 @@ from config import *
 import clang_helpers
 from namespace_mgr import NamespaceMgr
 import cpp_type_expr_parser
+from symbol_helpers import replace_invalid_chars
 
 class CPPType:
     def __init__(self, type_name, is_pointer, is_const):
@@ -519,7 +521,10 @@ fabricBuildEnv.SharedLibrary(
                     for c in result_cursor.get_declaration().get_children():
                         if c.kind == CursorKind.CXX_METHOD:
                             print "%s    operator->: CXX_METHOD %s" % (indent, c.displayname)
-                            if c.is_static_method():
+                            if c.access_specifier != AccessSpecifier.PUBLIC:
+                                print "%s    %s ->is private" % (indent, c.displayname)
+                                continue
+                            elif c.is_static_method():
                                 print "%s    %s ->is static" % (indent, c.displayname)
                                 continue
                             else:
@@ -618,24 +623,6 @@ fabricBuildEnv.SharedLibrary(
             template_parameters = []
 
             for child in cursor.get_children():
-                if child.kind == CursorKind.TYPEDEF_DECL:
-                    self.parse_TYPEDEF_DECL(
-                        include_filename,
-                        indent+"  ",
-                        record_namespace_path,
-                        child,
-                        )
-                    continue
-
-                if child.kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
-                    print "%s  TEMPLATE_TYPE_PARAMETER %s" % (indent, child.displayname)
-                    template_parameters.append(child)
-                    continue
-                elif child.kind == CursorKind.FIELD_DECL:
-                    print "%s  FIELD_DECL %s" % (indent, child.displayname)
-                    clang_members.append(child)
-                    continue
-
                 if child.kind == CursorKind.CONSTRUCTOR and \
                       child.access_specifier != AccessSpecifier.PUBLIC:
                     print "%s  private CONSTRUCTOR %s" % (indent, child.displayname)
@@ -646,7 +633,23 @@ fabricBuildEnv.SharedLibrary(
                 if child.access_specifier != AccessSpecifier.PUBLIC:
                     continue
 
-                if child.kind == CursorKind.CXX_BASE_SPECIFIER:
+                if child.kind == CursorKind.TYPEDEF_DECL:
+                    self.parse_TYPEDEF_DECL(
+                        include_filename,
+                        indent+"  ",
+                        record_namespace_path,
+                        child,
+                        )
+                    continue
+                elif child.kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
+                    print "%s  TEMPLATE_TYPE_PARAMETER %s" % (indent, child.displayname)
+                    template_parameters.append(child)
+                    continue
+                elif child.kind == CursorKind.FIELD_DECL:
+                    print "%s  FIELD_DECL %s" % (indent, child.displayname)
+                    clang_members.append(child)
+                    continue
+                elif child.kind == CursorKind.CXX_BASE_SPECIFIER:
                     print "%s  CXX_BASE_SPECIFIER %s" % (indent, child.displayname)
                     clang_base_classes.append(child)
                 elif child.kind == CursorKind.CXX_METHOD:
@@ -671,7 +674,7 @@ fabricBuildEnv.SharedLibrary(
                     clang_nested_types.append(child)
                     continue
 
-            if len(template_parameters) != len(template_param_types):
+            if len(template_parameters) > len(template_param_types):
                 raise Exception("number of template parameters doesn't match expected number")
 
             template_param_type_map = {}
@@ -832,7 +835,8 @@ fabricBuildEnv.SharedLibrary(
 
             # [andrew 20160517] FIXME this would be fine with objects + interfaces but not structs
             if len(base_classes) > 1:
-                raise Exception("type has more than one base class")
+                print 'WARNING: ignoring all but the first base class: "'+str(base_classes[0].type_info.get_desc())+'"'
+                base_classes = [base_classes[0]]
 
             if can_in_place:
                 self.edk_decls.add(
@@ -943,13 +947,15 @@ fabricBuildEnv.SharedLibrary(
             self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
             old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
             self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
+            new_kl_type_name = "_".join(new_nested_name)
+            new_kl_type_name = replace_invalid_chars(new_kl_type_name)
             self.edk_decls.add(
                 ast.Alias(
                     self.config['extname'],
                     include_filename,
                     self.get_location(cursor.location),
                     cursor.displayname,
-                    "_".join(new_nested_name),
+                    new_kl_type_name,
                     old_type_info,
                     )
                 )

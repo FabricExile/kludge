@@ -1,0 +1,6 @@
+require NSTemplTypedef;
+
+operator entry() {
+  IntPtr i(99);
+  report(i.getValue());
+}

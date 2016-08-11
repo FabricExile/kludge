@@ -9,11 +9,15 @@ class DeclSet:
   def jinja_streams(self, jinjenv, lang):
     types = []
     funcs = []
+    aliases = []
     for decl in self._decls:
       t = decl.jinja_stream_types(jinjenv, lang)
       if t:
         types.append(t)
+      a = decl.jinja_stream_aliases(jinjenv, lang)
+      if a:
+        aliases.append(a)
       f = decl.jinja_stream_funcs(jinjenv, lang)
       if f:
         funcs.append(f)
-    return types + funcs
+    return types + aliases + funcs

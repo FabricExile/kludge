@@ -987,24 +987,19 @@ fabricBuildEnv.SharedLibrary(
             old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, old_cpp_type_name)
             print "%sTYPEDEF_DECL %s -> %s" % (indent, str(new_cpp_type_expr), str(old_cpp_type_expr))
 
-            num_template_args = underlying_type.get_num_template_arguments()
-            if num_template_args > 0:
-                old_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
-                        current_namespace_path, underlying_type, cursor)
-            else:
-                self.maybe_parse_dependent_record_decl(indent, underlying_type)
+            # check if we handle this type specially, like std::vector<>
+            old_type_info = self.type_mgr.maybe_get_dqti(old_cpp_type_expr)
+            if not old_type_info:
+                num_template_args = underlying_type.get_num_template_arguments()
+                if num_template_args > 0:
+                    old_cpp_type_expr = self.resolve_template_specialization(indent, include_filename,
+                            current_namespace_path, underlying_type, cursor)
+                else:
+                    self.maybe_parse_dependent_record_decl(indent, underlying_type)
 
-            undq_old_cpp_type_expr, _ = old_cpp_type_expr.get_undq_type_expr_and_dq()
-            is_named_or_template = isinstance(undq_old_cpp_type_expr, cpp_type_expr_parser.Named) or \
-                isinstance(undq_old_cpp_type_expr, cpp_type_expr_parser.Template)
-
-            if is_named_or_template and \
-                    not self.parsed_cpp_types.get(str(undq_old_cpp_type_expr), False) and \
-                    not self.type_mgr.has_alias(undq_old_cpp_type_expr):
-                raise Exception('type "'+str(undq_old_cpp_type_expr)+'" not mapped to KL')
+            old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
 
             self.namespace_mgr.add_type(current_namespace_path, new_cpp_type_name, new_cpp_type_expr)
-            old_type_info = self.type_mgr.get_dqti(old_cpp_type_expr).type_info
             self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
             new_kl_type_name = "_".join(new_nested_name)
             new_kl_type_name = replace_invalid_chars(new_kl_type_name)

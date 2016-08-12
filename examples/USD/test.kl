@@ -17,8 +17,8 @@ operator entry()
   UsdPrim sphere = stage.DefinePrim('/hello/world', 'Sphere');
 
   UsdGeomXform xform_typed = UsdGeomXform_Get(stage, '/hello');
+  TfToken typed_attrs[] = UsdGeomXform_GetSchemaAttributeNames(true);
   /*
-  String typed_attrs[] = UsdGeomXform_GetSchemaAttributeNames(true);
   for (Integer i=0; i<typed_attrs.size(); i++)
     report('typed_attr:'+typed_attrs[i]);
   */

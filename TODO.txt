@@ -12,7 +12,6 @@ General issues
 - make Complex unit test work (template/namespace parsing problems)
 - fix commented out failure in StdString.hpp, is_pointer in ./protocols/param/default/lib.cpp
 - re-enable InPlace types (inheritance support for InPlace types and vtable pointer)
-- fix typedef'd std::vector types, see commented out stuff in StdVector tests
 - exception handling, or exception-like (USD) handling
 - add support for all operator types (+/*/[]/etc.)
 
@@ -32,3 +31,4 @@ X consolidate template handling code
 X fix template namespace issues (Template.hpp -> MyspaceType1)
 X namespace issues with templated types (Foo<Bar>: Bar has wrong namespace)
 X uncomment typedef in Namespaces.hpp
+X fix typedef'd std::vector types, see commented out stuff in StdVector tests

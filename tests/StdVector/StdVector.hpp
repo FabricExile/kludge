@@ -34,15 +34,14 @@ inline std::vector< std::vector<std::string> > ReturnStringArrayArray()
   return a;
 }
 
-/*
 typedef std::vector< std::string > StringVector;
-StringVector GetStringArray()
+
+StringVector GetStringVector()
 {
   StringVector s;
   s.push_back("hello");
   s.push_back("world");
   return s;
 }
-*/
 
 #endif

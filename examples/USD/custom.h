@@ -1,3 +1,6 @@
+#ifndef __KLUDGE_USD_CUSTOM_H__
+#define __KLUDGE_USD_CUSTOM_H__
+
 #include <vector>
 
 //
@@ -27,3 +30,40 @@ typedef TfWeakPtr<UsdStage> UsdStagePtr;
 typedef std::vector<UsdStagePtr> PtrVector;
 //typedef std::vector<UsdStageConstPtr> ConstPtrVector;
 
+#include <pxr/base/vt/array.h>
+#include <pxr/usd/usd/timeCode.h>
+#include <pxr/usd/usd/attribute.h>
+
+#define KLUDGE_USDATTRIBUTE_GETTER_SETTER(type)                                \
+                                                                               \
+  typedef VtArray<type> type##Array;                                           \
+                                                                               \
+  static bool UsdAttribute_Get##type(UsdAttribute const &attr, type &param,    \
+                                     UsdTimeCode time =                        \
+                                         UsdTimeCode::Default()) {             \
+    return attr.Get<type>(&param, time);                                       \
+  }                                                                            \
+                                                                               \
+  static bool UsdAttribute_Set##type(                                          \
+      UsdAttribute const &attr, type const &param,                             \
+      UsdTimeCode time = UsdTimeCode::Default()) {                             \
+    return attr.Set<type>(param, time);                                        \
+  }                                                                            \
+  static bool UsdAttribute_Get##type##Array(                                   \
+      UsdAttribute const &attr, type##Array &param,                            \
+      UsdTimeCode time = UsdTimeCode::Default()) {                             \
+    return attr.Get<type##Array>(&param, time);                                \
+  }                                                                            \
+                                                                               \
+  static bool UsdAttribute_Set##type##Array(                                   \
+      UsdAttribute const &attr, type##Array const &param,                      \
+      UsdTimeCode time = UsdTimeCode::Default()) {                             \
+    return attr.Set<type##Array>(param, time);                                 \
+  }
+
+// add all other relevant types
+
+KLUDGE_USDATTRIBUTE_GETTER_SETTER(GfVec3f);
+KLUDGE_USDATTRIBUTE_GETTER_SETTER(TfToken);
+
+#endif // __KLUDGE_USD_CUSTOM_H__

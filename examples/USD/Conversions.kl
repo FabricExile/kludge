@@ -2,6 +2,7 @@ require Math;
 
 Vec3(GfVec3f that)
 {
+  // FIXME GfVec3f relies on operator[] to access its values
   //this = Vec3(that.getX(), that.getY(), that.getZ());
 }
 

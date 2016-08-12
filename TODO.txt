@@ -1,22 +1,24 @@
-- PureC unit test, fix issues compiling with C standard
-- clang import to never use system version
-- inheritance support for InPlace types (vtable pointer)
-- unit test output or in-test value verification + throw
-- fix extra -I on clang_index.parse() for clang 3.8.0 includes
-- file issue re: FabricEDK.h and Pure C
-- exception handling, or exception-like (USD) handling
-- fix very ambiguous object ownership in types/wrapped_ptr/conv/lib_to_edk.cpp
-- need to make header ordering unimportant
-- don't parse other headers in two places, either top-level or on-demand not both
-- find and fix all FIXME hacks
-- add support for all operator types (+/*/etc.)
-- how to handle forward declarations
-- return values as refs/pointers should never create a new object
-- fix templates using different types of same class (e.g. Templ<Foo> and Templ<Foo*>)
-- fix is_pointer in ./protocols/param/default/lib.cpp, failure in StdString.hpp
-- all 'const' return values are automatically casted to non-const in KL
+General issues
+--------------------
 
---
+- find and fix all FIXME hacks
+- make unit tests check output
+- fix extra -I on clang_index.parse() for clang 3.9.0 includes
+- fix templates using different types of same class (e.g. Templ<Foo> and Templ<Foo*>)
+- all 'const' return values are automatically casted to non-const in KL (./types/wrapped_ptr/conv/lib_to_edk.cpp)
+- return values as refs/pointers should probably never create a new object
+  - related: fix hacky var_as_pointer object ownership in types/wrapped_ptr/conv/lib_to_edk.cpp
+- make NSTemplTypedef unit test work (template/namespace parsing problems)
+- make Complex unit test work (template/namespace parsing problems)
+- fix commented out failure in StdString.hpp, is_pointer in ./protocols/param/default/lib.cpp
+- re-enable InPlace types (inheritance support for InPlace types and vtable pointer)
+- fix typedef'd std::vector types, see commented out stuff in StdVector tests
+- exception handling, or exception-like (USD) handling
+- add support for all operator types (+/*/[]/etc.)
+
+Resolved issues
+--------------------
+
 X fix Inheritance with abstract return value
 X missing namespace for 'new 's in fabric example
 X must always defined default constructor (take away InlineType::InlineType() to see crash in test.kl)

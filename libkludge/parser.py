@@ -551,7 +551,8 @@ fabricBuildEnv.SharedLibrary(
                             existing_method_edk_symbol_names, current_namespace_path,
                             record_namespace_path, template_param_type_map, this_type_info, True)
                 elif clang_instance_method.spelling.startswith("operator"):
-                    print "%s    ->is operator (FIXME)" % (indent)
+                    # FIXME [andrew 20160812] add operator support
+                    print "%s    ->is operator" % (indent)
                     continue
                 else:
                     for param_config in param_configs:
@@ -1052,7 +1053,8 @@ fabricBuildEnv.SharedLibrary(
 
         try:
             if cursor.spelling.startswith("operator"):
-                raise Exception("function is operator (FIXME)")
+                # FIXME [andrew 20160812] add operator support
+                raise Exception("function is operator")
 
             param_configs = self.collect_params(indent+'  ', cursor,
                     current_namespace_path, {})

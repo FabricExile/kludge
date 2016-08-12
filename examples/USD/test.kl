@@ -21,7 +21,9 @@ operator entry()
   String typed_attrs[] = UsdGeomXform_GetSchemaAttributeNames(true);
   for (Integer i=0; i<typed_attrs.size(); i++)
     report('typed_attr:'+typed_attrs[i]);
+  */
   UsdAttribute opOrderAttr = xform_typed.GetXformOpOrderAttr();
+  /*
   String opOrderStr[];
   success = opOrderAttr.GetAsStringVA(opOrderStr, UsdTime_Default());
   report('opOrder = '+opOrderStr);

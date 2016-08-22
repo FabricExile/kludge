@@ -31,7 +31,9 @@ class StdMapSelector(Selector):
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Template) \
-      and cpp_type_expr.name == "std::map" \
+      and len(cpp_type_expr.nested_name) == 2 \
+      and cpp_type_expr.nested_name[0] == "std" \
+      and cpp_type_expr.nested_name[1] == "vectormap" \
       and len(cpp_type_expr.params) == 2:
       key_dqti = type_mgr.get_dqti(cpp_type_expr.params[0])
       value_dqti = type_mgr.get_dqti(cpp_type_expr.params[1])
@@ -47,7 +49,9 @@ class StdMapSelector(Selector):
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Template) \
       and cpp_type_expr.pointee.is_const \
-      and cpp_type_expr.pointee.name == "std::map" \
+      and len(cpp_type_expr.nested_name) == 2 \
+      and cpp_type_expr.nested_name[0] == "std" \
+      and cpp_type_expr.nested_name[1] == "map" \
       and len(cpp_type_expr.pointee.params) == 2:
       key_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.params[0])
       value_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.params[1])

@@ -1,5 +1,6 @@
 from expr import *
 from pyparsing import *
+import sys, traceback
 
 class Parser:
 
@@ -7,7 +8,7 @@ class Parser:
     expr = self._maybe_lookup_cpp_type_expr_cb(name)
     if expr:
       return expr
-    return Named(name)
+    return Named([name])
 
   def __init__(self, maybe_lookup_cpp_type_expr_cb):
     self.tok_ast = Literal("*").suppress()
@@ -64,7 +65,7 @@ class Parser:
     self.ty_floating_point = self.ty_float | self.ty_double
     self.ty_custom = Forward()
     self.ty_custom << MatchFirst([
-      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Named(t[0].name + "::" + t[1].name)),
+      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Named(t[0].nested_name + t[1].nested_name)),
       self.key_struct.suppress() + self.ident,
       self.ident,
       ])
@@ -79,7 +80,7 @@ class Parser:
       ])
 
     def make_template(s,l,t):
-      return Template(t[0].name, t[1:])
+      return Template(t[0].nested_name, t[1:])
 
     self.ty_templated = \
       (self.ty_custom + self.tok_langle + self.ty_templated_params + self.tok_rangle).setParseAction(make_template)
@@ -133,8 +134,8 @@ class Parser:
   def parse(self, cpp_type_name):
     try:
       return self.grammar.parseString(cpp_type_name)[0]
-    except:
-      raise Exception(cpp_type_name + ": unhandled C++ type expression")
+    except Exception as e:
+      raise Exception(cpp_type_name + ": unhandled C++ type expression (details: %s)" % str(e))
 
 if __name__ == "__main__":
   p = Parser()

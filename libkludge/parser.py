@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import jinja2, os, sys, optparse, re
+import jinja2, os, sys, optparse, re, traceback
 import commentjson as json
 
 import clang
@@ -174,6 +174,13 @@ OR %prog -c <config file>""",
                 help="output OUTDIR/BASENAME.{kl,cpp} (defaults to EXTNAME)",
                 )
             opt_parser.add_option(
+                '-d', '--dump-ast',
+                action='store_true',
+                default=False,
+                dest='dump_ast',
+                help="dump libclang AST for each file before processing",
+                )
+            opt_parser.add_option(
                 '--clang_opt',
                 action='append',
                 dest='clang_opts',
@@ -230,7 +237,11 @@ OR %prog -c <config file>""",
         self.type_mgr = TypeMgr(self.jinjenv)
 
         for infile in self.config['infiles']:
-            self.parse(self.expand_envvars(infile), self.config.get('parse_includes', False))
+            self.parse(
+                self.expand_envvars(infile),
+                parse_includes = self.config.get('parse_includes', False),
+                dump_ast = opts.dump_ast,
+                )
 
         self.queue_functions = False
         for func in self.queued_functions:
@@ -384,7 +395,19 @@ fabricBuildEnv.SharedLibrary(
 
     def dump_cursor(self, indent, cursor):
         print indent + str(cursor.kind) + " " + cursor.displayname
-        print indent + str(cursor.location)
+        print indent + "  " + str(cursor.location)
+        if cursor.kind == CursorKind.TYPEDEF_DECL:
+            print indent + "  underlying type: " + cursor.underlying_typedef_type.spelling
+            declaration = cursor.underlying_typedef_type.get_declaration()
+            if declaration:
+                print indent + "    [declaration]"
+                self.dump_cursor(indent + "    ", declaration)
+        if cursor.kind == CursorKind.TYPE_REF \
+            or cursor.kind == CursorKind.TEMPLATE_REF:
+            referenced = cursor.referenced
+            if referenced:
+                print indent + "  [referenced]"
+                self.dump_cursor(indent + "  ", referenced)
         childIndent = indent + "."
         for childCursor in cursor.get_children():
             self.dump_cursor(childIndent, childCursor)
@@ -442,11 +465,18 @@ fabricBuildEnv.SharedLibrary(
                 str(undq_cpp_type_expr), None)
         return resolved_type
 
-    def resolve_maybe_templated_cpp_expr(self, indent, current_namespace_path, clang_type, template_param_type_map): 
+    def resolve_maybe_templated_cpp_expr(
+        self,
+        indent,
+        current_namespace_path,
+        clang_type,
+        template_param_type_map,
+        ): 
+        print "resolve_maybe_templated_cpp_expr clang_type=%s template_param_type_map=%s" % (clang_type, template_param_type_map)
+
         result_type = clang_type
 
-        cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(
-                current_namespace_path, clang_type.spelling)
+        cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, clang_type.spelling)
         orig_cpp_type_expr = cpp_type_expr.__copy__()
         undq_cpp_type_expr, _ = orig_cpp_type_expr.get_undq_type_expr_and_dq()
         resolved_type = template_param_type_map.get(
@@ -599,9 +629,14 @@ fabricBuildEnv.SharedLibrary(
         template_param_types = [],
         cpp_specialized_type_name = None
         ):
+        # print "---------------------------------------------------------------------"
+        # traceback.print_stack(file=sys.stdout)
+        # print "---------------------------------------------------------------------"
+        # self.dump_cursor(indent + "  ", cursor)
+
         # if the ignore type is a template ignore anything derived from it
         if cursor.displayname.split('<')[0] in self.config.get('ignore_types', []):
-            print "Ignoring <RECORD>_DECL '%s' at %s:%d by user request" % (
+            print "Ignoring RECORD_DECL '%s' at %s:%d by user request" % (
                 cursor.displayname, cursor.location.file, cursor.location.line)
             return
 
@@ -611,11 +646,12 @@ fabricBuildEnv.SharedLibrary(
 
         if not cpp_specialized_type_name:
             cpp_specialized_type_name = cursor.displayname
-        
+        print "parse_record_decl cpp_specialized_type_name=%s" % cpp_specialized_type_name
+
         record_namespace_path = current_namespace_path + [cpp_specialized_type_name]
         try:
             cpp_type_expr = self.namespace_mgr.cpp_type_expr_parser.parse(cpp_specialized_type_name)
-            print "%s<RECORD>_DECL %s" % (indent, str(cpp_type_expr))
+            print "%sRECORD_DECL %s" % (indent, str(cpp_type_expr))
 
             self.namespace_mgr.add_type(current_namespace_path, str(cpp_type_expr), cpp_type_expr)
             cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr(current_namespace_path, str(cpp_type_expr))
@@ -694,7 +730,7 @@ fabricBuildEnv.SharedLibrary(
                     clang_constructors.append(child)
                     continue
                 elif child.kind == CursorKind.CLASS_DECL or child.kind == CursorKind.STRUCT_DECL:
-                    print "%s  nested <RECORD>_DECL %s" % (indent, child.displayname)
+                    print "%s  nested RECORD_DECL %s" % (indent, child.displayname)
                     clang_nested_types.append(child)
                     continue
 
@@ -983,7 +1019,7 @@ fabricBuildEnv.SharedLibrary(
         underlying_type = cursor.underlying_typedef_type
         new_cpp_type_name = cursor.type.spelling
         new_nested_name = current_namespace_path + [new_cpp_type_name]
-        new_cpp_type_expr = cpp_type_expr_parser.Named("::".join(new_nested_name))
+        new_cpp_type_expr = cpp_type_expr_parser.Named(new_nested_name)
 
         if self.type_mgr.has_alias(new_cpp_type_expr):
             return
@@ -1134,7 +1170,7 @@ fabricBuildEnv.SharedLibrary(
         for childCursor in cursor.get_children():
             self.parse_cursor(include_filename, childIndent, current_namespace_path, childCursor)
 
-    def parse(self, unit_filename, parse_includes):
+    def parse(self, unit_filename, parse_includes, dump_ast):
         print "Parsing C++ source file: %s" % unit_filename
 
         clang_opts = self.config['clang_opts']
@@ -1163,6 +1199,9 @@ fabricBuildEnv.SharedLibrary(
         if skip:
             print 'skipping unit: ' + unit.spelling
         else:
+            if dump_ast:
+                self.dump_cursor('', unit.cursor)
+
             for cursor in unit.cursor.get_children():
                 if not parse_includes and hasattr(cursor.location.file, 'name') and cursor.location.file.name != unit_filename:
                     continue

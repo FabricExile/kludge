@@ -1,5 +1,6 @@
 import abc
 import directions, qualifiers
+import sys, traceback
 from dir_qual import DirQual
 
 class CPPTypeExprException(Exception):
@@ -266,25 +267,6 @@ class Double(FloatingPoint):
   def __copy__(self):
     return Double()
 
-class Named(Direct):
-
-  def __init__(self, name):
-    Direct.__init__(self)
-    self.name = name
-
-  def build_unqualified_desc(self):
-    return self.name, ""
-
-  def tranform_names(self, cb):
-    self.name = cb(self.name)
-
-  def __eq__(self, other):
-    return Direct.__eq__(self, other) \
-      and self.name == other.name
-
-  def __copy__(self):
-    return Named(self.name)
-
 class FixedArrayOf(Direct):
 
   def __init__(self, element, size):
@@ -312,19 +294,46 @@ class FixedArrayOf(Direct):
   def __copy__(self):
     return FixedArrayOf(self.element, self.size)
 
-class Template(Direct):
+class Named(Direct):
 
-  def __init__(self, name, params):
+  def __init__(self, nested_name):
     Direct.__init__(self)
-    self.name = name
-    self.params = params
+    self.nested_name = nested_name
+
+  @property
+  def name(self):
+    print "---------------------------------------------------------------------"
+    traceback.print_stack(file=sys.stdout)
+    print "---------------------------------------------------------------------"
+
+  def build_unqualified_desc(self):
+    return '::'.join(self.nested_name), ""
 
   def tranform_names(self, cb):
-    # [andrew 2016-07-21] we need to resolve the namespace of the specialized
-    # type here since the template may live in a different namespace
-    full_name, _ = self.build_unqualified_desc()
-    full_name = cb(full_name)
-    self.name = full_name.split('<')[0]
+    self.nested_name = cb(self.nested_name)
+
+  def __eq__(self, other):
+    return Direct.__eq__(self, other) \
+      and self.nested_name == other.nested_name
+
+  def __copy__(self):
+    return Named(self.nested_name)
+
+class Template(Direct):
+
+  def __init__(self, nested_name, params):
+    Direct.__init__(self)
+    self.nested_name = nested_name
+    self.params = params
+
+  @property
+  def name(self):
+    print "---------------------------------------------------------------------"
+    traceback.print_stack(file=sys.stdout)
+    print "---------------------------------------------------------------------"
+
+  def tranform_names(self, cb):
+    self.nested_name = cb(self.nested_name)
     for i in range(0, len(self.params)):
       self.params[i].tranform_names(cb)
 
@@ -337,16 +346,16 @@ class Template(Direct):
         desc = '::'
       desc += param.get_desc()
       descs += [desc]
-    lhs = self.name + "< " + ", ".join(descs) + " >"
+    lhs = '::'.join(self.nested_name) + "< " + ", ".join(descs) + " >"
     return lhs, ""
 
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
-      and self.name == other.name \
+      and self.nested_name == other.nested_name \
       and self.params == other.params
 
   def __copy__(self):
-    return Template(self.name, self.params)
+    return Template(self.nested_name, self.params)
 
 class Indirect(Type):
 

@@ -105,32 +105,23 @@ class NamespaceMgr:
       raise Exception("Failed to resolve namespace '%s' inside namespace '%s'" % ("::".join(import_namespace_path), "::".join(namespace_path)))
     namespace.usings.append(import_namespace)
 
-  def globalize_simple_cpp_type_name(self, current_namespace_path, type_name):
-
-    # we want to resolve the namespace of the template type itself, not its params
-    template_type_name = type_name.split("<", 1)
-    nested_type_name = template_type_name[0].split("::")
-    if len(template_type_name) > 1:
-      nested_type_name[-1] += "<" + template_type_name[-1]
-
+  def globalize_simple_cpp_nested_name(self, current_namespace_path, nested_name):
+    result = nested_name
     current_namespace = self._resolve_namespace(current_namespace_path)
     while current_namespace:        
-      cpp_type_expr = current_namespace.maybe_find_cpp_type_expr(nested_type_name)
+      cpp_type_expr = current_namespace.maybe_find_cpp_type_expr(nested_name)
       if cpp_type_expr:
-        nested_type_name = current_namespace.paths[0] + nested_type_name
+        result = current_namespace.paths[0] + nested_name
         break
       current_namespace = current_namespace.parent_namespace
-
-    # replace std::__1 with std
-    if len(nested_type_name) >= 2 and nested_type_name[0] == 'std' and nested_type_name[1] == '__1':
-      nested_type_name = [nested_type_name[0]] + nested_type_name[2:]
-    
-    return "::".join(nested_type_name)
+    if len(result) >= 2 and result[0] == 'std' and result[1] == '__1':
+      result = [result[0]] + result[2:]
+    return result
 
   def globalize_cpp_type_expr(self, current_namespace_path, cpp_type_expr):
-    def globalize_name(name):
-      return self.globalize_simple_cpp_type_name(current_namespace_path, name)
-    cpp_type_expr.tranform_names(globalize_name)
+    def globalize_nested_name(nested_name):
+      return self.globalize_simple_cpp_nested_name(current_namespace_path, nested_name)
+    cpp_type_expr.tranform_names(globalize_nested_name)
 
   def resolve_cpp_type_expr(self, current_namespace_path, value):
     current_namespace = self._resolve_namespace(current_namespace_path)

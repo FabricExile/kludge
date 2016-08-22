@@ -25,10 +25,6 @@ class StdStringTypeInfo(TypeInfo):
 
 class StdStringSelector(Selector):
 
-  cpp_type_names = [
-    "std::string",
-    ]
-
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
 
@@ -37,7 +33,9 @@ class StdStringSelector(Selector):
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Named) \
-      and cpp_type_expr.name in self.cpp_type_names:
+      and len(cpp_type_expr.nested_name) == 2 \
+      and cpp_type_expr.nested_name[0] == "std" \
+      and cpp_type_expr.nested_name[1] == "string":
       return DirQualTypeInfo(
         dir_qual.direct,
         StdStringTypeInfo(
@@ -47,7 +45,9 @@ class StdStringSelector(Selector):
         )
     if isinstance(cpp_type_expr, PointerTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and cpp_type_expr.pointee.name in self.cpp_type_names:
+      and len(cpp_type_expr.pointee.nested_name) == 2 \
+      and cpp_type_expr.pointee.nested_name[0] == "std" \
+      and cpp_type_expr.pointee.nested_name[1] == "string":
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_pointer
       else:
@@ -61,7 +61,9 @@ class StdStringSelector(Selector):
         )
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and cpp_type_expr.pointee.name in self.cpp_type_names:
+      and len(cpp_type_expr.pointee.nested_name) == 2 \
+      and cpp_type_expr.pointee.nested_name[0] == "std" \
+      and cpp_type_expr.pointee.nested_name[1] == "string":
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_reference
       else:

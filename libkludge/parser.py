@@ -266,6 +266,10 @@ except:
 SConscript(os.path.join(fabricPath, 'Samples', 'EDK', 'SConscript'))
 Import('fabricBuildEnv')
 
+if os.environ.get('CC'):
+    fabricBuildEnv['CC'] = os.environ.get('CC')
+if os.environ.get('CXX'):
+    fabricBuildEnv['CXX'] = os.environ.get('CXX')
 fabricBuildEnv.Append(CPPPATH = ["../..", "."])
 fabricBuildEnv.Append(CXXFLAGS = cxxflags)
 fabricBuildEnv.Append(CPPPATH = cpppath)

@@ -298,6 +298,8 @@ class Named(Direct):
 
   def __init__(self, nested_name):
     Direct.__init__(self)
+    if not isinstance(nested_name, list):
+      raise Exception("nested_name: expecting a list")
     self.nested_name = nested_name
 
   @property
@@ -323,7 +325,11 @@ class Template(Direct):
 
   def __init__(self, nested_name, params):
     Direct.__init__(self)
+    if not isinstance(nested_name, list):
+      raise Exception("nested_name: expecting a list")
     self.nested_name = nested_name
+    if not isinstance(params, list):
+      raise Exception("params: expecting a list")
     self.params = params
 
   @property

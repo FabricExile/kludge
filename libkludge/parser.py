@@ -1061,6 +1061,10 @@ fabricBuildEnv.SharedLibrary(
             print "Warning: ignored typedef '%s' at %s:%d" % (
                     new_cpp_type_name, cursor.location.file, cursor.location.line)
             print "  Reason: %s" % e
+            print "  Traceback:"
+            print "---------------------------------------------------------------------"
+            traceback.print_exc(file=sys.stdout)
+            print "---------------------------------------------------------------------"
 
     def parse_FUNCTION_DECL(self, include_filename, indent, current_namespace_path, cursor):
         if self.queue_functions:

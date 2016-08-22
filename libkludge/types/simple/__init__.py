@@ -27,21 +27,21 @@ class SimpleSelector(Selector):
   boolean_type_info_gen = lambda jinjenv: \
     SimpleTypeInfo(jinjenv, "Boolean", Bool())
   sint8_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "SInt8", Named("int8_t"))
+    SimpleTypeInfo(jinjenv, "SInt8", Named(["int8_t"]))
   uint8_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "UInt8", Named("uint8_t"))
+    SimpleTypeInfo(jinjenv, "UInt8", Named(["uint8_t"]))
   sint16_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "SInt16", Named("int16_t"))
+    SimpleTypeInfo(jinjenv, "SInt16", Named(["int16_t"]))
   uint16_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "UInt16", Named("uint16_t"))
+    SimpleTypeInfo(jinjenv, "UInt16", Named(["uint16_t"]))
   sint32_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "SInt32", Named("int32_t"))
+    SimpleTypeInfo(jinjenv, "SInt32", Named(["int32_t"]))
   uint32_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "UInt32", Named("uint32_t"))
+    SimpleTypeInfo(jinjenv, "UInt32", Named(["uint32_t"]))
   sint64_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "SInt64", Named("int64_t"))
+    SimpleTypeInfo(jinjenv, "SInt64", Named(["int64_t"]))
   uint64_type_info_gen = lambda jinjenv: \
-    SimpleTypeInfo(jinjenv, "UInt64", Named("uint64_t"))
+    SimpleTypeInfo(jinjenv, "UInt64", Named(["uint64_t"]))
   float32_type_info_gen = lambda jinjenv: \
     SimpleTypeInfo(jinjenv, "Float32", Float())
   float64_type_info_gen = lambda jinjenv: \

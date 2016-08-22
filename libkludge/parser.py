@@ -1147,7 +1147,10 @@ fabricBuildEnv.SharedLibrary(
         unit = clang_index.parse(
             unit_filename,
             # [andrew 20160517] FIXME this must be due to paths on my system
-            clang_opts + ["-I", self.expand_envvars('${LLVM_PATH}/lib/clang/3.9.0/include')],
+            [
+                "-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/include/c++/v1'),
+                "-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/lib/clang/3.9.0/include'),
+                ] + clang_opts,
             None,
             clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
             # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD

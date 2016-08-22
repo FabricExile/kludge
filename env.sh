@@ -1,9 +1,6 @@
 # libclang
-#export LLVM_PATH="/build/llvm-3.8/build"
-export LLVM_PATH="/build/fabric-llvm/build"
-export PATH="$PATH:/opt/usd-deps/bin:$LLVM_PATH/bin"
-export PYTHONPATH="$PYTHONPATH:$LLVM_PATH/../tools/clang/bindings/python"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/usd-deps/lib:/opt/gcc-4.8/lib64:$LLVM_PATH/lib"
+export KLUDGE_LLVM_ROOT="/build/fabric-llvm/install"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/usd-deps/lib:/opt/gcc-4.8/lib64:$KLUDGE_LLVM_ROOT/lib"
 
 # Bullet
 export BULLET_DIR=/build/arbus/ThirdParty/PreBuilt/Linux/x86_64/Debug/bullet/2.78

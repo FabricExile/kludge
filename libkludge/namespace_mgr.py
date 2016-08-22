@@ -120,6 +120,11 @@ class NamespaceMgr:
         nested_type_name = current_namespace.paths[0] + nested_type_name
         break
       current_namespace = current_namespace.parent_namespace
+
+    # replace std::__1 with std
+    if len(nested_type_name) >= 2 and nested_type_name[0] == 'std' and nested_type_name[1] == '__1':
+      nested_type_name = [nested_type_name[0]] + nested_type_name[2:]
+    
     return "::".join(nested_type_name)
 
   def globalize_cpp_type_expr(self, current_namespace_path, cpp_type_expr):

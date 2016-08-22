@@ -135,6 +135,10 @@ class Parser:
                 + string_value[match_object.end(0):]
         return string_value
 
+    @classmethod
+    def escape_cxxflag(cls, string_value):
+        return string_value.replace('"', '\\\\"')
+
     def main(self):
         self.config = create_default_config()
 
@@ -276,7 +280,7 @@ fabricBuildEnv.SharedLibrary(
     self.config['extname'],
     self.config['basename'],
     ", ".join(map(
-        lambda opt: "'%s'" % self.expand_envvars(opt),
+        lambda opt: "'%s'" % self.escape_cxxflag(self.expand_envvars(opt)),
         self.config.get('clang_opts', [])
         )),
     ", ".join(map(

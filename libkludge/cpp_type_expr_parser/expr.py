@@ -51,8 +51,8 @@ class Type:
       copy.qualifier = qualifiers.Unqualified
       return copy
 
-  def get_desc(self):
-    lhs, rhs = self.build_desc()
+  def get_desc(self, user_prefix=''):
+    lhs, rhs = self.build_desc(user_prefix)
     return lhs + rhs
 
   @staticmethod
@@ -62,8 +62,8 @@ class Type:
       rhs = ")" + rhs
     return lhs, rhs
 
-  def build_desc(self):
-    lhs, rhs = self.build_unqualified_desc()
+  def build_desc(self, user_prefix):
+    lhs, rhs = self.build_unqualified_desc(user_prefix)
     if self.is_const:
       lhs, rhs = self.maybe_bracket_desc(lhs, rhs)
       if lhs and not lhs.endswith(" "):
@@ -77,7 +77,7 @@ class Type:
     return lhs, rhs
 
   @abc.abstractmethod
-  def build_unqualified_desc(self):
+  def build_unqualified_desc(self, user_prefix):
     pass
 
   def get_undq_type_expr_and_dq(self):
@@ -135,7 +135,7 @@ class Void(Direct):
   def __init__(self):
     Direct.__init__(self)
 
-  def build_unqualified_desc(self):
+  def build_unqualified_desc(self, user_prefix):
     return "void", ""
 
   def __copy__(self):
@@ -146,7 +146,7 @@ class Bool(Direct):
   def __init__(self):
     Direct.__init__(self)
 
-  def build_unqualified_desc(self):
+  def build_unqualified_desc(self, user_prefix):
     return "bool", ""
 
   def __copy__(self):
@@ -171,7 +171,7 @@ class Integer(Numeric):
     self.is_signed = True
     return self
 
-  def build_unqualified_desc(self):
+  def build_unqualified_desc(self, user_prefix):
     if not self.is_signed:
       return "unsigned " + self.get_signed_desc(), ""
     else:
@@ -250,7 +250,7 @@ class Float(FloatingPoint):
   def __init__(self):
     FloatingPoint.__init__(self)
 
-  def build_unqualified_desc(self):
+  def build_unqualified_desc(self, user_prefix):
     return "float", ""
 
   def __copy__(self):
@@ -261,7 +261,7 @@ class Double(FloatingPoint):
   def __init__(self):
     FloatingPoint.__init__(self)
 
-  def build_unqualified_desc(self):
+  def build_unqualified_desc(self, user_prefix):
     return "double", ""
 
   def __copy__(self):
@@ -274,8 +274,8 @@ class FixedArrayOf(Direct):
     self.element = element
     self.size = size
 
-  def build_unqualified_desc(self):
-    lhs, rhs = self.element.build_desc()
+  def build_unqualified_desc(self, user_prefix):
+    lhs, rhs = self.element.build_desc(user_prefix)
     rhs = "[%u]%s" % (self.size, rhs)
     return lhs, rhs
 
@@ -294,74 +294,103 @@ class FixedArrayOf(Direct):
   def __copy__(self):
     return FixedArrayOf(self.element, self.size)
 
-class Named(Direct):
+class Component:
 
-  def __init__(self, nested_name):
-    Direct.__init__(self)
-    if not isinstance(nested_name, list):
-      raise Exception("nested_name: expecting a list")
-    self.nested_name = nested_name
+  def __init__(self):
+    pass
 
-  @property
-  def name(self):
-    print "---------------------------------------------------------------------"
-    traceback.print_stack(file=sys.stdout)
-    print "---------------------------------------------------------------------"
-
-  def build_unqualified_desc(self):
-    return '::'.join(self.nested_name), ""
+  @abc.abstractmethod
+  def build_component_desc(self, user_prefix):
+    pass
 
   def tranform_names(self, cb):
-    self.nested_name = cb(self.nested_name)
+    pass
+
+  def __str__(self):
+    return self.build_component_desc("")
 
   def __eq__(self, other):
-    return Direct.__eq__(self, other) \
-      and self.nested_name == other.nested_name
+    return type(self) == type(other)
+
+  @abc.abstractmethod
+  def __copy__(self):
+    pass
+
+class Simple(Component):
+
+  def __init__(self, name):
+    Component.__init__(self)
+    if not isinstance(name, str):
+      raise Exception("name: expecting a str")
+    self.name = name
+
+  def build_component_desc(self, user_prefix):
+    return self.name
+
+  def __eq__(self, other):
+    return Component.__eq__(self, other) \
+      and self.name == other.name
 
   def __copy__(self):
-    return Named(self.nested_name)
+    return Simple(self.name)
 
-class Template(Direct):
+class Templated(Component):
 
-  def __init__(self, nested_name, params):
-    Direct.__init__(self)
-    if not isinstance(nested_name, list):
-      raise Exception("nested_name: expecting a list")
-    self.nested_name = nested_name
+  def __init__(self, name, params):
+    Component.__init__(self)
+    if not isinstance(name, str):
+      raise Exception("name: expecting a str")
+    self.name = name
     if not isinstance(params, list):
       raise Exception("params: expecting a list")
     self.params = params
 
-  @property
-  def name(self):
-    print "---------------------------------------------------------------------"
-    traceback.print_stack(file=sys.stdout)
-    print "---------------------------------------------------------------------"
+  def build_component_desc(self, user_prefix):
+    return self.name + "< " + ", ".join(map(
+      lambda param: param.get_desc(user_prefix),
+      self.params,
+      )) + " >"
 
   def tranform_names(self, cb):
-    self.nested_name = cb(self.nested_name)
     for i in range(0, len(self.params)):
       self.params[i].tranform_names(cb)
 
-  def build_unqualified_desc(self):
-    descs = []
-    for param in self.params:
-      desc = ''
-      if isinstance(param, Named) or \
-          isinstance(param, Indirect) and isinstance(param.pointee, Named):
-        desc = '::'
-      desc += param.get_desc()
-      descs += [desc]
-    lhs = '::'.join(self.nested_name) + "< " + ", ".join(descs) + " >"
-    return lhs, ""
-
   def __eq__(self, other):
-    return Direct.__eq__(self, other) \
-      and self.nested_name == other.nested_name \
+    return Component.__eq__(self, other) \
+      and self.name == other.name \
       and self.params == other.params
 
   def __copy__(self):
-    return Template(self.nested_name, self.params)
+    return Templated(self.name, self.params)
+
+class User(Direct):
+
+  def __init__(self, components):
+    Direct.__init__(self)
+    if not isinstance(components, list):
+      raise Exception("components: expected a list")
+    for i in range(0, len(components)):
+      if not isinstance(components[i], Component):
+        raise Exception("components[%d]: expected a Component" % i)
+    self.components = components
+
+  def tranform_names(self, cb):
+    self.components = cb(self.components)
+    for i in range(0, len(self.components)):
+      self.components[i].tranform_names(cb)
+
+  def build_unqualified_desc(self, user_prefix):
+    return user_prefix + "::".join(map(
+      lambda component: component.build_component_desc(user_prefix),
+      self.components,
+      )), ""
+
+  def __eq__(self, other):
+    return Direct.__eq__(self, other) \
+      and self.components == other.components
+
+  def __copy__(self):
+    return User(self.components)
 
 class Indirect(Type):
 
@@ -381,8 +410,8 @@ class PointerTo(Indirect):
   def __init__(self, pointee):
     Indirect.__init__(self, pointee)
 
-  def build_unqualified_desc(self):
-    lhs, rhs = self.pointee.build_desc()
+  def build_unqualified_desc(self, user_prefix):
+    lhs, rhs = self.pointee.build_desc(user_prefix)
     lhs, rhs = self.maybe_bracket_desc(lhs, rhs)
     if lhs and not lhs.endswith(" "):
       lhs += " "
@@ -397,8 +426,8 @@ class ReferenceTo(Indirect):
   def __init__(self, pointee):
     Indirect.__init__(self, pointee)
 
-  def build_unqualified_desc(self):
-    lhs, rhs = self.pointee.build_desc()
+  def build_unqualified_desc(self, user_prefix):
+    lhs, rhs = self.pointee.build_desc(user_prefix)
     lhs, rhs = self.maybe_bracket_desc(lhs, rhs)
     if lhs and not lhs.endswith(" "):
       lhs += " "

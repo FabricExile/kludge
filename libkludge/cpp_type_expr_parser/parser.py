@@ -4,16 +4,13 @@ import sys, traceback
 
 class Parser:
 
-  def _build_user(self, components):
-    user = User(components)
-    existing_type = self._maybe_lookup_type(user)
-    if existing_type:
-      return existing_type
-    return user
+  def _build_named(self, name):
+    expr = self._maybe_lookup_cpp_type_expr_cb(name)
+    if expr:
+      return expr
+    return Named([name])
 
-  def __init__(self, maybe_lookup_type):
-    self._maybe_lookup_type = maybe_lookup_type
-
+  def __init__(self, maybe_lookup_cpp_type_expr_cb):
     self.tok_ast = Literal("*").suppress()
     self.tok_amp = Literal("&").suppress()
     self.tok_colon_colon = Literal("::").suppress()
@@ -36,16 +33,16 @@ class Parser:
     self.key_const = Keyword("const")
     self.key_volatile = Keyword("volatile")
     self.key_struct = Keyword("struct")
-    self.key_class = Keyword("class")
 
     self.ident = And([
       NotAny(self.key_const),
       NotAny(self.key_volatile),
-      NotAny(self.key_struct),
-      NotAny(self.key_class),
+      Optional(self.tok_colon_colon),
       Word(alphas+"_", alphanums+"_"),
-      ]).setParseAction(lambda s,l,t: str(t[0]))
+      ]).setParseAction(lambda s,l,t: self._build_named(t[0]))
     self.number = Word(nums).setParseAction(lambda s,l,t: int(t[0]))
+
+    self._maybe_lookup_cpp_type_expr_cb = maybe_lookup_cpp_type_expr_cb
 
     self.ty_void = self.key_void.setParseAction(lambda s,l,t: Void())
     self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: Bool())
@@ -66,14 +63,14 @@ class Parser:
     self.ty_float = self.key_float.setParseAction(lambda s,l,t: Float())
     self.ty_double = self.key_double.setParseAction(lambda s,l,t: Double())
     self.ty_floating_point = self.ty_float | self.ty_double
+    self.ty_custom = Forward()
+    self.ty_custom << MatchFirst([
+      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Named(t[0].nested_name + t[1].nested_name)),
+      self.key_struct.suppress() + self.ident,
+      self.ident,
+      ])
 
     self.ty_post_qualified = Forward()
-
-    def make_simple(s,l,t):
-      # print "make_simple %s" % str(t[0])
-      return Simple(t[0])
-
-    self.ty_simple = MatchFirst([self.ident]).setParseAction(make_simple)
 
     self.ty_templated_params = Forward()
     self.ty_templated_params << MatchFirst([
@@ -82,40 +79,19 @@ class Parser:
       Empty()
       ])
 
-    def make_templated(s,l,t):
-      return Templated(t[0], t[1:])
+    def make_template(s,l,t):
+      return Template(t[0].nested_name, t[1:])
 
     self.ty_templated = \
-      (self.ident + self.tok_langle + self.ty_templated_params + self.tok_rangle).setParseAction(make_templated)
-
-    def make_component(s,l,t):
-      # print "make_component %s" % str(t[0])
-      return t[0]
-
-    self.ty_component = MatchFirst([
-      self.ty_templated,
-      self.ty_simple,
-      ]).setParseAction(make_component)
-
-    def make_single_user(s,l,t):
-      # print "make_single_user %s" % str(t[0])
-      return User([t[0]])
-
-    self.ty_user = Forward()
-    self.ty_user << MatchFirst([
-      (self.ty_component + self.tok_colon_colon.suppress() + self.ty_user).setParseAction(lambda s,l,t: User([t[0]] + t[1].components)),
-      (Optional(MatchFirst([
-        self.key_struct.suppress(),
-        self.key_class.suppress(),
-        ])).suppress() + self.ty_component).setParseAction(make_single_user),
-      ])
+      (self.ty_custom + self.tok_langle + self.ty_templated_params + self.tok_rangle).setParseAction(make_template)
 
     self.ty_unqualified = MatchFirst([
       self.ty_void,
       self.ty_bool,
       self.ty_integer,
       self.ty_floating_point,
-      self.ty_user,
+      self.ty_templated,
+      self.ty_custom,
       ])
 
     self.ty_pre_qualified = Forward()
@@ -162,7 +138,7 @@ class Parser:
       raise Exception(cpp_type_name + ": unhandled C++ type expression (details: %s)" % str(e))
 
 if __name__ == "__main__":
-  p = Parser(lambda user: None)
+  p = Parser()
   for e in [
     "void",
     "const void",
@@ -175,7 +151,6 @@ if __name__ == "__main__":
     "const uint64_t & const ** volatile &",
     "std::string const &",
     "std::vector<std::string>",
-    "std::vector<std::string>::iterator",
     "some::nested<template::expr<int, another>, yet::another<const volatile void *>>",
     "const std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > &",
     "int[2]",

@@ -13,7 +13,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 
-#include <{{ decl.include_filename }}>
+{% for cpp_local_include in decl.cpp_local_includes %}
+#include <{{cpp_local_include}}>
+{% endfor %}
 
 {% block body %}
 {% endblock body %}

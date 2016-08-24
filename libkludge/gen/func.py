@@ -3,6 +3,7 @@
 #
 
 from decl import Decl
+from libkludge.cpp_type_expr_parser import Void
 from libkludge.result_codec import ResultCodec
 from libkludge import cpp_type_expr_parser
 import hashlib
@@ -21,17 +22,19 @@ class Func(Decl):
 
     self._nested_function_name = name.split('::')
 
-    self.result_codec = None
+    self.result_codec = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
+
     self.params = []
 
-  @property
-  def edk_symbol_name(self):
+    self._update_edk_symbol_name()
+
+  def _update_edk_symbol_name(self):
     h = hashlib.md5()
-    for name in nested_function_name:
+    for name in self._nested_function_name:
       h.update(name)
-    for param in params:
+    for param in self.params:
       h.update(param.type_info.edk.name.toplevel)
-    return "_".join([self._ext.name] + self._nested_function_name + [h.hexdigest()])
+    self.edk_symbol_name = "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
 
   def name_kl(self):
     return "_".join(self._nested_function_name)
@@ -40,4 +43,4 @@ class Func(Decl):
     return "::" + "::".join(self._nested_function_name)
 
   def jinja_stream_funcs(self, jinjenv, lang):
-    return jinjenv.get_template('func/func.template.' + lang).stream(decl=self, func=self)
+    return jinjenv.get_template('gen/func/func.template.' + lang).stream(decl=self, func=self)

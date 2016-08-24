@@ -44,7 +44,6 @@ class LibTypeName:
 class LibTypeInfo:
 
   def __init__(self, expr):
-    print "LibTypeInfo " + str(expr)
     self.expr = expr
     base, suffix = expr.build_desc()
     self.name = LibTypeName(base, suffix)

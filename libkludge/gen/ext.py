@@ -19,7 +19,26 @@ class Ext:
       trim_blocks = True,
       lstrip_blocks = True,
       undefined = jinja2.StrictUndefined,
-      loader = jinja2.PackageLoader('__main__', 'libkludge/gen/templates'),
+      loader=jinja2.PrefixLoader({
+          "protocols": jinja2.PrefixLoader({
+              "conv": jinja2.PrefixLoader({
+                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/conv'),
+                  }),
+              "result": jinja2.PrefixLoader({
+                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/result'),
+                  }),
+              "param": jinja2.PrefixLoader({
+                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/param'),
+                  }),
+              "self": jinja2.PrefixLoader({
+                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/self'),
+                  }),
+              }),
+          "types": jinja2.PrefixLoader({
+              "builtin": jinja2.PackageLoader('__main__', 'libkludge/types'),
+              }),
+          "gen": jinja2.PackageLoader('__main__', 'libkludge/gen/templates'),
+          }),
       )
     self.namespace_mgr = NamespaceMgr()
     self.type_mgr = TypeMgr(self.jinjenv)
@@ -48,7 +67,7 @@ class Ext:
         raise Exception("Caught exception processing %s: %s" % (filename, e))
 
   def jinja_stream(self, lang):
-      return self.jinjenv.get_template("ext/ext.template." + lang).stream(
+      return self.jinjenv.get_template("gen/ext/ext.template." + lang).stream(
         name = self.name,
         cpp_global_includes = self.cpp_global_includes,
         gen_decl_streams = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),

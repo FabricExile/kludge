@@ -5,8 +5,10 @@
 from decl import Decl
 from libkludge.cpp_type_expr_parser import Void
 from libkludge.result_codec import ResultCodec
+from libkludge.param_codec import ParamCodec
 from libkludge import cpp_type_expr_parser
 import hashlib
+import util
 
 class Func(Decl):
   def __init__(
@@ -43,7 +45,19 @@ class Func(Decl):
         )
       )
     return self
-    
+
+  def add_param(self, cpp_type_name, name = None):
+    if not isinstance(name, basestring):
+      name = "arg%d" % len(self.params)
+    self.params.append(
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+          ),
+        name
+        )
+      )
+
   def name_kl(self):
     return "_".join(self._nested_function_name)
 

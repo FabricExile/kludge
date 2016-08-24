@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import clang
+# import clang
 from cpp_type_expr_parser import *
 
 class Namespace:
@@ -125,9 +125,10 @@ class NamespaceMgr:
 
   def resolve_cpp_type_expr(self, current_namespace_path, value):
     current_namespace = self._resolve_namespace(current_namespace_path)
-    if isinstance(value, clang.cindex.Type):
-      type_name = value.spelling
-    elif isinstance(value, basestring):
+    # if isinstance(value, clang.cindex.Type):
+    #   type_name = value.spelling
+    # el
+    if isinstance(value, basestring):
       type_name = value
     else:
       raise Exception("unexpected value type")

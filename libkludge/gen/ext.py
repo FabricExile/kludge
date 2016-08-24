@@ -7,6 +7,7 @@ from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
 from libkludge.ast.decl_set import DeclSet
 from func import Func
+import util
 
 class Ext:
 
@@ -26,21 +27,17 @@ class Ext:
     self.cpp_global_includes = []
     self.edk_decls = DeclSet()
 
-  def log(self, level, string):
-    if self.opts.verbosity >= level:
-      print string
-
   def error(self, string):
-    self.log(0, "Error: %s" % string)
+    util.error(self.opts, string)
 
   def warning(self, string):
-    self.log(1, "Warning: %s" % string)
+    util.warning(self.opts, string)
 
   def info(self, string):
-    self.log(2, string)
+    util.info(self.opts, string)
 
   def debug(self, string):
-    self.log(3, "Debug: %s" % string)
+    util.debug(self.opts, string)
 
   def process(self, filename):
     with open(filename, "r") as file:

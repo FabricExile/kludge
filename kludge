@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
 import os, sys
-if not os.environ.get('KLUDGE_LLVM_ROOT'):
-  print "Missing KLUDGE_LLVM_ROOT environment variabling; exiting."
-  sys.exit(1)
-sys.path.append(os.path.join(os.environ['KLUDGE_LLVM_ROOT'], 'lib', 'python'))
-print sys.path
 
-import libkludge
+# if not os.environ.get('KLUDGE_LLVM_ROOT'):
+#   print "Missing KLUDGE_LLVM_ROOT environment variabling; exiting."
+#   sys.exit(1)
+# sys.path.append(os.path.join(os.environ['KLUDGE_LLVM_ROOT'], 'lib', 'python'))
+# print sys.path
 
-libkludge.Parser().main()
+# import libkludge
+
+# libkludge.Parser().main()
+
+from libkludge import gen
+
+gen.main(sys.argv[0], sys.argv[2:])

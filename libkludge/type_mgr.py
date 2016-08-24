@@ -8,8 +8,8 @@ from value_name import ValueName
 from type_info import TypeInfo
 from dir_qual_type_info import DirQualTypeInfo
 from param_codec import ParamCodec
-import clang.cindex
-import clang_helpers
+# import clang.cindex
+# import clang_helpers
 from cpp_type_expr_parser import *
 
 class TypeMgr:

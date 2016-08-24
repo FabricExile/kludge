@@ -2,13 +2,18 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import optparse
+import sys, optparse
 from ext import Ext
+import util
 
 usage = "gen [OPTIONS] <name> <gen_script.kludge.py> [<gen_script.kludge.py>...]"
 description = "Generate KL extension from a Kludge script"
 
-def main(args):
+def quit_with_usage(prog):
+  print "Run '%s gen --help' for usage" % prog
+  sys.exit(1)
+
+def main(prog, args):
   opt_parser = optparse.OptionParser(
       usage="%prog " + usage,
       description=description,
@@ -32,15 +37,17 @@ def main(args):
   (opts, args) = opt_parser.parse_args(args=args)
   opts.verbosity = int(opts.verbosity)
   if len(args) < 1:
-    raise Exception("missing extension name")
-  ext = Ext(
-    name = args[0],
-    opts = opts,
-    )
+    util.error(opts, "Missing extension name")
+    quit_with_usage(prog)
   script_filenames = args[1:]
   if len(script_filenames) == 0:
-    ext.warning("No script filename provided, empty extension will be generated")
+    util.error(opts, "Missing script filename")
+    quit_with_usage(prog)
   else:
+    ext = Ext(
+      name = args[0],
+      opts = opts,
+      )
     for script_filename in script_filenames:
       ext.process(script_filename)
-  ext.write()
+    ext.write()

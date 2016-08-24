@@ -36,6 +36,14 @@ class Func(Decl):
       h.update(param.type_info.edk.name.toplevel)
     self.edk_symbol_name = "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
 
+  def returns(self, cpp_type_name):
+    self.result_codec = ResultCodec(
+      self.ext.type_mgr.get_dqti(
+        self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+        )
+      )
+    return self
+    
   def name_kl(self):
     return "_".join(self._nested_function_name)
 

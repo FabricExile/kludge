@@ -46,6 +46,10 @@ class Ext:
     self.cpp_global_includes = []
     self.edk_decls = DeclSet()
 
+  @property
+  def cpp_type_expr_parser(self):
+    return self.namespace_mgr.cpp_type_expr_parser
+  
   def error(self, string):
     util.error(self.opts, string)
 

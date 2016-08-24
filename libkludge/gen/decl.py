@@ -16,6 +16,7 @@ class Decl:
 
   def add_cpp_local_include(self, cpp_local_include):
     self.cpp_local_includes.append(cpp_local_include)
+    return self
 
   @property
   def location(self):

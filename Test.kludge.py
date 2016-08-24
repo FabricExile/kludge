@@ -2,7 +2,11 @@
 ext.add_cpp_global_include('string')
 ext.add_func(
   'hello'
-  ).add_cpp_local_include('vector')#.add_test("""
+  ).add_cpp_local_include(
+    'vector'
+    ).returns(
+    'std::vector<std::string>'
+    )#.add_test("""
 # {{name}}(),
 # """, """
 # Hello, world!

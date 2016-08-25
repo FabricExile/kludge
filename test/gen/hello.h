@@ -9,7 +9,7 @@
 
 std::vector<std::string> hello( int count )
 {
-  std::cout << "Called hello(" << count << ")\n";
+  std::cout << "Called hello(" << count << ")\n" << std::flush;
   std::vector<std::string> result;
   for ( int i = 0; i < count; ++i )
   {

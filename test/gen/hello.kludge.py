@@ -10,5 +10,5 @@ ext.add_func(
 report("Result is: " + {{func.name_kl}}(4));
 """, """
 Called {{func.name_kl}}(4)
-Result is ["foo0", "foo1", "foo2", "foo3"]
+Result is: ["foo0","foo1","foo2","foo3"]
 """)

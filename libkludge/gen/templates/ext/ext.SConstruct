@@ -28,6 +28,8 @@ if os.environ.get('CC'):
   fabricBuildEnv['CC'] = os.environ.get('CC')
 if os.environ.get('CXX'):
   fabricBuildEnv['CXX'] = os.environ.get('CXX')
+if os.environ.get('CPPPATH'):
+  fabricBuildEnv.Append(CPPPATH = [os.environ.get('CPPPATH')])
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),

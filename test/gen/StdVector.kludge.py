@@ -33,14 +33,10 @@ report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
 ReturnStringArrayArray() = [["hello","there","my","friend"],["hello","there","my","friend"],["hello","there","my","friend"]]
 """)
 
-#   report("GetStringVector() = " + GetStringVector());
+ext.add_alias('StringVector', 'std::vector< std::string >')
 
-# typedef std::vector< std::string > StringVector;
-
-# StringVector GetStringVector()
-# {
-#   StringVector s;
-#   s.push_back("hello");
-#   s.push_back("world");
-#   return s;
-# }
+ext.add_func('GetStringVector').returns('StringVector').add_test("""
+report("GetStringVector() = " + GetStringVector());
+""", """
+GetStringVector() = ["hello","world"]
+""")

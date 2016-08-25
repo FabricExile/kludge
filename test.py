@@ -23,51 +23,44 @@ def collect_test_gen_kludge_py_basenames():
 def test_kludge_py_basename(kludge_py_basename):
 
   test_tmp_dir = os.path.join(test_tmp_dir_base, kludge_py_basename)
-  
+
   if not os.path.isdir(test_tmp_dir):
     os.makedirs(test_tmp_dir)
 
-  with open(os.devnull, 'w') as devnull:
+  assert subprocess.call(
+    [
+      './kludge', 'gen',
+      '-o', test_tmp_dir,
+      kludge_py_basename,
+      os.path.join(test_gen_dir, kludge_py_basename + '.kludge.py'),
+      ],
+    ) == 0
 
-    assert subprocess.call(
-      [
-        './kludge', 'gen',
-        '-o', test_tmp_dir,
-        kludge_py_basename,
-        os.path.join(test_gen_dir, kludge_py_basename + '.kludge.py'),
-        ],
-      stdout = devnull,
-      stderr = devnull,
-      ) == 0
+  scons_env = os.environ.copy()
+  scons_env['CPPPATH'] = os.path.abspath(test_gen_dir)
+  assert subprocess.call(
+    [
+      'scons',
+      '-f', kludge_py_basename + '.SConstruct',
+      ],
+    cwd = test_tmp_dir,
+    env = scons_env,
+    ) == 0
 
-    scons_env = os.environ.copy()
-    scons_env['CPPPATH'] = os.path.abspath(test_gen_dir)
-    assert subprocess.call(
-      [
-        'scons',
-        '-f', kludge_py_basename + '.SConstruct',
-        ],
-      stdout = devnull,
-      stderr = devnull,
-      cwd = test_tmp_dir,
-      env = scons_env,
-      ) == 0
-
-    kl_env = os.environ.copy()
-    kl_env['FABRIC_EXTS_PATH'] = test_tmp_dir
-    with open(os.path.join(test_tmp_dir, kludge_py_basename + '.test.out')) as expected_kl_output_file:
-      expected_kl_output = expected_kl_output_file.read().splitlines()
-    actual_kl_output = subprocess.check_output(
-      [
-        'kl',
-        os.path.join(test_tmp_dir, kludge_py_basename + '.test.kl'),
-        ],
-      stderr = devnull,
-      env = kl_env,
-      ).splitlines()
-    difflines = difflib.unified_diff(expected_kl_output, actual_kl_output)
-    diffline_count = 0
-    for diffline in difflines:
-      print diffline
-      diffline_count += 1
-    assert diffline_count == 0
+  kl_env = os.environ.copy()
+  kl_env['FABRIC_EXTS_PATH'] = test_tmp_dir
+  with open(os.path.join(test_tmp_dir, kludge_py_basename + '.test.out')) as expected_kl_output_file:
+    expected_kl_output = expected_kl_output_file.read().splitlines()
+  actual_kl_output = subprocess.check_output(
+    [
+      'kl',
+      os.path.join(test_tmp_dir, kludge_py_basename + '.test.kl'),
+      ],
+    env = kl_env,
+    ).splitlines()
+  difflines = difflib.unified_diff(expected_kl_output, actual_kl_output)
+  diffline_count = 0
+  for diffline in difflines:
+    print diffline
+    diffline_count += 1
+  assert diffline_count == 0

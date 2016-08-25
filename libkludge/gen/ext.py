@@ -5,6 +5,8 @@
 import os, jinja2
 from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
+from libkludge.cpp_type_expr_parser import Named
+from alias import Alias
 from func import Func
 import util
 
@@ -43,6 +45,7 @@ class Ext:
     self.type_mgr = TypeMgr(self.jinjenv)
 
     self.cpp_includes = []
+    self.aliases = []
     self.funcs = []
 
   @property
@@ -102,3 +105,13 @@ class Ext:
     func = Func(self, name)
     self.funcs.append(func)
     return func
+
+  def add_alias(self, new_cpp_type_name, old_cpp_type_name):
+    new_cpp_type_expr = Named([new_cpp_type_name])
+    old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr([], old_cpp_type_name)
+    self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
+    new_kl_type_name = new_cpp_type_name
+    old_dqti = self.type_mgr.maybe_get_dqti(old_cpp_type_expr)
+    alias = Alias(self, new_kl_type_name, old_dqti.type_info)
+    self.aliases.append(alias)
+    return alias

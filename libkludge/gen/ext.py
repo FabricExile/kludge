@@ -71,7 +71,7 @@ class Ext:
         raise Exception("Caught exception processing %s: %s" % (filename, e))
 
   def jinja_stream(self, lang):
-      return self.jinjenv.get_template("gen/ext/ext.template." + lang).stream(
+      return self.jinjenv.get_template("gen/ext/ext." + lang).stream(
         name = self.name,
         cpp_global_includes = self.cpp_global_includes,
         gen_decl_streams = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),

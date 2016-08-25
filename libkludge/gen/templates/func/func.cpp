@@ -3,7 +3,7 @@
 {######################################################################}
 
 {% import "gen/macros.cpp" as macros %}
-{% extends "gen/decl/decl.template.cpp" %}
+{% extends "gen/decl/decl.cpp" %}
 {% block body %}
 FABRIC_EXT_EXPORT
 {{func.result_codec.render_direct_type_edk()}}

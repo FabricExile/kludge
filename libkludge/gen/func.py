@@ -65,4 +65,4 @@ class Func(Decl):
     return "::" + "::".join(self._nested_function_name)
 
   def jinja_stream_funcs(self, jinjenv, lang):
-    return jinjenv.get_template('gen/func/func.template.' + lang).stream(decl=self, func=self)
+    return jinjenv.get_template('gen/func/func.' + lang).stream(decl=self, func=self)

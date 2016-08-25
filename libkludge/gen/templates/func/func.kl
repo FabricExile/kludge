@@ -3,7 +3,7 @@
 {######################################################################}
 
 {% import "gen/macros.kl" as macros %}
-{% extends "gen/decl/decl.template.kl" %}
+{% extends "gen/decl/decl.kl" %}
 {% block body %}
 {{ func.result_codec.render_type_kl() }}
 {{ func.name_kl() }}(

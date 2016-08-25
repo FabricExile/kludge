@@ -25,8 +25,8 @@ class Func(Decl):
     self._nested_function_name = name.split('::')
 
     self.result_codec = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
-
     self.params = []
+    self.tests = []
 
     self._update_edk_symbol_name()
 
@@ -57,12 +57,31 @@ class Func(Decl):
         name
         )
       )
+    return self
 
+  class Test:
+
+    def __init__(self, func, kl_code, output):
+      self._func = func
+      self._kl_code_template = func.ext.jinjenv.from_string(kl_code)
+      self._output_template = func.ext.jinjenv.from_string(output)
+
+    def get_kl_code(self, context):
+      return self._kl_code_template.render({'func': self._func}).strip()
+
+    def get_output(self, context):
+      return self._output_template.render({'func': self._func}).strip()
+
+  def add_test(self, kl_code, output):
+    self.tests.append(self.Test(self, kl_code, output))
+
+  @property
   def name_kl(self):
     return "_".join(self._nested_function_name)
 
+  @property
   def name_cpp(self):
     return "::" + "::".join(self._nested_function_name)
 
-  def jinja_stream_funcs(self, jinjenv, lang):
-    return jinjenv.get_template('gen/func/func.' + lang).stream(decl=self, func=self)
+  def render(self, lang):
+    return self.ext.jinjenv.get_template("gen/func/func." + lang).render(decl=self, func=self)

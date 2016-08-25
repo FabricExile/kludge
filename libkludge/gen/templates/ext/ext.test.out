@@ -1,9 +1,6 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{
-  "libs": "{{ext.name}}",
-  "code": [
-    "{{ext.name}}.kl"
-    ]
-  }
+{% for func in ext.funcs %}
+{{ func.render('test.out') }}
+{% endfor %}

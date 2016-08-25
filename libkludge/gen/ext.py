@@ -5,7 +5,6 @@
 import os, jinja2
 from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
-from libkludge.ast.decl_set import DeclSet
 from func import Func
 import util
 
@@ -19,7 +18,7 @@ class Ext:
       trim_blocks = True,
       lstrip_blocks = True,
       undefined = jinja2.StrictUndefined,
-      loader=jinja2.PrefixLoader({
+      loader = jinja2.PrefixLoader({
           "protocols": jinja2.PrefixLoader({
               "conv": jinja2.PrefixLoader({
                   "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/conv'),
@@ -44,7 +43,7 @@ class Ext:
     self.type_mgr = TypeMgr(self.jinjenv)
 
     self.cpp_global_includes = []
-    self.edk_decls = DeclSet()
+    self.funcs = []
 
   @property
   def cpp_type_expr_parser(self):
@@ -67,15 +66,9 @@ class Ext:
       self.info("Processing %s" % filename)
       try:
         exec file in {'ext': self}
-      except Exception as e:
-        raise Exception("Caught exception processing %s: %s" % (filename, e))
-
-  def jinja_stream(self, lang):
-      return self.jinjenv.get_template("gen/ext/ext." + lang).stream(
-        name = self.name,
-        cpp_global_includes = self.cpp_global_includes,
-        gen_decl_streams = lambda: self.edk_decls.jinja_streams(self.jinjenv, lang),
-        )
+      except:
+        self.error("Caught exception processing %s:" % filename)
+        raise
 
   def write(self):
     for lang in [
@@ -83,11 +76,13 @@ class Ext:
       'cpp',
       'fpm.json',
       'SConstruct',
+      'test.kl',
+      'test.out',
       ]:
       filename = os.path.join(self.opts.outdir, self.name + '.' + lang)
       self.info("Writing %s" % (filename))
       with open(filename, 'w') as file:
-        self.jinja_stream(lang).dump(file)
+        self.jinjenv.get_template("gen/ext/ext." + lang).stream(ext=self).dump(file)
 
   def add_cpp_global_include(self, cpp_global_include):
     self.debug("Adding C++ global include '%s'" % cpp_global_include)
@@ -95,5 +90,5 @@ class Ext:
 
   def add_func(self, name):
     func = Func(self, name)
-    self.edk_decls.add(func)
+    self.funcs.append(func)
     return func

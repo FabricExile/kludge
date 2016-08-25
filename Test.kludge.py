@@ -8,8 +8,9 @@ ext.add_func(
   'std::vector<std::string>'
 ).add_param(
   'int'
-)#.add_test("""
-# {{name}}(),
-# """, """
-# Hello, world!
-# """)
+).add_test("""
+report("Result is: " + {{func.name_kl}}(4));
+""", """
+Called {{func.name_kl}}(4)
+Result is ["foo0", "foo1", "foo2", "foo3"]
+""")

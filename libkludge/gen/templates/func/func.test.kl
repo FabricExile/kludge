@@ -1,9 +1,11 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
+KLUDGE_TEST_FUNC_{{ func.name_kl }}()
 {
-  "libs": "{{ext.name}}",
-  "code": [
-    "{{ext.name}}.kl"
-    ]
-  }
+  report("KLUDGE_TEST_FUNC_{{ func.name_kl }}: Begin")
+{% for test in func.tests %}
+  {{ test.get_kl_code(func) }}
+{% endfor %}
+  report("KLUDGE_TEST_FUNC_{{ func.name_kl }}: End")
+}

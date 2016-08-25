@@ -51,9 +51,9 @@ class StdVectorSelector(Selector):
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Template) \
       and cpp_type_expr.pointee.is_const \
-      and len(cpp_type_expr.nested_name) == 2 \
-      and cpp_type_expr.nested_name[0] == "std" \
-      and cpp_type_expr.nested_name[1] == "vector" \
+      and len(cpp_type_expr.pointee.nested_name) == 2 \
+      and cpp_type_expr.pointee.nested_name[0] == "std" \
+      and cpp_type_expr.pointee.nested_name[1] == "vector" \
       and len(cpp_type_expr.pointee.params) == 1:
       element_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.params[0])
       return DirQualTypeInfo(

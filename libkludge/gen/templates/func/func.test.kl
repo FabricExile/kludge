@@ -3,9 +3,9 @@
 {######################################################################}
 KLUDGE_TEST_FUNC_{{ func.name_kl }}()
 {
-  report("KLUDGE_TEST_FUNC_{{ func.name_kl }}: Begin")
+  report("KLUDGE_TEST_FUNC_{{ func.name_kl }}: Begin");
 {% for test in func.tests %}
   {{ test.get_kl_code(func) }}
 {% endfor %}
-  report("KLUDGE_TEST_FUNC_{{ func.name_kl }}: End")
+  report("KLUDGE_TEST_FUNC_{{ func.name_kl }}: End");
 }

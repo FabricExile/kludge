@@ -11,6 +11,14 @@
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+require {{ ext.name }};
+
 {% for func in ext.funcs %}
 {{ func.render('test.kl') }}
 {% endfor %}
+
+operator entry() {
+  {% for func in ext.funcs %}
+  KLUDGE_TEST_FUNC_{{ func.name_kl }}();
+  {% endfor %}
+}

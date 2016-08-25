@@ -30,12 +30,17 @@ IMPLEMENT_FABRIC_EDK_ENTRIES({{ext.name}})
 // To include C++ global headers in your extension, add to
 // gen_script.kludge.kl:
 //
-// ext.add_cpp_global_include('string')  # -> #include <string>
+// ext.add_cpp_angled_include('string')  # -> #include <string>
+// ext.add_cpp_quoted_include('hello.h')  # -> #include "hello.h"
 //
-// You can also include headers on a per-declaration basis.
+// You can also include headers on a per-type and per-function basis.
 //
-{% for cpp_global_include in ext.cpp_global_includes %}
-#include <{{cpp_global_include}}>
+{% for cpp_include in ext.cpp_includes %}
+{% if cpp_include.is_angled %}
+#include <{{cpp_include.filepath}}>
+{% else %}
+#include "{{cpp_include.filepath}}"
+{% endif %}
 {% endfor %}
 
 //////////////////////////////////////////////////////////////////////////////

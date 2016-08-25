@@ -42,7 +42,7 @@ class Ext:
     self.namespace_mgr = NamespaceMgr()
     self.type_mgr = TypeMgr(self.jinjenv)
 
-    self.cpp_global_includes = []
+    self.cpp_includes = []
     self.funcs = []
 
   @property
@@ -84,9 +84,19 @@ class Ext:
       with open(filename, 'w') as file:
         self.jinjenv.get_template("gen/ext/ext." + lang).stream(ext=self).dump(file)
 
-  def add_cpp_global_include(self, cpp_global_include):
-    self.debug("Adding C++ global include '%s'" % cpp_global_include)
-    self.cpp_global_includes.append(cpp_global_include)
+  class CPPInclude:
+
+    def __init__(self, filepath, is_angled):
+      self.filepath = filepath
+      self.is_angled = is_angled
+
+  def add_cpp_quoted_include(self, filepath):
+    self.debug("Extension: Adding C++ quoted include '%s'" % filepath)
+    self.cpp_includes.append(self.CPPInclude(filepath, is_angled=False))
+
+  def add_cpp_angled_include(self, filepath):
+    self.debug("Extension: Adding C++ angled include '%s'" % filepath)
+    self.cpp_includes.append(self.CPPInclude(filepath, is_angled=True))
 
   def add_func(self, name):
     func = Func(self, name)

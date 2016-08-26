@@ -24,6 +24,7 @@ class Record(Decl):
     ):
     Decl.__init__(self, ext, desc)
 
+    self.nested_name = [kl_type_name]
     self.kl_type_name = kl_type_name
     self.this_value_name = this_cpp_value_name
     self.this_type_info = this_type_info
@@ -68,7 +69,7 @@ class Record(Decl):
 
     def __init__(self, record):
       self._record = record
-      self._nested_function_name = [record.get_kl_name(), '__ctor__']
+      self._nested_function_name = record.nested_name + ['__ctor__']
       self.result = None
       self.this = self._record.mutable_this
       self.params = []
@@ -112,6 +113,14 @@ class Record(Decl):
     ctor = self.Ctor(self)
     self.ctors.append(ctor)
     return ctor
+  
+  @property
+  def dtor_edk_symbol_name(self):
+    nested_name = self.nested_name + ['__dtor__']
+    h = hashlib.md5()
+    for name in nested_name:
+      h.update(name)
+    return "_".join([self.ext.name] + nested_name + [h.hexdigest()])
 
   def get_kl_name(self):
     return self.kl_type_name

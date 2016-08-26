@@ -20,6 +20,7 @@
     ) = "{{ctor.edk_symbol_name}}";
 
 {% endfor %}
+~{{decl.this_type_info.kl.name.compound}}() = "{{decl.dtor_edk_symbol_name}}";
 
   {% for method in decl.methods %}
 //////////////////////////////////////////////////////////////////////////////

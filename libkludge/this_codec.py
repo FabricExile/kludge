@@ -17,8 +17,18 @@ class ThisCodec:
       "this": self,
       })
 
-  def render_member_cpp(self, cpp_member_name):
-    return self.type_info._render("repr", "member_cpp", "cpp", {
+  def render_new(self):
+    return self.type_info._render("repr", "new", "cpp", {
       "this": self,
-      "cpp_member_name": cpp_member_name
+      })
+
+  def render_member_cpp(self, cpp_member_name):
+    return self.type_info._render("repr", "member", "cpp", {
+      "this": self,
+      "cpp_member_name": cpp_member_name,
+      })
+
+  def render_delete(self):
+    return self.type_info._render("repr", "delete", "cpp", {
+      "this": self,
       })

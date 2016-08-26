@@ -42,20 +42,26 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% endfor %}
 {% for ctor in decl.ctors %}
-FABRIC_EXT_EXPORT
-void
+FABRIC_EXT_EXPORT void
 {{ctor.edk_symbol_name}}(
     {{macros.edk_param_list(ctor.result, ctor.this, ctor.params) | indent(4)}}
     )
 {
     {{macros.cpp_call_pre(ctor.result, ctor.params) | indent(4)}}
-    {{decl.this_value_name.edk}}.cpp_ptr = new ::{{ctor.this.type_info.lib.name.base}}(
+    {{decl.mutable_this.render_new()}} ::{{ctor.this.type_info.lib.name.base}}(
         {{macros.cpp_call_args(ctor.params) | indent(8)}}
         );
     {{macros.cpp_call_post(ctor.result, ctor.params) | indent(4)}}
 }
 
 {% endfor %}
+FABRIC_EXT_EXPORT void
+{{decl.dtor_edk_symbol_name}}(
+    {{decl.mutable_this.render_param_edk()}}
+    )
+{
+    {{decl.mutable_this.render_delete()}};
+}
 
 {% for method in decl.methods %}
 //////////////////////////////////////////////////////////////////////////////

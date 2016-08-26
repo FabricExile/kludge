@@ -43,49 +43,28 @@ void
     {% endif %}
 {% endfor %}
 
-{% if decl.block_empty_kl_constructor %}
-FABRIC_EXT_EXPORT
-void
-{{decl.this_type_info.kl.name.compound}}_block_empty_constructor(
-  {{decl.mutable_this.render_param_edk()}}
-  )
-{
-  //::Fabric::EDK::throwException( "no empty constructor for {{decl.this_type_info.kl.name.compound}}" );
-  {{decl.this_value_name.edk}}.cpp_ptr = 0;
-}
-{% endif %}
-
-FABRIC_EXT_EXPORT
-::Fabric::EDK::KL::Boolean
-{{decl.this_type_info.kl.name.compound}}_is_null(
-  {{decl.const_this.render_param_edk()}}
-  )
-{
-  return {{decl.this_value_name.edk}}.cpp_ptr == 0;
-}
-
-{% for constructor in decl.constructors %}
+{% for ctor in decl.ctors %}
 //////////////////////////////////////////////////////////////////////////////
 //
 // KLUDGE EDK
-// Description: {{ constructor.desc }}
-{% if constructor.location %}
-// C++ Source Location: {{ constructor.location }}
+// Description: {{ ctor.desc }}
+{% if ctor.location %}
+// C++ Source Location: {{ ctor.location }}
 {% endif %}
 //
 //////////////////////////////////////////////////////////////////////////////
 //
 FABRIC_EXT_EXPORT
 void
-{{constructor.edk_symbol_name}}(
-    {{macros.edk_param_list(constructor.result, constructor.this, constructor.params) | indent(4)}}
+{{ctor.edk_symbol_name}}(
+    {{macros.edk_param_list(ctor.result, ctor.this, ctor.params) | indent(4)}}
     )
 {
-    {{macros.cpp_call_pre(constructor.result, constructor.params) | indent(4)}}
-    {{decl.this_value_name.edk}}.cpp_ptr = new ::{{constructor.this.type_info.lib.name.base}}(
-        {{macros.cpp_call_args(constructor.params) | indent(8)}}
+    {{macros.cpp_call_pre(ctor.result, ctor.params) | indent(4)}}
+    {{decl.this_value_name.edk}}.cpp_ptr = new ::{{ctor.this.type_info.lib.name.base}}(
+        {{macros.cpp_call_args(ctor.params) | indent(8)}}
         );
-    {{macros.cpp_call_post(constructor.result, constructor.params) | indent(4)}}
+    {{macros.cpp_call_post(ctor.result, ctor.params) | indent(4)}}
 }
 //////////////////////////////////////////////////////////////////////////////
 

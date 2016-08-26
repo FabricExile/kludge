@@ -12,4 +12,5 @@ struct {{decl.this_type_info.kl.name.compound}}
   private Data cpp_ptr;
 {% endif %}
 };
+
 {% endblock body %}

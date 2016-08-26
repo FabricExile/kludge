@@ -12,7 +12,7 @@ class Alias(Decl):
     Decl.__init__(
       self,
       ext,
-      "Type alias %s -> %s" % (new_kl_type_name, old_type_info.lib.name)
+      "alias '%s' -> '%s'" % (new_kl_type_name, old_type_info.lib.name)
       )
     self.new_kl_type_name = new_kl_type_name
     self.old_type_info = old_type_info

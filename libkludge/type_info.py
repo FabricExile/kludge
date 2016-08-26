@@ -97,6 +97,7 @@ class TypeInfo:
       "result": {"*": "protocols/result/builtin/indirect"},
       "param": {"*": "protocols/param/builtin/default"},
       "self": {"*": "protocols/self/builtin/default"},
+      "member": {"*": "protocols/member/builtin/indirect"},
       }
 
   def _resolve_proto_dir(self, proto, obj):

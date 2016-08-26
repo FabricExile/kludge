@@ -16,3 +16,9 @@ class ThisCodec:
     return self.type_info._render("self", "param_edk", "cpp", {
       "this": self,
       })
+
+  def render_member_cpp(self, cpp_member_name):
+    return self.type_info._render("member", "cpp", "cpp", {
+      "this": self,
+      "cpp_member_name": cpp_member_name
+      })

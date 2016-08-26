@@ -19,7 +19,7 @@ FABRIC_EXT_EXPORT
     {{member.result.render_indirect_init_edk() | indent(4)}}
 
     {{member.result.render_decl_and_assign_lib() | indent(4)}}
-        {{decl.this_value_name.edk}}.cpp_ptr->{{member.cpp_name}};
+        {{decl.const_this.render_member_cpp(member.cpp_name)}};
 
     {{member.result.render_indirect_lib_to_edk() | indent(4)}}
     {{member.result.render_direct_return_edk() | indent(4)}}
@@ -35,7 +35,7 @@ FABRIC_EXT_EXPORT void
 {
     {{member.param.render_edk_to_lib_decl() | indent(4)}}
 
-    {{decl.this_value_name.edk}}.cpp_ptr->{{member.cpp_name}} =
+    {{decl.mutable_this.render_member_cpp(member.cpp_name)}} =
         {{member.param.render_lib()}};
 }
         

@@ -25,26 +25,26 @@ class Decl(object):
 
   class Test(object):
 
-    def __init__(self, decl, kl, out):
-      self._decl = decl
+    def __init__(self, name_kl, jinjenv, kl, out):
+      self.name_kl = name_kl
       self._templates = {
-        'kl': decl.ext.jinjenv.from_string(kl),
-        'out': decl.ext.jinjenv.from_string(out),
+        'kl': jinjenv.from_string(kl),
+        'out': jinjenv.from_string(out),
         }
-
-    @property
-    def name_kl(self):
-      return self._decl.name_kl
     
     def render(self, lang):
       return self._templates[lang].render(test = self).strip()
 
-  def add_test(self, kl_code, output):
-    self.tests.append(self.Test(self, kl_code, output))
+  def add_test(self, kl, out):
+    self.tests.append(self.Test(self.name_kl, self.ext.jinjenv, kl, out))
 
   @abc.abstractmethod
   def get_kl_name(self):
     pass
+
+  @property
+  def name_kl(self):
+    return self.get_kl_name()
 
   @abc.abstractmethod
   def get_template_basename(self):

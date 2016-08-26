@@ -19,7 +19,6 @@ class Record(Decl):
     kl_type_name,
     this_type_info,
     base_classes,
-    template_basename,
     block_empty_ctor = False
     ):
     Decl.__init__(self, ext, desc)
@@ -31,7 +30,6 @@ class Record(Decl):
     self.const_this = ThisCodec(this_type_info, False)
     self.mutable_this = ThisCodec(this_type_info, True)
     self.base_classes = base_classes
-    self.template_basename = template_basename
     self.block_empty_ctor = block_empty_ctor
 
     self.members = []
@@ -126,4 +124,4 @@ class Record(Decl):
     return self.kl_type_name
 
   def get_template_basename(self):
-    return self.template_basename
+    return 'record'

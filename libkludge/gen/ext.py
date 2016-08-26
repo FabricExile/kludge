@@ -138,7 +138,6 @@ class Ext:
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       [], # base_classes
-      'wrapped_ptr'
       )
     self.decls.append(record)
     return record

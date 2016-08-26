@@ -26,7 +26,6 @@ class Func(Decl):
 
     self.result_codec = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
     self.params = []
-    self.tests = []
 
     self._update_edk_symbol_name()
 
@@ -59,29 +58,17 @@ class Func(Decl):
       )
     return self
 
-  class Test:
-
-    def __init__(self, func, kl_code, output):
-      self._func = func
-      self._kl_code_template = func.ext.jinjenv.from_string(kl_code)
-      self._output_template = func.ext.jinjenv.from_string(output)
-
-    def get_kl_code(self, context):
-      return self._kl_code_template.render({'func': self._func}).strip()
-
-    def get_output(self, context):
-      return self._output_template.render({'func': self._func}).strip()
-
-  def add_test(self, kl_code, output):
-    self.tests.append(self.Test(self, kl_code, output))
+  def get_kl_name(self):
+    return "_".join(self._nested_function_name)
 
   @property
   def name_kl(self):
-    return "_".join(self._nested_function_name)
+    return self.get_kl_name()
 
   @property
   def name_cpp(self):
     return "::" + "::".join(self._nested_function_name)
 
-  def render(self, lang):
-    return self.ext.jinjenv.get_template("gen/func/func." + lang).render(decl=self, func=self)
+  def get_template_basename(self):
+    return 'func'
+  

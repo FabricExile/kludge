@@ -1,0 +1,42 @@
+{######################################################################}
+{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
+{######################################################################}
+{% extends "gen/decl/decl.impls.kl" %}
+{% block body %}
+{% for ctor in decl.ctors %}
+//////////////////////////////////////////////////////////////////////////////
+//
+// KLUDGE EDK
+// Description: {{ ctor.desc }}
+// C++ Source Location: {{ ctor.location }}
+//
+//////////////////////////////////////////////////////////////////////////////
+//
+{{decl.this_type_info.kl.name.compound}}(
+    {% for param in ctor.params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{ctor.edk_symbol_name}}";
+//////////////////////////////////////////////////////////////////////////////
+
+{% endfor %}
+
+{% for method in decl.methods %}
+//////////////////////////////////////////////////////////////////////////////
+//
+// KLUDGE EDK
+// Description: {{ method.desc }}
+// C++ Source Location: {{ method.location }}
+//
+//////////////////////////////////////////////////////////////////////////////
+//
+{{method.result.type_info.kl.name.compound}}
+{{decl.this_type_info.kl.name.compound}}.{{method.name}}(
+    {% for param in method.params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{method.edk_symbol_name}}";
+//////////////////////////////////////////////////////////////////////////////
+
+{% endfor %}
+{% endblock body %}

@@ -17,5 +17,8 @@ class Alias(Decl):
     self.new_kl_type_name = new_kl_type_name
     self.old_type_info = old_type_info
 
-  def render(self, lang):
-    return self.ext.jinjenv.get_template("gen/alias/alias." + lang).render(decl=self, alias=self)
+  def get_kl_name(self):
+    return self.new_kl_type_name
+
+  def get_template_basename(self):
+    return 'alias'

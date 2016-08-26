@@ -1,8 +1,3 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-KLUDGE_TEST_FUNC_{{ func.name_kl }}: Begin
-{% for test in func.tests %}
-{{test.get_output(func)}}
-{% endfor %}
-KLUDGE_TEST_FUNC_{{ func.name_kl }}: End

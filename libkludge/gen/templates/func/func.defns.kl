@@ -1,10 +1,3 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% for decl in ext.decls %}
-{% for test in decl.tests %}
-KLUDGE_TEST_{{ test.name_kl }}: Begin
-{{ test.render('out') }}
-KLUDGE_TEST_{{ test.name_kl }}: End
-{% endfor %}
-{% endfor %}

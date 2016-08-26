@@ -45,8 +45,7 @@ class Ext:
     self.type_mgr = TypeMgr(self.jinjenv)
 
     self.cpp_includes = []
-    self.aliases = []
-    self.funcs = []
+    self.decls = []
 
   @property
   def cpp_type_expr_parser(self):
@@ -103,7 +102,7 @@ class Ext:
 
   def add_func(self, name):
     func = Func(self, name)
-    self.funcs.append(func)
+    self.decls.append(func)
     return func
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
@@ -113,5 +112,5 @@ class Ext:
     new_kl_type_name = new_cpp_type_name
     old_dqti = self.type_mgr.maybe_get_dqti(old_cpp_type_expr)
     alias = Alias(self, new_kl_type_name, old_dqti.type_info)
-    self.aliases.append(alias)
+    self.decls.append(alias)
     return alias

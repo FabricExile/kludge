@@ -4,7 +4,7 @@
 
 import abc
 
-class Decl:
+class Decl(object):
   def __init__(
     self,
     ext,
@@ -13,6 +13,7 @@ class Decl:
     self.ext = ext
     self.desc = desc
     self.cpp_local_includes = []
+    self.tests = []
 
   def add_cpp_local_include(self, cpp_local_include):
     self.cpp_local_includes.append(cpp_local_include)
@@ -21,12 +22,36 @@ class Decl:
   @property
   def location(self):
     return None
-  
-  @abc.abstractmethod
-  def jinja_stream_types(self, jinjenv, lang): pass
+
+  class Test(object):
+
+    def __init__(self, decl, kl, out):
+      self._decl = decl
+      self._templates = {
+        'kl': decl.ext.jinjenv.from_string(kl),
+        'out': decl.ext.jinjenv.from_string(out),
+        }
+
+    @property
+    def name_kl(self):
+      return self._decl.name_kl
+    
+    def render(self, lang):
+      return self._templates[lang].render(test = self).strip()
+
+  def add_test(self, kl_code, output):
+    self.tests.append(self.Test(self, kl_code, output))
 
   @abc.abstractmethod
-  def jinja_stream_aliases(self, jinjenv, lang): pass
+  def get_kl_name(self):
+    pass
 
   @abc.abstractmethod
-  def jinja_stream_funcs(self, jinjenv, lang): pass
+  def get_template_basename(self):
+    pass
+
+  def render(self, context, lang):
+    basename = self.get_template_basename()
+    return self.ext.jinjenv.get_template(
+      'gen/'+basename+'/'+basename+'.'+context+'.'+lang
+      ).render({'decl': self, basename: self})

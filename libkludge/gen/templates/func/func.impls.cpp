@@ -2,7 +2,7 @@
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
 {% import "gen/macros.cpp" as macros %}
-{% extends "gen/decl/decl.cpp" %}
+{% extends "gen/decl/decl.impls.cpp" %}
 {% block body %}
 FABRIC_EXT_EXPORT
 {{func.result_codec.render_direct_type_edk()}}
@@ -16,4 +16,5 @@ FABRIC_EXT_EXPORT
         );
     {{macros.cpp_call_post(func.result_codec, func.params) | indent(4)}}
 }
+
 {% endblock body %}

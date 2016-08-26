@@ -2,10 +2,11 @@
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
 {% import "gen/macros.kl" as macros %}
-{% extends "gen/decl/decl.kl" %}
+{% extends "gen/decl/decl.impls.kl" %}
 {% block body %}
 {{ func.result_codec.render_type_kl() }}
 {{ func.name_kl }}(
     {{ macros.kl_param_list(func.params) | indent(4) }}
     ) = "{{func.edk_symbol_name}}";
+
 {% endblock body %}

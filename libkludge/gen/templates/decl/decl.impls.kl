@@ -3,20 +3,13 @@
 {######################################################################}
 //////////////////////////////////////////////////////////////////////////////
 //
-// Description: {{ decl.desc }}
+// {{ decl.desc }} - Implementations
 {% if decl.location %}
-// C++ Source Location: {{ decl.location }}
+// {{ decl.location }}
 {% endif %}
 //
 //////////////////////////////////////////////////////////////////////////////
-//
-
-{% for cpp_local_include in decl.cpp_local_includes %}
-#include <{{cpp_local_include}}>
-{% endfor %}
 
 {% block body %}
 {% endblock body %}
-
-//
 //////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, libkludge
 
 # if not os.environ.get('KLUDGE_LLVM_ROOT'):
 #   print "Missing KLUDGE_LLVM_ROOT environment variabling; exiting."
@@ -8,10 +8,26 @@ import os, sys
 # sys.path.append(os.path.join(os.environ['KLUDGE_LLVM_ROOT'], 'lib', 'python'))
 # print sys.path
 
-# import libkludge
+def global_usage():
+  print """KLUDGE: KL wrapping tool
 
-# libkludge.Parser().main()
+Global usage:
 
-from libkludge import gen
+%s %s
+  %s
 
-gen.main(sys.argv[0], sys.argv[2:])
+Run %s <command> --help for more details of each command""" % (
+  sys.argv[0],
+  libkludge.gen.usage,
+  libkludge.gen.description,
+  sys.argv[0],
+  )
+  sys.exit(1)
+
+if len(sys.argv) < 2:
+  global_usage()
+elif sys.argv[1] == 'gen':
+  libkludge.gen.main(sys.argv[0], sys.argv[2:])
+else:
+  print "Unrecognized command: %s" % sys.argv[1]
+  global_usage()

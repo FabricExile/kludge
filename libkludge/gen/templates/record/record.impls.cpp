@@ -64,14 +64,6 @@ FABRIC_EXT_EXPORT void
 }
 
 {% for method in decl.methods %}
-//////////////////////////////////////////////////////////////////////////////
-//
-// KLUDGE EDK
-// Description: {{ method.desc }}
-// C++ Source Location: {{ method.location }}
-//
-//////////////////////////////////////////////////////////////////////////////
-//
 FABRIC_EXT_EXPORT
 {{method.result.render_direct_type_edk()}}
 {{method.edk_symbol_name}}(
@@ -80,16 +72,11 @@ FABRIC_EXT_EXPORT
 {
     {{macros.cpp_call_pre(method.result, method.params) | indent(4)}}
 
-    {% if method.uses_operator_arrow %}
-        ( *{{decl.this_value_name.edk}}.cpp_ptr )->{{method.name}}(
-    {% else %}
-        {{decl.this_value_name.edk}}.cpp_ptr->{{method.name}}(
-    {% endif %}
-            {{macros.cpp_call_args(method.params) | indent(12)}}
-            );
+    {{decl.mutable_this.render_member_cpp(method.cpp_name)}}(
+        {{macros.cpp_call_args(method.params) | indent(8)}}
+        );
     {{macros.cpp_call_post(method.result, method.params) | indent(4)}}
 }
-//////////////////////////////////////////////////////////////////////////////
 
 {% endfor %}
 

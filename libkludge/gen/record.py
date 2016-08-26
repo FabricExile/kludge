@@ -4,7 +4,7 @@
 
 from decl import Decl
 from test import Test
-from libkludge.cpp_type_expr_parser import Named
+from libkludge.cpp_type_expr_parser import Void, Named
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
@@ -111,6 +111,68 @@ class Record(Decl):
     ctor = self.Ctor(self)
     self.ctors.append(ctor)
     return ctor
+
+  class Method(object):
+
+    def __init__(self, record, cpp_name):
+      self._record = record
+      self._nested_function_name = record.nested_name + [cpp_name]
+      self.result = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
+      self.cpp_name = cpp_name
+      self.this = self._record.mutable_this
+      self.params = []
+
+    @property
+    def ext(self):
+      return self._record.ext
+    
+    @property
+    def kl_name(self):
+      return self.cpp_name
+    
+    @property
+    def edk_symbol_name(self):
+      h = hashlib.md5()
+      for name in self._nested_function_name:
+        h.update(name)
+      for param in self.params:
+        h.update(param.type_info.edk.name.toplevel)
+      return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
+
+    def get_test_name(self):
+      return self.edk_symbol_name
+
+    def returns(self, cpp_type_name):
+      self.result = ResultCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+          )
+        )
+      return self
+
+    def add_param(self, cpp_type_name, cpp_name = None):
+      if not isinstance(cpp_name, basestring):
+        cpp_name = "arg%d" % len(self.params)
+      self.params.append(
+        ParamCodec(
+          self.ext.type_mgr.get_dqti(
+            self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+            ),
+          cpp_name
+          )
+        )
+      return self
+    
+    def add_test(self, kl, out):
+      self._record.tests.append(Test(
+        self.get_test_name() + '_' + str(len(self._record.tests)),
+        self.ext.jinjenv, kl, out,
+        ))
+  
+  def add_method(self, cpp_name):
+    method = self.Method(self, cpp_name)
+    self.methods.append(method)
+    return method
   
   @property
   def dtor_edk_symbol_name(self):

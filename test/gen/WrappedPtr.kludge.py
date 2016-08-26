@@ -17,6 +17,16 @@ c.get_floatValue() = +3.14
 c.get_stringValue() = hello
 Class::~Class()
 """)
+ty.add_method('publicMethod')\
+  .returns('std::string const &')\
+  .add_test("""
+Class c(3.14, "hello", 42);
+report("c.publicMethod() = " + c.publicMethod());
+""", """
+Class::Class(3.14, hello, 42)
+c.publicMethod() = hello
+Class::~Class()
+""")
 
 #   Class() {}
 #   Class(

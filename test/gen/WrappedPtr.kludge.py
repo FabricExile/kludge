@@ -12,8 +12,10 @@ Class c(3.14, "hello", 42);
 report("c.get_floatValue() = " + c.get_floatValue());
 report("c.get_stringValue() = " + c.get_stringValue());
 """, """
+Class::Class(3.14, hello, 42)
 c.get_floatValue() = +3.14
 c.get_stringValue() = hello
+Class::~Class()
 """)
 
 #   Class() {}

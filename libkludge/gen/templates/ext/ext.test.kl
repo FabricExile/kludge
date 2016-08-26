@@ -17,7 +17,9 @@ require {{ ext.name }};
 {% for test in decl.tests %}
 KLUDGE_TEST_{{ test.name_kl }}() {
   report("KLUDGE_TEST_{{ test.name_kl }}: Begin");
-  {{ test.render('kl') | indent(2) }}
+  {
+    {{ test.render('kl') | indent(4) }}
+  }
   report("KLUDGE_TEST_{{ test.name_kl }}: End");
 }
 

@@ -1,6 +1,7 @@
 #ifndef _WrappedPtr_HPP
 #define _WrappedPtr_HPP
 
+#include <iostream>
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -17,13 +18,18 @@ public:
     : floatValue( _floatValue )
     , stringValue( _stringValue )
     , pri_intValue( _intValue )
-    {}
+  {
+    std::cout << "Class::Class(" << _floatValue << ", " << _stringValue << ", " << _intValue << ")\n" << std::flush;
+  }
   Class( Class const &that )
     : floatValue( that.floatValue )
     , stringValue( that.stringValue )
     , pri_intValue( that.pri_intValue )
     {}
-  ~Class() {}
+  ~Class()
+  {
+    std::cout << "Class::~Class()\n" << std::flush;
+  }
 
   Class &operator=( Class const &that )
   {

@@ -3,6 +3,7 @@
 #
 
 import abc
+from test import Test
 
 class Decl(object):
   def __init__(
@@ -23,20 +24,8 @@ class Decl(object):
   def location(self):
     return None
 
-  class Test(object):
-
-    def __init__(self, name_kl, jinjenv, kl, out):
-      self.name_kl = name_kl
-      self._templates = {
-        'kl': jinjenv.from_string(kl),
-        'out': jinjenv.from_string(out),
-        }
-    
-    def render(self, lang):
-      return self._templates[lang].render(test = self).strip()
-
   def add_test(self, kl, out):
-    self.tests.append(self.Test(
+    self.tests.append(Test(
       self.get_test_name() + '_' + str(len(self.tests)),
       self.ext.jinjenv, kl, out,
       ))

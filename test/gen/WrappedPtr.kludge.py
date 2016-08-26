@@ -1,8 +1,8 @@
 ext.add_cpp_quoted_include('WrappedPtr.hpp')
 
 ty = ext.add_class('Class')
-# ty.add_member('floatValue', 'float')
-# ty.add_member('stringValue', 'std::string')
+ty.add_member('floatValue', 'float')
+ty.add_member('stringValue', 'std::string')
 # ty.add_ctor().add_test("""
 # report(Class());
 # """, """

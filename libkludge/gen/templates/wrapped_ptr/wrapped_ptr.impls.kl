@@ -3,15 +3,15 @@
 {######################################################################}
 {% extends "gen/decl/decl.impls.kl" %}
 {% block body %}
-  {% for member in decl.members %}
-    {% if member.is_public %}
-{{member.result.type_info.kl.name.compound}} {{decl.this_type_info.kl.name.compound}}.GET_{{member.name}}() = "{{decl.this_type_info.kl.name.compound}}_GET_{{member.name}}";
-      {% if member.is_settable %}
-{{decl.this_type_info.kl.name.compound}}.SET_{{member.name}}!({{member.param.type_info.kl.name.base}} {{member.name}}{{member.param.type_info.kl.name.suffix}}) = "{{decl.this_type_info.kl.name.compound}}_SET_{{member.name}}";
-      {% endif %}
-      
-    {% endif %}
-  {% endfor %}
+{% for member in decl.members %}
+{% if member.has_getter() %}
+{{member.type_info.kl.name.compound}} {{decl.this_type_info.kl.name.compound}}.{{member.getter_kl_name}}() = "{{decl.this_type_info.kl.name.compound}}_GET_{{member.cpp_name}}";
+{% endif %}
+{% if member.has_setter() %}
+{{decl.this_type_info.kl.name.compound}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}}) = "{{decl.this_type_info.kl.name.compound}}_SET_{{member.cpp_name}}";
+{% endif %}
+
+{% endfor %}
 
   {% for ctor in decl.ctors %}
 //////////////////////////////////////////////////////////////////////////////

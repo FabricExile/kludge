@@ -5,10 +5,10 @@
 {% extends "gen/decl/decl.impls.cpp" %}
 {% block body %}
 {% for member in decl.members %}
-    {% if member.is_public %}
+{% if member.has_getter() %}
 FABRIC_EXT_EXPORT
 {{member.result.render_direct_type_edk()}}
-{{decl.this_type_info.kl.name.compound}}_GET_{{member.name}}(
+{{decl.this_type_info.kl.name.compound}}_GET_{{member.cpp_name}}(
     {% set indirect_param_edk = member.result.render_indirect_param_edk() %}
     {% if indirect_param_edk %}
       {{indirect_param_edk | indent(4)}},
@@ -19,28 +19,27 @@ FABRIC_EXT_EXPORT
     {{member.result.render_indirect_init_edk() | indent(4)}}
 
     {{member.result.render_decl_and_assign_lib() | indent(4)}}
-        {{decl.this_value_name.edk}}.cpp_ptr->{{member.name}};
+        {{decl.this_value_name.edk}}.cpp_ptr->{{member.cpp_name}};
 
-    {{member.result.render_indirect_lib_to_edk() | indent(4) }}
-    {{ member.result.render_direct_return_edk() | indent(4) }}
+    {{member.result.render_indirect_lib_to_edk() | indent(4)}}
+    {{member.result.render_direct_return_edk() | indent(4)}}
 }
 
-        {% if member.is_settable %}
-FABRIC_EXT_EXPORT
-void
-{{decl.this_type_info.kl.name.compound}}_SET_{{member.name}}(
+{% endif %}
+{% if member.has_setter() %}
+FABRIC_EXT_EXPORT void
+{{decl.this_type_info.kl.name.compound}}_SET_{{member.cpp_name}}(
     {{decl.mutable_this.render_param_edk() | indent(4)}},
-    {{ member.param.render_edk() | indent(4)}}
+    {{member.param.render_edk() | indent(4)}}
     )
 {
-    {{ member.param.render_edk_to_lib_decl() | indent(4) }}
+    {{member.param.render_edk_to_lib_decl() | indent(4)}}
 
-    {{decl.this_value_name.edk}}.cpp_ptr->{{member.name}} =
-        {{ member.param.render_lib() }};
+    {{decl.this_value_name.edk}}.cpp_ptr->{{member.cpp_name}} =
+        {{member.param.render_lib()}};
 }
         
-        {% endif %}
-    {% endif %}
+{% endif %}
 {% endfor %}
 
 {% for ctor in decl.ctors %}

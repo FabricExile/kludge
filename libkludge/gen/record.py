@@ -12,6 +12,11 @@ from libkludge.param_codec import ParamCodec
 import hashlib
 
 class Record(Decl):
+
+  public = 0
+  protected = 1
+  private = 2
+
   def __init__(
     self,
     ext,
@@ -30,15 +35,20 @@ class Record(Decl):
     self.const_this = ThisCodec(this_type_info, False)
     self.mutable_this = ThisCodec(this_type_info, True)
     self.base_classes = base_classes
+    self.default_access = self.public
     self.block_empty_ctor = block_empty_ctor
 
     self.members = []
     self.ctors = []
     self.methods = []
 
+  def set_default_access(self, access):
+    self.default_access = access
+
   class Member(object):
 
-    def __init__(self, cpp_name, dqti, getter_kl_name, setter_kl_name):
+    def __init__(self, record, cpp_name, dqti, getter_kl_name, setter_kl_name, access):
+      self._record = record
       self.cpp_name = cpp_name
       self.type_info = dqti.type_info
       self.result = ResultCodec(dqti)
@@ -49,17 +59,23 @@ class Record(Decl):
       self.setter_kl_name = setter_kl_name
       if not self.setter_kl_name is None and self.setter_kl_name == '':
         self.setter_kl_name = 'set_' + cpp_name
+      self.access = access
 
     def has_getter(self):
-        return self.getter_kl_name is not None
+      return self.getter_kl_name is not None
 
     def has_setter(self):
-        return self.setter_kl_name is not None
+      return self.setter_kl_name is not None
+
+    def is_public(self):
+      return self.access == self._record.public
     
-  def add_member(self, cpp_name, cpp_type_name, getter='', setter=''):
+  def add_member(self, cpp_name, cpp_type_name, getter='', setter='', access=None):
+    if access is None:
+      access = self.default_access
     cpp_type_expr = self.ext.cpp_type_expr_parser.parse(cpp_type_name)
     dqti = self.ext.type_mgr.get_dqti(cpp_type_expr)
-    member = self.Member(cpp_name, dqti, getter, setter)
+    member = self.Member(self, cpp_name, dqti, getter, setter, access=access)
     self.members.append(member)
     return self
 
@@ -107,8 +123,10 @@ class Record(Decl):
         self.ext.jinjenv, kl, out,
         ))
   
-  def add_ctor(self):
+  def add_ctor(self, param_cpp_type_names = []):
     ctor = self.Ctor(self)
+    for param_cpp_type_name in param_cpp_type_names:
+      ctor.add_param(param_cpp_type_name)
     self.ctors.append(ctor)
     return ctor
 

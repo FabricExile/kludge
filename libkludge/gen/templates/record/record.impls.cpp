@@ -5,6 +5,7 @@
 {% extends "gen/decl/decl.impls.cpp" %}
 {% block body %}
 {% for member in decl.members %}
+{% if member.is_public() %}
 {% if member.has_getter() %}
 FABRIC_EXT_EXPORT
 {{member.result.render_direct_type_edk()}}
@@ -39,6 +40,7 @@ FABRIC_EXT_EXPORT void
         {{member.param.render_lib()}};
 }
         
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for ctor in decl.ctors %}

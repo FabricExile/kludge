@@ -1,8 +1,6 @@
 ext.add_cpp_quoted_include('WrappedPtr.hpp')
 
 ty = ext.add_class('Class')
-ty.add_member('floatValue', 'float')
-ty.add_member('stringValue', 'std::string')
 ty.add_ctor()\
   .add_param('float')\
   .add_param('std::string const &')\
@@ -27,6 +25,11 @@ Class::Class(3.14, hello, 42)
 c.publicMethod() = hello
 Class::~Class()
 """)
+ty.set_default_access(ty.public)
+ty.add_member('floatValue', 'float')
+ty.add_member('stringValue', 'std::string')
+ty.set_default_access(ty.private)
+ty.add_member('pri_intValue', 'int')
 
 #   Class() {}
 #   Class(

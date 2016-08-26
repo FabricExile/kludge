@@ -4,11 +4,13 @@
 {% extends "gen/decl/decl.impls.kl" %}
 {% block body %}
 {% for member in decl.members %}
+{% if member.is_public() %}
 {% if member.has_getter() %}
 {{member.type_info.kl.name.compound}} {{decl.this_type_info.kl.name.compound}}.{{member.getter_kl_name}}() = "{{decl.this_type_info.kl.name.compound}}_GET_{{member.cpp_name}}";
 {% endif %}
 {% if member.has_setter() %}
 {{decl.this_type_info.kl.name.compound}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}}) = "{{decl.this_type_info.kl.name.compound}}_SET_{{member.cpp_name}}";
+{% endif %}
 {% endif %}
 
 {% endfor %}

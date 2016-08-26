@@ -2,6 +2,7 @@
 #define _InPlaceStruct_HPP
 
 #include <stdio.h>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -11,11 +12,16 @@ public:
   Class() {}
   Class( int _intValue, float _floatValue )
     : intValue( _intValue ), floatValue( _floatValue ) 
-    {}
+  {
+    std::cout<< "Class::Class(" << _intValue << ", " << _floatValue << ")\n" << std::flush;
+  }
   Class( Class const &that )
     : intValue( that.intValue ), floatValue( that.floatValue )
     {}
-  ~Class() {}
+  ~Class()
+  {
+    std::cout<< "Class::~Class()\n" << std::flush;
+  }
 
   Class &operator=( Class const &that )
   {

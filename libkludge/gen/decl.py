@@ -36,15 +36,14 @@ class Decl(object):
       return self._templates[lang].render(test = self).strip()
 
   def add_test(self, kl, out):
-    self.tests.append(self.Test(self.name_kl, self.ext.jinjenv, kl, out))
+    self.tests.append(self.Test(
+      self.get_test_name() + '_' + str(len(self.tests)),
+      self.ext.jinjenv, kl, out,
+      ))
 
   @abc.abstractmethod
-  def get_kl_name(self):
+  def get_test_name(self):
     pass
-
-  @property
-  def name_kl(self):
-    return self.get_kl_name()
 
   @abc.abstractmethod
   def get_template_basename(self):

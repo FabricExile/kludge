@@ -26,7 +26,7 @@ TakeAliasType(alias_value);
 report("<empty>");
 """, """
 <empty>
-""");
+""")
 
 ext.add_func('TakeAliasTypeRef')\
   .add_param('AliasType &')\
@@ -36,7 +36,7 @@ TakeAliasTypeRef(alias_value);
 report("<empty>");
 """, """
 <empty>
-""");
+""")
 
 ext.add_func('TakeAliasTypeConstRef')\
   .add_param('AliasType const &')\
@@ -46,4 +46,4 @@ TakeAliasTypeConstRef(alias_value);
 report("<empty>");
 """, """
 <empty>
-""");
+""")

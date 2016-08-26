@@ -17,7 +17,7 @@ class Alias(Decl):
     self.new_kl_type_name = new_kl_type_name
     self.old_type_info = old_type_info
 
-  def get_kl_name(self):
+  def get_test_name(self):
     return self.new_kl_type_name
 
   def get_template_basename(self):

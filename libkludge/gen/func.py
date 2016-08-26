@@ -27,15 +27,14 @@ class Func(Decl):
     self.result_codec = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
     self.params = []
 
-    self._update_edk_symbol_name()
-
-  def _update_edk_symbol_name(self):
+  @property
+  def edk_symbol_name(self):
     h = hashlib.md5()
     for name in self._nested_function_name:
       h.update(name)
     for param in self.params:
       h.update(param.type_info.edk.name.toplevel)
-    self.edk_symbol_name = "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
+    return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
 
   def returns(self, cpp_type_name):
     self.result_codec = ResultCodec(
@@ -58,12 +57,12 @@ class Func(Decl):
       )
     return self
 
-  def get_kl_name(self):
-    return "_".join(self._nested_function_name)
+  def get_test_name(self):
+    return self.edk_symbol_name
 
   @property
   def name_kl(self):
-    return self.get_kl_name()
+    return "_".join(self._nested_function_name)
 
   @property
   def name_cpp(self):

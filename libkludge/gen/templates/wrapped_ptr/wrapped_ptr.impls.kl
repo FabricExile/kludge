@@ -12,24 +12,14 @@
 {% endif %}
 
 {% endfor %}
-
-  {% for ctor in decl.ctors %}
-//////////////////////////////////////////////////////////////////////////////
-//
-// KLUDGE EDK
-// Description: {{ ctor.desc }}
-// C++ Source Location: {{ ctor.location }}
-//
-//////////////////////////////////////////////////////////////////////////////
-//
+{% for ctor in decl.ctors %}
 {{decl.this_type_info.kl.name.compound}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{ctor.edk_symbol_name}}";
-//////////////////////////////////////////////////////////////////////////////
 
-  {% endfor %}
+{% endfor %}
 
   {% for method in decl.methods %}
 //////////////////////////////////////////////////////////////////////////////

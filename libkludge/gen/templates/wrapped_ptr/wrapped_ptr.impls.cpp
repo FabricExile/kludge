@@ -41,18 +41,7 @@ FABRIC_EXT_EXPORT void
         
 {% endif %}
 {% endfor %}
-
 {% for ctor in decl.ctors %}
-//////////////////////////////////////////////////////////////////////////////
-//
-// KLUDGE EDK
-// Description: {{ ctor.desc }}
-{% if ctor.location %}
-// C++ Source Location: {{ ctor.location }}
-{% endif %}
-//
-//////////////////////////////////////////////////////////////////////////////
-//
 FABRIC_EXT_EXPORT
 void
 {{ctor.edk_symbol_name}}(
@@ -65,7 +54,6 @@ void
         );
     {{macros.cpp_call_post(ctor.result, ctor.params) | indent(4)}}
 }
-//////////////////////////////////////////////////////////////////////////////
 
 {% endfor %}
 

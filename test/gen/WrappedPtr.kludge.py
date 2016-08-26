@@ -3,10 +3,18 @@ ext.add_cpp_quoted_include('WrappedPtr.hpp')
 ty = ext.add_class('Class')
 ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
-# ty.add_ctor().add_test("""
-# report(Class());
-# """, """
-# """)
+ty.add_ctor()\
+  .add_param('float')\
+  .add_param('std::string const &')\
+  .add_param('int')\
+  .add_test("""
+Class c(3.14, "hello", 42);
+report("c.get_floatValue() = " + c.get_floatValue());
+report("c.get_stringValue() = " + c.get_stringValue());
+""", """
+c.get_floatValue() = +3.14
+c.get_stringValue() = hello
+""")
 
 #   Class() {}
 #   Class(

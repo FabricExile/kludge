@@ -3,11 +3,13 @@
 #
 
 from decl import Decl
+from test import Test
 from libkludge.cpp_type_expr_parser import Named
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
+import hashlib
 
 class Record(Decl):
   def __init__(
@@ -61,6 +63,55 @@ class Record(Decl):
     member = self.Member(cpp_name, dqti, getter, setter)
     self.members.append(member)
     return self
+
+  class Ctor(object):
+
+    def __init__(self, record):
+      self._record = record
+      self._nested_function_name = [record.get_kl_name(), '__ctor__']
+      self.result = None
+      self.this = self._record.mutable_this
+      self.params = []
+
+    @property
+    def ext(self):
+      return self._record.ext
+    
+    @property
+    def edk_symbol_name(self):
+      h = hashlib.md5()
+      for name in self._nested_function_name:
+        h.update(name)
+      for param in self.params:
+        h.update(param.type_info.edk.name.toplevel)
+      return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
+
+    def get_test_name(self):
+      return self.edk_symbol_name
+
+    def add_param(self, cpp_type_name, name = None):
+      if not isinstance(name, basestring):
+        name = "arg%d" % len(self.params)
+      self.params.append(
+        ParamCodec(
+          self.ext.type_mgr.get_dqti(
+            self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+            ),
+          name
+          )
+        )
+      return self
+    
+    def add_test(self, kl, out):
+      self._record.tests.append(Test(
+        self.get_test_name() + '_' + str(len(self._record.tests)),
+        self.ext.jinjenv, kl, out,
+        ))
+  
+  def add_ctor(self):
+    ctor = self.Ctor(self)
+    self.ctors.append(ctor)
+    return ctor
 
   def get_kl_name(self):
     return self.kl_type_name

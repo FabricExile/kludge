@@ -1,9 +1,11 @@
 {% macro edk_param_list(result_codec, this_codec, params) %}
   {% set need_comma = False %}
-  {% set indirect_param_edk = result_codec.render_indirect_param_edk() %}
-  {% if indirect_param_edk %}
+  {% if result_codec %}
+    {% set indirect_param_edk = result_codec.render_indirect_param_edk() %}
+    {% if indirect_param_edk %}
 {{ indirect_param_edk }}
-    {% set need_comma = True %}
+      {% set need_comma = True %}
+    {% endif %}
   {% endif %}
   {% if this_codec %}
 {{ ", " if need_comma else "" }}{{this_codec.render_param_edk()}}
@@ -16,8 +18,10 @@
 {% endmacro %}
 
 {% macro cpp_call_pre(result_codec, params) %}
+{% if result_codec %}
 {{ result_codec.render_indirect_init_edk() }}
-  
+{% endif %}
+
   {% for param in params %}
 {{ param.render_edk_to_lib_decl() }}
   {% endfor %}
@@ -37,7 +41,9 @@
   {% for param in params %}
 {{ param.render_lib_to_edk() }}
   {% endfor %}
-  
+
+{% if result_codec %}  
 {{ result_codec.render_indirect_lib_to_edk() }}
 {{ result_codec.render_direct_return_edk() }}
+{% endif %}
 {% endmacro %}

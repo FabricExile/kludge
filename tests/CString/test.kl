@@ -1,7 +1,0 @@
-require CString;
-
-operator entry() {
-  report("CStringParams('value', 'constRef') = " + CStringParams('value', 'constRef'));
-  report("CStringValueReturn() = " + CStringValueReturn());
-  report("CStringConstRefReturn() = " + CStringConstRefReturn());
-}

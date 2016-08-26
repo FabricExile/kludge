@@ -36,8 +36,8 @@ class Ext:
               "self": jinja2.PrefixLoader({
                   "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/self'),
                   }),
-              "member": jinja2.PrefixLoader({
-                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/member'),
+              "repr": jinja2.PrefixLoader({
+                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/repr'),
                   }),
               }),
           "types": jinja2.PrefixLoader({

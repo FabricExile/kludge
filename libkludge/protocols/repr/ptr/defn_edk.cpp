@@ -1,8 +1,8 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% extends "gen/decl/decl.defns.kl" %}
-{% block body %}
-{{decl.mutable_this.render_defn_kl()}}
-
-{% endblock body %}
+namespace Fabric { namespace EDK { namespace KL {
+struct {{this.type_info.edk.name.local}} {
+  ::{{this.type_info.lib.name.base}} *cpp_ptr{{this.type_info.lib.name.suffix}};
+};
+} } }

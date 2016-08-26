@@ -1,8 +1,4 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% extends "gen/decl/decl.defns.kl" %}
-{% block body %}
-{{decl.mutable_this.render_defn_kl()}}
-
-{% endblock body %}
+{{this.value_name.edk}}.cpp_ptr->{{cpp_member_name}}

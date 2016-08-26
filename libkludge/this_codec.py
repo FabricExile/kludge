@@ -17,6 +17,16 @@ class ThisCodec:
       "this": self,
       })
 
+  def render_defn_kl(self):
+    return self.type_info._render("repr", "defn_kl", "kl", {
+      "this": self,
+      })
+
+  def render_defn_edk(self):
+    return self.type_info._render("repr", "defn_edk", "cpp", {
+      "this": self,
+      })
+
   def render_new(self):
     return self.type_info._render("repr", "new", "cpp", {
       "this": self,

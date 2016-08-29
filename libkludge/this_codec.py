@@ -7,9 +7,10 @@ from value_name import this_cpp_value_name
 
 class ThisCodec:
 
-  def __init__(self, type_info, is_mutable):
+  def __init__(self, type_info, members, is_mutable):
     self.value_name = this_cpp_value_name
     self.type_info = type_info
+    self.members = members
     self.is_mutable = is_mutable
 
   def render_param_edk(self):

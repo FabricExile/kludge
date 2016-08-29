@@ -28,19 +28,19 @@ class Record(Decl):
     ):
     Decl.__init__(self, ext, desc)
 
+    self.members = []
+    self.ctors = []
+    self.methods = []
+
     self.nested_name = [kl_type_name]
     self.kl_type_name = kl_type_name
     self.this_value_name = this_cpp_value_name
     self.this_type_info = this_type_info
-    self.const_this = ThisCodec(this_type_info, False)
-    self.mutable_this = ThisCodec(this_type_info, True)
+    self.const_this = ThisCodec(this_type_info, self.members, False)
+    self.mutable_this = ThisCodec(this_type_info, self.members, True)
     self.base_classes = base_classes
     self.default_access = self.public
     self.block_empty_ctor = block_empty_ctor
-
-    self.members = []
-    self.ctors = []
-    self.methods = []
 
   def set_default_access(self, access):
     self.default_access = access
@@ -50,6 +50,7 @@ class Record(Decl):
     def __init__(self, record, cpp_name, dqti, getter_kl_name, setter_kl_name, access):
       self._record = record
       self.cpp_name = cpp_name
+      self.kl_name = cpp_name
       self.type_info = dqti.type_info
       self.result = ResultCodec(dqti)
       self.param = ParamCodec(dqti, cpp_name)

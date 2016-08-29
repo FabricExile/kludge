@@ -20,6 +20,7 @@ class InPlaceStructTypeInfo(TypeInfo):
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["result"]["decl_and_assign_lib"] = "types/builtin/in_place_struct/result"
     tds["result"]["indirect_lib_to_edk"] = "types/builtin/in_place_struct/result"
+    tds["repr"]["*"] = "protocols/repr/builtin/inplace"
     return tds    
 
 class InPlaceStructSelector(Selector):
@@ -34,7 +35,8 @@ class InPlaceStructSelector(Selector):
     
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Named) \
-      and cpp_type_expr.name == self.cpp_type_name:
+      and str(cpp_type_expr) == self.cpp_type_name:
+      print "%s == %s" % (str(cpp_type_expr), self.cpp_type_name)
       return DirQualTypeInfo(
         dir_qual.direct,
         InPlaceStructTypeInfo(
@@ -43,9 +45,10 @@ class InPlaceStructSelector(Selector):
           cpp_type_expr.make_unqualified()
           )
         )
+
     if isinstance(cpp_type_expr, PointerTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and cpp_type_expr.pointee.name == self.cpp_type_name:
+      and str(cpp_type_expr.pointee) == self.cpp_type_name:
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_pointer
       else:
@@ -58,9 +61,10 @@ class InPlaceStructSelector(Selector):
           cpp_type_expr.pointee.make_unqualified()
           )
         )
+
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and cpp_type_expr.pointee.name == self.cpp_type_name:
+      and str(cpp_type_expr.pointee) == self.cpp_type_name:
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_reference
       else:

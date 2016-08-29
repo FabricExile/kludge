@@ -120,18 +120,27 @@ class Ext:
     self.decls.append(alias)
     return alias
 
-  def add_record(self, cpp_type_name, desc):
+  def add_record(self, cpp_type_name, desc, variant='wrapped_ptr'):
     cpp_type_expr = Named([cpp_type_name])
     kl_type_name = cpp_type_name
-    self.type_mgr.add_selector(
-      WrappedPtrSelector(
-        self.jinjenv,
-        [cpp_type_name],
-        cpp_type_expr,
-        False, #is_abstract,
-        False, #no_copy_constructor,
+    if variant == 'in_place_struct':
+      self.type_mgr.add_selector(
+        InPlaceStructSelector(
+          self.jinjenv,
+          [cpp_type_name],
+          cpp_type_expr,
+          )
         )
-      )
+    else:
+      self.type_mgr.add_selector(
+        WrappedPtrSelector(
+          self.jinjenv,
+          [cpp_type_name],
+          cpp_type_expr,
+          False, #is_abstract,
+          False, #no_copy_constructor,
+          )
+        )
     record = Record(
       self,
       desc,
@@ -142,8 +151,8 @@ class Ext:
     self.decls.append(record)
     return record
 
-  def add_class(self, cpp_type_name):
-    return self.add_record(cpp_type_name, "class '%s'" % cpp_type_name)
+  def add_class(self, cpp_type_name, variant='wrapped_ptr'):
+    return self.add_record(cpp_type_name, "class '%s'" % cpp_type_name, variant)
 
-  def add_struct(self, cpp_type_name):
-    return self.add_record(cpp_type_name, "struct '%s'" % cpp_type_name)
+  def add_struct(self, cpp_type_name, variant='wrapped_ptr'):
+    return self.add_record(cpp_type_name, "struct '%s'" % cpp_type_name, variant)

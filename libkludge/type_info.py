@@ -39,7 +39,6 @@ class LibTypeName:
   @property
   def compound(self):
     return self.base + self.suffix
-  
 
 class LibTypeInfo:
 

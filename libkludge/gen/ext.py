@@ -9,7 +9,7 @@ from libkludge.cpp_type_expr_parser import Named
 from record import Record
 from alias import Alias
 from func import Func
-from libkludge.types import InPlaceStructSelector, WrappedPtrSelector
+from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, WrappedPtrSelector
 import util
 
 class Ext:
@@ -50,6 +50,7 @@ class Ext:
     self.type_mgr = TypeMgr(self.jinjenv)
 
     self.cpp_includes = []
+    self.kl_requires = []
     self.decls = []
 
   @property
@@ -105,6 +106,10 @@ class Ext:
     self.debug("Extension: Adding C++ angled include '%s'" % filepath)
     self.cpp_includes.append(self.CPPInclude(filepath, is_angled=True))
 
+  def add_kl_require(self, kl_ext_name):
+    self.debug("Extension: Adding KL require '%s'" % kl_ext_name)
+    self.kl_requires.append(kl_ext_name)
+
   def add_func(self, name):
     func = Func(self, name)
     self.decls.append(func)
@@ -147,6 +152,34 @@ class Ext:
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       [], # base_classes
+      )
+    self.decls.append(record)
+    return record
+
+  def add_kl_ext_type_alias(
+    self,
+    cpp_type_name,
+    kl_ext_name,
+    kl_type_name,
+    ):
+    cpp_type_expr = Named([cpp_type_name])
+    self.add_kl_require(kl_ext_name)
+    self.type_mgr.add_selector(
+      KLExtTypeAliasSelector(
+        self.jinjenv,
+        [cpp_type_name],
+        cpp_type_expr,
+        kl_type_name,
+        )
+      )
+    record = Record(
+      self,
+      "KLExtTypeAlias: %s -> %s[%s]" % (cpp_type_name, kl_ext_name, kl_type_name),
+      kl_type_name,
+      self.type_mgr.get_dqti(cpp_type_expr).type_info,
+      [], # base_classes
+      include_getters_setters = False,
+      include_dtor = False,
       )
     self.decls.append(record)
     return record

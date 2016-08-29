@@ -1,6 +1,6 @@
 ext.add_cpp_quoted_include('InPlaceStruct.hpp')
 
-ty = ext.add_class('Class')
+ty = ext.add_class('Class', variant='in_place_struct')
 ty.add_ctor(['int', 'float']).add_test("""
 Class c(-7, 1.52);
 report("c.get_intValue() = " + c.get_intValue());
@@ -18,7 +18,7 @@ ty.add_member('floatValue', 'float')
 
 #   Class() {}
 #   Class( int _intValue, float _floatValue )
-#     : intValue( _intValue ), floatValue( _floatValue ) 
+#     : intValue( _intValueu ), floatValue( _floatValue ) 
 #     {}
 #   Class( Class const &that )
 #     : intValue( that.intValue ), floatValue( that.floatValue )

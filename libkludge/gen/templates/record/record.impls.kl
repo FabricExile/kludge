@@ -3,35 +3,38 @@
 {######################################################################}
 {% extends "gen/decl/decl.impls.kl" %}
 {% block body %}
-{% for member in decl.members %}
+{% if record.include_getters_setters %}
+{% for member in record.members %}
 {% if member.is_public() %}
 {% if member.has_getter() %}
-{{member.type_info.kl.name.compound}} {{decl.this_type_info.kl.name.compound}}.{{member.getter_kl_name}}() = "{{decl.this_type_info.kl.name.compound}}_GET_{{member.cpp_name}}";
+{{member.type_info.kl.name.compound}} {{record.this_type_info.kl.name.compound}}.{{member.getter_kl_name}}() = "{{record.this_type_info.kl.name.compound}}_GET_{{member.cpp_name}}";
 {% endif %}
 {% if member.has_setter() %}
-{{decl.this_type_info.kl.name.compound}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}}) = "{{decl.this_type_info.kl.name.compound}}_SET_{{member.cpp_name}}";
+{{record.this_type_info.kl.name.compound}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}}) = "{{record.this_type_info.kl.name.compound}}_SET_{{member.cpp_name}}";
 {% endif %}
 {% endif %}
 
 {% endfor %}
-{% for ctor in decl.ctors %}
-{{decl.this_type_info.kl.name.compound}}(
+{% endif %}
+{% for ctor in record.ctors %}
+{{record.this_type_info.kl.name.compound}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{ctor.edk_symbol_name}}";
 
 {% endfor %}
-~{{decl.this_type_info.kl.name.compound}}() = "{{decl.dtor_edk_symbol_name}}";
+{% if record.include_dtor %}
+~{{record.this_type_info.kl.name.compound}}() = "{{record.dtor_edk_symbol_name}}";
 
-{% for method in decl.methods %}
+{% endif %}
+{% for method in record.methods %}
 {{method.result.type_info.kl.name.compound}}
-{{decl.this_type_info.kl.name.compound}}.{{method.kl_name}}(
+{{record.this_type_info.kl.name.compound}}.{{method.kl_name}}(
     {% for param in method.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{method.edk_symbol_name}}";
-//////////////////////////////////////////////////////////////////////////////
 
 {% endfor %}
 {% endblock body %}

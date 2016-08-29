@@ -4,7 +4,7 @@
 
 import abc
 
-class Selector:
+class Selector(object):
 
   __metaclass__ = abc.ABCMeta
 

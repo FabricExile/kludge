@@ -24,7 +24,9 @@ class Record(Decl):
     kl_type_name,
     this_type_info,
     base_classes,
-    block_empty_ctor = False
+    block_empty_ctor = False,
+    include_getters_setters = True,
+    include_dtor = True,
     ):
     Decl.__init__(self, ext, desc)
 
@@ -41,6 +43,8 @@ class Record(Decl):
     self.base_classes = base_classes
     self.default_access = self.public
     self.block_empty_ctor = block_empty_ctor
+    self.include_getters_setters = include_getters_setters
+    self.include_dtor = include_dtor
 
   def set_default_access(self, access):
     self.default_access = access
@@ -188,9 +192,18 @@ class Record(Decl):
         self.ext.jinjenv, kl, out,
         ))
   
-  def add_method(self, cpp_name):
+  def add_method(
+    self,
+    cpp_name,
+    return_cpp_type_name=None,
+    param_cpp_type_names=[],
+    ):
     method = self.Method(self, cpp_name)
     self.methods.append(method)
+    if return_cpp_type_name:
+      method.returns(return_cpp_type_name)
+    for param_cpp_type_name in param_cpp_type_names:
+      method.add_param(param_cpp_type_name)
     return method
   
   @property

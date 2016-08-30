@@ -73,12 +73,20 @@ FABRIC_EXT_EXPORT void
 FABRIC_EXT_EXPORT
 {{method.result.render_direct_type_edk()}}
 {{method.edk_symbol_name}}(
+{% if method.is_static %}
+    {{macros.edk_param_list(method.result, None, method.params) | indent(4)}}
+{% else %}
     {{macros.edk_param_list(method.result, method.this, method.params) | indent(4)}}
+{% endif %}
     )
 {
     {{macros.cpp_call_pre(method.result, method.params) | indent(4)}}
 
+{% if method.is_static %}
+    {{method.this.type_info.lib.name.compound}}::{{method.cpp_name}}(
+{% else %}
     {{record.mutable_this.render_member_cpp(method.cpp_name)}}(
+{% endif %}
         {{macros.cpp_call_args(method.params) | indent(8)}}
         );
     {{macros.cpp_call_post(method.result, method.params) | indent(4)}}

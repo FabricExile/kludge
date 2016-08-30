@@ -30,7 +30,11 @@
 {% endif %}
 {% for method in record.methods %}
 {{method.result.type_info.kl.name.compound}}
-{{record.this_type_info.kl.name.compound}}.{{method.kl_name}}{{'!' if method.mutates else ''}}(
+{% if method.is_static %}
+{{record.this_type_info.kl.name.compound}}_{{method.kl_name}}(
+{% else %}
+{{record.this_type_info.kl.name.compound}}.{{method.kl_name}}{{method.this_access_suffix}}(
+{% endif %}
     {% for param in method.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}

@@ -9,6 +9,7 @@ from libkludge.cpp_type_expr_parser import Named
 from record import Record
 from alias import Alias
 from func import Func
+from this_access import ThisAccess
 from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, WrappedPtrSelector
 import util
 
@@ -76,7 +77,10 @@ class Ext:
     with open(filename, "r") as file:
       self.info("Processing %s" % filename)
       try:
-        exec file in {'ext': self}
+        exec file in {
+          'ext': self,
+          'ThisAccess': ThisAccess,
+          }
       except:
         self.error("Caught exception processing %s:" % filename)
         raise

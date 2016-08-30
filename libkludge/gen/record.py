@@ -4,6 +4,7 @@
 
 from decl import Decl
 from test import Test
+from this_access import ThisAccess
 from libkludge.cpp_type_expr_parser import Void, Named
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec
@@ -137,14 +138,17 @@ class Record(Decl):
 
   class Method(object):
 
-    def __init__(self, record, cpp_name, mutates=False):
+    def __init__(self, record, cpp_name, this_access=ThisAccess.const):
       self._record = record
       self._nested_function_name = record.nested_name + [cpp_name]
       self.result = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
       self.cpp_name = cpp_name
       self.this = self._record.mutable_this
       self.params = []
-      self.mutates = mutates
+      self.this_access = this_access
+      self.is_const = self.this_access == ThisAccess.const
+      self.is_mutable = self.this_access == ThisAccess.mutable
+      self.is_static = self.this_access == ThisAccess.static
 
     @property
     def ext(self):
@@ -153,6 +157,15 @@ class Record(Decl):
     @property
     def kl_name(self):
       return self.cpp_name
+
+    @property
+    def this_access_suffix(self):
+      if self.this_access == ThisAccess.const:
+        return '?'
+      elif self.this_access == ThisAccess.mutable:
+        return '!'
+      else:
+        assert False
     
     @property
     def edk_symbol_name(self):
@@ -198,9 +211,9 @@ class Record(Decl):
     cpp_name,
     returns=None,
     params=[],
-    mutates=False
+    this_access=ThisAccess.const,
     ):
-    method = self.Method(self, cpp_name, mutates=mutates)
+    method = self.Method(self, cpp_name, this_access=this_access)
     self.methods.append(method)
     if returns:
       method.returns(returns)

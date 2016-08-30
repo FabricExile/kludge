@@ -3,6 +3,9 @@
 {######################################################################}
 {% extends "gen/decl/decl.impls.kl" %}
 {% block body %}
+{######################################################################}
+{# Getters and Setters                                                #}
+{######################################################################}
 {% if record.include_getters_setters %}
 {% for member in record.members %}
 {% if member.is_public() %}
@@ -16,6 +19,9 @@
 
 {% endfor %}
 {% endif %}
+{######################################################################}
+{# Constructors                                                       #}
+{######################################################################}
 {% for ctor in record.ctors %}
 {{record.this_type_info.kl.name.compound}}(
     {% for param in ctor.params %}
@@ -24,10 +30,16 @@
     ) = "{{ctor.edk_symbol_name}}";
 
 {% endfor %}
+{######################################################################}
+{# Destructor                                                         #}
+{######################################################################}
 {% if record.include_dtor %}
 ~{{record.this_type_info.kl.name.compound}}() = "{{record.dtor_edk_symbol_name}}";
 
 {% endif %}
+{######################################################################}
+{# Methods                                                            #}
+{######################################################################}
 {% for method in record.methods %}
 {{method.result.type_info.kl.name.compound}}
 {% if method.is_static %}
@@ -41,4 +53,14 @@
     ) = "{{method.edk_symbol_name}}";
 
 {% endfor %}
+{######################################################################}
+{# Assignment Operators                                               #}
+{######################################################################}
+{% for ass_op in record.ass_ops %}
+{{record.this_type_info.kl.name.compound}}.{{ass_op.op}}(
+    {{ass_op.param.render_kl() | indent(4)}}
+    ) = "{{ass_op.edk_symbol_name}}";
+
+{% endfor %}
+{######################################################################}
 {% endblock body %}

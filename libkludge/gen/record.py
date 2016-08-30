@@ -34,6 +34,7 @@ class Record(Decl):
     self.members = []
     self.ctors = []
     self.methods = []
+    self.ass_ops = []
 
     self.nested_name = [kl_type_name]
     self.kl_type_name = kl_type_name
@@ -220,6 +221,66 @@ class Record(Decl):
     for param in params:
       method.add_param(param)
     return method
+
+  class AssOp(object):
+
+    op_to_edk_op = {
+      "=": 'SIMPLE',
+      "+=": 'ADD',
+      "-=": 'SUB',
+      "*=": 'MUL',
+      "/=": 'DIV',
+      "%=": 'MOD',
+      "|=": 'BIT_OR',
+      "&=": 'BIT_AND',
+      "^=": 'BIT_XOR',
+      "<<=": 'SHL',
+      ">>=": 'SHR',
+    }
+
+    def __init__(self, record, op, param_type, param_name=None):
+      self._record = record
+      self._nested_function_name = record.nested_name + ['__ass_op_'+self.op_to_edk_op[op]]
+      self.this = self._record.mutable_this
+      self.op = op
+      if not isinstance(param_name, basestring):
+        param_name = "arg"
+      self.param = ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse(param_type)
+          ),
+        param_name
+        )
+
+    @property
+    def ext(self):
+      return self._record.ext
+    
+    @property
+    def edk_symbol_name(self):
+      h = hashlib.md5()
+      for name in self._nested_function_name:
+        h.update(name)
+      h.update(self.param.type_info.edk.name.toplevel)
+      return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
+
+    def get_test_name(self):
+      return '_'.join(self._nested_function_name)
+    
+    def add_test(self, kl, out):
+      self._record.tests.append(Test(
+        self.get_test_name(),
+        self.ext.jinjenv, kl, out,
+        ))
+  
+  def add_ass_op(
+    self,
+    op,
+    param,
+    ):
+    ass_op = self.AssOp(self, op, param)
+    self.ass_ops.append(ass_op)
+    return ass_op
 
   def get_test_name(self):
     return self.kl_type_name

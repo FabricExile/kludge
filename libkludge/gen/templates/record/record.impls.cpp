@@ -93,5 +93,18 @@ FABRIC_EXT_EXPORT
 }
 
 {% endfor %}
+{% for ass_op in record.ass_ops %}
+FABRIC_EXT_EXPORT void
+{{ass_op.edk_symbol_name}}(
+    {{macros.edk_param_list(None, ass_op.this, [ass_op.param]) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(None, [ass_op.param]) | indent(4)}}
+    {{ass_op.this.render_ref()}} {{ass_op.op}}
+        {{macros.cpp_call_args([ass_op.param]) | indent(8)}};
+    {{macros.cpp_call_post(None, [ass_op.param]) | indent(4)}}
+}
+
+{% endfor %}
 
 {% endblock body %}

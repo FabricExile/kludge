@@ -89,6 +89,7 @@ class Ext:
       'SConstruct',
       'test.kl',
       'test.out',
+      'test.py',
       ]:
       filename = os.path.join(self.opts.outdir, self.name + '.' + lang)
       self.info("Writing %s" % (filename))

@@ -205,6 +205,9 @@ class Record(Decl):
     for param_cpp_type_name in param_cpp_type_names:
       method.add_param(param_cpp_type_name)
     return method
+
+  def get_test_name(self):
+    return self.kl_type_name
   
   @property
   def dtor_edk_symbol_name(self):

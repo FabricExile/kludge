@@ -58,7 +58,7 @@ class Func(Decl):
     return self
 
   def get_test_name(self):
-    return self.edk_symbol_name
+    return self.name_kl
 
   @property
   def name_kl(self):

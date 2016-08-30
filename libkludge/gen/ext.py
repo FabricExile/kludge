@@ -49,6 +49,9 @@ class Ext:
     self.namespace_mgr = NamespaceMgr()
     self.type_mgr = TypeMgr(self.jinjenv)
 
+    self.cpp_flags = []
+    self.cpp_defines = []
+    self.cpp_include_dirs = []
     self.cpp_includes = []
     self.kl_requires = []
     self.decls = []
@@ -91,6 +94,15 @@ class Ext:
       self.info("Writing %s" % (filename))
       with open(filename, 'w') as file:
         self.jinjenv.get_template("gen/ext/ext." + lang).stream(ext=self).dump(file)
+
+  def add_cpp_flag(self, cpp_flag):
+    self.cpp_flags.append(os.path.expandvars(cpp_flag))
+
+  def add_cpp_define(self, cpp_define):
+    self.cpp_defines.append(os.path.expandvars(cpp_define))
+
+  def add_cpp_include_dir(self, cpp_include_dir):
+    self.cpp_include_dirs.append(os.path.expandvars(cpp_include_dir))
 
   class CPPInclude:
 

@@ -15,12 +15,12 @@ require {{ ext.name }};
 
 {% for decl in ext.decls %}
 {% for test in decl.tests %}
-KLUDGE_TEST_{{ test.name_kl }}() {
-  report("KLUDGE_TEST_{{ test.name_kl }}: Begin");
+KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}() {
+  report("KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}: Begin");
   {
     {{ test.render('kl') | indent(4) }}
   }
-  report("KLUDGE_TEST_{{ test.name_kl }}: End");
+  report("KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}: End");
 }
 
 {% endfor %}
@@ -28,7 +28,7 @@ KLUDGE_TEST_{{ test.name_kl }}() {
 operator entry() {
 {% for decl in ext.decls %}
 {% for test in decl.tests %}
-  KLUDGE_TEST_{{ test.name_kl }}();
+  KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}();
 {% endfor %}
 {% endfor %}
 }

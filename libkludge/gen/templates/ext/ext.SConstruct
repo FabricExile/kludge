@@ -12,8 +12,8 @@
 
 import os, sys
 
-extname = '{{ext.name}}'
-basename = '{{ext.name}}'
+extname = '{{ ext.name }}'
+basename = '{{ ext.name }}'
 
 try:
   fabricPath = os.environ['FABRIC_DIR']
@@ -28,8 +28,17 @@ if os.environ.get('CC'):
   fabricBuildEnv['CC'] = os.environ.get('CC')
 if os.environ.get('CXX'):
   fabricBuildEnv['CXX'] = os.environ.get('CXX')
+{% for cpp_flag in ext.cpp_flags %}
+fabricBuildEnv.Append(CPPFLAGS = ['{{ cpp_flag }}'])
+{% endfor %}
+{% for cpp_define in ext.cpp_defines %}
+fabricBuildEnv.Append(CPPDEFINES = ['{{ cpp_define }}'])
+{% endfor %}
 if os.environ.get('CPPPATH'):
   fabricBuildEnv.Append(CPPPATH = [os.environ.get('CPPPATH')])
+{% for cpp_include_dir in ext.cpp_include_dirs %}
+fabricBuildEnv.Append(CPPPATH = ['{{ cpp_include_dir }}'])
+{% endfor %}
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),

@@ -3,8 +3,8 @@
 {######################################################################}
 {% for decl in ext.decls %}
 {% for test in decl.tests %}
-KLUDGE_TEST_{{ test.name_kl }}: Begin
+KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}: Begin
 {{ test.render('out') }}
-KLUDGE_TEST_{{ test.name_kl }}: End
+KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}: End
 {% endfor %}
 {% endfor %}

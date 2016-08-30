@@ -70,8 +70,7 @@ FABRIC_EXT_EXPORT void
 
 {% endif %}
 {% for method in record.methods %}
-FABRIC_EXT_EXPORT
-{{method.result.render_direct_type_edk()}}
+FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {{method.edk_symbol_name}}(
 {% if method.is_static %}
     {{macros.edk_param_list(method.result, None, method.params) | indent(4)}}
@@ -93,16 +92,36 @@ FABRIC_EXT_EXPORT
 }
 
 {% endfor %}
+{######################################################################}
+{# Binary Operators                                                   #}
+{######################################################################}
+{% for bin_op in record.bin_ops %}
+FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
+{{bin_op.edk_symbol_name}}(
+    {{macros.edk_param_list(bin_op.result, None, bin_op.params) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(bin_op.result, bin_op.params) | indent(4)}}
+    {{bin_op.result.render_decl_and_assign_lib() | indent(4)}}
+        {{macros.cpp_call_args([bin_op.params[0]]) | indent(8)}} {{bin_op.op}}
+            {{macros.cpp_call_args([bin_op.params[1]]) | indent(12)}};
+    {{macros.cpp_call_post(bin_op.result, bin_op.params) | indent(4)}}
+}
+
+{% endfor %}
+{######################################################################}
+{# Assignment Operators                                               #}
+{######################################################################}
 {% for ass_op in record.ass_ops %}
 FABRIC_EXT_EXPORT void
 {{ass_op.edk_symbol_name}}(
-    {{macros.edk_param_list(None, ass_op.this, [ass_op.param]) | indent(4)}}
+    {{macros.edk_param_list(None, ass_op.this, ass_op.params) | indent(4)}}
     )
 {
-    {{macros.cpp_call_pre(None, [ass_op.param]) | indent(4)}}
+    {{macros.cpp_call_pre(None, ass_op.params) | indent(4)}}
     {{ass_op.this.render_ref()}} {{ass_op.op}}
-        {{macros.cpp_call_args([ass_op.param]) | indent(8)}};
-    {{macros.cpp_call_post(None, [ass_op.param]) | indent(4)}}
+        {{macros.cpp_call_args(ass_op.params) | indent(8)}};
+    {{macros.cpp_call_post(None, ass_op.params) | indent(4)}}
 }
 
 {% endfor %}

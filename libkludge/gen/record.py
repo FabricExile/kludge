@@ -34,6 +34,7 @@ class Record(Decl):
     self.members = []
     self.ctors = []
     self.methods = []
+    self.bin_ops = []
     self.ass_ops = []
 
     self.nested_name = [kl_type_name]
@@ -222,6 +223,103 @@ class Record(Decl):
       method.add_param(param)
     return method
 
+  class BinOp(object):
+
+    op_to_edk_op = {
+      "+": 'ADD',
+      "-": 'SUB',
+      "*": 'MUL',
+      "/": 'DIV',
+      "%": 'MOD',
+      "==": 'EQ',
+      "!=": 'NE',
+      "<": 'LT',
+      "<=": 'LE',
+      ">": 'GT',
+      ">=": 'GE',
+      "===": 'EX_EQ',
+      "!==": 'EX_NE',
+      "|": 'BIT_OR',
+      "&": 'BIT_AND',
+      "^": 'BIT_XOR',
+      "<<": 'SHL',
+      ">>": 'SHR',
+    }
+
+    def __init__(
+      self,
+      record,
+      result_type,
+      op,
+      lhs_param_name,
+      lhs_param_type,
+      rhs_param_name,
+      rhs_param_type,
+      ):
+      self._record = record
+      self._nested_function_name = record.nested_name + ['__bin_op_'+self.op_to_edk_op[op]]
+      self.result = ResultCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse(result_type)
+          )
+        )
+      self.op = op
+      self.params = [
+        ParamCodec(
+          self.ext.type_mgr.get_dqti(
+            self.ext.cpp_type_expr_parser.parse(lhs_param_type)
+            ),
+          lhs_param_name
+          ),
+        ParamCodec(
+          self.ext.type_mgr.get_dqti(
+            self.ext.cpp_type_expr_parser.parse(rhs_param_type)
+            ),
+          rhs_param_name
+          ),
+        ]
+
+    @property
+    def ext(self):
+      return self._record.ext
+    
+    @property
+    def edk_symbol_name(self):
+      h = hashlib.md5()
+      for name in self._nested_function_name:
+        h.update(name)
+      for param in self.params:
+        h.update(param.type_info.edk.name.toplevel)
+      return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
+
+    def get_test_name(self):
+      return '_'.join(self._nested_function_name)
+    
+    def add_test(self, kl, out):
+      self._record.tests.append(Test(
+        self.get_test_name(),
+        self.ext.jinjenv, kl, out,
+        ))
+  
+  def add_bin_op(
+    self,
+    returns,
+    op,
+    params,
+    ):
+    assert len(params) == 2
+    bin_op = self.BinOp(
+      self,
+      result_type=returns,
+      op=op,
+      lhs_param_name='lhs',
+      lhs_param_type=params[0],
+      rhs_param_name='rhs',
+      rhs_param_type=params[1],
+      )
+    self.bin_ops.append(bin_op)
+    return bin_op
+
   class AssOp(object):
 
     op_to_edk_op = {
@@ -238,19 +336,25 @@ class Record(Decl):
       ">>=": 'SHR',
     }
 
-    def __init__(self, record, op, param_type, param_name=None):
+    def __init__(
+      self,
+      record,
+      op,
+      param_type,
+      param_name,
+      ):
       self._record = record
       self._nested_function_name = record.nested_name + ['__ass_op_'+self.op_to_edk_op[op]]
       self.this = self._record.mutable_this
       self.op = op
-      if not isinstance(param_name, basestring):
-        param_name = "arg"
-      self.param = ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse(param_type)
+      self.params = [
+        ParamCodec(
+          self.ext.type_mgr.get_dqti(
+            self.ext.cpp_type_expr_parser.parse(param_type)
+            ),
+          param_name
           ),
-        param_name
-        )
+        ]
 
     @property
     def ext(self):
@@ -261,7 +365,8 @@ class Record(Decl):
       h = hashlib.md5()
       for name in self._nested_function_name:
         h.update(name)
-      h.update(self.param.type_info.edk.name.toplevel)
+      for param in self.params:
+        h.update(param.type_info.edk.name.toplevel)
       return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
 
     def get_test_name(self):
@@ -276,9 +381,15 @@ class Record(Decl):
   def add_ass_op(
     self,
     op,
-    param,
+    params,
     ):
-    ass_op = self.AssOp(self, op, param)
+    assert len(params) == 1
+    ass_op = self.AssOp(
+      self,
+      op=op,
+      param_name='arg',
+      param_type=params[0],
+      )
     self.ass_ops.append(ass_op)
     return ass_op
 

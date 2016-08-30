@@ -54,11 +54,22 @@
 
 {% endfor %}
 {######################################################################}
+{# Binary Operators                                                   #}
+{######################################################################}
+{% for bin_op in record.bin_ops %}
+{{bin_op.result.type_info.kl.name.compound}}
+{{bin_op.op}}(
+    {{bin_op.params[0].render_kl() | indent(4)}},
+    {{bin_op.params[1].render_kl() | indent(4)}}
+    ) = "{{bin_op.edk_symbol_name}}";
+
+{% endfor %}
+{######################################################################}
 {# Assignment Operators                                               #}
 {######################################################################}
 {% for ass_op in record.ass_ops %}
 {{record.this_type_info.kl.name.compound}}.{{ass_op.op}}(
-    {{ass_op.param.render_kl() | indent(4)}}
+    {{ass_op.params[0].render_kl() | indent(4)}}
     ) = "{{ass_op.edk_symbol_name}}";
 
 {% endfor %}

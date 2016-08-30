@@ -54,6 +54,8 @@ class Ext:
     self.cpp_defines = []
     self.cpp_include_dirs = []
     self.cpp_includes = []
+    self.lib_dirs = []
+    self.libs = []
     self.kl_requires = []
     self.decls = []
 
@@ -123,12 +125,22 @@ class Ext:
     self.debug("Extension: Adding C++ angled include '%s'" % filepath)
     self.cpp_includes.append(self.CPPInclude(filepath, is_angled=True))
 
+  def add_lib_dir(self, lib_dir):
+    self.lib_dirs.append(os.path.expandvars(lib_dir))
+
+  def add_lib(self, lib):
+    self.libs.append(os.path.expandvars(lib))
+
   def add_kl_require(self, kl_ext_name):
     self.debug("Extension: Adding KL require '%s'" % kl_ext_name)
     self.kl_requires.append(kl_ext_name)
 
-  def add_func(self, name):
+  def add_func(self, name, returns=None, params=[]):
     func = Func(self, name)
+    if returns:
+      func.returns(returns)
+    for param in params:
+      func.add_param(param)
     self.decls.append(func)
     return func
 

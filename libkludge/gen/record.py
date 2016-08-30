@@ -210,12 +210,12 @@ class Record(Decl):
   
   def add_method(
     self,
-    cpp_name,
+    name,
     returns=None,
     params=[],
     this_access=ThisAccess.const,
     ):
-    method = self.Method(self, cpp_name, this_access=this_access)
+    method = self.Method(self, name, this_access=this_access)
     self.methods.append(method)
     if returns:
       method.returns(returns)

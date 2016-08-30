@@ -39,6 +39,12 @@ if os.environ.get('CPPPATH'):
 {% for cpp_include_dir in ext.cpp_include_dirs %}
 fabricBuildEnv.Append(CPPPATH = ['{{ cpp_include_dir }}'])
 {% endfor %}
+{% for lib_dir in ext.lib_dirs %}
+fabricBuildEnv.Append(LIBPATH = ['{{ lib_dir }}'])
+{% endfor %}
+{% for lib in ext.libs %}
+fabricBuildEnv.Append(LIBS = ['{{ lib }}'])
+{% endfor %}
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),

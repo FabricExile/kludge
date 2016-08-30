@@ -102,7 +102,6 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
     )
 {
     {{macros.cpp_call_pre(bin_op.result, bin_op.params) | indent(4)}}
-    {{bin_op.result.render_decl_and_assign_lib() | indent(4)}}
         {{macros.cpp_call_args([bin_op.params[0]]) | indent(8)}} {{bin_op.op}}
             {{macros.cpp_call_args([bin_op.params[1]]) | indent(12)}};
     {{macros.cpp_call_post(bin_op.result, bin_op.params) | indent(4)}}

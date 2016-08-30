@@ -107,7 +107,7 @@ class Record(Decl):
       return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
 
     def get_test_name(self):
-      return self.edk_symbol_name
+      return '_'.join(self._nested_function_name)
 
     def add_param(self, cpp_type_name, name = None):
       if not isinstance(name, basestring):
@@ -124,7 +124,7 @@ class Record(Decl):
     
     def add_test(self, kl, out):
       self._record.tests.append(Test(
-        self.get_test_name() + '_' + str(len(self._record.tests)),
+        self.get_test_name(),
         self.ext.jinjenv, kl, out,
         ))
   
@@ -137,13 +137,14 @@ class Record(Decl):
 
   class Method(object):
 
-    def __init__(self, record, cpp_name):
+    def __init__(self, record, cpp_name, mutates=False):
       self._record = record
       self._nested_function_name = record.nested_name + [cpp_name]
       self.result = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
       self.cpp_name = cpp_name
       self.this = self._record.mutable_this
       self.params = []
+      self.mutates = mutates
 
     @property
     def ext(self):
@@ -163,7 +164,7 @@ class Record(Decl):
       return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
 
     def get_test_name(self):
-      return self.edk_symbol_name
+      return '_'.join(self._nested_function_name)
 
     def returns(self, cpp_type_name):
       self.result = ResultCodec(
@@ -188,22 +189,23 @@ class Record(Decl):
     
     def add_test(self, kl, out):
       self._record.tests.append(Test(
-        self.get_test_name() + '_' + str(len(self._record.tests)),
+        self.get_test_name(),
         self.ext.jinjenv, kl, out,
         ))
   
   def add_method(
     self,
     cpp_name,
-    return_cpp_type_name=None,
-    param_cpp_type_names=[],
+    returns=None,
+    params=[],
+    mutates=False
     ):
-    method = self.Method(self, cpp_name)
+    method = self.Method(self, cpp_name, mutates=mutates)
     self.methods.append(method)
-    if return_cpp_type_name:
-      method.returns(return_cpp_type_name)
-    for param_cpp_type_name in param_cpp_type_names:
-      method.add_param(param_cpp_type_name)
+    if returns:
+      method.returns(returns)
+    for param in params:
+      method.add_param(param)
     return method
 
   def get_test_name(self):

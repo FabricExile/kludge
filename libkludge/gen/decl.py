@@ -26,7 +26,7 @@ class Decl(object):
 
   def add_test(self, kl, out):
     self.tests.append(Test(
-      self.get_test_name() + '__' + str(len(self.tests)),
+      self.get_test_name(),
       self.ext.jinjenv, kl, out,
       ))
 

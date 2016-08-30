@@ -35,7 +35,7 @@ class InPlaceStructSelector(Selector):
     
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if isinstance(cpp_type_expr, Named) \
-      and str(cpp_type_expr) == self.cpp_type_name:
+      and cpp_type_expr.nested_name == [self.cpp_type_name]:
       return DirQualTypeInfo(
         dir_qual.direct,
         InPlaceStructTypeInfo(
@@ -47,7 +47,7 @@ class InPlaceStructSelector(Selector):
 
     if isinstance(cpp_type_expr, PointerTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and str(cpp_type_expr.pointee) == self.cpp_type_name:
+      and cpp_type_expr.pointee.nested_name == [self.cpp_type_name]:
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_pointer
       else:
@@ -63,7 +63,7 @@ class InPlaceStructSelector(Selector):
 
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Named) \
-      and str(cpp_type_expr.pointee) == self.cpp_type_name:
+      and cpp_type_expr.pointee.nested_name == [self.cpp_type_name]:
       if cpp_type_expr.pointee.is_const:
         dq = dir_qual.const_reference
       else:

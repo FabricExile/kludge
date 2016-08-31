@@ -1,6 +1,6 @@
-ext.add_cpp_quoted_include('WrappedPtr.hpp')
+ext.add_cpp_quoted_include('CPPPtr.hpp')
 
-ty = ext.add_wrapped_ptr('Wrapper', 'Class')
+ty = ext.add_class('Class')
 ty.add_ctor()\
   .add_param('float')\
   .add_param('std::string const &')\

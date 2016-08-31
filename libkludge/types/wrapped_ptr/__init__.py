@@ -7,14 +7,14 @@ from libkludge.selector import Selector
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
 
-class CPPPtrTypeInfo(TypeInfo):
+class WrappedPtrTypeInfo(TypeInfo):
 
   can_in_place = True
 
   def __init__(
     self,
     jinjenv,
-    kl_type_name,
+    cpp_wrapper_name,
     nested_name,
     undq_cpp_type_expr,
     is_abstract,
@@ -27,38 +27,42 @@ class CPPPtrTypeInfo(TypeInfo):
       jinjenv,
       nested_name = nested_name,
       lib_expr = undq_cpp_type_expr,
-      kl_name_base = kl_type_name,
-      kl_name_suffix = '',
       )
     self.lib.is_abstract = is_abstract
     self.lib.no_copy_constructor = no_copy_constructor
+    self.cpp_wrapper_name = cpp_wrapper_name
 
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)
-    rules["conv"]["*"] = "types/builtin/cpp_ptr/conv"
-    rules["result"]["indirect_init_edk"] = "types/builtin/cpp_ptr/result"
+    rules["conv"]["*"] = "types/builtin/wrapped_ptr/conv"
+    rules["result"]["indirect_init_edk"] = "types/builtin/wrapped_ptr/result"
+    rules["repr"]["defn_edk"] = "types/builtin/wrapped_ptr/repr"
+    rules["repr"]["ref"] = "types/builtin/wrapped_ptr/repr"
+    rules["repr"]["member_ref"] = "types/builtin/wrapped_ptr/repr"
+    rules["repr"]["new_begin"] = "types/builtin/wrapped_ptr/repr"
+    rules["repr"]["new_end"] = "types/builtin/wrapped_ptr/repr"
     return rules
 
-class CPPPtrSelector(Selector):
+class WrappedPtrSelector(Selector):
 
   def __init__(
     self,
     jinjenv,
-    kl_type_name,
+    cpp_wrapper_name,
     nested_name,
     cpp_type_expr,
     is_abstract,
     no_copy_constructor,
     ):
     Selector.__init__(self, jinjenv)
-    self.kl_type_name = kl_type_name
+    self.cpp_wrapper_name = cpp_wrapper_name
     self.nested_name = nested_name
     self.cpp_type_expr = cpp_type_expr
     self.is_abstract = is_abstract
     self.no_copy_constructor = no_copy_constructor
 
   def get_desc(self):
-    return "CPPPtr:%s" % str(self.nested_name)
+    return "WrappedPtr:%s<%s>" % (self.cpp_wrapper_name, str(self.nested_name))
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
@@ -66,9 +70,9 @@ class CPPPtrSelector(Selector):
       print "%s, %s" % (str(self.cpp_type_expr), str(self.cpp_type_expr))
       result = DirQualTypeInfo(
         dir_qual.direct,
-        CPPPtrTypeInfo(
+        WrappedPtrTypeInfo(
           self.jinjenv,
-          self.kl_type_name,
+          self.cpp_wrapper_name,
           self.nested_name,
           cpp_type_expr.make_unqualified(),
           self.is_abstract,
@@ -103,8 +107,10 @@ class CPPPtrSelector(Selector):
             dq = dir_qual.mutable_reference
         return DirQualTypeInfo(
           dq,
-          CPPPtrTypeInfo(
+          WrappedPtrTypeInfo(
             self.jinjenv,
+            self.kl_type_name,
+            self.cpp_wrapper_name,
             self.nested_name,
             cpp_type_expr.pointee.make_unqualified(),
             self.is_abstract,

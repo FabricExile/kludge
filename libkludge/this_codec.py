@@ -7,11 +7,19 @@ from value_name import this_cpp_value_name
 
 class ThisCodec:
 
-  def __init__(self, type_info, members, is_mutable):
+  def __init__(
+    self,
+    type_info,
+    members,
+    is_mutable,
+    extras = {},
+    ):
     self.value_name = this_cpp_value_name
     self.type_info = type_info
     self.members = members
     self.is_mutable = is_mutable
+    for k, v in extras.iteritems():
+      setattr(self, k, value)
 
   def render_param_edk(self):
     return self.type_info._render("self", "param_edk", "cpp", {
@@ -28,8 +36,13 @@ class ThisCodec:
       "this": self,
       })
 
-  def render_new(self):
-    return self.type_info._render("repr", "new", "cpp", {
+  def render_new_begin(self):
+    return self.type_info._render("repr", "new_begin", "cpp", {
+      "this": self,
+      })
+
+  def render_new_end(self):
+    return self.type_info._render("repr", "new_end", "cpp", {
       "this": self,
       })
 

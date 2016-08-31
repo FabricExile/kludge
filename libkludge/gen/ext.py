@@ -5,14 +5,14 @@
 import os, jinja2
 from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
-from libkludge.cpp_type_expr_parser import Named
+from libkludge.cpp_type_expr_parser import Named, Template
 from record import Record
 from alias import Alias
 from func import Func
 from test import Test
 from this_access import ThisAccess
 from member_access import MemberAccess
-from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, CPPPtrSelector
+from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, CPPPtrSelector, WrappedPtrSelector
 import util
 
 class Ext:
@@ -164,14 +164,12 @@ class Ext:
     self.decls.append(alias)
     return alias
 
-  def add_wrapped_ptr(self, kl_type_name, cpp_type_name=None):
-    if not cpp_type_name:
-      cpp_type_name = kl_type_name
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
+  def add_wrapped_ptr(self, cpp_wrapper_name, cpp_type_name):
+    cpp_type_expr = Named([cpp_type_name])
     self.type_mgr.add_selector(
-      CPPPtrSelector(
+      WrappedPtrSelector(
         self.jinjenv,
-        kl_type_name,
+        cpp_wrapper_name,
         [cpp_type_name],
         cpp_type_expr,
         False, #is_abstract,
@@ -180,8 +178,8 @@ class Ext:
       )
     record = Record(
       self,
-      "WrappedPtr: %s -> %s" % (kl_type_name, cpp_type_name),
-      kl_type_name,
+      "WrappedPtr: %s -> %s<%s>" % (cpp_type_name, cpp_wrapper_name, cpp_type_name),
+      cpp_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       [], # base_classes
       )

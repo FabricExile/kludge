@@ -1,4 +1,6 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-(*{{this.value_name.edk}}.cpp_ptr)
+struct {{this.type_info.edk.name.local}} {
+  {{this.type_info.cpp_wrapper_name}}< ::{{this.type_info.lib.name.base}} > *cpp_ptr{{this.type_info.lib.name.suffix}};
+};

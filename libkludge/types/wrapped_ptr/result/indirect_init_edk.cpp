@@ -1,4 +1,5 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-new (&{{this.value_name.edk}}) ::{{this.type_info.lib.name.base}}
+
+{{result.value_name.edk}}.cpp_ptr = 0;

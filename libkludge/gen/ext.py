@@ -5,7 +5,7 @@
 import os, jinja2
 from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
-from libkludge.cpp_type_expr_parser import Named, Template
+from libkludge.cpp_type_expr_parser import Named, Template, PointerTo
 from record import Record
 from alias import Alias
 from func import Func
@@ -165,7 +165,7 @@ class Ext:
     return alias
 
   def add_wrapped_ptr(self, cpp_wrapper_name, cpp_type_name):
-    cpp_type_expr = Named([cpp_type_name])
+    cpp_type_expr = PointerTo(Named([cpp_type_name]))
     self.type_mgr.add_selector(
       WrappedPtrSelector(
         self.jinjenv,

@@ -36,6 +36,7 @@ class WrappedPtrTypeInfo(TypeInfo):
     rules = TypeInfo.build_codec_lookup_rules(self)
     rules["conv"]["*"] = "types/builtin/wrapped_ptr/conv"
     rules["result"]["indirect_init_edk"] = "types/builtin/wrapped_ptr/result"
+    rules["result"]["decl_and_assign_lib"] = "types/builtin/wrapped_ptr/result"
     rules["repr"]["defn_edk"] = "types/builtin/wrapped_ptr/repr"
     rules["repr"]["ref"] = "types/builtin/wrapped_ptr/repr"
     rules["repr"]["member_ref"] = "types/builtin/wrapped_ptr/repr"
@@ -65,56 +66,15 @@ class WrappedPtrSelector(Selector):
     return "WrappedPtr:%s<%s>" % (self.cpp_wrapper_name, str(self.nested_name))
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    if (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
-      and cpp_type_expr == self.cpp_type_expr:
-      print "%s, %s" % (str(self.cpp_type_expr), str(self.cpp_type_expr))
-      result = DirQualTypeInfo(
+    if cpp_type_expr == self.cpp_type_expr:
+      return DirQualTypeInfo(
         dir_qual.direct,
         WrappedPtrTypeInfo(
           self.jinjenv,
           self.cpp_wrapper_name,
           self.nested_name,
-          cpp_type_expr.make_unqualified(),
+          self.cpp_type_expr.pointee,
           self.is_abstract,
           self.no_copy_constructor,
           )
         )
-      return result
-
-    is_reference = isinstance(cpp_type_expr, ReferenceTo)
-    is_pointer = isinstance(cpp_type_expr, PointerTo)
-
-    # FIXME special case, e.g. "Class * &" we drop to just "Class *"
-    if is_reference and isinstance(cpp_type_expr.pointee, PointerTo):
-      cpp_type_expr = cpp_type_expr.pointee
-      is_pointer = True
-      is_reference = False
-
-    if (is_pointer or is_reference) \
-      and (isinstance(cpp_type_expr.pointee, Named) or \
-        isinstance(cpp_type_expr.pointee, Template)):
-      undq_cpp_type_expr, _ = cpp_type_expr.pointee.get_undq_type_expr_and_dq()
-      if undq_cpp_type_expr == self.cpp_type_expr:
-        if is_pointer:
-          if cpp_type_expr.pointee.is_const:
-            dq = dir_qual.const_pointer
-          else:
-            dq = dir_qual.mutable_pointer
-        else:
-          if cpp_type_expr.pointee.is_const:
-            dq = dir_qual.const_reference
-          else:
-            dq = dir_qual.mutable_reference
-        return DirQualTypeInfo(
-          dq,
-          WrappedPtrTypeInfo(
-            self.jinjenv,
-            self.kl_type_name,
-            self.cpp_wrapper_name,
-            self.nested_name,
-            cpp_type_expr.pointee.make_unqualified(),
-            self.is_abstract,
-            self.no_copy_constructor,
-            )
-          )
-

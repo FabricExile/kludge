@@ -12,4 +12,4 @@ class Test(object):
       }
   
   def render(self, lang):
-    return self._templates[lang].render(test = self).strip()
+    return self._templates[lang].render(test = self).lstrip()

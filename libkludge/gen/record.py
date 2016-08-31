@@ -303,10 +303,12 @@ class Record(Decl):
   
   def add_bin_op(
     self,
-    returns,
     op,
-    params,
+    returns='bool',
+    params=None,
     ):
+    if not params:
+      params = [self.this_type_info.lib.name.compound + ' const &', self.this_type_info.lib.name.compound + ' const &']
     assert len(params) == 2
     bin_op = self.BinOp(
       self,

@@ -76,17 +76,20 @@ class Ext:
     util.debug(self.opts, string)
 
   def process(self, filename):
-    with open(filename, "r") as file:
-      self.info("Processing %s" % filename)
-      try:
-        exec file in {
-          'ext': self,
-          'ThisAccess': ThisAccess,
-          }
-      except:
-        self.error("Caught exception processing %s:" % filename)
-        raise
-
+    def include(filename):
+      with open(filename, "r") as file:
+        self.info("Processing %s" % filename)
+        try:
+          exec file in {
+            'ext': self,
+            'ThisAccess': ThisAccess,
+            'include': include
+            }
+        except:
+          self.error("Caught exception processing %s:" % filename)
+          raise
+    include(filename)
+  
   def write(self):
     for lang in [
       'kl',

@@ -1,5 +1,4 @@
-#ifndef _WrappedPtr_HPP
-#define _WrappedPtr_HPP
+#pragma once
 
 #include <iostream>
 #include <stdio.h>
@@ -85,5 +84,3 @@ private:
 
   int pri_intValue;
 };
-
-#endif

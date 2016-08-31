@@ -1,6 +1,6 @@
-ext.add_cpp_quoted_include('InPlaceStruct.hpp')
+ext.add_cpp_quoted_include('InPlaceType.hpp')
 
-ty = ext.add_class('Class', variant='in_place_struct')
+ty = ext.add_in_place_type('Class')
 ty.add_ctor(['int', 'float']).add_test("""
 Class c(-7, 1.52);
 report("c.get_intValue() = " + c.get_intValue());

@@ -7,7 +7,7 @@ from libkludge.selector import Selector
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
 
-class CPPPtrTypeInfo(TypeInfo):
+class DirectTypeInfo(TypeInfo):
 
   can_in_place = True
 
@@ -39,7 +39,7 @@ class CPPPtrTypeInfo(TypeInfo):
     rules["result"]["indirect_init_edk"] = "types/builtin/cpp_ptr/result"
     return rules
 
-class CPPPtrSelector(Selector):
+class DirectSelector(Selector):
 
   def __init__(
     self,
@@ -58,15 +58,13 @@ class CPPPtrSelector(Selector):
     self.no_copy_constructor = no_copy_constructor
 
   def get_desc(self):
-    return "CPPPtr:%s" % str(self.nested_name)
+    return "Direct:%s" % str(self.nested_name)
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    if (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
-      and cpp_type_expr == self.cpp_type_expr:
-      print "%s, %s" % (str(self.cpp_type_expr), str(self.cpp_type_expr))
+    if cpp_type_expr == self.cpp_type_expr:
       result = DirQualTypeInfo(
         dir_qual.direct,
-        CPPPtrTypeInfo(
+        DirectTypeInfo(
           self.jinjenv,
           self.kl_type_name,
           self.nested_name,
@@ -103,12 +101,12 @@ class CPPPtrSelector(Selector):
             dq = dir_qual.mutable_reference
         return DirQualTypeInfo(
           dq,
-          CPPPtrTypeInfo(
+          DirectTypeInfo(
             self.jinjenv,
+            self.kl_type_name,
             self.nested_name,
             cpp_type_expr.pointee.make_unqualified(),
             self.is_abstract,
             self.no_copy_constructor,
             )
           )
-

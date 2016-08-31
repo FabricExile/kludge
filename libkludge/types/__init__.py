@@ -10,7 +10,7 @@ from std_string import StdStringSelector
 from fixed_array import FixedArraySelector
 from std_vector import StdVectorSelector
 from std_map import StdMapSelector
-from in_place_struct import InPlaceStructSelector
-from cpp_ptr import CPPPtrSelector
-from wrapped_ptr import WrappedPtrSelector
+from in_place import InPlaceSelector
+from direct import DirectSelector
+from wrapped import WrappedSelector
 from kl_ext_type_alias import KLExtTypeAliasSelector

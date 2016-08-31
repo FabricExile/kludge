@@ -12,7 +12,7 @@ from func import Func
 from test import Test
 from this_access import ThisAccess
 from member_access import MemberAccess
-from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, WrappedPtrSelector
+from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, CPPPtrSelector
 import util
 
 class Ext:
@@ -169,7 +169,7 @@ class Ext:
       cpp_type_name = kl_type_name
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     self.type_mgr.add_selector(
-      WrappedPtrSelector(
+      CPPPtrSelector(
         self.jinjenv,
         kl_type_name,
         [cpp_type_name],
@@ -230,7 +230,7 @@ class Ext:
         )
     else:
       self.type_mgr.add_selector(
-        WrappedPtrSelector(
+        CPPPtrSelector(
           self.jinjenv,
           kl_type_name,
           [cpp_type_name],

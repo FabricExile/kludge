@@ -11,5 +11,5 @@ from fixed_array import FixedArraySelector
 from std_vector import StdVectorSelector
 from std_map import StdMapSelector
 from in_place_struct import InPlaceStructSelector
-from wrapped_ptr import WrappedPtrSelector
+from cpp_ptr import CPPPtrSelector
 from kl_ext_type_alias import KLExtTypeAliasSelector

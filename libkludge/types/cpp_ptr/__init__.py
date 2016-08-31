@@ -7,7 +7,7 @@ from libkludge.selector import Selector
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
 
-class WrappedPtrTypeInfo(TypeInfo):
+class CPPPtrTypeInfo(TypeInfo):
 
   can_in_place = True
 
@@ -39,7 +39,7 @@ class WrappedPtrTypeInfo(TypeInfo):
     rules["result"]["indirect_init_edk"] = "types/builtin/wrapped_ptr/result"
     return rules
 
-class WrappedPtrSelector(Selector):
+class CPPPtrSelector(Selector):
 
   def __init__(
     self,
@@ -58,7 +58,7 @@ class WrappedPtrSelector(Selector):
     self.no_copy_constructor = no_copy_constructor
 
   def get_desc(self):
-    return "WrappedPtr:%s" % str(self.nested_name)
+    return "CPPPtr:%s" % str(self.nested_name)
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
@@ -66,7 +66,7 @@ class WrappedPtrSelector(Selector):
       print "%s, %s" % (str(self.cpp_type_expr), str(self.cpp_type_expr))
       result = DirQualTypeInfo(
         dir_qual.direct,
-        WrappedPtrTypeInfo(
+        CPPPtrTypeInfo(
           self.jinjenv,
           self.kl_type_name,
           self.nested_name,
@@ -103,7 +103,7 @@ class WrappedPtrSelector(Selector):
             dq = dir_qual.mutable_reference
         return DirQualTypeInfo(
           dq,
-          WrappedPtrTypeInfo(
+          CPPPtrTypeInfo(
             self.jinjenv,
             self.nested_name,
             cpp_type_expr.pointee.make_unqualified(),

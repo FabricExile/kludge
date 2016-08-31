@@ -10,6 +10,7 @@ from record import Record
 from alias import Alias
 from func import Func
 from this_access import ThisAccess
+from member_access import MemberAccess
 from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, WrappedPtrSelector
 import util
 
@@ -83,13 +84,14 @@ class Ext:
           exec file in {
             'ext': self,
             'ThisAccess': ThisAccess,
+            'MemberAccess': MemberAccess,
             'include': include
             }
         except:
           self.error("Caught exception processing %s:" % filename)
           raise
     include(filename)
-  
+
   def write(self):
     for lang in [
       'kl',

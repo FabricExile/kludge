@@ -4,6 +4,7 @@
 
 from decl import Decl
 from test import Test
+from member_access import MemberAccess
 from this_access import ThisAccess
 from libkludge.cpp_type_expr_parser import Void, Named
 from libkludge.value_name import this_cpp_value_name
@@ -13,10 +14,6 @@ from libkludge.param_codec import ParamCodec
 import hashlib
 
 class Record(Decl):
-
-  public = 0
-  protected = 1
-  private = 2
 
   def __init__(
     self,
@@ -44,7 +41,7 @@ class Record(Decl):
     self.const_this = ThisCodec(this_type_info, self.members, False)
     self.mutable_this = ThisCodec(this_type_info, self.members, True)
     self.base_classes = base_classes
-    self.default_access = self.public
+    self.default_access = MemberAccess.public
     self.block_empty_ctor = block_empty_ctor
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
@@ -76,7 +73,7 @@ class Record(Decl):
       return self.setter_kl_name is not None
 
     def is_public(self):
-      return self.access == self._record.public
+      return self.access == MemberAccess.public
     
   def add_member(self, cpp_name, cpp_type_name, getter='', setter='', access=None):
     if access is None:

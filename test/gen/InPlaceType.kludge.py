@@ -19,6 +19,25 @@ report(Class_GetStaticFloat());
 """, """
 +3.3
 """)
+ty.add_get_ind_op('int').add_test("""
+Class c(-7, 3.14);
+report(c.getAt(56));
+""", """
+Class::Class(-7, 3.14)
+Class::operator[] const(56)
+-7
+Class::~Class()
+""")
+ty.add_set_ind_op('int').add_test("""
+Class c(-7, 3.14);
+c.setAt(56, 4);
+report(c);
+""", """
+Class::Class(-7, 3.14)
+Class::operator[](56)
+{intValue:4,floatValue:+3.14}
+Class::~Class()
+""")
 
 #   Class( Class const &that )
 #     : intValue( that.intValue ), floatValue( that.floatValue )

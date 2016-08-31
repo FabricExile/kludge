@@ -87,4 +87,24 @@
 
 {% endif %}
 {######################################################################}
+{# Index Operators                                                    #}
+{######################################################################}
+{% if record.get_ind_op_result %}
+{{record.get_ind_op_result.type_info.kl.name.compound}}
+{{record.get_ind_op_this.type_info.kl.name.compound}}.getAt(
+    {% for param in record.get_ind_op_params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{record.get_ind_op_edk_symbol_name}}";
+
+{% endif %}
+{% if record.set_ind_op_params %}
+{{record.set_ind_op_this.type_info.kl.name.compound}}.setAt(
+    {% for param in record.set_ind_op_params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{record.set_ind_op_edk_symbol_name}}";
+
+{% endif %}
+{######################################################################}
 {% endblock body %}

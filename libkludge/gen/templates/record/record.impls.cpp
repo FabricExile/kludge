@@ -24,7 +24,7 @@ FABRIC_EXT_EXPORT
     {{member.result.render_indirect_init_edk() | indent(4)}}
 
     {{member.result.render_decl_and_assign_lib() | indent(4)}}
-        {{record.const_this.render_member_ref(member.cpp_name)}};
+        {{record.const_this.render_member_ref(member.cpp_name) | indent(8)}};
 
     {{member.result.render_indirect_lib_to_edk() | indent(4)}}
     {{member.result.render_direct_return_edk() | indent(4)}}
@@ -168,6 +168,37 @@ FABRIC_EXT_EXPORT void
     {{record.mutable_this.render_wrapper_ref()}} =
         {{macros.cpp_call_args(record.copy_params) | indent(8)}};
     {{macros.cpp_call_post(None, record.copy_params) | indent(4)}}
+}
+
+{% endif %}
+{######################################################################}
+{# Index Operators                                                    #}
+{######################################################################}
+{% if record.get_ind_op_result %}
+FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
+{{record.get_ind_op_edk_symbol_name}}(
+    {{macros.edk_param_list(record.get_ind_op_result, record.get_ind_op_this, record.get_ind_op_params) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
+        {{record.get_ind_op_this.render_ref() | indent(8)}}[
+            {{record.get_ind_op_params[0].render_lib() | indent(12)}}
+            ];
+    {{macros.cpp_call_post(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
+}
+
+{% endif %}
+{% if record.set_ind_op_params %}
+FABRIC_EXT_EXPORT void
+{{record.set_ind_op_edk_symbol_name}}(
+    {{macros.edk_param_list(None, record.set_ind_op_this, record.set_ind_op_params) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(None, record.set_ind_op_params) | indent(4)}}
+    {{record.set_ind_op_this.render_ref() | indent(4)}}[
+        {{record.set_ind_op_params[0].render_lib() | indent(8)}}
+        ] = {{record.set_ind_op_params[1].render_lib() | indent(8)}};
+    {{macros.cpp_call_post(None, record.set_ind_op_params) | indent(4)}}
 }
 
 {% endif %}

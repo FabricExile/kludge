@@ -9,7 +9,10 @@
 class Class {
 public:
 
-  Class() {}
+  Class()
+  {
+    std::cout<< "Class::Class()\n" << std::flush;
+  }
   Class( int _intValue, float _floatValue )
     : intValue( _intValue ), floatValue( _floatValue ) 
   {
@@ -42,6 +45,18 @@ public:
   }
 
   static float GetStaticFloat() { return 3.3; }
+
+  int operator[]( size_t index ) const
+  {
+    std::cout<< "Class::operator[] const(" << index << ")\n" << std::flush;
+    return intValue;
+  }
+
+  int &operator[]( size_t index )
+  {
+    std::cout<< "Class::operator[](" << index << ")\n" << std::flush;
+    return intValue;
+  }
 
 protected:
 

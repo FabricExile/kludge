@@ -94,6 +94,18 @@ public:
     fflush( stdout );
   }
 
+  int operator[]( size_t index ) const
+  {
+    std::cout<< "Class::operator[] const(" << index << ")\n" << std::flush;
+    return pri_intValue;
+  }
+
+  int &operator[]( size_t index )
+  {
+    std::cout<< "Class::operator[](" << index << ")\n" << std::flush;
+    return pri_intValue;
+  }
+
   void retain()
     { ++pri_refCount; }
   void release()

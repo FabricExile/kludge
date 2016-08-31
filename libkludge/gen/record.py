@@ -48,6 +48,9 @@ class Record(Decl):
     self.include_simple_ass_op = include_simple_ass_op
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
+    self.get_ind_op_result = None
+    self.get_ind_op_params = None
+    self.set_ind_op_params = None
     copy_param_cpp_type_name = this_type_info.lib.name.compound + ' const &'
     self.copy_params = [
       ParamCodec(
@@ -57,6 +60,10 @@ class Record(Decl):
         'that'
         )
       ]
+
+  @property
+  def cpp_type_expr_parser(self):
+    return self.ext.cpp_type_expr_parser
   
   @property
   def empty_ctor_edk_symbol_name(self):
@@ -413,6 +420,69 @@ class Record(Decl):
       )
     self.ass_ops.append(ass_op)
     return ass_op
+
+  def add_get_ind_op(
+    self,
+    value_cpp_type_name,
+    this_access = ThisAccess.const
+    ):
+    self.get_ind_op_result = ResultCodec(
+      self.ext.type_mgr.get_dqti(
+        self.ext.cpp_type_expr_parser.parse(value_cpp_type_name)
+        )
+      )
+    self.get_ind_op_params = [
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse('size_t')
+          ),
+        'index'
+        ),
+      ]
+    if this_access == ThisAccess.mutable:
+      self.get_ind_op_this = self.mutable_this
+    else:
+      self.get_ind_op_this = self.const_this
+    return self
+
+  def add_set_ind_op(
+    self,
+    value_cpp_type_name,
+    this_access = ThisAccess.mutable
+    ):
+    self.set_ind_op_params = [
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse('size_t')
+          ),
+        'index'
+        ),
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse(value_cpp_type_name)
+          ),
+        'value'
+        ),
+      ]
+    if this_access == ThisAccess.const:
+      self.set_ind_op_this = self.const_this
+    else:
+      self.set_ind_op_this = self.mutable_this
+    return self
+
+  @property
+  def get_ind_op_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_type_name + '__get_ind_op'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
+
+  @property
+  def set_ind_op_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_type_name + '__set_ind_op'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   def get_test_name(self):
     return self.kl_type_name

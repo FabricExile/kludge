@@ -10,7 +10,7 @@ c.get_intValue() = -7
 Class::~Class()
 """)
 ty.add_member('intValue', 'int')
-ty.set_default_access(ty.private)
+ty.set_default_access(MemberAccess.private)
 ty.add_member('floatValue', 'float')
 
 # class Class {

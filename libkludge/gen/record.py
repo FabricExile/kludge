@@ -123,10 +123,7 @@ class Record(Decl):
       return self
     
     def add_test(self, kl, out):
-      self._record.tests.append(Test(
-        self.get_test_name(),
-        self.ext.jinjenv, kl, out,
-        ))
+      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_ctor(self, param_cpp_type_names = []):
     ctor = self.Ctor(self)
@@ -200,10 +197,7 @@ class Record(Decl):
       return self
     
     def add_test(self, kl, out):
-      self._record.tests.append(Test(
-        self.get_test_name(),
-        self.ext.jinjenv, kl, out,
-        ))
+      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_method(
     self,
@@ -293,10 +287,7 @@ class Record(Decl):
       return '_'.join(self._nested_function_name)
     
     def add_test(self, kl, out):
-      self._record.tests.append(Test(
-        self.get_test_name(),
-        self.ext.jinjenv, kl, out,
-        ))
+      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_bin_op(
     self,
@@ -372,10 +363,7 @@ class Record(Decl):
       return '_'.join(self._nested_function_name)
     
     def add_test(self, kl, out):
-      self._record.tests.append(Test(
-        self.get_test_name(),
-        self.ext.jinjenv, kl, out,
-        ))
+      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_ass_op(
     self,

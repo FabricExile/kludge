@@ -25,10 +25,10 @@ Class::Class(3.14, hello, 42)
 c.publicMethod() = hello
 Class::~Class()
 """)
-ty.set_default_access(ty.public)
+ty.set_default_access(MemberAccess.public)
 ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
-ty.set_default_access(ty.private)
+ty.set_default_access(MemberAccess.private)
 ty.add_member('pri_intValue', 'int')
 
 #   Class() {}

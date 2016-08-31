@@ -13,8 +13,7 @@
 
 require {{ ext.name }};
 
-{% for decl in ext.decls %}
-{% for test in decl.tests %}
+{% for test in ext.tests %}
 KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}() {
   report("KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}: Begin");
   {
@@ -24,11 +23,8 @@ KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}() {
 }
 
 {% endfor %}
-{% endfor %}
 operator entry() {
-{% for decl in ext.decls %}
-{% for test in decl.tests %}
+{% for test in ext.tests %}
   KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}();
-{% endfor %}
 {% endfor %}
 }

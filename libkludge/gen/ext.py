@@ -9,6 +9,7 @@ from libkludge.cpp_type_expr_parser import Named
 from record import Record
 from alias import Alias
 from func import Func
+from test import Test
 from this_access import ThisAccess
 from member_access import MemberAccess
 from libkludge.types import InPlaceStructSelector, KLExtTypeAliasSelector, WrappedPtrSelector
@@ -59,6 +60,7 @@ class Ext:
     self.libs = []
     self.kl_requires = []
     self.decls = []
+    self.tests = []
 
   @property
   def cpp_type_expr_parser(self):
@@ -91,6 +93,9 @@ class Ext:
           self.error("Caught exception processing %s:" % filename)
           raise
     include(filename)
+
+  def add_test(self, test_name, kl, out):
+    self.tests.append(Test(test_name, self.jinjenv, kl, out))
 
   def write(self):
     for lang in [
@@ -159,30 +164,23 @@ class Ext:
     self.decls.append(alias)
     return alias
 
-  def add_record(self, cpp_type_name, desc, variant='wrapped_ptr'):
-    cpp_type_expr = Named([cpp_type_name])
-    kl_type_name = cpp_type_name
-    if variant == 'in_place_struct':
-      self.type_mgr.add_selector(
-        InPlaceStructSelector(
-          self.jinjenv,
-          [cpp_type_name],
-          cpp_type_expr,
-          )
+  def add_wrapped_ptr(self, kl_type_name, cpp_type_name=None):
+    if not cpp_type_name:
+      cpp_type_name = kl_type_name
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
+    self.type_mgr.add_selector(
+      WrappedPtrSelector(
+        self.jinjenv,
+        kl_type_name,
+        [cpp_type_name],
+        cpp_type_expr,
+        False, #is_abstract,
+        False, #no_copy_constructor,
         )
-    else:
-      self.type_mgr.add_selector(
-        WrappedPtrSelector(
-          self.jinjenv,
-          [cpp_type_name],
-          cpp_type_expr,
-          False, #is_abstract,
-          False, #no_copy_constructor,
-          )
-        )
+      )
     record = Record(
       self,
-      desc,
+      "WrappedPtr: %s -> %s" % (kl_type_name, cpp_type_name),
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       [], # base_classes
@@ -218,8 +216,41 @@ class Ext:
     self.decls.append(record)
     return record
 
+  def add_record(self, kl_type_name, desc, cpp_type_name=None, variant='wrapped_ptr'):
+    if not cpp_type_name:
+      cpp_type_name = kl_type_name
+    cpp_type_expr = Named([cpp_type_name])
+    if variant == 'in_place_struct':
+      self.type_mgr.add_selector(
+        InPlaceStructSelector(
+          self.jinjenv,
+          [cpp_type_name],
+          cpp_type_expr,
+          )
+        )
+    else:
+      self.type_mgr.add_selector(
+        WrappedPtrSelector(
+          self.jinjenv,
+          kl_type_name,
+          [cpp_type_name],
+          cpp_type_expr,
+          False, #is_abstract,
+          False, #no_copy_constructor,
+          )
+        )
+    record = Record(
+      self,
+      desc,
+      kl_type_name,
+      self.type_mgr.get_dqti(cpp_type_expr).type_info,
+      [], # base_classes
+      )
+    self.decls.append(record)
+    return record
+
   def add_class(self, cpp_type_name, variant='wrapped_ptr'):
-    return self.add_record(cpp_type_name, "class '%s'" % cpp_type_name, variant)
+    return self.add_record(cpp_type_name, "class '%s'" % cpp_type_name, variant=variant)
 
   def add_struct(self, cpp_type_name, variant='wrapped_ptr'):
-    return self.add_record(cpp_type_name, "struct '%s'" % cpp_type_name, variant)
+    return self.add_record(cpp_type_name, "struct '%s'" % cpp_type_name, variant=variant)

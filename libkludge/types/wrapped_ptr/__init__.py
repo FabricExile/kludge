@@ -11,12 +11,24 @@ class WrappedPtrTypeInfo(TypeInfo):
 
   can_in_place = True
 
-  def __init__(self, jinjenv, nested_name, undq_cpp_type_expr, is_abstract, no_copy_constructor):
+  def __init__(
+    self,
+    jinjenv,
+    kl_type_name,
+    nested_name,
+    undq_cpp_type_expr,
+    is_abstract,
+    no_copy_constructor,
+    kl_base_name=None,
+    kl_suffix=None,
+    ):
     TypeInfo.__init__(
       self,
       jinjenv,
       nested_name = nested_name,
       lib_expr = undq_cpp_type_expr,
+      kl_name_base = kl_type_name,
+      kl_name_suffix = '',
       )
     self.lib.is_abstract = is_abstract
     self.lib.no_copy_constructor = no_copy_constructor
@@ -29,10 +41,19 @@ class WrappedPtrTypeInfo(TypeInfo):
 
 class WrappedPtrSelector(Selector):
 
-  def __init__(self, jinjenv, nested_name, cpp_type_expr, is_abstract, no_copy_constructor):
+  def __init__(
+    self,
+    jinjenv,
+    kl_type_name,
+    nested_name,
+    cpp_type_expr,
+    is_abstract,
+    no_copy_constructor,
+    ):
     Selector.__init__(self, jinjenv)
+    self.kl_type_name = kl_type_name
     self.nested_name = nested_name
-    self.cpp_type_name = str(cpp_type_expr)
+    self.cpp_type_expr = cpp_type_expr
     self.is_abstract = is_abstract
     self.no_copy_constructor = no_copy_constructor
 
@@ -41,17 +62,20 @@ class WrappedPtrSelector(Selector):
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     if (isinstance(cpp_type_expr, Named) or isinstance(cpp_type_expr, Template))\
-      and str(cpp_type_expr) == self.cpp_type_name:
-      return DirQualTypeInfo(
+      and cpp_type_expr == self.cpp_type_expr:
+      print "%s, %s" % (str(self.cpp_type_expr), str(self.cpp_type_expr))
+      result = DirQualTypeInfo(
         dir_qual.direct,
         WrappedPtrTypeInfo(
           self.jinjenv,
+          self.kl_type_name,
           self.nested_name,
           cpp_type_expr.make_unqualified(),
           self.is_abstract,
           self.no_copy_constructor,
           )
         )
+      return result
 
     is_reference = isinstance(cpp_type_expr, ReferenceTo)
     is_pointer = isinstance(cpp_type_expr, PointerTo)
@@ -66,7 +90,7 @@ class WrappedPtrSelector(Selector):
       and (isinstance(cpp_type_expr.pointee, Named) or \
         isinstance(cpp_type_expr.pointee, Template)):
       undq_cpp_type_expr, _ = cpp_type_expr.pointee.get_undq_type_expr_and_dq()
-      if str(undq_cpp_type_expr) == self.cpp_type_name:
+      if undq_cpp_type_expr == self.cpp_type_expr:
         if is_pointer:
           if cpp_type_expr.pointee.is_const:
             dq = dir_qual.const_pointer

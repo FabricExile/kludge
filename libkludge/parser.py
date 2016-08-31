@@ -826,6 +826,7 @@ fabricBuildEnv.SharedLibrary(
                 self.type_mgr.add_selector(
                     WrappedPtrSelector(
                         self.jinjenv,
+                        std(cpp_type_expr),
                         record_namespace_path,
                         cpp_type_expr,
                         is_abstract,

@@ -3,7 +3,6 @@
 #
 
 import abc
-from test import Test
 
 class Decl(object):
   def __init__(
@@ -14,7 +13,6 @@ class Decl(object):
     self.ext = ext
     self.desc = desc
     self.cpp_local_includes = []
-    self.tests = []
 
   def add_cpp_local_include(self, cpp_local_include):
     self.cpp_local_includes.append(cpp_local_include)
@@ -25,10 +23,7 @@ class Decl(object):
     return None
 
   def add_test(self, kl, out):
-    self.tests.append(Test(
-      self.get_test_name(),
-      self.ext.jinjenv, kl, out,
-      ))
+    self.ext.add_test(self.get_test_name(), kl, out)
 
   @abc.abstractmethod
   def get_test_name(self):

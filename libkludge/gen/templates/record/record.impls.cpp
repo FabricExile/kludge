@@ -52,7 +52,7 @@ FABRIC_EXT_EXPORT void
     )
 {
     {{macros.cpp_call_pre(ctor.result, ctor.params) | indent(4)}}
-    {{record.mutable_this.render_new()}} ::{{ctor.this.type_info.lib.name.base}}(
+    {{record.mutable_this.render_new()}}(
         {{macros.cpp_call_args(ctor.params) | indent(8)}}
         );
     {{macros.cpp_call_post(ctor.result, ctor.params) | indent(4)}}

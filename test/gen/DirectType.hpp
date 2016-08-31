@@ -25,7 +25,9 @@ public:
     : floatValue( that.floatValue )
     , stringValue( that.stringValue )
     , pri_intValue( that.pri_intValue )
-    {}
+  {
+    std::cout << "Class::Class(Class const &)\n" << std::flush;
+  }
   ~Class()
   {
     std::cout << "Class::~Class()\n" << std::flush;
@@ -33,6 +35,7 @@ public:
 
   Class &operator=( Class const &that )
   {
+    std::cout << "Class::operator=(Class const &)\n" << std::flush;
     floatValue = that.floatValue;
     stringValue = that.stringValue;
     pri_intValue = that.pri_intValue;

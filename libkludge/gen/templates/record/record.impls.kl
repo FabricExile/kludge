@@ -23,13 +23,20 @@
 {# Constructors                                                       #}
 {######################################################################}
 {% for ctor in record.ctors %}
-{{record.this_type_info.kl.name.compound}}(
+{{ctor.this.type_info.kl.name.compound}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{ctor.edk_symbol_name}}";
 
 {% endfor %}
+{# Always include copy constructor #}
+{{record.this_type_info.kl.name.compound}}(
+    {% for param in record.copy_params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) = "{{record.copy_ctor_edk_symbol_name}}";
+
 {######################################################################}
 {# Destructor                                                         #}
 {######################################################################}
@@ -68,10 +75,15 @@
 {# Assignment Operators                                               #}
 {######################################################################}
 {% for ass_op in record.ass_ops %}
-{{record.this_type_info.kl.name.compound}}.{{ass_op.op}}(
+{{ass_op.this.type_info.kl.name.compound}}.{{ass_op.op}}(
     {{ass_op.params[0].render_kl() | indent(4)}}
     ) = "{{ass_op.edk_symbol_name}}";
 
 {% endfor %}
+{# Always render simple assignment #}
+{{record.this_type_info.kl.name.compound}}.=(
+    {{record.copy_params[0].render_kl() | indent(4)}}
+    ) = "{{record.simple_ass_op_edk_symbol_name}}";
+
 {######################################################################}
 {% endblock body %}

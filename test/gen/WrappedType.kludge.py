@@ -11,8 +11,10 @@ report("c.get_floatValue() = " + c.get_floatValue());
 report("c.get_stringValue() = " + c.get_stringValue());
 """, """
 Class::Class(3.14, hello, 42)
+Wrapper::Wrapper(Ty *)
 c.get_floatValue() = +3.14
 c.get_stringValue() = hello
+Wrapper::~Wrapper()
 Class::~Class()
 """)
 ty.add_method('publicMethod')\
@@ -22,7 +24,9 @@ Class c(3.14, "hello", 42);
 report("c.publicMethod() = " + c.publicMethod());
 """, """
 Class::Class(3.14, hello, 42)
+Wrapper::Wrapper(Ty *)
 c.publicMethod() = hello
+Wrapper::~Wrapper()
 Class::~Class()
 """)
 ty.set_default_access(MemberAccess.public)
@@ -38,7 +42,9 @@ ty.add_method(
 Class_PrintValues(Class(1.32, "hoo", 23));
 """, """
 Class::Class(1.32, hoo, 23)
+Wrapper::Wrapper(Ty *)
 1.32 hoo 23
+Wrapper::~Wrapper()
 Class::~Class()
 """)
 

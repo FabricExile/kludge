@@ -44,6 +44,33 @@ class Record(Decl):
     self.block_empty_ctor = block_empty_ctor
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
+    copy_param_cpp_type_name = this_type_info.lib.name.compound + ' const &'
+    self.copy_params = [
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse(copy_param_cpp_type_name)
+          ),
+        'that'
+        )
+      ]
+  
+  @property
+  def copy_ctor_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_type_name + '__copy_ctor'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    for param in self.copy_params:
+      h.update(param.type_info.edk.name.toplevel)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
+  
+  @property
+  def simple_ass_op_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_type_name + '__simple_ass_op'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    for param in self.copy_params:
+      h.update(param.type_info.edk.name.toplevel)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   def set_default_access(self, access):
     self.default_access = access
@@ -88,7 +115,6 @@ class Record(Decl):
     def __init__(self, record):
       self._record = record
       self.base_edk_symbol_name = record.kl_type_name + '__ctor'
-      self.result = None
       self.this = self._record.mutable_this
       self.params = []
 

@@ -46,8 +46,23 @@ class ThisCodec:
       "this": self,
       })
 
+  def render_copy_begin(self):
+    return self.type_info._render("repr", "copy_begin", "cpp", {
+      "this": self,
+      })
+
+  def render_copy_end(self):
+    return self.type_info._render("repr", "copy_end", "cpp", {
+      "this": self,
+      })
+
   def render_class_name(self):
     return self.type_info._render("repr", "class_name", "cpp", {
+      "this": self,
+      })
+
+  def render_wrapper_ref(self):
+    return self.type_info._render("repr", "wrapper_ref", "cpp", {
       "this": self,
       })
 

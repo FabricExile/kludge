@@ -17,7 +17,9 @@ public:
   }
   Class( Class const &that )
     : intValue( that.intValue ), floatValue( that.floatValue )
-    {}
+  {
+    std::cout<< "Class::Class(Class const &)\n" << std::flush;
+  }
   ~Class()
   {
     std::cout<< "Class::~Class()\n" << std::flush;
@@ -25,6 +27,7 @@ public:
 
   Class &operator=( Class const &that )
   {
+    std::cout<< "Class::operator=(Class const &)\n" << std::flush;
     intValue = that.intValue;
     floatValue = that.floatValue;
     return *this;

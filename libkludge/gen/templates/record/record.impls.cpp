@@ -4,6 +4,9 @@
 {% import "gen/macros.cpp" as macros %}
 {% extends "gen/decl/decl.impls.cpp" %}
 {% block body %}
+{######################################################################}
+{# Getters and Setters                                                #}
+{######################################################################}
 {% if record.include_getters_setters %}
 {% for member in record.members %}
 {% if member.is_public() %}
@@ -45,20 +48,36 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% endfor %}
 {% endif %}
+{######################################################################}
+{# Constructors                                                       #}
+{######################################################################}
 {% for ctor in record.ctors %}
 FABRIC_EXT_EXPORT void
 {{ctor.edk_symbol_name}}(
-    {{macros.edk_param_list(ctor.result, ctor.this, ctor.params) | indent(4)}}
+    {{macros.edk_param_list(None, ctor.this, ctor.params) | indent(4)}}
     )
 {
-    {{macros.cpp_call_pre(ctor.result, ctor.params) | indent(4)}}
+    {{macros.cpp_call_pre(None, ctor.params) | indent(4)}}
     {{record.mutable_this.render_new_begin() | indent(4)}}
         {{macros.cpp_call_args(ctor.params) | indent(8)}}
         {{record.mutable_this.render_new_end() | indent(8)}}
-    {{macros.cpp_call_post(ctor.result, ctor.params) | indent(4)}}
+    {{macros.cpp_call_post(None, ctor.params) | indent(4)}}
 }
 
 {% endfor %}
+{# Always include copy constructor #}
+FABRIC_EXT_EXPORT void
+{{record.copy_ctor_edk_symbol_name}}(
+    {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(None, record.copy_params) | indent(4)}}
+    {{record.mutable_this.render_copy_begin() | indent(4)}}
+        {{macros.cpp_call_args(record.copy_params) | indent(8)}}
+        {{record.mutable_this.render_copy_end() | indent(8)}}
+    {{macros.cpp_call_post(None, record.copy_params) | indent(4)}}
+}
+
 {% if record.include_dtor %}
 FABRIC_EXT_EXPORT void
 {{record.dtor_edk_symbol_name}}(
@@ -69,6 +88,9 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
+{######################################################################}
+{# Methods                                                            #}
+{######################################################################}
 {% for method in record.methods %}
 FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {{method.edk_symbol_name}}(
@@ -124,5 +146,17 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endfor %}
+{# Always render simple assignment #}
+FABRIC_EXT_EXPORT void
+{{record.simple_ass_op_edk_symbol_name}}(
+    {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(None, record.copy_params) | indent(4)}}
+    {{record.mutable_this.render_wrapper_ref()}} =
+        {{macros.cpp_call_args(record.copy_params) | indent(8)}};
+    {{macros.cpp_call_post(None, record.copy_params) | indent(4)}}
+}
+
 
 {% endblock body %}

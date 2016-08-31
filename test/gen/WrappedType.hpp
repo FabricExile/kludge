@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 template<typename Ty>
 class Wrapper
@@ -11,18 +12,31 @@ class Wrapper
 public:
 
   Wrapper()
-    : m_ptr( 0 ) {}
+    : m_ptr( 0 )
+  {
+    std::cout << "Wrapper::Wrapper()\n" << std::flush;
+  }
   Wrapper( Ty *ptr )
     : m_ptr( ptr )
-    { if ( m_ptr ) m_ptr->retain(); }
+  {
+    std::cout << "Wrapper::Wrapper(Ty *)\n" << std::flush;
+    if ( m_ptr ) m_ptr->retain();
+  }
   Wrapper( Wrapper const &that )
     : m_ptr( that.m_ptr )
-    { if ( m_ptr ) m_ptr->retain(); }
+  {
+    std::cout << "Wrapper::Wrapper(Wrapper const &)\n" << std::flush;
+    if ( m_ptr ) m_ptr->retain();
+  }
   ~Wrapper()
-    { if ( m_ptr ) m_ptr->release(); }
+  {
+    std::cout << "Wrapper::~Wrapper()\n" << std::flush;
+    if ( m_ptr ) m_ptr->release();
+  }
 
   Wrapper &operator=( Wrapper const &that )
   {
+    std::cout << "Wrapper::operator=(Wrapper const &)\n" << std::flush;
     if ( m_ptr )
       m_ptr->release();
     m_ptr = that.m_ptr;
@@ -59,9 +73,18 @@ public:
   {
     std::cout << "Class::Class(" << _floatValue << ", " << _stringValue << ", " << _intValue << ")\n" << std::flush;
   }
+  Class( Class const &that )
+  {
+    assert( false );
+  }
   ~Class()
   {
     std::cout << "Class::~Class()\n" << std::flush;
+  }
+
+  Class &operator=(Class const &that)
+  {
+    assert( false );
   }
 
   static void PrintValues( Wrapper<Class> const &that )

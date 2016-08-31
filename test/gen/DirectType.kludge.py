@@ -1,6 +1,12 @@
 ext.add_cpp_quoted_include('DirectType.hpp')
 
 ty = ext.add_direct_type('Class')
+ty.set_default_access(MemberAccess.public)
+ty.add_member('floatValue', 'float')
+ty.add_member('stringValue', 'std::string')
+ty.set_default_access(MemberAccess.private)
+ty.add_member('pri_intValue', 'int')
+
 ty.add_ctor()
 ty.add_ctor(['float', 'std::string const &', 'int'])\
   .add_test("""
@@ -23,11 +29,7 @@ Class::Class(3.14, hello, 42)
 c.publicMethod() = hello
 Class::~Class()
 """)
-ty.set_default_access(MemberAccess.public)
-ty.add_member('floatValue', 'float')
-ty.add_member('stringValue', 'std::string')
-ty.set_default_access(MemberAccess.private)
-ty.add_member('pri_intValue', 'int')
+
 ty.add_method(
   'PrintValues',
   params = ['Class const &'],
@@ -39,19 +41,18 @@ Class::Class(1.32, hoo, 23)
 1.32 hoo 23
 Class::~Class()
 """)
-#   Class( Class const &that )
-#     : floatValue( that.floatValue )
-#     , stringValue( that.stringValue )
-#     , pri_intValue( that.pri_intValue )
-#     {}
 
-#   Class &operator=( Class const &that )
-#   {
-#     floatValue = that.floatValue;
-#     stringValue = that.stringValue;
-#     pri_intValue = that.pri_intValue;
-#     return *this;
-#   }
+ty.add_test("""
+Class c1(3.14, "hello", 42);
+Class c2 = c1;
+c1 = c2;
+""", """
+Class::Class(3.14, hello, 42)
+Class::Class(Class const &)
+Class::operator=(Class const &)
+Class::~Class()
+Class::~Class()
+""")
 
 #   void changeValues( Class &that )
 #   {

@@ -22,7 +22,9 @@ class Record(Decl):
     kl_type_name,
     this_type_info,
     base_classes,
-    block_empty_ctor = False,
+    include_empty_ctor = True,
+    include_copy_ctor = True,
+    include_simple_ass_op = True,
     include_getters_setters = True,
     include_dtor = True,
     ):
@@ -41,7 +43,9 @@ class Record(Decl):
     self.mutable_this = ThisCodec(this_type_info, self.members, True)
     self.base_classes = base_classes
     self.default_access = MemberAccess.public
-    self.block_empty_ctor = block_empty_ctor
+    self.include_empty_ctor = include_empty_ctor
+    self.include_copy_ctor = include_copy_ctor
+    self.include_simple_ass_op = include_simple_ass_op
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
     copy_param_cpp_type_name = this_type_info.lib.name.compound + ' const &'
@@ -53,6 +57,13 @@ class Record(Decl):
         'that'
         )
       ]
+  
+  @property
+  def empty_ctor_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_type_name + '__empty_ctor'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
   
   @property
   def copy_ctor_edk_symbol_name(self):
@@ -153,6 +164,8 @@ class Record(Decl):
     ctor = self.Ctor(self)
     for param_cpp_type_name in param_cpp_type_names:
       ctor.add_param(param_cpp_type_name)
+    if len(ctor.params) == 0:
+      self.include_empty_ctor = False
     self.ctors.append(ctor)
     return ctor
 

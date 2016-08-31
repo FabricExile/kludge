@@ -283,6 +283,9 @@ class Ext:
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       [], # base_classes
+      include_empty_ctor = False,
+      include_copy_ctor = False,
+      include_simple_ass_op = False,
       include_getters_setters = False,
       include_dtor = False,
       )

@@ -20,8 +20,18 @@
 {% endfor %}
 {% endif %}
 {######################################################################}
-{# Constructors                                                       #}
+{# Constructors and Destructor                                        #}
 {######################################################################}
+{% if record.include_empty_ctor %}
+{{record.this_type_info.kl.name.compound}}() = "{{record.empty_ctor_edk_symbol_name}}";
+
+{% endif %}
+{% if record.include_copy_ctor %}
+{{record.this_type_info.kl.name.compound}}(
+    {{record.copy_params[0].render_kl() | indent(4)}}
+    ) = "{{record.copy_ctor_edk_symbol_name}}";
+
+{% endif %}
 {% for ctor in record.ctors %}
 {{ctor.this.type_info.kl.name.compound}}(
     {% for param in ctor.params %}
@@ -30,16 +40,6 @@
     ) = "{{ctor.edk_symbol_name}}";
 
 {% endfor %}
-{# Always include copy constructor #}
-{{record.this_type_info.kl.name.compound}}(
-    {% for param in record.copy_params %}
-    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
-    {% endfor %}
-    ) = "{{record.copy_ctor_edk_symbol_name}}";
-
-{######################################################################}
-{# Destructor                                                         #}
-{######################################################################}
 {% if record.include_dtor %}
 ~{{record.this_type_info.kl.name.compound}}() = "{{record.dtor_edk_symbol_name}}";
 
@@ -80,10 +80,11 @@
     ) = "{{ass_op.edk_symbol_name}}";
 
 {% endfor %}
-{# Always render simple assignment #}
+{% if record.include_simple_ass_op %}
 {{record.this_type_info.kl.name.compound}}.=(
     {{record.copy_params[0].render_kl() | indent(4)}}
     ) = "{{record.simple_ass_op_edk_symbol_name}}";
 
+{% endif %}
 {######################################################################}
 {% endblock body %}

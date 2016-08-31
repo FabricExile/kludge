@@ -11,10 +11,12 @@
 {{ ", " if need_comma else "" }}{{this_codec.render_param_edk()}}
     {% set need_comma = True %}
   {% endif %}
-  {% for param in params %}
+  {% if params %}
+    {% for param in params %}
 {{ "," if loop.first and need_comma else "" }}
 {{ param.render_edk() }}{{ "," if not loop.last else "" }}
-  {% endfor %}
+    {% endfor %}
+  {% endif %}
 {% endmacro %}
 
 {% macro cpp_call_pre(result_codec, params) %}
@@ -22,9 +24,11 @@
 {{ result_codec.render_indirect_init_edk() }}
 {% endif %}
 
-  {% for param in params %}
+  {% if params %}
+    {% for param in params %}
 {{ param.render_edk_to_lib_decl() }}
-  {% endfor %}
+    {% endfor %}
+  {% endif %}
   {% if result_codec %}
 
 {{ result_codec.render_decl_and_assign_lib() }}
@@ -32,9 +36,11 @@
 {% endmacro %}
 
 {% macro cpp_call_args(params) %}
-  {% for param in params %}
+  {% if params %}
+    {% for param in params %}
 {{param.render_lib()}}{{"," if not loop.last else ""}}
-  {% endfor %}
+    {% endfor %}
+  {% endif %}
 {% endmacro %}
 
 {% macro cpp_call_post(result_codec, params) %}

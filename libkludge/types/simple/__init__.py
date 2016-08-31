@@ -92,19 +92,19 @@ class SimpleSelector(Selector):
           dir_qual.direct,
           simple_type_info_gen(self.jinjenv)
           )
-    # if isinstance(cpp_type_expr, PointerTo) \
-    #   and isinstance(cpp_type_expr.pointee, Direct):
-    #   undq_cpp_type_expr = cpp_type_expr.pointee.make_unqualified()
-    #   simple_type_info_gen = self.type_name_lib_undq_to_simple_type_info_gen.get(undq_cpp_type_expr.get_desc())
-    #   if simple_type_info_gen:
-    #     if cpp_type_expr.pointee.is_const:
-    #       dq = dir_qual.const_pointer
-    #     else:
-    #       dq = dir_qual.mutable_pointer
-    #     return DirQualTypeInfo(
-    #       dq,
-    #       simple_type_info_gen(self.jinjenv)
-    #       )
+    if isinstance(cpp_type_expr, PointerTo) \
+      and isinstance(cpp_type_expr.pointee, Direct):
+      undq_cpp_type_expr = cpp_type_expr.pointee.make_unqualified()
+      simple_type_info_gen = self.type_name_lib_undq_to_simple_type_info_gen.get(undq_cpp_type_expr.get_desc())
+      if simple_type_info_gen:
+        if cpp_type_expr.pointee.is_const:
+          dq = dir_qual.const_pointer
+        else:
+          dq = dir_qual.mutable_pointer
+        return DirQualTypeInfo(
+          dq,
+          simple_type_info_gen(self.jinjenv)
+          )
     if isinstance(cpp_type_expr, ReferenceTo) \
       and isinstance(cpp_type_expr.pointee, Direct):
       undq_cpp_type_expr = cpp_type_expr.pointee.make_unqualified()

@@ -64,6 +64,13 @@ public:
     std::cout << "Class::~Class()\n" << std::flush;
   }
 
+  static void PrintValues( Wrapper<Class> const &that )
+  {
+    printf("%.2f %s %d\n", that->floatValue, that->stringValue.c_str(),
+           that->pri_intValue);
+    fflush( stdout );
+  }
+
   void retain()
     { ++pri_refCount; }
   void release()

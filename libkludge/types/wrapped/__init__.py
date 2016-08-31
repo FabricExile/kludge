@@ -38,6 +38,7 @@ class WrappedTypeInfo(TypeInfo):
     rules["result"]["decl_and_assign_lib"] = "types/builtin/wrapped/result"
     rules["repr"]["new_begin"] = "types/builtin/wrapped/repr"
     rules["repr"]["new_end"] = "types/builtin/wrapped/repr"
+    rules["repr"]["class_name"] = "types/builtin/wrapped/repr"
     rules["repr"]["ref"] = "types/builtin/wrapped/repr"
     rules["repr"]["member_ref"] = "types/builtin/wrapped/repr"
     return rules
@@ -72,6 +73,42 @@ class WrappedSelector(Selector):
           self.kl_type_name,
           self.nested_name,
           self.cpp_type_expr,
+          self.is_abstract,
+          self.no_copy_constructor,
+          )
+        )
+
+    if isinstance(cpp_type_expr, PointerTo) \
+      and cpp_type_expr.pointee.make_unqualified() == self.cpp_type_expr:
+      if cpp_type_expr.pointee.is_const:
+        dq = dir_qual.const_pointer
+      else:
+        dq = dir_qual.mutable_pointer
+      return DirQualTypeInfo(
+        dq,
+        WrappedTypeInfo(
+          self.jinjenv,
+          self.kl_type_name,
+          self.nested_name,
+          cpp_type_expr.pointee.make_unqualified(),
+          self.is_abstract,
+          self.no_copy_constructor,
+          )
+        )
+
+    if isinstance(cpp_type_expr, ReferenceTo) \
+      and cpp_type_expr.pointee.make_unqualified() == self.cpp_type_expr:
+      if cpp_type_expr.pointee.is_const:
+        dq = dir_qual.const_reference
+      else:
+        dq = dir_qual.mutable_reference
+      return DirQualTypeInfo(
+        dq,
+        WrappedTypeInfo(
+          self.jinjenv,
+          self.kl_type_name,
+          self.nested_name,
+          cpp_type_expr.pointee.make_unqualified(),
           self.is_abstract,
           self.no_copy_constructor,
           )

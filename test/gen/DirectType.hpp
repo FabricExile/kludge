@@ -43,6 +43,7 @@ public:
   {
     printf("%.2f %s %d\n", that.floatValue, that.stringValue.c_str(),
            that.pri_intValue);
+    fflush( stdout );
   }
 
   void changeValues( Class &that )

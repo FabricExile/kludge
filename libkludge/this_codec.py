@@ -46,12 +46,17 @@ class ThisCodec:
       "this": self,
       })
 
+  def render_class_name(self):
+    return self.type_info._render("repr", "class_name", "cpp", {
+      "this": self,
+      })
+
   def render_ref(self):
     return self.type_info._render("repr", "ref", "cpp", {
       "this": self,
       })
 
-  def render_member_cpp(self, cpp_member_name):
+  def render_member_ref(self, cpp_member_name):
     return self.type_info._render("repr", "member_ref", "cpp", {
       "this": self,
       "cpp_member_name": cpp_member_name,

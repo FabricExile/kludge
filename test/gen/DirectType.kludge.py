@@ -1,10 +1,8 @@
 ext.add_cpp_quoted_include('DirectType.hpp')
 
 ty = ext.add_direct_type('Class')
-ty.add_ctor()\
-  .add_param('float')\
-  .add_param('std::string const &')\
-  .add_param('int')\
+ty.add_ctor()
+ty.add_ctor(['float', 'std::string const &', 'int'])\
   .add_test("""
 Class c(3.14, "hello", 42);
 report("c.get_floatValue() = " + c.get_floatValue());
@@ -30,23 +28,22 @@ ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
 ty.set_default_access(MemberAccess.private)
 ty.add_member('pri_intValue', 'int')
-
-#   Class() {}
-#   Class(
-#     float _floatValue,
-#     std::string const &_stringValue,
-#     int _intValue
-#     )
-#     : floatValue( _floatValue )
-#     , stringValue( _stringValue )
-#     , pri_intValue( _intValue )
-#     {}
+ty.add_method(
+  'PrintValues',
+  params = ['Class const &'],
+  this_access = ThisAccess.static,
+  ).add_test("""
+Class_PrintValues(Class(1.32, "hoo", 23));
+""", """
+Class::Class(1.32, hoo, 23)
+1.32 hoo 23
+Class::~Class()
+""")
 #   Class( Class const &that )
 #     : floatValue( that.floatValue )
 #     , stringValue( that.stringValue )
 #     , pri_intValue( that.pri_intValue )
 #     {}
-#   ~Class() {}
 
 #   Class &operator=( Class const &that )
 #   {
@@ -54,12 +51,6 @@ ty.add_member('pri_intValue', 'int')
 #     stringValue = that.stringValue;
 #     pri_intValue = that.pri_intValue;
 #     return *this;
-#   }
-
-#   static void PrintValues( Class const &that )
-#   {
-#     printf("%.2f %s %d\n", that.floatValue, that.stringValue.c_str(),
-#            that.pri_intValue);
 #   }
 
 #   void changeValues( Class &that )

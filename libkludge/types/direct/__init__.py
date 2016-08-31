@@ -35,8 +35,8 @@ class DirectTypeInfo(TypeInfo):
 
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)
-    rules["conv"]["*"] = "types/builtin/cpp_ptr/conv"
-    rules["result"]["indirect_init_edk"] = "types/builtin/cpp_ptr/result"
+    rules["conv"]["*"] = "types/builtin/direct/conv"
+    rules["result"]["indirect_init_edk"] = "types/builtin/direct/result"
     return rules
 
 class DirectSelector(Selector):

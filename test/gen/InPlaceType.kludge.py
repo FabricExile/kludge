@@ -1,6 +1,7 @@
 ext.add_cpp_quoted_include('InPlaceType.hpp')
 
 ty = ext.add_in_place_type('Class')
+ty.add_ctor()
 ty.add_ctor(['int', 'float']).add_test("""
 Class c(-7, 1.52);
 report("c.get_intValue() = " + c.get_intValue());
@@ -12,18 +13,16 @@ Class::~Class()
 ty.add_member('intValue', 'int')
 ty.set_default_access(MemberAccess.private)
 ty.add_member('floatValue', 'float')
+ty.add_method('GetStaticFloat', 'float', this_access=ThisAccess.static)\
+  .add_test("""
+report(Class_GetStaticFloat());
+""", """
++3.3
+""")
 
-# class Class {
-# public:
-
-#   Class() {}
-#   Class( int _intValue, float _floatValue )
-#     : intValue( _intValueu ), floatValue( _floatValue ) 
-#     {}
 #   Class( Class const &that )
 #     : intValue( that.intValue ), floatValue( that.floatValue )
 #     {}
-#   ~Class() {}
 
 #   Class &operator=( Class const &that )
 #   {
@@ -39,8 +38,6 @@ ty.add_member('floatValue', 'float')
 #     snprintf( buf, 256, "intValue:%d floatValue:%f", intValue, floatValue );
 #     return std::string( buf );
 #   }
-
-#   static float GetStaticFloat() { return 3.3; }
 
 # protected:
 

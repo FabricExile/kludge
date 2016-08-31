@@ -21,7 +21,7 @@ FABRIC_EXT_EXPORT
     {{member.result.render_indirect_init_edk() | indent(4)}}
 
     {{member.result.render_decl_and_assign_lib() | indent(4)}}
-        {{record.const_this.render_member_cpp(member.cpp_name)}};
+        {{record.const_this.render_member_ref(member.cpp_name)}};
 
     {{member.result.render_indirect_lib_to_edk() | indent(4)}}
     {{member.result.render_direct_return_edk() | indent(4)}}
@@ -37,7 +37,7 @@ FABRIC_EXT_EXPORT void
 {
     {{member.param.render_edk_to_lib_decl() | indent(4)}}
 
-    {{record.mutable_this.render_member_cpp(member.cpp_name)}} =
+    {{record.mutable_this.render_member_ref(member.cpp_name)}} =
         {{member.param.render_lib()}};
 }
         
@@ -82,9 +82,9 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
     {{macros.cpp_call_pre(method.result, method.params) | indent(4)}}
 
 {% if method.is_static %}
-    {{method.this.type_info.lib.name.compound}}::{{method.cpp_name}}(
+    {{method.this.render_class_name()}}::{{method.cpp_name}}(
 {% else %}
-    {{record.mutable_this.render_member_cpp(method.cpp_name)}}(
+    {{method.this.render_member_ref(method.cpp_name)}}(
 {% endif %}
         {{macros.cpp_call_args(method.params) | indent(8)}}
         );

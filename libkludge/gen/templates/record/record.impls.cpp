@@ -122,6 +122,21 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 
 {% endfor %}
 {######################################################################}
+{# Unary Operators                                                    #}
+{######################################################################}
+{% for uni_op in record.uni_ops %}
+FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
+{{uni_op.edk_symbol_name}}(
+    {{macros.edk_param_list(uni_op.result, uni_op.this, None) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(uni_op.result, None) | indent(4)}}
+        {{uni_op.op}}{{uni_op.this.render_ref()}};
+    {{macros.cpp_call_post(uni_op.result, None) | indent(4)}}
+}
+
+{% endfor %}
+{######################################################################}
 {# Binary Operators                                                   #}
 {######################################################################}
 {% for bin_op in record.bin_ops %}

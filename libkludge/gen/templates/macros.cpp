@@ -44,9 +44,11 @@
 {% endmacro %}
 
 {% macro cpp_call_post(result_codec, params) %}
-  {% for param in params %}
+  {% if params %}
+    {% for param in params %}
 {{ param.render_lib_to_edk() }}
-  {% endfor %}
+    {% endfor %}
+  {% endif %}
 
 {% if result_codec %}  
 {{ result_codec.render_indirect_lib_to_edk() }}

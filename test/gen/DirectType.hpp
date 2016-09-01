@@ -58,6 +58,8 @@ public:
 
   std::string const &publicMethod() { return stringValue; }
 
+  int getIntValue() const { return pri_intValue; }
+
   std::string getDesc() const {
     return "stringValue: " + stringValue;
   }
@@ -77,6 +79,9 @@ public:
 
   operator bool() const
     { return !!pri_intValue; }
+
+  Class &operator ++()
+    { ++pri_intValue; return *this; }
 
 protected:
 

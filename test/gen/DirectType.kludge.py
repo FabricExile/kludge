@@ -69,6 +69,18 @@ Class::~Class()
 Class::~Class()
 """)
 
+ty.add_const_method('getIntValue', 'int')
+ty.add_uni_op('++', 'next', 'bool')\
+  .add_test("""
+for ( Class c1(3.14, "hello", -2); c1; c1.next() )
+  report(c1.getIntValue());
+""", """
+Class::Class(3.14, hello, -2)
+-2
+-1
+Class::~Class()
+""")
+
 dty = ext.add_direct_type('DerivedClass', extends='Class')
 dty.add_ctor(['int'])
 dty.add_const_method('newMethod', 'int')

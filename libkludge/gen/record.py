@@ -34,6 +34,7 @@ class Record(Decl):
     self.members = []
     self.ctors = []
     self.methods = []
+    self.uni_ops = []
     self.bin_ops = []
     self.ass_ops = []
     self.casts = []
@@ -290,6 +291,64 @@ class Record(Decl):
 
   def add_static_method(self, name, returns=None, params=[]):
     return self.add_method(name, returns, params, ThisAccess.static)
+
+  class UniOp(object):
+
+    op_to_edk_op = {
+      "++": 'INC',
+      "--": 'DEC',
+    }
+
+    def __init__(
+      self,
+      record,
+      op,
+      kl_method_name,
+      result_cpp_type_name,
+      ):
+      self._record = record
+      self.base_edk_symbol_name = record.kl_type_name + '__uni_op_'+self.op_to_edk_op[op]
+      assert isinstance(kl_method_name, basestring)
+      self.kl_method_name = kl_method_name
+      self.op = op
+      self.this = record.mutable_this
+      assert isinstance(result_cpp_type_name, basestring)
+      self.result = ResultCodec(
+        self.ext.type_mgr.get_dqti(
+          self.ext.cpp_type_expr_parser.parse(result_cpp_type_name)
+          )
+        )
+
+    @property
+    def ext(self):
+      return self._record.ext
+    
+    @property
+    def edk_symbol_name(self):
+      h = hashlib.md5()
+      h.update(self.base_edk_symbol_name)
+      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+    def get_test_name(self):
+      return self.base_edk_symbol_name
+    
+    def add_test(self, kl, out):
+      self.ext.add_test(self.get_test_name(), kl, out)
+  
+  def add_uni_op(
+    self,
+    op,
+    kl_method_name,
+    returns,
+    ):
+    uni_op = self.UniOp(
+      self,
+      op,
+      kl_method_name,
+      returns,
+      )
+    self.uni_ops.append(uni_op)
+    return uni_op
 
   class BinOp(object):
 

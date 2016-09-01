@@ -61,6 +61,15 @@
 
 {% endfor %}
 {######################################################################}
+{# Unary Operators                                                    #}
+{######################################################################}
+{% for uni_op in record.uni_ops %}
+{{uni_op.result.type_info.kl.name.compound}}
+{{uni_op.this.type_info.kl.name.compound}}.{{uni_op.kl_method_name}}!(
+    ) = "{{uni_op.edk_symbol_name}}";
+
+{% endfor %}
+{######################################################################}
 {# Binary Operators                                                   #}
 {######################################################################}
 {% for bin_op in record.bin_ops %}

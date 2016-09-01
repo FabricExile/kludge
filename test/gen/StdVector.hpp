@@ -44,4 +44,9 @@ StringVector GetStringVector()
   return s;
 }
 
+void AppendToStringVector( std::vector<std::string> &v )
+{
+  v.push_back("appended string");
+}
+
 #endif

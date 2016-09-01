@@ -34,33 +34,18 @@ class StdVectorSelector(Selector):
     return "StdVector"
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    if isinstance(cpp_type_expr, Template) \
-      and len(cpp_type_expr.nested_name) == 2 \
-      and cpp_type_expr.nested_name[0] == "std" \
-      and cpp_type_expr.nested_name[1] == "vector" \
-      and len(cpp_type_expr.params) == 1:
-      element_dqti = type_mgr.get_dqti(cpp_type_expr.params[0])
+    undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
+    if isinstance(undq_cpp_type_expr, Template) \
+      and len(undq_cpp_type_expr.nested_name) == 2 \
+      and undq_cpp_type_expr.nested_name[0] == "std" \
+      and undq_cpp_type_expr.nested_name[1] == "vector" \
+      and len(undq_cpp_type_expr.params) == 1:
+      element_dqti = type_mgr.get_dqti(undq_cpp_type_expr.params[0])
       return DirQualTypeInfo(
-        dir_qual.direct,
+        dq,
         StdVectorTypeInfo(
           self.jinjenv,
-          cpp_type_expr.make_unqualified(),
-          element_dqti,
-          )
-        )
-    if isinstance(cpp_type_expr, ReferenceTo) \
-      and isinstance(cpp_type_expr.pointee, Template) \
-      and cpp_type_expr.pointee.is_const \
-      and len(cpp_type_expr.pointee.nested_name) == 2 \
-      and cpp_type_expr.pointee.nested_name[0] == "std" \
-      and cpp_type_expr.pointee.nested_name[1] == "vector" \
-      and len(cpp_type_expr.pointee.params) == 1:
-      element_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.params[0])
-      return DirQualTypeInfo(
-        dir_qual.const_reference,
-        StdVectorTypeInfo(
-          self.jinjenv,
-          cpp_type_expr.pointee.make_unqualified(),
+          undq_cpp_type_expr,
           element_dqti,
           )
         )

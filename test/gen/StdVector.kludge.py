@@ -40,3 +40,13 @@ report("GetStringVector() = " + GetStringVector());
 """, """
 GetStringVector() = ["hello","world"]
 """)
+
+ext.add_func('AppendToStringVector').add_param('std::vector<std::string> &').add_test("""
+String s[];
+s.push("before append");
+AppendToStringVector(s);
+report(s);
+""", """
+["before append","appended string"]
+""")
+  

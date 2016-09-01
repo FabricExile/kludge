@@ -1,10 +1,7 @@
 ext.add_cpp_quoted_include('WrappedType.hpp')
 
 ty = ext.add_wrapped_type('Wrapper<Class>')
-ty.add_ctor()\
-  .add_param('float')\
-  .add_param('std::string const &')\
-  .add_param('int')\
+ty.add_ctor(['float', 'std::string const &', 'int'])\
   .add_test("""
 Class c(3.14, "hello", 42);
 report("c.get_floatValue() = " + c.get_floatValue());

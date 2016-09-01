@@ -93,7 +93,7 @@ FABRIC_EXT_EXPORT void
     {{record.mutable_this.render_param_edk()}}
     )
 {
-    {{record.mutable_this.render_delete()}};
+    {{record.mutable_this.render_delete()}}
 }
 
 {% endif %}
@@ -162,8 +162,7 @@ FABRIC_EXT_EXPORT void
     )
 {
     {{macros.cpp_call_pre(None, record.copy_params) | indent(4)}}
-    {{record.mutable_this.render_wrapper_ref()}} =
-        {{macros.cpp_call_args(record.copy_params) | indent(8)}};
+    {{record.mutable_this.render_new_or_ass(record.copy_params[0]) | indent(4)}}
     {{macros.cpp_call_post(None, record.copy_params) | indent(4)}}
 }
 

@@ -36,6 +36,12 @@ class ThisCodec:
       "this": self,
       })
 
+  def render_new_or_ass(self, param):
+    return self.type_info._render("repr", "new_or_ass", "cpp", {
+      "this": self,
+      "param": param,
+      })
+
   def render_new_begin(self):
     return self.type_info._render("repr", "new_begin", "cpp", {
       "this": self,

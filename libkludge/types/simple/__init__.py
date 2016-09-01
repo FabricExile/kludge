@@ -20,6 +20,8 @@ class SimpleTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["result"]["*"] = "protocols/result/builtin/direct"
+    tds["repr"]["new_begin"] = "types/builtin/simple/repr"
+    tds["repr"]["new_end"] = "types/builtin/simple/repr"
     return tds
 
 class SimpleSelector(Selector):

@@ -54,10 +54,25 @@ Class::~Class()
 Class::~Class()
 """)
 
-ty = ext.add_direct_type('DerivedClass', extends='Class')
-ty.add_ctor(['int'])
-ty.add_const_method('newMethod', 'int')
-ty.add_test("""
+ty.add_cast('bool')\
+  .add_test("""
+Class c1(3.14, "hello", 4);
+report(!!c1);
+Class c2(3.14, "hello", 0);
+report(!!c2);
+""", """
+Class::Class(3.14, hello, 4)
+true
+Class::Class(3.14, hello, 0)
+false
+Class::~Class()
+Class::~Class()
+""")
+
+dty = ext.add_direct_type('DerivedClass', extends='Class')
+dty.add_ctor(['int'])
+dty.add_const_method('newMethod', 'int')
+dty.add_test("""
 DerivedClass dc(56);
 report("dc.newMethod() = " + dc.newMethod());
 report("dc.publicMethod() = " + dc.publicMethod());

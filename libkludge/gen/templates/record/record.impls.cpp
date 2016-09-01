@@ -164,6 +164,23 @@ FABRIC_EXT_EXPORT void
 
 {% endif %}
 {######################################################################}
+{# Casts                                                              #}
+{######################################################################}
+{% for cast in record.casts %}
+FABRIC_EXT_EXPORT void
+{{cast.edk_symbol_name}}(
+    {{macros.edk_param_list(None, cast.this, cast.params) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(None, cast.params) | indent(4)}}
+    {{cast.this.render_new_begin() | indent(4)}}
+        {{macros.cpp_call_args(cast.params) | indent(8)}}
+        {{cast.this.render_new_end() | indent(8)}}
+    {{macros.cpp_call_post(None, cast.params) | indent(4)}}
+}
+
+{% endfor %}
+{######################################################################}
 {# Index Operators                                                    #}
 {######################################################################}
 {% if record.get_ind_op_result %}

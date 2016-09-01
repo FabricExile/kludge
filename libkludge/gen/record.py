@@ -6,11 +6,12 @@ from decl import Decl
 from test import Test
 from member_access import MemberAccess
 from this_access import ThisAccess
-from libkludge.cpp_type_expr_parser import Void, Named
+from libkludge.cpp_type_expr_parser import Void, Named, DirQual, directions, qualifiers
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
+from libkludge.dir_qual_type_info import DirQualTypeInfo
 import hashlib
 
 class Record(Decl):
@@ -35,6 +36,7 @@ class Record(Decl):
     self.methods = []
     self.bin_ops = []
     self.ass_ops = []
+    self.casts = []
 
     self.kl_type_name = kl_type_name
     self.this_value_name = this_cpp_value_name
@@ -185,10 +187,11 @@ class Record(Decl):
     def add_test(self, kl, out):
       self.ext.add_test(self.get_test_name(), kl, out)
   
-  def add_ctor(self, param_cpp_type_names = []):
+  def add_ctor(self, params = []):
     ctor = self.Ctor(self)
-    for param_cpp_type_name in param_cpp_type_names:
-      ctor.add_param(param_cpp_type_name)
+    assert isinstance(params, list)
+    for param in params:
+      ctor.add_param(param)
     if len(ctor.params) == 0:
       self.include_empty_ctor = False
     self.ctors.append(ctor)
@@ -451,6 +454,60 @@ class Record(Decl):
       )
     self.ass_ops.append(ass_op)
     return ass_op
+
+  class Cast(object):
+
+    def __init__(
+      self,
+      record,
+      dst_cpp_type_name,
+      ):
+      self._record = record
+      assert isinstance(dst_cpp_type_name, basestring)
+      this_dqti = self.ext.type_mgr.get_dqti(
+        self.ext.cpp_type_expr_parser.parse(dst_cpp_type_name)
+        )
+      self.base_edk_symbol_name = this_dqti.type_info.kl.name.compound + '__cast'
+      self.this = ThisCodec(
+        this_dqti.type_info,
+        [],
+        True, # is_mutable
+        )
+      self.params = [
+        ParamCodec(
+          DirQualTypeInfo(
+            DirQual(directions.Reference, qualifiers.Const),
+            record.const_this.type_info,
+            ),
+          "that"
+          ),
+        ]
+
+    @property
+    def ext(self):
+      return self._record.ext
+    
+    @property
+    def edk_symbol_name(self):
+      h = hashlib.md5()
+      h.update(self.base_edk_symbol_name)
+      for param in self.params:
+        h.update(param.type_info.edk.name.toplevel)
+      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+    def get_test_name(self):
+      return self.base_edk_symbol_name
+    
+    def add_test(self, kl, out):
+      self.ext.add_test(self.get_test_name(), kl, out)
+  
+  def add_cast(
+    self,
+    dst,
+    ):
+    cast = self.Cast(self, dst)
+    self.casts.append(cast)
+    return cast
 
   def add_get_ind_op(
     self,

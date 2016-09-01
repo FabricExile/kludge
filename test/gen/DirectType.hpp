@@ -75,6 +75,9 @@ public:
     _intValue = pri_intValue;
   }
 
+  operator bool() const
+    { return !!pri_intValue; }
+
 protected:
 
   std::string const &protectedMethod() { return stringValue; }

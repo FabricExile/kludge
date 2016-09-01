@@ -28,7 +28,6 @@ class InPlaceTypeInfo(TypeInfo):
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["result"]["decl_and_assign_lib"] = "types/builtin/in_place/result"
     tds["result"]["indirect_lib_to_edk"] = "types/builtin/in_place/result"
-    tds["repr"]["*"] = "protocols/repr/builtin/inplace"
     return tds    
 
 class InPlaceSelector(Selector):

@@ -36,15 +36,7 @@ class WrappedTypeInfo(TypeInfo):
     rules["conv"]["*"] = "types/builtin/wrapped/conv"
     rules["result"]["indirect_init_edk"] = "types/builtin/wrapped/result"
     rules["result"]["decl_and_assign_lib"] = "types/builtin/wrapped/result"
-    rules["repr"]["new_begin"] = "types/builtin/wrapped/repr"
-    rules["repr"]["new_end"] = "types/builtin/wrapped/repr"
-    rules["repr"]["copy_ctor"] = "types/builtin/wrapped/repr"
-    rules["repr"]["simple_ass_op"] = "types/builtin/wrapped/repr"
-    rules["repr"]["class_name"] = "types/builtin/wrapped/repr"
-    rules["repr"]["wrapper_ref"] = "types/builtin/wrapped/repr"
-    rules["repr"]["ref"] = "types/builtin/wrapped/repr"
-    rules["repr"]["member_ref"] = "types/builtin/wrapped/repr"
-    rules["repr"]["delete"] = "types/builtin/wrapped/repr"
+    rules["repr"]["*"] = "types/builtin/wrapped/repr"
     return rules
 
 class WrappedSelector(Selector):

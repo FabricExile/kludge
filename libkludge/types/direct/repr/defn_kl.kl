@@ -8,6 +8,5 @@ struct {{this.type_info.kl.name.compound}}
 {% else %}
 {
   private Data cpp_ptr;
-  private Boolean is_owned;
 };
 {% endif %}

@@ -6,5 +6,8 @@ struct {{this.type_info.kl.name.compound}}
   : {{this.extends_this.type_info.kl.name.compound}}
   {};
 {% else %}
-  { protected Data cpp_ptr; };
+{
+  private Data cpp_ptr;
+  private Boolean is_owned;
+};
 {% endif %}

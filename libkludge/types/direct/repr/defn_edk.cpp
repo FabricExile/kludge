@@ -6,5 +6,8 @@ struct {{this.type_info.edk.name.local}}
   : {{this.extends_this.type_info.edk.name.local}}
   {};
 {% else %}
-  { ::{{this.type_info.lib.name.base}} *cpp_ptr{{this.type_info.lib.name.suffix}}; };
+{
+  ::{{this.type_info.lib.name.base}} *cpp_ptr{{this.type_info.lib.name.suffix}};
+  bool is_owned;
+};
 {% endif %}

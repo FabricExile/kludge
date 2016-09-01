@@ -67,9 +67,7 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
     )
 {
-    {{macros.cpp_call_pre(None, record.copy_params) | indent(4)}}
     {{record.mutable_this.render_copy_ctor(record.copy_params[0]) | indent(4)}}
-    {{macros.cpp_call_post(None, record.copy_params) | indent(4)}}
 }
 
 {% endif %}
@@ -161,9 +159,7 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
     )
 {
-    {{macros.cpp_call_pre(None, record.copy_params) | indent(4)}}
-    {{record.mutable_this.render_new_or_ass(record.copy_params[0]) | indent(4)}}
-    {{macros.cpp_call_post(None, record.copy_params) | indent(4)}}
+    {{record.mutable_this.render_simple_ass_op(record.copy_params[0]) | indent(4)}}
 }
 
 {% endif %}

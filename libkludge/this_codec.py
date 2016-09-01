@@ -36,8 +36,8 @@ class ThisCodec:
       "this": self,
       })
 
-  def render_new_or_ass(self, param):
-    return self.type_info._render("repr", "new_or_ass", "cpp", {
+  def render_simple_ass_op(self, param):
+    return self.type_info._render("repr", "simple_ass_op", "cpp", {
       "this": self,
       "param": param,
       })

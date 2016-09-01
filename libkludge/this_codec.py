@@ -46,14 +46,15 @@ class ThisCodec:
       "this": self,
       })
 
-  def render_copy_begin(self):
-    return self.type_info._render("repr", "copy_begin", "cpp", {
+  def render_empty_ctor(self):
+    return self.type_info._render("repr", "empty_ctor", "cpp", {
       "this": self,
       })
 
-  def render_copy_end(self):
-    return self.type_info._render("repr", "copy_end", "cpp", {
+  def render_copy_ctor(self, param):
+    return self.type_info._render("repr", "copy_ctor", "cpp", {
       "this": self,
+      "param": param,
       })
 
   def render_class_name(self):

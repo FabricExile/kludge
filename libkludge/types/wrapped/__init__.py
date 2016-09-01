@@ -42,6 +42,7 @@ class WrappedTypeInfo(TypeInfo):
     rules["repr"]["wrapper_ref"] = "types/builtin/wrapped/repr"
     rules["repr"]["ref"] = "types/builtin/wrapped/repr"
     rules["repr"]["member_ref"] = "types/builtin/wrapped/repr"
+    rules["repr"]["empty_ctor"] = "types/builtin/wrapped/repr"
     return rules
 
 class WrappedSelector(Selector):

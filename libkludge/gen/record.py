@@ -219,6 +219,7 @@ class Record(Decl):
       return self.base_edk_symbol_name
 
     def returns(self, cpp_type_name):
+      assert isinstance(cpp_type_name, basestring)
       self.result = ResultCodec(
         self.ext.type_mgr.get_dqti(
           self.ext.cpp_type_expr_parser.parse(cpp_type_name)
@@ -227,6 +228,7 @@ class Record(Decl):
       return self
 
     def add_param(self, cpp_type_name, cpp_name = None):
+      assert isinstance(cpp_type_name, basestring)
       if not isinstance(cpp_name, basestring):
         cpp_name = "arg%d" % len(self.params)
       self.params.append(
@@ -245,17 +247,28 @@ class Record(Decl):
   def add_method(
     self,
     name,
-    returns=None,
-    params=[],
-    this_access=ThisAccess.const,
+    returns = None,
+    params = [],
+    this_access = ThisAccess.const,
     ):
+    assert isinstance(name, basestring)
     method = self.Method(self, name, this_access=this_access)
     self.methods.append(method)
     if returns:
       method.returns(returns)
+    assert isinstance(params, list)
     for param in params:
       method.add_param(param)
     return method
+
+  def add_const_method(self, name, returns=None, params=[]):
+    return self.add_method(name, returns, params, ThisAccess.const)
+
+  def add_mutable_method(self, name, returns=None, params=[]):
+    return self.add_method(name, returns, params, ThisAccess.mutable)
+
+  def add_static_method(self, name, returns=None, params=[]):
+    return self.add_method(name, returns, params, ThisAccess.static)
 
   class BinOp(object):
 

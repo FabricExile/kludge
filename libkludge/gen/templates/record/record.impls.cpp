@@ -4,9 +4,10 @@
 {% import "gen/macros.cpp" as macros %}
 {% extends "gen/decl/decl.impls.cpp" %}
 {% block body %}
-{######################################################################}
-{# Getters and Setters                                                #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Getters and Setters
+////////////////////////////////////////////////////////////////////////
+
 {% if record.include_getters_setters %}
 {% for member in record.members %}
 {% if member.is_public() %}
@@ -48,9 +49,10 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% endfor %}
 {% endif %}
-{######################################################################}
-{# Constructors and Destructor                                        #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Constructors and Destructor
+////////////////////////////////////////////////////////////////////////
+
 {% if record.include_empty_ctor %}
 FABRIC_EXT_EXPORT void
 {{record.empty_ctor_edk_symbol_name}}(
@@ -95,9 +97,10 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
-{######################################################################}
-{# Methods                                                            #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Methods
+////////////////////////////////////////////////////////////////////////
+
 {% for method in record.methods %}
 FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {{method.edk_symbol_name}}(
@@ -121,9 +124,10 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 }
 
 {% endfor %}
-{######################################################################}
-{# Unary Operators                                                    #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Unary Operators
+////////////////////////////////////////////////////////////////////////
+
 {% for uni_op in record.uni_ops %}
 FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
 {{uni_op.edk_symbol_name}}(
@@ -136,9 +140,10 @@ FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
 }
 
 {% endfor %}
-{######################################################################}
-{# Binary Operators                                                   #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Binary Operators
+////////////////////////////////////////////////////////////////////////
+
 {% for bin_op in record.bin_ops %}
 FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 {{bin_op.edk_symbol_name}}(
@@ -152,9 +157,10 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 }
 
 {% endfor %}
-{######################################################################}
-{# Assignment Operators                                               #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Assignment Operators
+////////////////////////////////////////////////////////////////////////
+
 {% for ass_op in record.ass_ops %}
 FABRIC_EXT_EXPORT void
 {{ass_op.edk_symbol_name}}(
@@ -178,9 +184,10 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
-{######################################################################}
-{# Casts                                                              #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Casts
+////////////////////////////////////////////////////////////////////////
+
 {% for cast in record.casts %}
 FABRIC_EXT_EXPORT void
 {{cast.edk_symbol_name}}(
@@ -195,9 +202,26 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endfor %}
-{######################################################################}
-{# Index Operators                                                    #}
-{######################################################################}
+////////////////////////////////////////////////////////////////////////
+// Deref
+////////////////////////////////////////////////////////////////////////
+
+{% if record.deref_kl_method_name %}
+FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
+{{record.deref_edk_symbol_name}}(
+    {{macros.edk_param_list(record.deref_result, record.deref_this, None) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(record.deref_result, None) | indent(4)}}
+        *{{record.deref_this.render_ref() | indent(8)}};
+    {{macros.cpp_call_post(record.deref_result, None) | indent(4)}}
+}
+
+{% endif %}
+////////////////////////////////////////////////////////////////////////
+// Index Operators
+////////////////////////////////////////////////////////////////////////
+
 {% if record.get_ind_op_result %}
 FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
 {{record.get_ind_op_edk_symbol_name}}(

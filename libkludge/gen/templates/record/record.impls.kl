@@ -105,6 +105,15 @@
 
 {% endfor %}
 {######################################################################}
+{# Deref                                                              #}
+{######################################################################}
+{% if record.deref_kl_method_name %}
+{{record.deref_result.type_info.kl.name.compound}}
+{{record.deref_this.type_info.kl.name.compound}}.{{record.deref_kl_method_name}}(
+    ) = "{{record.deref_edk_symbol_name}}";
+
+{% endif %}
+{######################################################################}
 {# Index Operators                                                    #}
 {######################################################################}
 {% if record.get_ind_op_result %}

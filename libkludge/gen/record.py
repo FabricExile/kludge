@@ -38,6 +38,8 @@ class Record(Decl):
     self.bin_ops = []
     self.ass_ops = []
     self.casts = []
+    self.deref_kl_method_name = None
+    self.deref_result = None
 
     self.kl_type_name = kl_type_name
     self.this_value_name = this_cpp_value_name
@@ -616,6 +618,34 @@ class Record(Decl):
     else:
       self.set_ind_op_this = self.mutable_this
     return self
+
+  def add_deref(
+    self,
+    kl_method_name,
+    returns,
+    this_access = ThisAccess.const
+    ):
+    assert not self.deref_kl_method_name
+    assert isinstance(kl_method_name, basestring)
+    self.deref_kl_method_name = kl_method_name
+    assert isinstance(returns, basestring)
+    self.deref_result = ResultCodec(
+      self.ext.type_mgr.get_dqti(
+        self.ext.cpp_type_expr_parser.parse(returns)
+        )
+      )
+    if this_access == ThisAccess.mutable:
+      self.deref_this = self.mutable_this
+    else:
+      self.deref_this = self.const_this
+    return self
+    
+  @property
+  def deref_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_type_name + '__deref'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   @property
   def get_ind_op_edk_symbol_name(self):

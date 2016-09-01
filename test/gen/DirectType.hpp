@@ -83,6 +83,9 @@ public:
   Class &operator ++()
     { ++pri_intValue; return *this; }
 
+  int const &operator*() const
+    { return pri_intValue; }
+
 protected:
 
   std::string const &protectedMethod() { return stringValue; }

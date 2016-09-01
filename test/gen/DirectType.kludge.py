@@ -69,11 +69,11 @@ Class::~Class()
 Class::~Class()
 """)
 
-ty.add_const_method('getIntValue', 'int')
-ty.add_uni_op('++', 'next', 'bool')\
-  .add_test("""
+ty.add_uni_op('++', 'next', 'bool')
+ty.add_deref('deref', 'int const &')
+ty.add_test("""
 for ( Class c1(3.14, "hello", -2); c1; c1.next() )
-  report(c1.getIntValue());
+  report(c1.deref());
 """, """
 Class::Class(3.14, hello, -2)
 -2

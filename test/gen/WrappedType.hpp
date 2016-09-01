@@ -126,3 +126,25 @@ private:
 
   int pri_intValue;
 };
+
+
+class DerivedClass : public Class
+{
+public:
+
+  DerivedClass(
+    int _intValue
+    )
+    : Class( 3.14, "hello", _intValue )
+  {
+    std::cout << "DerivedClass::DerivedClass(" << _intValue << ")\n" << std::flush;
+  }
+
+  ~DerivedClass()
+  {
+    std::cout << "DerivedClass::~DerivedClass()\n" << std::flush;
+  }
+
+  int newMethod() const
+    { return -9; }
+};

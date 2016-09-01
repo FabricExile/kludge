@@ -12,14 +12,19 @@ class ThisCodec:
     type_info,
     members,
     is_mutable,
-    extras = {},
+    extends_this = None,
     ):
     self.value_name = this_cpp_value_name
     self.type_info = type_info
     self.members = members
     self.is_mutable = is_mutable
-    for k, v in extras.iteritems():
-      setattr(self, k, value)
+    self.extends_this = extends_this
+
+  @property
+  def base_this(self):
+    if self.extends_this:
+      return self.extends_this.base_this
+    return self
 
   def render_param_edk(self):
     return self.type_info._render("self", "param_edk", "cpp", {

@@ -1,6 +1,10 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-struct {{this.type_info.kl.name.compound}} {
-  private Data cpp_ptr;
-};
+struct {{this.type_info.kl.name.compound}}
+{% if this.extends_this %}
+  : {{this.extends_this.type_info.kl.name.compound}}
+  {};
+{% else %}
+  { protected Data cpp_ptr; };
+{% endif %}

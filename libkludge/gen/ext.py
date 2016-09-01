@@ -64,6 +64,7 @@ class Ext:
     self.kl_requires = []
     self.decls = []
     self.tests = []
+    self.cpp_type_name_to_record = {}
 
   @property
   def cpp_type_expr_parser(self):
@@ -200,18 +201,21 @@ class Ext:
       "InPlaceType: %s -> %s" % (kl_type_name, str(cpp_type_expr)),
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      [], # base_classes
       )
     self.decls.append(record)
+    self.cpp_type_name_to_record[cpp_type_name] = record
     return record
 
   def add_direct_type(
     self,
     cpp_type_name,
     kl_type_name = None,
+    extends = None
     ):
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_type_name = self.maybe_generate_kl_type_name(kl_type_name, cpp_type_expr)
+    if extends:
+      extends = self.cpp_type_name_to_record[extends]
     self.type_mgr.add_selector(
       DirectSelector(
         self.jinjenv,
@@ -227,20 +231,24 @@ class Ext:
       "DirectType: %s -> %s" % (kl_type_name, str(cpp_type_expr)),
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      [], # base_classes
+      extends = extends
       )
     self.decls.append(record)
+    self.cpp_type_name_to_record[cpp_type_name] = record
     return record
 
   def add_wrapped_type(
     self,
     cpp_type_name,
     kl_type_name = None,
+    extends = None
     ):
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     assert isinstance(cpp_type_expr, Template) \
       and len(cpp_type_expr.params) == 1
     kl_type_name = self.maybe_generate_kl_type_name(kl_type_name, cpp_type_expr.params[0])
+    if extends:
+      extends = self.cpp_type_name_to_record[extends]
     self.type_mgr.add_selector(
       WrappedSelector(
         self.jinjenv,
@@ -256,9 +264,10 @@ class Ext:
       "WrappedType: %s -> %s" % (kl_type_name, str(cpp_type_expr)),
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      [], # base_classes
+      extends = extends
       )
     self.decls.append(record)
+    self.cpp_type_name_to_record[cpp_type_name] = record
     return record
 
   def add_kl_ext_type_alias(
@@ -282,7 +291,6 @@ class Ext:
       "KLExtTypeAlias: %s -> %s[%s]" % (cpp_type_name, kl_ext_name, kl_type_name),
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      [], # base_classes
       include_empty_ctor = False,
       include_copy_ctor = False,
       include_simple_ass_op = False,
@@ -290,4 +298,5 @@ class Ext:
       include_dtor = False,
       )
     self.decls.append(record)
+    self.cpp_type_name_to_record[cpp_type_name] = record
     return record

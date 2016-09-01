@@ -68,6 +68,28 @@ Wrapper::~Wrapper()
 Class::~Class()
 """)
 
+ty = ext.add_wrapped_type('Wrapper<DerivedClass>', extends='Wrapper<Class>')
+ty.add_ctor(['int'])
+ty.add_const_method('newMethod', 'int')
+ty.add_test("""
+DerivedClass dc(56);
+report("dc.newMethod() = " + dc.newMethod());
+report("dc.publicMethod() = " + dc.publicMethod());
+Class c = dc;
+report("c.publicMethod() = " + c.publicMethod());
+""", """
+Class::Class(3.14, hello, 56)
+DerivedClass::DerivedClass(56)
+Wrapper::Wrapper(Ty *)
+dc.newMethod() = -9
+dc.publicMethod() = hello
+Wrapper::Wrapper(Ty *)
+c.publicMethod() = hello
+Wrapper::~Wrapper()
+Wrapper::~Wrapper()
+Class::~Class()
+""")
+
 #   Class() {}
 #   Class(
 #     float _floatValue,

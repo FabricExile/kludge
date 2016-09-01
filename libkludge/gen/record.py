@@ -21,7 +21,7 @@ class Record(Decl):
     desc,
     kl_type_name,
     this_type_info,
-    base_classes,
+    extends = None,
     include_empty_ctor = True,
     include_copy_ctor = True,
     include_simple_ass_op = True,
@@ -39,9 +39,27 @@ class Record(Decl):
     self.kl_type_name = kl_type_name
     self.this_value_name = this_cpp_value_name
     self.this_type_info = this_type_info
-    self.const_this = ThisCodec(this_type_info, self.members, False)
-    self.mutable_this = ThisCodec(this_type_info, self.members, True)
-    self.base_classes = base_classes
+    if extends:
+      extends_const_this = extends.const_this
+    else:
+      extends_const_this = None
+    self.const_this = ThisCodec(
+      this_type_info,
+      self.members,
+      False,
+      extends_this = extends_const_this
+      )
+    if extends:
+      extends_mutable_this = extends.mutable_this
+    else:
+      extends_mutable_this = None
+    self.mutable_this = ThisCodec(
+      this_type_info,
+      self.members,
+      True,
+      extends_this = extends_mutable_this
+      )
+    self.extends = extends
     self.default_access = MemberAccess.public
     self.include_empty_ctor = include_empty_ctor
     self.include_copy_ctor = include_copy_ctor

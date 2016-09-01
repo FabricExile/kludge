@@ -6,17 +6,17 @@ if ( !{{this.value_name.edk}}.cpp_ptr )
   if ( {{param.value_name.edk}}.cpp_ptr )
     {{this.value_name.edk}}.cpp_ptr =
       new ::{{this.type_info.lib.name.base}}(
-        *{{param.value_name.edk}}.cpp_ptr
+        *static_cast< ::{{this.type_info.lib.name.base}} const * >( {{param.value_name.edk}}.cpp_ptr )
         );
 }
 else
 {
   if ( {{param.value_name.edk}}.cpp_ptr )
-    *{{this.value_name.edk}}.cpp_ptr =
-        *{{param.value_name.edk}}.cpp_ptr;
+    *static_cast< ::{{this.type_info.lib.name.base}} * >( {{this.value_name.edk}}.cpp_ptr ) =
+        *static_cast< ::{{this.type_info.lib.name.base}} const * >( {{param.value_name.edk}}.cpp_ptr );
   else
   {
-    delete {{this.value_name.edk}}.cpp_ptr;
+    delete static_cast< ::{{this.type_info.lib.name.base}} * >( {{this.value_name.edk}}.cpp_ptr );
     {{this.value_name.edk}}.cpp_ptr = NULL;
   }
 }

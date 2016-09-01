@@ -54,6 +54,27 @@ Class::~Class()
 Class::~Class()
 """)
 
+ty = ext.add_direct_type('DerivedClass', extends='Class')
+ty.add_ctor(['int'])
+ty.add_const_method('newMethod', 'int')
+ty.add_test("""
+DerivedClass dc(56);
+report("dc.newMethod() = " + dc.newMethod());
+report("dc.publicMethod() = " + dc.publicMethod());
+Class c = dc;
+report("c.publicMethod() = " + c.publicMethod());
+""", """
+Class::Class(3.14, hello, 56)
+DerivedClass::DerivedClass(56)
+dc.newMethod() = -9
+dc.publicMethod() = hello
+Class::Class(Class const &)
+c.publicMethod() = hello
+Class::~Class()
+DerivedClass::~DerivedClass()
+Class::~Class()
+""")
+
 #   void changeValues( Class &that )
 #   {
 #     floatValue = that.floatValue;

@@ -59,6 +59,8 @@ class Ext:
     self.cpp_defines = []
     self.cpp_include_dirs = []
     self.cpp_includes = []
+    self.cpp_prologs = []
+    self.cpp_epilogs = []
     self.lib_dirs = []
     self.libs = []
     self.kl_requires = []
@@ -139,7 +141,13 @@ class Ext:
   def add_cpp_angled_include(self, filepath):
     self.debug("Extension: Adding C++ angled include '%s'" % filepath)
     self.cpp_includes.append(self.CPPInclude(filepath, is_angled=True))
-
+  
+  def add_cpp_prolog(self, cpp_prolog):
+    self.cpp_prologs.append(cpp_prolog)
+  
+  def add_cpp_epilog(self, cpp_epilog):
+    self.cpp_epilogs.append(cpp_epilog)
+  
   def add_lib_dir(self, lib_dir):
     self.lib_dirs.append(os.path.expandvars(lib_dir))
 

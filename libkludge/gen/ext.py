@@ -247,7 +247,7 @@ class Ext:
     ):
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     assert isinstance(cpp_type_expr, Named) \
-      and len(cpp_type_expr.components) == 1 \
+      and len(cpp_type_expr.components) >= 1 \
       and isinstance(cpp_type_expr.components[0], Template) \
       and len(cpp_type_expr.components[0].params) == 1 \
       and isinstance(cpp_type_expr.components[0].params[0], Named) \

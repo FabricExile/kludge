@@ -24,8 +24,9 @@ FABRIC_EXT_EXPORT
 {
     {{member.result.render_indirect_init_edk() | indent(4)}}
 
-    {{member.result.render_decl_and_assign_lib() | indent(4)}}
-        {{record.const_this.render_member_ref(member.cpp_name) | indent(8)}};
+    {{member.result.render_decl_and_assign_lib_begin() | indent(4)}}
+        {{record.const_this.render_member_ref(member.cpp_name) | indent(8)}}
+        {{member.result.render_decl_and_assign_lib_end() | indent(4)}}
 
     {{member.result.render_indirect_lib_to_edk() | indent(4)}}
     {{member.result.render_direct_return_edk() | indent(4)}}

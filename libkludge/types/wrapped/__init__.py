@@ -35,7 +35,8 @@ class WrappedTypeInfo(TypeInfo):
     rules = TypeInfo.build_codec_lookup_rules(self)
     rules["conv"]["*"] = "types/builtin/wrapped/conv"
     rules["result"]["indirect_init_edk"] = "types/builtin/wrapped/result"
-    rules["result"]["decl_and_assign_lib"] = "types/builtin/wrapped/result"
+    rules["result"]["decl_and_assign_lib_begin"] = "types/builtin/wrapped/result"
+    rules["result"]["decl_and_assign_lib_end"] = "types/builtin/wrapped/result"
     rules["repr"]["*"] = "types/builtin/wrapped/repr"
     return rules
 

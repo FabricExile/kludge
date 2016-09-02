@@ -23,7 +23,7 @@
   {% endfor %}
   {% if result_codec %}
 
-{{ result_codec.render_decl_and_assign_lib() }}
+{{ result_codec.render_decl_and_assign_lib_begin() }}
   {% endif %}
 {% endmacro %}
 
@@ -34,6 +34,10 @@
 {% endmacro %}
 
 {% macro cpp_call_post(result_codec, params) %}
+  {% if result_codec %}
+{{ result_codec.render_decl_and_assign_lib_end() }}
+
+  {% endif %}
   {% for param in params %}
 {{ param.render_lib_to_edk() }}
   {% endfor %}

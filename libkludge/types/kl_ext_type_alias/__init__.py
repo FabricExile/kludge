@@ -20,7 +20,8 @@ class KLExtTypeAliasTypeInfo(TypeInfo):
   def build_codec_lookup_rules(self):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none"
-    tds["result"]["decl_and_assign_lib"] = "types/builtin/kl_ext_type_alias/result"
+    tds["result"]["decl_and_assign_lib_begin"] = "types/builtin/kl_ext_type_alias/result"
+    tds["result"]["decl_and_assign_lib_end"] = "types/builtin/kl_ext_type_alias/result"
     tds["result"]["indirect_lib_to_edk"] = "types/builtin/kl_ext_type_alias/result"
     tds["repr"]["defn_kl"] = "types/builtin/kl_ext_type_alias/repr"
     return tds    

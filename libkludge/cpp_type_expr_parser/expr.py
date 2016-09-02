@@ -294,74 +294,96 @@ class FixedArrayOf(Direct):
   def __copy__(self):
     return FixedArrayOf(self.element, self.size)
 
-class Named(Direct):
+class Component(object):
 
-  def __init__(self, nested_name):
-    Direct.__init__(self)
-    if not isinstance(nested_name, list):
-      raise Exception("nested_name: expecting a list")
-    self.nested_name = nested_name
+  def __init__(self):
+    pass
 
-  @property
-  def name(self):
-    print "---------------------------------------------------------------------"
-    traceback.print_stack(file=sys.stdout)
-    print "---------------------------------------------------------------------"
-
-  def build_unqualified_desc(self):
-    return '::'.join(self.nested_name), ""
+  @abc.abstractmethod
+  def get_desc(self):
+    pass
 
   def tranform_names(self, cb):
-    self.nested_name = cb(self.nested_name)
+    pass
 
   def __eq__(self, other):
-    return Direct.__eq__(self, other) \
-      and self.nested_name == other.nested_name
+    return type(self) == type(other)
+
+  def __ne__(self, other):
+    return not self == other
+
+class Simple(Component):
+
+  def __init__(self, name):
+    Component.__init__(self)
+    if not isinstance(name, basestring):
+      raise Exception("name: expecting a string")
+    self.name = name
+
+  def get_desc(self):
+    return self.name
+
+  def __eq__(self, other):
+    return Component.__eq__(self, other) \
+      and self.name == other.name
 
   def __copy__(self):
-    return Named(self.nested_name)
+    return Simple(self.name)
 
-class Template(Direct):
+class Template(Component):
 
-  def __init__(self, nested_name, params):
-    Direct.__init__(self)
-    if not isinstance(nested_name, list):
-      raise Exception("nested_name: expecting a list")
-    self.nested_name = nested_name
+  def __init__(self, name, params):
+    Component.__init__(self)
+    if not isinstance(name, basestring):
+      raise Exception("name: expecting a string")
+    self.name = name
     if not isinstance(params, list):
       raise Exception("params: expecting a list")
     self.params = params
 
-  @property
-  def name(self):
-    print "---------------------------------------------------------------------"
-    traceback.print_stack(file=sys.stdout)
-    print "---------------------------------------------------------------------"
-
   def tranform_names(self, cb):
-    self.nested_name = cb(self.nested_name)
+    self.name = cb(self.name)
     for i in range(0, len(self.params)):
       self.params[i].tranform_names(cb)
 
-  def build_unqualified_desc(self):
-    descs = []
-    for param in self.params:
-      desc = ''
-      if isinstance(param, Named) or \
-          isinstance(param, Indirect) and isinstance(param.pointee, Named):
-        desc = '::'
-      desc += param.get_desc()
-      descs += [desc]
-    lhs = '::'.join(self.nested_name) + "< " + ", ".join(descs) + " >"
-    return lhs, ""
+  def get_desc(self):
+    return self.name + "< " + ", ".join(
+      [param.get_desc() for param in self.params]
+      ) + " >"
 
   def __eq__(self, other):
-    return Direct.__eq__(self, other) \
-      and self.nested_name == other.nested_name \
+    return Component.__eq__(self, other) \
+      and self.name == other.name \
       and self.params == other.params
 
   def __copy__(self):
     return Template(self.nested_name, self.params)
+
+class Named(Direct):
+
+  def __init__(self, components):
+    Direct.__init__(self)
+    assert isinstance(components, list)
+    for component in components:
+      assert isinstance(component, Component)
+    self.components = components
+
+  def tranform_names(self, cb):
+    self.components = cb(self.components)
+    for component in self.components:
+      component.tranform_names(cb)
+
+  def build_unqualified_desc(self):
+    return '::'.join(
+      [component.get_desc() for component in self.components]
+      ), ""
+
+  def __eq__(self, other):
+    return Direct.__eq__(self, other) \
+      and self.components == other.components
+
+  def __copy__(self):
+    return Named(self.components)
 
 class Indirect(Type):
 

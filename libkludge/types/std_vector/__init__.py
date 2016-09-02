@@ -35,12 +35,13 @@ class StdVectorSelector(Selector):
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
-    if isinstance(undq_cpp_type_expr, Template) \
-      and len(undq_cpp_type_expr.nested_name) == 2 \
-      and undq_cpp_type_expr.nested_name[0] == "std" \
-      and undq_cpp_type_expr.nested_name[1] == "vector" \
-      and len(undq_cpp_type_expr.params) == 1:
-      element_dqti = type_mgr.get_dqti(undq_cpp_type_expr.params[0])
+    if isinstance(undq_cpp_type_expr, Named) \
+      and len(undq_cpp_type_expr.components) == 2 \
+      and undq_cpp_type_expr.components[0] == Simple("std") \
+      and isinstance(undq_cpp_type_expr.components[1], Template) \
+      and undq_cpp_type_expr.components[1].name == "vector" \
+      and len(undq_cpp_type_expr.components[1].params) == 1:
+      element_dqti = type_mgr.get_dqti(undq_cpp_type_expr.components[1].params[0])
       return DirQualTypeInfo(
         dq,
         StdVectorTypeInfo(

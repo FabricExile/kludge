@@ -5,7 +5,7 @@
 import os, jinja2
 from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
-from libkludge.cpp_type_expr_parser import Named, Template, PointerTo
+from libkludge.cpp_type_expr_parser import Named, Simple, Template
 from record import Record
 from alias import Alias
 from func import Func
@@ -160,7 +160,7 @@ class Ext:
     return func
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
-    new_cpp_type_expr = Named([new_cpp_type_name])
+    new_cpp_type_expr = Named([Simple(new_cpp_type_name)])
     old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr([], old_cpp_type_name)
     self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
     new_kl_type_name = new_cpp_type_name
@@ -171,12 +171,14 @@ class Ext:
 
   def maybe_generate_kl_type_name(self, kl_type_name, cpp_type_expr):
     if not kl_type_name:
-      if isinstance(cpp_type_expr, Named):
-        kl_type_name = '_'.join(cpp_type_expr.nested_name)
-      elif isinstance(cpp_type_expr, Template) \
-        and len(cpp_type_expr.params) == 1 \
-        and isinstance(cpp_type_expr.params[0], Named):
-        kl_type_name = '_'.join(cpp_type_expr.params[0].nested_name)
+      assert isinstance(cpp_type_expr, Named)
+      if isinstance(cpp_type_expr.components[0], Simple):
+        kl_type_name = cpp_type_expr.components[0].name
+      elif isinstance(cpp_type_expr.components[0], Template) \
+        and len(cpp_type_expr.components[0].params) == 1 \
+        and isinstance(cpp_type_expr.components[0].params[0], Named) \
+        and isinstance(cpp_type_expr.components[0].params[0].components[0], Simple):
+        kl_type_name = cpp_type_expr.components[0].params[0].components[0].name
       else:
         raise Exception(str(cpp_type_expr) + ": unable to generate kl_type_name")
     return kl_type_name
@@ -244,9 +246,14 @@ class Ext:
     extends = None
     ):
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
-    assert isinstance(cpp_type_expr, Template) \
-      and len(cpp_type_expr.params) == 1
-    kl_type_name = self.maybe_generate_kl_type_name(kl_type_name, cpp_type_expr.params[0])
+    assert isinstance(cpp_type_expr, Named) \
+      and len(cpp_type_expr.components) == 1 \
+      and isinstance(cpp_type_expr.components[0], Template) \
+      and len(cpp_type_expr.components[0].params) == 1 \
+      and isinstance(cpp_type_expr.components[0].params[0], Named) \
+      and len(cpp_type_expr.components[0].params[0].components) == 1 \
+      and isinstance(cpp_type_expr.components[0].params[0].components[0], Simple)
+    kl_type_name = self.maybe_generate_kl_type_name(kl_type_name, cpp_type_expr)
     if extends:
       extends = self.cpp_type_name_to_record[extends]
     self.type_mgr.add_selector(
@@ -276,7 +283,7 @@ class Ext:
     kl_ext_name,
     kl_type_name,
     ):
-    cpp_type_expr = Named([cpp_type_name])
+    cpp_type_expr = Named([Simple(cpp_type_name)])
     self.add_kl_require(kl_ext_name)
     self.type_mgr.add_selector(
       KLExtTypeAliasSelector(

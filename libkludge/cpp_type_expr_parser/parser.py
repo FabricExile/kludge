@@ -4,13 +4,7 @@ import sys, traceback
 
 class Parser:
 
-  def _build_named(self, name):
-    expr = self._maybe_lookup_cpp_type_expr_cb(name)
-    if expr:
-      return expr
-    return Named([name])
-
-  def __init__(self, maybe_lookup_cpp_type_expr_cb):
+  def __init__(self, maybe_lookup_cpp_type_expr_cb=None):
     self.tok_ast = Literal("*").suppress()
     self.tok_amp = Literal("&").suppress()
     self.tok_colon_colon = Literal("::").suppress()
@@ -37,12 +31,9 @@ class Parser:
     self.ident = And([
       NotAny(self.key_const),
       NotAny(self.key_volatile),
-      Optional(self.tok_colon_colon),
       Word(alphas+"_", alphanums+"_"),
-      ]).setParseAction(lambda s,l,t: self._build_named(t[0]))
+      ])
     self.number = Word(nums).setParseAction(lambda s,l,t: int(t[0]))
-
-    self._maybe_lookup_cpp_type_expr_cb = maybe_lookup_cpp_type_expr_cb
 
     self.ty_void = self.key_void.setParseAction(lambda s,l,t: Void())
     self.ty_bool = self.key_bool.setParseAction(lambda s,l,t: Bool())
@@ -63,35 +54,60 @@ class Parser:
     self.ty_float = self.key_float.setParseAction(lambda s,l,t: Float())
     self.ty_double = self.key_double.setParseAction(lambda s,l,t: Double())
     self.ty_floating_point = self.ty_float | self.ty_double
-    self.ty_custom = Forward()
-    self.ty_custom << MatchFirst([
-      (self.ident + self.tok_colon_colon + self.ty_custom).setParseAction(lambda s,l,t: Named(t[0].nested_name + t[1].nested_name)),
-      self.key_struct.suppress() + self.ident,
-      self.ident,
-      ])
 
     self.ty_post_qualified = Forward()
 
-    self.ty_templated_params = Forward()
-    self.ty_templated_params << MatchFirst([
-      self.ty_post_qualified + self.tok_comma + self.ty_templated_params,
-      self.ty_post_qualified,
-      Empty()
-      ])
+    def make_simple(s,l,t):
+      # print "make_simple t=%s" % t
+      return Simple(t[0])
+    self.ty_simple = MatchFirst([
+      self.ident
+      ]).setParseAction(make_simple)
+
+    self.ty_template_params = Forward()
+    self.ty_template_params << (
+        (self.ty_post_qualified + self.tok_comma + self.ty_template_params)
+      | self.ty_post_qualified
+      | Empty()
+      )
 
     def make_template(s,l,t):
-      return Template(t[0].nested_name, t[1:])
+      # print "make_template t[0]=%s t[1:]=%s" % (t[0].__class__, t[1:].__class__)
+      return Template(t[0], t[1:])
+    self.ty_template = (
+        self.ident
+      + self.tok_langle
+      + self.ty_template_params
+      + self.tok_rangle
+      ).setParseAction(make_template)
 
-    self.ty_templated = \
-      (self.ty_custom + self.tok_langle + self.ty_templated_params + self.tok_rangle).setParseAction(make_template)
+    def make_component(s,l,t):
+      # print "make_component t=%s" % t
+      return t[0]
+    self.ty_component = (
+        self.ty_template
+      | self.ty_simple
+      ).setParseAction(make_component)
+
+    self.ty_components = Forward()
+    self.ty_components << (
+        (self.ty_component + self.tok_colon_colon + self.ty_components)
+      | self.ty_component
+      )
+
+    def make_named(s,l,t):
+      # print "make_named t=%s" % t
+      return Named(t[:])
+    self.ty_named = MatchFirst([
+      self.ty_components
+      ]).setParseAction(make_named)
 
     self.ty_unqualified = MatchFirst([
       self.ty_void,
       self.ty_bool,
       self.ty_integer,
       self.ty_floating_point,
-      self.ty_templated,
-      self.ty_custom,
+      self.ty_named,
       ])
 
     self.ty_pre_qualified = Forward()
@@ -149,6 +165,9 @@ if __name__ == "__main__":
     "const bool",
     "volatile const signed unsigned",
     "const uint64_t & const ** volatile &",
+    "foo<>",
+    "foo<bar>",
+    "foo<bar, baz>",
     "std::string const &",
     "std::vector<std::string>",
     "some::nested<template::expr<int, another>, yet::another<const volatile void *>>",
@@ -156,6 +175,7 @@ if __name__ == "__main__":
     "int[2]",
     "float[4][4]",
     "std::vector<std::string[2]>[5]",
+    "SdfHandleTo<SdfLayer>::Handle",
     # error cases
     "const",
     "volatile",

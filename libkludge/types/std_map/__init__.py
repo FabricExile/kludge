@@ -30,13 +30,14 @@ class StdMapSelector(Selector):
     return "StdMap"
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    if isinstance(cpp_type_expr, Template) \
-      and len(cpp_type_expr.nested_name) == 2 \
-      and cpp_type_expr.nested_name[0] == "std" \
-      and cpp_type_expr.nested_name[1] == "map" \
-      and len(cpp_type_expr.params) == 2:
-      key_dqti = type_mgr.get_dqti(cpp_type_expr.params[0])
-      value_dqti = type_mgr.get_dqti(cpp_type_expr.params[1])
+    if isinstance(cpp_type_expr, Named) \
+      and len(cpp_type_expr.components) == 2 \
+      and cpp_type_expr.components[0] == Simple("std") \
+      and isinstance(cpp_type_expr.components[1], Template) \
+      and cpp_type_expr.components[1].name == "map" \
+      and len(cpp_type_expr.components[1].params) == 2:
+      key_dqti = type_mgr.get_dqti(cpp_type_expr.components[1].params[0])
+      value_dqti = type_mgr.get_dqti(cpp_type_expr.components[1].params[1])
       return DirQualTypeInfo(
         dir_qual.direct,
         StdMapTypeInfo(
@@ -47,14 +48,15 @@ class StdMapSelector(Selector):
           )
         )
     if isinstance(cpp_type_expr, ReferenceTo) \
-      and isinstance(cpp_type_expr.pointee, Template) \
       and cpp_type_expr.pointee.is_const \
-      and len(cpp_type_expr.pointee.nested_name) == 2 \
-      and cpp_type_expr.pointee.nested_name[0] == "std" \
-      and cpp_type_expr.pointee.nested_name[1] == "map" \
-      and len(cpp_type_expr.pointee.params) == 2:
-      key_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.params[0])
-      value_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.params[1])
+      and isinstance(cpp_type_expr.pointee, Named) \
+      and len(cpp_type_expr.pointee.components) == 2 \
+      and cpp_type_expr.pointee.components[0] == Simple("std") \
+      and isinstance(cpp_type_expr.pointee.components[1], Template) \
+      and cpp_type_expr.pointee.components[1].name == "map" \
+      and len(cpp_type_expr.pointee.components[1].params) == 2:
+      key_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.components[1].params[0])
+      value_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.components[1].params[1])
       return DirQualTypeInfo(
         dir_qual.const_reference,
         StdMapTypeInfo(

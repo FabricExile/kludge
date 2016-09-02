@@ -27,51 +27,21 @@ class StdStringSelector(Selector):
 
   def __init__(self, jinjenv):
     Selector.__init__(self, jinjenv)
+    self.cpp_type_expr = Named([
+      Simple('std'),
+      Simple('string'),
+      ])
 
   def get_desc(self):
     return "StdString"
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    if isinstance(cpp_type_expr, Named) \
-      and len(cpp_type_expr.nested_name) == 2 \
-      and cpp_type_expr.nested_name[0] == "std" \
-      and cpp_type_expr.nested_name[1] == "string":
-      return DirQualTypeInfo(
-        dir_qual.direct,
-        StdStringTypeInfo(
-          self.jinjenv,
-          cpp_type_expr.make_unqualified()
-          )
-        )
-    if isinstance(cpp_type_expr, PointerTo) \
-      and isinstance(cpp_type_expr.pointee, Named) \
-      and len(cpp_type_expr.pointee.nested_name) == 2 \
-      and cpp_type_expr.pointee.nested_name[0] == "std" \
-      and cpp_type_expr.pointee.nested_name[1] == "string":
-      if cpp_type_expr.pointee.is_const:
-        dq = dir_qual.const_pointer
-      else:
-        dq = dir_qual.mutable_pointer
+    undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
+    if undq_cpp_type_expr == self.cpp_type_expr:
       return DirQualTypeInfo(
         dq,
         StdStringTypeInfo(
           self.jinjenv,
-          cpp_type_expr.pointee.make_unqualified()
-          )
-        )
-    if isinstance(cpp_type_expr, ReferenceTo) \
-      and isinstance(cpp_type_expr.pointee, Named) \
-      and len(cpp_type_expr.pointee.nested_name) == 2 \
-      and cpp_type_expr.pointee.nested_name[0] == "std" \
-      and cpp_type_expr.pointee.nested_name[1] == "string":
-      if cpp_type_expr.pointee.is_const:
-        dq = dir_qual.const_reference
-      else:
-        dq = dir_qual.mutable_reference
-      return DirQualTypeInfo(
-        dq,
-        StdStringTypeInfo(
-          self.jinjenv,
-          cpp_type_expr.pointee.make_unqualified()
+          undq_cpp_type_expr
           )
         )

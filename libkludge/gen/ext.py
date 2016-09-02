@@ -64,6 +64,8 @@ class Ext:
     self.lib_dirs = []
     self.libs = []
     self.kl_requires = []
+    self.kl_prologs = []
+    self.kl_epilogs = []
     self.decls = []
     self.tests = []
     self.cpp_type_name_to_record = {}
@@ -147,6 +149,12 @@ class Ext:
   
   def add_cpp_epilog(self, cpp_epilog):
     self.cpp_epilogs.append(cpp_epilog)
+  
+  def add_kl_prolog(self, kl_prolog):
+    self.kl_prologs.append(kl_prolog)
+  
+  def add_kl_epilog(self, kl_epilog):
+    self.kl_epilogs.append(kl_epilog)
   
   def add_lib_dir(self, lib_dir):
     self.lib_dirs.append(os.path.expandvars(lib_dir))

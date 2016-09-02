@@ -68,8 +68,13 @@ class ThisCodec:
       "param": param,
       })
 
-  def render_class_name(self):
+  def render_class_name_cpp(self):
     return self.type_info._render("repr", "class_name", "cpp", {
+      "this": self,
+      })
+
+  def render_class_name_kl(self):
+    return self.type_info._render("repr", "class_name", "kl", {
       "this": self,
       })
 

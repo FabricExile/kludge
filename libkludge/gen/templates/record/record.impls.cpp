@@ -114,7 +114,7 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
     {{macros.cpp_call_pre(method.result, method.params) | indent(4)}}
 
 {% if method.is_static %}
-    {{method.this.render_class_name()}}::{{method.cpp_name}}(
+    {{method.this.render_class_name_cpp()}}::{{method.cpp_name}}(
 {% else %}
     {{method.this.render_member_ref(method.cpp_name)}}(
 {% endif %}

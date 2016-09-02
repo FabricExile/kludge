@@ -70,7 +70,7 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
     )
 {
-    {{record.mutable_this.render_copy_ctor(record.copy_params[0]) | indent(4)}}
+    {{record.mutable_this.render_copy_ctor(record.copy_params[0], record.forbid_copy) | indent(4)}}
 }
 
 {% endif %}
@@ -120,7 +120,7 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
     {{method.this.render_member_ref(method.cpp_name)}}(
 {% endif %}
         {{macros.cpp_call_args(method.params) | indent(8)}}
-        );
+        )
     {{macros.cpp_call_post(method.result, method.params) | indent(4)}}
 }
 
@@ -136,7 +136,7 @@ FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
     )
 {
     {{macros.cpp_call_pre(uni_op.result, None) | indent(4)}}
-        {{uni_op.op}}{{uni_op.this.render_ref()}};
+        {{uni_op.op}}{{uni_op.this.render_ref()}}
     {{macros.cpp_call_post(uni_op.result, None) | indent(4)}}
 }
 
@@ -153,7 +153,7 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 {
     {{macros.cpp_call_pre(bin_op.result, bin_op.params) | indent(4)}}
         {{macros.cpp_call_args([bin_op.params[0]]) | indent(8)}} {{bin_op.op}}
-            {{macros.cpp_call_args([bin_op.params[1]]) | indent(12)}};
+            {{macros.cpp_call_args([bin_op.params[1]]) | indent(12)}}
     {{macros.cpp_call_post(bin_op.result, bin_op.params) | indent(4)}}
 }
 
@@ -170,7 +170,7 @@ FABRIC_EXT_EXPORT void
 {
     {{macros.cpp_call_pre(None, ass_op.params) | indent(4)}}
     {{ass_op.this.render_ref()}} {{ass_op.op}}
-        {{macros.cpp_call_args(ass_op.params) | indent(8)}};
+        {{macros.cpp_call_args(ass_op.params) | indent(8)}}
     {{macros.cpp_call_post(None, ass_op.params) | indent(4)}}
 }
 
@@ -181,7 +181,7 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
     )
 {
-    {{record.mutable_this.render_simple_ass_op(record.copy_params[0]) | indent(4)}}
+    {{record.mutable_this.render_simple_ass_op(record.copy_params[0], record.forbid_copy) | indent(4)}}
 }
 
 {% endif %}
@@ -214,7 +214,7 @@ FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
     )
 {
     {{macros.cpp_call_pre(record.deref_result, None) | indent(4)}}
-        *{{record.deref_this.render_ref() | indent(8)}};
+        *{{record.deref_this.render_ref() | indent(8)}}
     {{macros.cpp_call_post(record.deref_result, None) | indent(4)}}
 }
 
@@ -232,7 +232,7 @@ FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
     {{macros.cpp_call_pre(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
         {{record.get_ind_op_this.render_ref() | indent(8)}}[
             {{record.get_ind_op_params[0].render_lib() | indent(12)}}
-            ];
+            ]
     {{macros.cpp_call_post(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
 }
 
@@ -246,7 +246,7 @@ FABRIC_EXT_EXPORT void
     {{macros.cpp_call_pre(None, record.set_ind_op_params) | indent(4)}}
     {{record.set_ind_op_this.render_ref() | indent(4)}}[
         {{record.set_ind_op_params[0].render_lib() | indent(8)}}
-        ] = {{record.set_ind_op_params[1].render_lib() | indent(8)}};
+        ] = {{record.set_ind_op_params[1].render_lib() | indent(8)}}
     {{macros.cpp_call_post(None, record.set_ind_op_params) | indent(4)}}
 }
 

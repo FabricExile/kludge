@@ -46,7 +46,8 @@
 {% macro cpp_call_post(result_codec, params) %}
   {% if result_codec %}
 {{ result_codec.render_decl_and_assign_lib_end() }}
-
+  {% else %}
+;
   {% endif %}
   {% if params %}
     {% for param in params %}

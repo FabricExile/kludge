@@ -28,6 +28,7 @@ class Record(Decl):
     include_simple_ass_op = True,
     include_getters_setters = True,
     include_dtor = True,
+    forbid_copy = False,
     ):
     Decl.__init__(self, ext, desc)
 
@@ -71,6 +72,7 @@ class Record(Decl):
     self.include_simple_ass_op = include_simple_ass_op
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
+    self.forbid_copy = forbid_copy
     self.get_ind_op_result = None
     self.get_ind_op_params = None
     self.set_ind_op_params = None

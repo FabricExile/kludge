@@ -228,7 +228,8 @@ class Ext:
     self,
     cpp_type_name,
     kl_type_name = None,
-    extends = None
+    extends = None,
+    forbid_copy = False,
     ):
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_type_name = self.maybe_generate_kl_type_name(kl_type_name, cpp_type_expr)
@@ -246,10 +247,16 @@ class Ext:
       )
     record = Record(
       self,
-      "DirectType: %s -> %s" % (kl_type_name, str(cpp_type_expr)),
+      "DirectType: %s -> %s [extends=%s forbid_copy=%s]" % (
+        kl_type_name,
+        str(cpp_type_expr),
+        extends,
+        forbid_copy,
+        ),
       kl_type_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      extends = extends
+      extends = extends,
+      forbid_copy = forbid_copy,
       )
     self.decls.append(record)
     self.cpp_type_name_to_record[cpp_type_name] = record

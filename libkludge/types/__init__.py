@@ -14,3 +14,4 @@ from in_place import InPlaceSelector
 from direct import DirectSelector
 from wrapped import WrappedSelector
 from kl_ext_type_alias import KLExtTypeAliasSelector
+from enum import EnumSelector

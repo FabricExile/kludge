@@ -8,6 +8,7 @@ from libkludge.type_mgr import TypeMgr
 from libkludge.cpp_type_expr_parser import Named, Simple, Template
 from record import Record
 from alias import Alias
+from enum import Enum
 from func import Func
 from test import Test
 from this_access import ThisAccess
@@ -16,6 +17,7 @@ from libkludge.types import InPlaceSelector
 from libkludge.types import KLExtTypeAliasSelector
 from libkludge.types import DirectSelector
 from libkludge.types import WrappedSelector
+from libkludge.types import EnumSelector
 import util
 
 class Ext:
@@ -330,3 +332,43 @@ class Ext:
     self.decls.append(record)
     self.cpp_type_name_to_record[cpp_type_name] = record
     return record
+
+  def add_enum(
+    self,
+    cpp_type_name,
+    values,
+    kl_type_name = None,
+    are_values_namespaced = False,
+    ):
+    assert isinstance(cpp_type_name, basestring)
+    cur_value = 0
+    clean_values = []
+    for value in values:
+      if isinstance(value, basestring):
+        clean_values.append((value, cur_value))
+      else:
+        clean_values.append(value)
+        cur_value = value[1]
+      cur_value += 1
+    cpp_type_expr = Named([Simple(cpp_type_name)])
+    kl_type_name = self.maybe_generate_kl_type_name(kl_type_name, cpp_type_expr)
+    self.type_mgr.add_selector(
+      EnumSelector(
+        self.jinjenv,
+        cpp_type_expr,
+        kl_type_name,
+        )
+      )
+    enum = Enum(
+      self,
+      "Enum: %s -> %s : %s" % (
+        cpp_type_expr,
+        kl_type_name,
+        ", ".join(["%s=%d"%(val[0], val[1]) for val in clean_values]),
+        ),
+      self.type_mgr.get_dqti(cpp_type_expr).type_info,
+      clean_values,
+      are_values_namespaced = are_values_namespaced,
+      )
+    self.decls.append(enum)
+    return enum

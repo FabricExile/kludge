@@ -13,33 +13,36 @@ import util
 class Func(Decl):
   def __init__(
     self,
-    ext,
-    name,
+    parent_namespace,
+    cpp_name,
+    kl_name = None,
     ):
     Decl.__init__(
       self,
-      ext,
-      "Global function '%s'" % name
+      parent_namespace,
+      "Global function '%s'" % cpp_name
       )
 
-    self._nested_function_name = name.split('::')
+    self.cpp_name = cpp_name
+    if not kl_name:
+      kl_name = cpp_name
+    self.kl_name = kl_name
 
-    self.result_codec = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
+    self.result_codec = ResultCodec(self.type_mgr.get_dqti(Void()))
     self.params = []
-
-  @property
-  def edk_symbol_name(self):
+  
+  def get_edk_symbol_name(self):
+    base_edk_symbol_name = '__'.join(self.parent_namespace.nested_cpp_names + [self.cpp_name])
     h = hashlib.md5()
-    for name in self._nested_function_name:
-      h.update(name)
+    h.update(base_edk_symbol_name)
     for param in self.params:
       h.update(param.type_info.edk.name.toplevel)
-    return "_".join([self.ext.name] + self._nested_function_name + [h.hexdigest()])
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   def returns(self, cpp_type_name):
     self.result_codec = ResultCodec(
-      self.ext.type_mgr.get_dqti(
-        self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+      self.type_mgr.get_dqti(
+        self.cpp_type_expr_parser.parse(cpp_type_name)
         )
       )
     return self
@@ -49,8 +52,8 @@ class Func(Decl):
       name = "arg%d" % len(self.params)
     self.params.append(
       ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+        self.type_mgr.get_dqti(
+          self.cpp_type_expr_parser.parse(cpp_type_name)
           ),
         name
         )
@@ -62,11 +65,11 @@ class Func(Decl):
 
   @property
   def name_kl(self):
-    return "_".join(self._nested_function_name)
+    return "_".join(self.parent_namespace.nested_kl_names + [self.kl_name])
 
   @property
   def name_cpp(self):
-    return "::" + "::".join(self._nested_function_name)
+    return "::" + "::".join(self.parent_namespace.nested_cpp_names + [self.cpp_name])
 
   def get_template_basename(self):
     return 'func'

@@ -2,25 +2,26 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
+import inspect, hashlib
 from decl import Decl
 from test import Test
 from member_access import MemberAccess
 from this_access import ThisAccess
-from libkludge.cpp_type_expr_parser import Void, Named, DirQual, directions, qualifiers
+from libkludge.cpp_type_expr_parser import Void, DirQual, directions, qualifiers
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
 from libkludge.dir_qual_type_info import DirQualTypeInfo
-import hashlib
 
 class Record(Decl):
 
   def __init__(
     self,
-    ext,
+    namespace,
     desc,
-    kl_type_name,
+    cpp_local_name,
+    kl_local_name,
     this_type_info,
     extends = None,
     include_empty_ctor = True,
@@ -29,8 +30,20 @@ class Record(Decl):
     include_getters_setters = True,
     include_dtor = True,
     forbid_copy = False,
+    create_child_namespace = True,
     ):
-    Decl.__init__(self, ext, desc)
+    Decl.__init__(self, namespace, desc)
+
+    if create_child_namespace:
+      self.namespace = namespace.create_child(cpp_local_name, kl_local_name)
+      for namespace_method in inspect.getmembers(
+        self.namespace,
+        predicate = inspect.ismethod,
+        ):
+        if namespace_method[0] not in ['add_func']:
+          setattr(self, namespace_method[0], namespace_method[1])
+    else:
+      self.namespace = namespace
 
     self.members = []
     self.ctors = []
@@ -42,7 +55,7 @@ class Record(Decl):
     self.deref_kl_method_name = None
     self.deref_result = None
 
-    self.kl_type_name = kl_type_name
+    self.kl_local_name = kl_local_name
     self.this_value_name = this_cpp_value_name
     self.this_type_info = this_type_info
     if extends:
@@ -77,38 +90,40 @@ class Record(Decl):
     self.get_ind_op_params = None
     self.set_ind_op_params = None
     copy_param_cpp_type_name = this_type_info.lib.name.compound + ' const &'
+    copy_param_cpp_type_expr = self.resolve_cpp_type_expr(copy_param_cpp_type_name)
     self.copy_params = [
       ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse(copy_param_cpp_type_name)
-          ),
+        self.ext.type_mgr.get_dqti(copy_param_cpp_type_expr),
         'that'
         )
       ]
+  
+  def resolve_cpp_type_expr(self, cpp_type_name):
+    return self.namespace.resolve_cpp_type_expr(cpp_type_name)
 
   @property
-  def cpp_type_expr_parser(self):
-    return self.ext.cpp_type_expr_parser
-  
-  @property
   def empty_ctor_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_type_name + '__empty_ctor'
+    base_edk_symbol_name = self.kl_global_name + '__empty_ctor'
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
   
   @property
   def copy_ctor_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_type_name + '__copy_ctor'
-    h = hashlib.md5()
-    h.update(base_edk_symbol_name)
-    for param in self.copy_params:
-      h.update(param.type_info.edk.name.toplevel)
-    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
-  
+    try:
+      base_edk_symbol_name = self.kl_global_name + '__copy_ctor'
+      h = hashlib.md5()
+      h.update(base_edk_symbol_name)
+      for param in self.copy_params:
+        h.update(param.type_info.edk.name.toplevel)
+      return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
+    except Exception as e:
+      print "Ex: " + str(e)
+      raise e
+
   @property
   def simple_ass_op_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_type_name + '__simple_ass_op'
+    base_edk_symbol_name = self.kl_global_name + '__simple_ass_op'
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     for param in self.copy_params:
@@ -147,7 +162,7 @@ class Record(Decl):
   def add_member(self, cpp_name, cpp_type_name, getter='', setter='', access=None):
     if access is None:
       access = self.default_access
-    cpp_type_expr = self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+    cpp_type_expr = self.resolve_cpp_type_expr(cpp_type_name)
     dqti = self.ext.type_mgr.get_dqti(cpp_type_expr)
     member = self.Member(self, cpp_name, dqti, getter, setter, access=access)
     self.members.append(member)
@@ -157,7 +172,8 @@ class Record(Decl):
 
     def __init__(self, record):
       self._record = record
-      self.base_edk_symbol_name = record.kl_type_name + '__ctor'
+      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+      self.base_edk_symbol_name = record.kl_global_name + '__ctor'
       self.this = self._record.mutable_this
       self.params = []
 
@@ -182,7 +198,7 @@ class Record(Decl):
       self.params.append(
         ParamCodec(
           self.ext.type_mgr.get_dqti(
-            self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+            self.resolve_cpp_type_expr(cpp_type_name)
             ),
           name
           )
@@ -206,7 +222,8 @@ class Record(Decl):
 
     def __init__(self, record, cpp_name, this_access=ThisAccess.const):
       self._record = record
-      self.base_edk_symbol_name = record.kl_type_name + '__meth_' + cpp_name
+      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+      self.base_edk_symbol_name = record.kl_global_name + '__meth_' + cpp_name
       self.result = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
       self.cpp_name = cpp_name
       self.this = self._record.mutable_this
@@ -248,7 +265,7 @@ class Record(Decl):
       assert isinstance(cpp_type_name, basestring)
       self.result = ResultCodec(
         self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+          self.resolve_cpp_type_expr(cpp_type_name)
           )
         )
       return self
@@ -260,7 +277,7 @@ class Record(Decl):
       self.params.append(
         ParamCodec(
           self.ext.type_mgr.get_dqti(
-            self.ext.cpp_type_expr_parser.parse(cpp_type_name)
+            self.resolve_cpp_type_expr(cpp_type_name)
             ),
           cpp_name
           )
@@ -311,7 +328,8 @@ class Record(Decl):
       result_cpp_type_name,
       ):
       self._record = record
-      self.base_edk_symbol_name = record.kl_type_name + '__uni_op_'+self.op_to_edk_op[op]
+      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+      self.base_edk_symbol_name = record.kl_global_name + '__uni_op_'+self.op_to_edk_op[op]
       assert isinstance(kl_method_name, basestring)
       self.kl_method_name = kl_method_name
       self.op = op
@@ -319,7 +337,7 @@ class Record(Decl):
       assert isinstance(result_cpp_type_name, basestring)
       self.result = ResultCodec(
         self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse(result_cpp_type_name)
+          self.resolve_cpp_type_expr(result_cpp_type_name)
           )
         )
 
@@ -388,23 +406,24 @@ class Record(Decl):
       rhs_param_type,
       ):
       self._record = record
-      self.base_edk_symbol_name = record.kl_type_name + '__bin_op_'+self.op_to_edk_op[op]
+      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+      self.base_edk_symbol_name = record.kl_global_name + '__bin_op_'+self.op_to_edk_op[op]
       self.result = ResultCodec(
         self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse(result_type)
+          self.resolve_cpp_type_expr(result_type)
           )
         )
       self.op = op
       self.params = [
         ParamCodec(
           self.ext.type_mgr.get_dqti(
-            self.ext.cpp_type_expr_parser.parse(lhs_param_type)
+            self.resolve_cpp_type_expr(lhs_param_type)
             ),
           lhs_param_name
           ),
         ParamCodec(
           self.ext.type_mgr.get_dqti(
-            self.ext.cpp_type_expr_parser.parse(rhs_param_type)
+            self.resolve_cpp_type_expr(rhs_param_type)
             ),
           rhs_param_name
           ),
@@ -473,13 +492,14 @@ class Record(Decl):
       param_name,
       ):
       self._record = record
-      self.base_edk_symbol_name = record.kl_type_name + '__ass_op_' + self.op_to_edk_op[op]
+      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+      self.base_edk_symbol_name = record.kl_global_name + '__ass_op_' + self.op_to_edk_op[op]
       self.this = self._record.mutable_this
       self.op = op
       self.params = [
         ParamCodec(
           self.ext.type_mgr.get_dqti(
-            self.ext.cpp_type_expr_parser.parse(param_type)
+            self.resolve_cpp_type_expr(param_type)
             ),
           param_name
           ),
@@ -526,9 +546,10 @@ class Record(Decl):
       dst_cpp_type_name,
       ):
       self._record = record
+      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
       assert isinstance(dst_cpp_type_name, basestring)
       this_dqti = self.ext.type_mgr.get_dqti(
-        self.ext.cpp_type_expr_parser.parse(dst_cpp_type_name)
+        self.resolve_cpp_type_expr(dst_cpp_type_name)
         )
       self.base_edk_symbol_name = this_dqti.type_info.kl.name.compound + '__cast'
       self.this = ThisCodec(
@@ -579,13 +600,13 @@ class Record(Decl):
     ):
     self.get_ind_op_result = ResultCodec(
       self.ext.type_mgr.get_dqti(
-        self.ext.cpp_type_expr_parser.parse(value_cpp_type_name)
+        self.resolve_cpp_type_expr(value_cpp_type_name)
         )
       )
     self.get_ind_op_params = [
       ParamCodec(
         self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse('size_t')
+          self.resolve_cpp_type_expr('size_t')
           ),
         'index'
         ),
@@ -604,13 +625,13 @@ class Record(Decl):
     self.set_ind_op_params = [
       ParamCodec(
         self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse('size_t')
+          self.resolve_cpp_type_expr('size_t')
           ),
         'index'
         ),
       ParamCodec(
         self.ext.type_mgr.get_dqti(
-          self.ext.cpp_type_expr_parser.parse(value_cpp_type_name)
+          self.resolve_cpp_type_expr(value_cpp_type_name)
           ),
         'value'
         ),
@@ -633,7 +654,7 @@ class Record(Decl):
     assert isinstance(returns, basestring)
     self.deref_result = ResultCodec(
       self.ext.type_mgr.get_dqti(
-        self.ext.cpp_type_expr_parser.parse(returns)
+        self.resolve_cpp_type_expr(returns)
         )
       )
     if this_access == ThisAccess.mutable:
@@ -644,37 +665,38 @@ class Record(Decl):
     
   @property
   def deref_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_type_name + '__deref'
+    base_edk_symbol_name = self.kl_global_name + '__deref'
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   @property
   def get_ind_op_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_type_name + '__get_ind_op'
+    base_edk_symbol_name = self.kl_global_name + '__get_ind_op'
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   @property
   def set_ind_op_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_type_name + '__set_ind_op'
+    base_edk_symbol_name = self.kl_global_name + '__set_ind_op'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
+  
+  @property
+  def dtor_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_global_name + '__dtor'
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   def get_test_name(self):
-    return self.kl_type_name
-  
-  @property
-  def dtor_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_type_name + '__dtor'
-    h = hashlib.md5()
-    h.update(base_edk_symbol_name)
-    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
+    return self.kl_global_name
 
-  def get_kl_name(self):
-    return self.kl_type_name
+  @property
+  def kl_global_name(self):
+    return '_'.join(self.namespace.nested_kl_names + [self.kl_local_name])
 
   def get_template_basename(self):
     return 'record'

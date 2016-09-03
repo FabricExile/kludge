@@ -7,16 +7,32 @@ import abc
 class Decl(object):
   def __init__(
     self,
-    ext,
+    parent_namespace,
     desc,
     ):
-    self.ext = ext
+    self.parent_namespace = parent_namespace
     self.desc = desc
     self.cpp_local_includes = []
 
   def add_cpp_local_include(self, cpp_local_include):
     self.cpp_local_includes.append(cpp_local_include)
     return self
+
+  @property
+  def ext(self):
+    return self.parent_namespace.ext
+
+  @property
+  def cpp_type_expr_parser(self):
+    return self.parent_namespace.cpp_type_expr_parser
+
+  @property
+  def type_mgr(self):
+    return self.parent_namespace.type_mgr
+
+  @property
+  def namespace_mgr(self):
+    return self.parent_namespace.namespace_mgr
 
   @property
   def location(self):

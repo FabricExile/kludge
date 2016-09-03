@@ -11,7 +11,7 @@ class Namespace:
     self.parent_namespace = parent_namespace
     self.paths = [path]
     self.sub_namespaces = {}
-    self.cpp_type_exprs = {}
+    self.global_cpp_type_exprs = {}
     self.usings = []
 
   def add_path(self, path):
@@ -41,30 +41,33 @@ class Namespace:
       namespace = namespace.parent_namespace
     return None
 
-  def maybe_find_cpp_type_expr(self, child_namespace_path):
+  def maybe_find_components(self, components):
+    assert isinstance(components, list)
     namespace = self
-    for i in range(0, len(child_namespace_path)):
-      child_namespace_path_component = child_namespace_path[i]
-      if i == len(child_namespace_path) - 1:
-        cpp_type_expr = namespace.cpp_type_exprs.get(child_namespace_path_component)
-        if not cpp_type_expr:
+    for i in range(0, len(components)):
+      component = components[i]
+      assert isinstance(component, Component)
+      named = Named([component])
+      if i == len(components) - 1:
+        global_cpp_type_expr = namespace.global_cpp_type_exprs.get(named)
+        if not global_cpp_type_expr:
           for using in self.usings:
-            cpp_type_expr = using.cpp_type_exprs.get(child_namespace_path_component)
-            if cpp_type_expr:
+            global_cpp_type_expr = using.global_cpp_type_exprs.get(named)
+            if global_cpp_type_expr:
               break
-        if not cpp_type_expr:
+        if not global_cpp_type_expr:
           return None
       else:
-        sub_namespace = namespace.sub_namespaces.get(child_namespace_path_component)
+        sub_namespace = namespace.sub_namespaces.get(named)
         if not sub_namespace:
           for using in self.usings:
-            sub_namespace = using.sub_namespaces.get(child_namespace_path_component)
+            sub_namespace = using.sub_namespaces.get(named)
             if sub_namespace:
               break
         if not sub_namespace:
           return None
         namespace = sub_namespace
-    return cpp_type_expr
+    return global_cpp_type_expr
 
 class NamespaceMgr:
 
@@ -73,9 +76,7 @@ class NamespaceMgr:
     # definition of the type (or typedef/using; if there is no definition, it's the declaration),
     # or a dict in the case that it's a nested namespace
     self.root_namespace = Namespace(None, [])
-    def maybe_lookup_cpp_type_expr(name):
-      return self.root_namespace.maybe_find_cpp_type_expr(name.split("::"))
-    self.cpp_type_expr_parser = Parser(maybe_lookup_cpp_type_expr)
+    self.cpp_type_expr_parser = Parser()
 
   def _resolve_namespace(self, namespace_path):
     namespace = self.root_namespace.maybe_get_child_namespace(namespace_path)
@@ -94,9 +95,9 @@ class NamespaceMgr:
     namespace_member = namespace.sub_namespaces.setdefault(nested_namespace_name, Namespace(namespace, namespace_path + [nested_namespace_name]))
     return namespace_path + [nested_namespace_name]
 
-  def add_type(self, namespace_path, type_name, cpp_type_expr):
-    namespace = self._resolve_namespace(namespace_path)
-    namespace.cpp_type_exprs.setdefault(type_name, cpp_type_expr)
+  def add_type(self, cpp_nested_names, local_cpp_type_expr, global_cpp_type_expr):
+    namespace = self._resolve_namespace(cpp_nested_names)
+    namespace.global_cpp_type_exprs.setdefault(local_cpp_type_expr, global_cpp_type_expr)
 
   def add_using_namespace(self, namespace_path, import_namespace_path):
     namespace = self._resolve_namespace(namespace_path)
@@ -105,34 +106,32 @@ class NamespaceMgr:
       raise Exception("Failed to resolve namespace '%s' inside namespace '%s'" % ("::".join(import_namespace_path), "::".join(namespace_path)))
     namespace.usings.append(import_namespace)
 
-  def globalize_simple_cpp_nested_name(self, current_namespace_path, nested_name):
-    result = nested_name
+  def globalize_components(self, current_namespace_path, components):
+    result = components
     current_namespace = self._resolve_namespace(current_namespace_path)
     while current_namespace:        
-      cpp_type_expr = current_namespace.maybe_find_cpp_type_expr(nested_name)
-      if cpp_type_expr:
-        result = current_namespace.paths[0] + nested_name
+      global_cpp_type_expr = current_namespace.maybe_find_components(components)
+      if global_cpp_type_expr:
+        result = [Simple(path_elt) for path_elt in current_namespace.paths[0]] + components
         break
       current_namespace = current_namespace.parent_namespace
-    if len(result) >= 2 and result[0] == 'std' and result[1] == '__1':
+    if len(result) >= 2 \
+      and isinstance(result[0], Simple) \
+      and result[0].name == 'std' \
+      and isinstance(result[1], Simple) \
+      and result[1] == '__1':
       result = [result[0]] + result[2:]
     return result
 
   def globalize_cpp_type_expr(self, current_namespace_path, cpp_type_expr):
     def globalize_nested_name(nested_name):
-      return self.globalize_simple_cpp_nested_name(current_namespace_path, nested_name)
+      return self.globalize_components(current_namespace_path, nested_name)
     cpp_type_expr.tranform_names(globalize_nested_name)
 
-  def resolve_cpp_type_expr(self, current_namespace_path, value):
+  def resolve_cpp_type_expr(self, current_namespace_path, cpp_type_name):
+    assert isinstance(cpp_type_name, basestring)
     current_namespace = self._resolve_namespace(current_namespace_path)
-    # if isinstance(value, clang.cindex.Type):
-    #   type_name = value.spelling
-    # el
-    if isinstance(value, basestring):
-      type_name = value
-    else:
-      raise Exception("unexpected value type")
-    cpp_type_expr = self.cpp_type_expr_parser.parse(type_name)
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     self.globalize_cpp_type_expr(current_namespace_path, cpp_type_expr)
     return cpp_type_expr
 

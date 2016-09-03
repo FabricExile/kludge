@@ -14,7 +14,7 @@ class DirectTypeInfo(TypeInfo):
   def __init__(
     self,
     jinjenv,
-    kl_type_name,
+    kl_global_name,
     nested_name,
     undq_cpp_type_expr,
     is_abstract,
@@ -27,7 +27,7 @@ class DirectTypeInfo(TypeInfo):
       jinjenv,
       nested_name = nested_name,
       lib_expr = undq_cpp_type_expr,
-      kl_name_base = kl_type_name,
+      kl_name_base = kl_global_name,
       kl_name_suffix = '',
       )
     self.lib.is_abstract = is_abstract
@@ -45,14 +45,14 @@ class DirectSelector(Selector):
   def __init__(
     self,
     jinjenv,
-    kl_type_name,
+    kl_global_name,
     nested_name,
     cpp_type_expr,
     is_abstract,
     no_copy_constructor,
     ):
     Selector.__init__(self, jinjenv)
-    self.kl_type_name = kl_type_name
+    self.kl_global_name = kl_global_name
     self.nested_name = nested_name
     self.cpp_type_expr = cpp_type_expr
     self.is_abstract = is_abstract
@@ -62,31 +62,16 @@ class DirectSelector(Selector):
     return "Direct:%s" % str(self.nested_name)
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    if cpp_type_expr == self.cpp_type_expr:
-      result = DirQualTypeInfo(
-        dir_qual.direct,
+    undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
+    if undq_cpp_type_expr == self.cpp_type_expr:
+      return DirQualTypeInfo(
+        dq,
         DirectTypeInfo(
           self.jinjenv,
-          self.kl_type_name,
+          self.kl_global_name,
           self.nested_name,
-          cpp_type_expr.make_unqualified(),
+          undq_cpp_type_expr,
           self.is_abstract,
           self.no_copy_constructor,
           )
         )
-      return result
-
-    if isinstance(cpp_type_expr, Indirect):
-      undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
-      if undq_cpp_type_expr == self.cpp_type_expr:
-        return DirQualTypeInfo(
-          dq,
-          DirectTypeInfo(
-            self.jinjenv,
-            self.kl_type_name,
-            self.nested_name,
-            cpp_type_expr.pointee.make_unqualified(),
-            self.is_abstract,
-            self.no_copy_constructor,
-            )
-          )

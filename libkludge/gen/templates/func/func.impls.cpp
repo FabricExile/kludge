@@ -6,7 +6,7 @@
 {% block body %}
 FABRIC_EXT_EXPORT
 {{func.result_codec.render_direct_type_edk()}}
-{{func.edk_symbol_name}}(
+{{func.get_edk_symbol_name()}}(
     {{macros.edk_param_list(func.result_codec, None, func.params) | indent(4)}}
     )
 {

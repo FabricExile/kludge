@@ -46,11 +46,10 @@ class TypeMgr:
 
   def maybe_get_dqti(self, cpp_type_expr):
     orig_type_expr = cpp_type_expr
-    if isinstance(cpp_type_expr, ReferenceTo) or \
-            isinstance(cpp_type_expr, PointerTo):
-        cpp_type_expr = cpp_type_expr.pointee
+    if isinstance(cpp_type_expr, Indirect):
+      cpp_type_expr = cpp_type_expr.pointee
     if cpp_type_expr.is_const:
-        cpp_type_expr = cpp_type_expr.make_unqualified()
+      cpp_type_expr = cpp_type_expr.make_unqualified()
 
     while True:
       cpp_type_name = str(cpp_type_expr)

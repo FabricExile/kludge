@@ -4,7 +4,7 @@ import sys, traceback
 
 class Parser:
 
-  def __init__(self, maybe_lookup_cpp_type_expr_cb=None):
+  def __init__(self):
     self.tok_ast = Literal("*").suppress()
     self.tok_amp = Literal("&").suppress()
     self.tok_colon_colon = Literal("::").suppress()

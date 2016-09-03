@@ -22,6 +22,9 @@ def collect_test_gen_kludge_py_basenames():
 @pytest.mark.parametrize("kludge_py_basename", collect_test_gen_kludge_py_basenames())
 def test_kludge_py_basename(kludge_py_basename):
 
+  if os.path.isfile(os.path.join(test_gen_dir, kludge_py_basename + '.skip')):
+    return
+
   test_tmp_dir = os.path.join(test_tmp_dir_base, kludge_py_basename)
 
   if not os.path.isdir(test_tmp_dir):

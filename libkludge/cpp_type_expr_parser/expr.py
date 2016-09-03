@@ -118,6 +118,9 @@ class Type:
   def __str__(self):
     return self.get_desc()
 
+  def __hash__(self):
+    return hash((type(self), self.qualifier))
+
   def __eq__(self, other):
     return type(self) == type(other) \
       and self.qualifier == other.qualifier
@@ -180,6 +183,9 @@ class Integer(Numeric):
   @abc.abstractmethod
   def get_signed_desc(self):
     pass
+
+  def __hash__(self):
+    return Numeric.__hash__(self) ^ hash(self.is_signed)
 
   def __eq__(self, other):
     return Numeric.__eq__(self, other) \
@@ -282,6 +288,9 @@ class FixedArrayOf(Direct):
   def tranform_names(self, cb):
     self.element.tranform_names(cb)
 
+  def __hash__(self):
+    return Direct.__hash__(self) ^ hash((self.element, self.size))
+
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
       and self.element == other.element \
@@ -306,6 +315,9 @@ class Component(object):
   def tranform_names(self, cb):
     pass
 
+  def __hash__(self):
+    return hash(type(self))
+
   def __eq__(self, other):
     return type(self) == type(other)
 
@@ -322,6 +334,9 @@ class Simple(Component):
 
   def get_desc(self):
     return self.name
+
+  def __hash__(self):
+    return Component.__hash__(self) ^ hash(self.name)
 
   def __eq__(self, other):
     return Component.__eq__(self, other) \
@@ -342,7 +357,6 @@ class Template(Component):
     self.params = params
 
   def tranform_names(self, cb):
-    self.name = cb(self.name)
     for i in range(0, len(self.params)):
       self.params[i].tranform_names(cb)
 
@@ -350,6 +364,12 @@ class Template(Component):
     return self.name + "< " + ", ".join(
       [param.get_desc() for param in self.params]
       ) + " >"
+
+  def __hash__(self):
+    result = Component.__hash__(self) ^ hash(self.name)
+    for param in self.params:
+      result ^= hash(param)
+    return result
 
   def __eq__(self, other):
     return Component.__eq__(self, other) \
@@ -370,13 +390,21 @@ class Named(Direct):
 
   def tranform_names(self, cb):
     self.components = cb(self.components)
+    assert isinstance(self.components, list)
     for component in self.components:
+      assert isinstance(component, Component)
       component.tranform_names(cb)
 
   def build_unqualified_desc(self):
     return '::'.join(
       [component.get_desc() for component in self.components]
       ), ""
+
+  def __hash__(self):
+    result = Direct.__hash__(self)
+    for component in self.components:
+      result ^= hash(component)
+    return result
 
   def __eq__(self, other):
     return Direct.__eq__(self, other) \
@@ -393,6 +421,9 @@ class Indirect(Type):
 
   def tranform_names(self, cb):
     self.pointee.tranform_names(cb)
+
+  def __hash__(self):
+    return Type.__hash__(self) ^ hash(self.pointee)
 
   def __eq__(self, other):
     return Type.__eq__(self, other) \

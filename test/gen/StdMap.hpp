@@ -1,5 +1,8 @@
-#ifndef _StdMap_hpp
-#define _StdMap_hpp
+//
+// Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+//
+
+#pragma once
 
 #include <string>
 #include <map>
@@ -40,5 +43,3 @@ inline std::map< char const *, std::map<float, std::string> > ReturnNestedMap()
 
   return m;
 }
-
-#endif

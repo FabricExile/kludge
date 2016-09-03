@@ -1,5 +1,8 @@
-#ifndef _StdVector_hpp
-#define _StdVector_hpp
+//
+// Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+//
+
+#pragma once
 
 #include <string>
 #include <vector>
@@ -48,5 +51,3 @@ void AppendToStringVector( std::vector<std::string> &v )
 {
   v.push_back("appended string");
 }
-
-#endif

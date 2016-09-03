@@ -1,5 +1,8 @@
-#ifndef _Simple_hpp
-#define _Simple_hpp
+//
+// Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+//
+
+#pragma once
 
 #include <stdint.h>
 
@@ -86,5 +89,3 @@ inline long SimpleObscure(
   long longVal,
   long long longLongVal
   ) { return signedShortVal + longVal + longLongVal; }
-
-#endif

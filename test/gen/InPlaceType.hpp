@@ -1,5 +1,8 @@
-#ifndef _InPlaceStruct_HPP
-#define _InPlaceStruct_HPP
+//
+// Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+//
+
+#pragma once
 
 #include <stdio.h>
 #include <iostream>
@@ -85,5 +88,3 @@ std::vector<Class> ReturnClassVec() {
   result.push_back( Class( -14, -3.45 ) );
   return result;
 }
-
-#endif

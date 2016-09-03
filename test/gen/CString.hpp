@@ -1,5 +1,8 @@
-#ifndef _CString_hpp
-#define _CString_hpp
+//
+// Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+//
+
+#pragma once
 
 #include <string>
 
@@ -16,5 +19,3 @@ inline const char *CStringParams(
 
 inline char const *CStringValueReturn() { return "value"; }
 inline char const * const &CStringConstRefReturn() { static char const *foo = "constRef"; return foo; }
-
-#endif

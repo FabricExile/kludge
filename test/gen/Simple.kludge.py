@@ -1,3 +1,7 @@
+#
+# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+#
+
 ext.add_cpp_quoted_include('Simple.hpp')
 
 ext.add_func('SimpleParams')\

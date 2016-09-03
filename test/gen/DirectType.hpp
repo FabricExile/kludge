@@ -1,5 +1,8 @@
-#ifndef _WrappedPtr_HPP
-#define _WrappedPtr_HPP
+//
+// Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+//
+
+#pragma once
 
 #include <iostream>
 #include <stdio.h>
@@ -146,5 +149,3 @@ public:
   int newMethod() const
     { return -9; }
 };
-
-#endif

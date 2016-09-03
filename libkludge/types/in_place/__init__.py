@@ -27,6 +27,7 @@ class InPlaceTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["result"]["decl_and_assign_lib_begin"] = "types/builtin/in_place/result"
+    tds["result"]["decl_and_assign_lib_end"] = "types/builtin/in_place/result"
     tds["result"]["indirect_lib_to_edk"] = "types/builtin/in_place/result"
     return tds    
 

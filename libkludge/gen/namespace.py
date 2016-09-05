@@ -28,7 +28,7 @@ class Namespace:
     self.cpp_name = cpp_name
     if parent_namespace:
       self.cpp_type_expr = parent_namespace.cpp_type_expr.extension(Named([Simple(cpp_name)]))
-      self.nested_kl_names = parent_namespace.nested_cpp_names + [kl_name]
+      self.nested_kl_names = parent_namespace.nested_kl_names + [kl_name]
     else:
       self.cpp_type_expr = Named([])
       self.nested_kl_names = []
@@ -101,7 +101,7 @@ class Namespace:
     return func
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
-    new_cpp_type_expr = Named([Simple(new_cpp_type_name)])
+    new_cpp_type_expr = self.cpp_type_expr.extension(Named([Simple(new_cpp_type_name)]))
     old_cpp_type_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
     self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
     new_kl_type_name = new_cpp_type_name
@@ -150,8 +150,7 @@ class Namespace:
     forbid_copy = False,
     ):
     cpp_local_name = cpp_type_name
-    cpp_global_name = '::'.join(self.nested_cpp_names + [cpp_local_name])
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_global_name)
+    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     if extends:
@@ -161,7 +160,6 @@ class Namespace:
       DirectSelector(
         self.jinjenv,
         kl_global_name,
-        self.nested_cpp_names + [cpp_local_name],
         cpp_type_expr,
         False, #is_abstract,
         False, #no_copy_constructor,
@@ -197,8 +195,7 @@ class Namespace:
     extends = None
     ):
     cpp_local_name = cpp_type_name
-    cpp_global_name = '::'.join(self.nested_cpp_names + [cpp_local_name])
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
+    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
     assert isinstance(cpp_type_expr, Named) \
       and len(cpp_type_expr.components) >= 1 \
       and isinstance(cpp_type_expr.components[-1], Template) \
@@ -215,7 +212,6 @@ class Namespace:
       WrappedSelector(
         self.jinjenv,
         kl_global_name,
-        self.nested_cpp_names + [cpp_local_name],
         cpp_type_expr,
         False, #is_abstract,
         False, #no_copy_constructor,
@@ -253,7 +249,6 @@ class Namespace:
     self.type_mgr.add_selector(
       KLExtTypeAliasSelector(
         self.jinjenv,
-        self.nested_cpp_names + [cpp_local_name],
         cpp_type_expr,
         kl_global_name,
         )
@@ -272,6 +267,11 @@ class Namespace:
       create_child_namespace = False,
       )
     self.ext.decls.append(record)
+    self.namespace_mgr.add_type(
+      self.cpp_type_expr,
+      Named([cpp_type_expr.components[-1]]),
+      cpp_type_expr,
+      )
     self.cpp_type_expr_to_record[cpp_type_expr] = record
     return record
 
@@ -292,9 +292,9 @@ class Namespace:
         clean_values.append(value)
         cur_value = value[1]
       cur_value += 1
-    cpp_global_name = '::'.join(self.nested_cpp_names + [cpp_local_name])
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_global_name)
+    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
     assert isinstance(cpp_type_expr, Named)
+    assert isinstance(cpp_type_expr.components[-1], Simple)
     kl_local_name = self.maybe_generate_kl_local_name(kl_local_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     self.type_mgr.add_selector(

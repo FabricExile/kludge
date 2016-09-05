@@ -117,12 +117,6 @@ class NamespaceMgr:
         result = current_namespace.cpp_type_expr.components + components
         break
       current_namespace = current_namespace.parent_namespace
-    if len(result) >= 2 \
-      and isinstance(result[0], Simple) \
-      and result[0].name == 'std' \
-      and isinstance(result[1], Simple) \
-      and result[1] == '__1':
-      result = [result[0]] + result[2:]
     return result
 
   def globalize_cpp_type_expr(self, ns_cpp_type_expr, cpp_type_expr):

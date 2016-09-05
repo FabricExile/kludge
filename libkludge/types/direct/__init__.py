@@ -15,7 +15,6 @@ class DirectTypeInfo(TypeInfo):
     self,
     jinjenv,
     kl_global_name,
-    nested_name,
     undq_cpp_type_expr,
     is_abstract,
     no_copy_constructor,
@@ -44,20 +43,18 @@ class DirectSelector(Selector):
     self,
     jinjenv,
     kl_global_name,
-    nested_name,
     cpp_type_expr,
     is_abstract,
     no_copy_constructor,
     ):
     Selector.__init__(self, jinjenv)
     self.kl_global_name = kl_global_name
-    self.nested_name = nested_name
     self.cpp_type_expr = cpp_type_expr
     self.is_abstract = is_abstract
     self.no_copy_constructor = no_copy_constructor
 
   def get_desc(self):
-    return "Direct:%s" % str(self.nested_name)
+    return "Direct:%s" % str(self.cpp_type_expr)
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
@@ -67,7 +64,6 @@ class DirectSelector(Selector):
         DirectTypeInfo(
           self.jinjenv,
           self.kl_global_name,
-          self.nested_name,
           undq_cpp_type_expr,
           self.is_abstract,
           self.no_copy_constructor,

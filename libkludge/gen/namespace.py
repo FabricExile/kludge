@@ -3,7 +3,7 @@
 #
 
 import os, jinja2
-from libkludge.cpp_type_expr_parser import Named, Simple, Template
+from libkludge.cpp_type_expr_parser import Named, Component, Simple, Template, iscomponentlist
 from record import Record
 from alias import Alias
 from enum import Enum
@@ -20,17 +20,18 @@ class Namespace:
     self,
     ext,
     parent_namespace,
-    cpp_name,
+    components,
     kl_name,
     ):
     self.ext = ext
     self.parent_namespace = parent_namespace
-    self.cpp_name = cpp_name
+    assert iscomponentlist(components)
+    self.components = components
     if parent_namespace:
-      self.cpp_type_expr = parent_namespace.cpp_type_expr.extension(Named([Simple(cpp_name)]))
+      assert isinstance(kl_name, basestring)
+      assert components[:-1] == parent_namespace.components
       self.nested_kl_names = parent_namespace.nested_kl_names + [kl_name]
     else:
-      self.cpp_type_expr = Named([])
       self.nested_kl_names = []
 
     for method_name in [
@@ -43,14 +44,16 @@ class Namespace:
 
   @property
   def nested_cpp_names(self):
-    return [str(component) for component in self.cpp_type_expr.components]
+    return [str(component) for component in self.components]
   
-  def create_child(self, cpp_name, kl_name):
-    self.namespace_mgr.add_nested_namespace(self.cpp_type_expr, cpp_name)
-    return Namespace(self.ext, self, cpp_name, kl_name)
+  def create_child(self, component, kl_name):
+    assert isinstance(component, Component)
+    assert isinstance(kl_name, basestring)
+    nested_namespace = self.namespace_mgr.add_nested_namespace(self.components, component)
+    return Namespace(self.ext, self, nested_namespace.components, kl_name)
   
   def resolve_cpp_type_expr(self, cpp_type_name):
-    return self.namespace_mgr.resolve_cpp_type_expr(self.cpp_type_expr, cpp_type_name)
+    return self.namespace_mgr.resolve_cpp_type_expr(self.components, cpp_type_name)
 
   @property
   def cpp_type_expr_parser(self):
@@ -80,8 +83,8 @@ class Namespace:
       elif isinstance(cpp_type_expr.components[-1], Template) \
         and len(cpp_type_expr.components[-1].params) == 1 \
         and isinstance(cpp_type_expr.components[-1].params[0], Named) \
-        and isinstance(cpp_type_expr.components[-1].params[0].components[0], Simple):
-        kl_local_name = cpp_type_expr.components[-1].params[0].components[0].name
+        and isinstance(cpp_type_expr.components[-1].params[0].components[-1], Simple):
+        kl_local_name = cpp_type_expr.components[-1].params[0].components[-1].name
       else:
         raise Exception(str(cpp_type_expr) + ": unable to generate kl_local_name")
     return kl_local_name
@@ -89,7 +92,10 @@ class Namespace:
   def add_namespace(self, cpp_name, kl_name=None):
     if not kl_name:
       kl_name = cpp_name
-    return self.create_child(cpp_name, kl_name)
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_name)
+    assert len(cpp_type_expr.components) == 1 \
+      and isinstance(cpp_type_expr.components[0], Simple)
+    return self.create_child(cpp_type_expr.components[0], kl_name)
 
   def add_func(self, name, returns=None, params=[]):
     func = Func(self, name)
@@ -101,7 +107,7 @@ class Namespace:
     return func
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
-    new_cpp_type_expr = self.cpp_type_expr.extension(Named([Simple(new_cpp_type_name)]))
+    new_cpp_type_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
     old_cpp_type_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
     self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
     new_kl_type_name = new_cpp_type_name
@@ -116,7 +122,7 @@ class Namespace:
     kl_type_name = None,
     ):
     cpp_local_name = cpp_type_name
-    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     self.type_mgr.add_selector(
@@ -129,14 +135,14 @@ class Namespace:
     record = Record(
       self,
       "InPlaceType: %s -> %s" % (kl_global_name, str(cpp_type_expr)),
-      cpp_local_name,
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
+      child_namespace_component=cpp_type_expr.components[-1],
       )
     self.ext.decls.append(record)
     self.namespace_mgr.add_type(
-      self.cpp_type_expr,
-      Named([cpp_type_expr.components[-1]]),
+      self.components,
+      cpp_type_expr.components[-1],
       cpp_type_expr,
       )
     self.cpp_type_expr_to_record[cpp_type_expr] = record
@@ -150,7 +156,7 @@ class Namespace:
     forbid_copy = False,
     ):
     cpp_local_name = cpp_type_name
-    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     if extends:
@@ -173,16 +179,16 @@ class Namespace:
         extends,
         forbid_copy,
         ),
-      cpp_local_name,
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      extends = extends,
-      forbid_copy = forbid_copy,
+      extends=extends,
+      forbid_copy=forbid_copy,
+      child_namespace_component=cpp_type_expr.components[-1],
       )
     self.ext.decls.append(record)
     self.namespace_mgr.add_type(
-      self.cpp_type_expr,
-      Named([cpp_type_expr.components[-1]]),
+      self.components,
+      cpp_type_expr.components[-1],
       cpp_type_expr,
       )
     self.cpp_type_expr_to_record[cpp_type_expr] = record
@@ -195,14 +201,20 @@ class Namespace:
     extends = None
     ):
     cpp_local_name = cpp_type_name
-    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
     assert isinstance(cpp_type_expr, Named) \
-      and len(cpp_type_expr.components) >= 1 \
-      and isinstance(cpp_type_expr.components[-1], Template) \
-      and len(cpp_type_expr.components[-1].params) == 1 \
-      and isinstance(cpp_type_expr.components[-1].params[0], Named) \
-      and len(cpp_type_expr.components[-1].params[0].components) == 1 \
-      and isinstance(cpp_type_expr.components[-1].params[0].components[0], Simple)
+      and len(cpp_type_expr.components) == 1 \
+      and isinstance(cpp_type_expr.components[0], Template) \
+      and len(cpp_type_expr.components[0].params) == 1 \
+      and isinstance(cpp_type_expr.components[0].params[0], Named) \
+      and len(cpp_type_expr.components[0].params[0].components) >= 1 \
+      and isinstance(cpp_type_expr.components[0].params[0].components[-1], Simple)
+    cpp_type_expr = Named([
+      Template(
+        cpp_type_expr.components[0].name,
+        [cpp_type_expr.components[0].params[0].prefix(self.components)],
+        )
+      ])
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     if extends:
@@ -220,15 +232,15 @@ class Namespace:
     record = Record(
       self,
       "WrappedType: %s -> %s" % (kl_global_name, str(cpp_type_expr)),
-      cpp_local_name,
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      extends = extends
+      extends=extends,
+      child_namespace_component=cpp_type_expr.components[0].params[0].components[-1],
       )
     self.ext.decls.append(record)
     self.namespace_mgr.add_type(
-      self.cpp_type_expr,
-      Named([cpp_type_expr.components[-1]]),
+      self.components,
+      cpp_type_expr.components[0].params[0].components[-1],
       cpp_type_expr,
       )
     self.cpp_type_expr_to_record[cpp_type_expr] = record
@@ -256,7 +268,6 @@ class Namespace:
     record = Record(
       self,
       "KLExtTypeAlias: %s -> %s[%s]" % (str(cpp_type_expr), kl_ext_name, kl_global_name),
-      cpp_local_name,
       kl_global_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       include_empty_ctor = False,
@@ -264,12 +275,11 @@ class Namespace:
       include_simple_ass_op = False,
       include_getters_setters = False,
       include_dtor = False,
-      create_child_namespace = False,
       )
     self.ext.decls.append(record)
     self.namespace_mgr.add_type(
-      self.cpp_type_expr,
-      Named([cpp_type_expr.components[-1]]),
+      self.components,
+      cpp_type_expr.components[-1],
       cpp_type_expr,
       )
     self.cpp_type_expr_to_record[cpp_type_expr] = record
@@ -292,7 +302,7 @@ class Namespace:
         clean_values.append(value)
         cur_value = value[1]
       cur_value += 1
-    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
     assert isinstance(cpp_type_expr, Named)
     assert isinstance(cpp_type_expr.components[-1], Simple)
     kl_local_name = self.maybe_generate_kl_local_name(kl_local_name, cpp_type_expr)
@@ -304,6 +314,10 @@ class Namespace:
         kl_global_name,
         )
       )
+    if are_values_namespaced:
+      child_namespace_component = cpp_type_expr.components[-1]
+    else:
+      child_namespace_component = None
     enum = Enum(
       self,
       "Enum: %s -> %s : %s" % (
@@ -311,16 +325,15 @@ class Namespace:
         kl_global_name,
         ", ".join(["%s=%d"%(val[0], val[1]) for val in clean_values]),
         ),
-      cpp_local_name,
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       clean_values,
-      are_values_namespaced = are_values_namespaced,
+      child_namespace_component=child_namespace_component,
       )
     self.ext.decls.append(enum)
     self.namespace_mgr.add_type(
-      self.cpp_type_expr,
-      Named([cpp_type_expr.components[-1]]),
+      self.components,
+      cpp_type_expr.components[-1],
       cpp_type_expr,
       )
     return enum

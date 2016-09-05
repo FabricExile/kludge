@@ -75,11 +75,6 @@ class ThisCodec:
       "forbid_copy": forbid_copy,
       })
 
-  def render_class_name_kl(self):
-    return self.type_info._render("repr", "class_name", "kl", {
-      "this": self,
-      })
-
   def render_wrapper_ref(self):
     return self.type_info._render("repr", "wrapper_ref", "cpp", {
       "this": self,

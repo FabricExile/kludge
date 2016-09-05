@@ -62,7 +62,7 @@ class Ext:
     self.tests = []
     self.cpp_type_expr_to_record = {}
 
-    self.root_namespace = Namespace(self, None, None, None)
+    self.root_namespace = Namespace(self, None, [], None)
     for root_namespace_method in inspect.getmembers(
       self.root_namespace,
       predicate = inspect.ismethod,

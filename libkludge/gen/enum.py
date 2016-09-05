@@ -20,17 +20,16 @@ class Enum(Decl):
     self,
     parent_namespace,
     desc,
-    cpp_local_name,
     kl_local_name,
     type_info,
     values,
-    are_values_namespaced = False,
+    child_namespace_component = None,
     ):
     Decl.__init__(self, parent_namespace, desc)
     self.type_info = type_info
     self.values = values
-    if are_values_namespaced:
-      self.namespace = parent_namespace.create_child(cpp_local_name, kl_local_name)
+    if child_namespace_component:
+      self.namespace = parent_namespace.create_child(child_namespace_component, kl_local_name)
     else:
       self.namespace = parent_namespace
 

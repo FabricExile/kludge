@@ -18,9 +18,8 @@ class Record(Decl):
 
   def __init__(
     self,
-    namespace,
+    parent_namespace,
     desc,
-    cpp_local_name,
     kl_local_name,
     this_type_info,
     extends = None,
@@ -30,12 +29,12 @@ class Record(Decl):
     include_getters_setters = True,
     include_dtor = True,
     forbid_copy = False,
-    create_child_namespace = True,
+    child_namespace_component = None,
     ):
-    Decl.__init__(self, namespace, desc)
+    Decl.__init__(self, parent_namespace, desc)
 
-    if create_child_namespace:
-      self.namespace = namespace.create_child(cpp_local_name, kl_local_name)
+    if child_namespace_component:
+      self.namespace = parent_namespace.create_child(child_namespace_component, kl_local_name)
       for namespace_method in inspect.getmembers(
         self.namespace,
         predicate = inspect.ismethod,
@@ -43,7 +42,7 @@ class Record(Decl):
         if namespace_method[0] not in ['add_func']:
           setattr(self, namespace_method[0], namespace_method[1])
     else:
-      self.namespace = namespace
+      self.namespace = parent_namespace
 
     self.members = []
     self.ctors = []

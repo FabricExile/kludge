@@ -327,6 +327,10 @@ class Component(object):
   def __ne__(self, other):
     return not self == other
 
+def iscomponentlist(components):
+  return isinstance(components, list) \
+    and all(isinstance(component, Component) for component in components)
+
 class Simple(Component):
 
   def __init__(self, name):
@@ -393,9 +397,8 @@ class Named(Direct):
 
   def tranform_names(self, cb):
     self.components = cb(self.components)
-    assert isinstance(self.components, list)
+    assert iscomponentlist(self.components)
     for component in self.components:
-      assert isinstance(component, Component)
       component.tranform_names(cb)
 
   def build_unqualified_desc(self):
@@ -403,9 +406,10 @@ class Named(Direct):
       [component.get_desc() for component in self.components]
       ), ""
 
-  def extension(self, that):
-    assert isinstance(that, Named)
-    return Named(self.components + that.components)
+  def prefix(self, components):
+    assert iscomponentlist(components)
+    self.components = components + self.components
+    return self
 
   def __hash__(self):
     result = Direct.__hash__(self)

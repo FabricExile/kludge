@@ -6,7 +6,7 @@ ext.add_cpp_quoted_include('Namespaces.hpp')
 
 ext.add_func('GlobalFunc', 'char const *')
 ns = ext.add_namespace('NameSpace')
-cl = ns.add_direct_type('Class')
+cl = ns.add_wrapped_type('Wrapper<Class>')
 scl = cl.add_in_place_type('SubClass')
 scl.add_member('x', 'int')
 scl.add_ctor(['int'])
@@ -22,17 +22,3 @@ Foo
 ns.add_func('GlobalFunc', 'char const *')
 nns = ns.add_namespace('NestedNameSpace')
 nns.add_func('GlobalFunc', 'char const *')
-
-# cl_rc = ns.add_wrapped_type('Wrapper<Class>')
-# scl_rc = cl.add_in_place_type('SubClass')
-# scl_rc.add_member('x', 'int')
-# scl_rc.add_ctor(['int'])
-# cl_rc.add_ctor(['int'])
-# cl_rc.add_const_method('getSubClass', 'SubClass const &')
-# cl_rc.add_enum('Enum', ['Foo', 'Bar'])
-# cl_rc.add_static_method('DescEnum', 'char const *', ['Enum'])\
-#   .add_test("""
-# report(NameSpace_Class_DescEnum(NameSpace_Class_Foo));
-# """, """
-# Foo
-# """)

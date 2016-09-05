@@ -3,7 +3,7 @@
 {######################################################################}
 struct {{this.type_info.edk.name.local}}
 {% if this.extends_this %}
-  : {{this.extends_this.type_info.edk.name.local}}
+  : public {{this.extends_this.type_info.edk.name.local}}
   {};
 {% else %}
 {

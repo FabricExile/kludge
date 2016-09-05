@@ -9,59 +9,13 @@
 #include <string>
 #include <vector>
 #include <assert.h>
+#include "Wrapper.hpp"
 
-template<typename Ty>
-class Wrapper
+class Class : public RefCounter
 {
 public:
 
-  Wrapper()
-    : m_ptr( 0 )
-  {
-    std::cout << "Wrapper::Wrapper()\n" << std::flush;
-  }
-  Wrapper( Ty *ptr )
-    : m_ptr( ptr )
-  {
-    std::cout << "Wrapper::Wrapper(Ty *)\n" << std::flush;
-    if ( m_ptr ) m_ptr->retain();
-  }
-  Wrapper( Wrapper const &that )
-    : m_ptr( that.m_ptr )
-  {
-    std::cout << "Wrapper::Wrapper(Wrapper const &)\n" << std::flush;
-    if ( m_ptr ) m_ptr->retain();
-  }
-  ~Wrapper()
-  {
-    std::cout << "Wrapper::~Wrapper()\n" << std::flush;
-    if ( m_ptr ) m_ptr->release();
-  }
-
-  Wrapper &operator=( Wrapper const &that )
-  {
-    std::cout << "Wrapper::operator=(Wrapper const &)\n" << std::flush;
-    if ( m_ptr )
-      m_ptr->release();
-    m_ptr = that.m_ptr;
-    if ( m_ptr )
-      m_ptr->retain();
-  }
-
-  Ty *operator->()
-    { return m_ptr; }
-  Ty const *operator->() const
-    { return m_ptr; }
-
-private:
-
-  Ty *m_ptr;
-};
-
-class Class {
-public:
-
-  Class() : pri_refCount( 0 )
+  Class()
   {
     std::cout << "Class::Class()\n" << std::flush;
   }
@@ -70,8 +24,7 @@ public:
     std::string const &_stringValue,
     int _intValue
     )
-    : pri_refCount( 0 )
-    , floatValue( _floatValue )
+    : floatValue( _floatValue )
     , stringValue( _stringValue )
     , pri_intValue( _intValue )
   {
@@ -110,16 +63,7 @@ public:
     return pri_intValue;
   }
 
-  void retain()
-    { ++pri_refCount; }
-  void release()
-    { if ( --pri_refCount == 0 ) delete this; }
-
   std::string const &publicMethod() { return stringValue; }
-
-private:
-
-  mutable int pri_refCount;
 
 public:
 

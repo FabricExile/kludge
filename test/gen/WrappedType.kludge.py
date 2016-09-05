@@ -91,6 +91,7 @@ Wrapper::Wrapper(Ty *)
 c.publicMethod() = hello
 Wrapper::~Wrapper()
 Wrapper::~Wrapper()
+DerivedClass::~DerivedClass()
 Class::~Class()
 """)
 

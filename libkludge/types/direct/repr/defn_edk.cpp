@@ -1,9 +1,9 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-struct {{this.type_info.edk.name.local}}
+struct {{this.type_info.edk.name}}
 {% if this.extends_this %}
-  : public {{this.extends_this.type_info.edk.name.local}}
+  : public {{this.extends_this.type_info.edk.name}}
   {};
 {% else %}
 {

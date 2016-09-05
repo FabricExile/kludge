@@ -11,7 +11,7 @@ class StdMapTypeInfo(TypeInfo):
       jinjenv,
       kl_name_base = value_dqti.type_info.kl.name.base,
       kl_name_suffix = "[" + key_dqti.type_info.kl.name.compound + "]" + value_dqti.type_info.kl.name.suffix,
-      edk_name_toplevel = "::Fabric::EDK::KL::Dict< " + key_dqti.type_info.edk.name.toplevel + ", " + value_dqti.type_info.edk.name.toplevel + " >",
+      edk_name = "Fabric::EDK::KL::Dict< " + key_dqti.type_info.edk.name + ", " + value_dqti.type_info.edk.name + " >",
       lib_expr = undq_cpp_type_expr,
       child_dqtis = [key_dqti, value_dqti]
       )

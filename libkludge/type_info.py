@@ -19,16 +19,10 @@ class KLTypeInfo:
   def __init__(self, name_base, name_suffix):
     self.name = KLTypeName(name_base, name_suffix)
 
-class EDKTypeName:
-
-  def __init__(self, toplevel, local):
-    self.toplevel = toplevel
-    self.local = local
-
 class EDKTypeInfo:
 
-  def __init__(self, name_toplevel, name_local):
-    self.name = EDKTypeName(name_toplevel, name_local)
+  def __init__(self, name):
+    self.name = name
 
 class LibTypeName:
 
@@ -63,32 +57,27 @@ class TypeInfo:
     self,
     jinjenv,
     lib_expr,
-    nested_name = None,
-    edk_name_toplevel = None,
-    edk_name_local = None,
     kl_name_base = None,
     kl_name_suffix = None,
+    edk_name = None,
     child_dqtis = [],
     ):
-    if kl_name_base:
+    if kl_name_base is not None:
+      if not kl_name_suffix:
+        kl_name_suffix = ''
       self.kl = KLTypeInfo(kl_name_base, kl_name_suffix)
-    else:
-      kl_name = "_".join(nested_name)
-      kl_name = replace_invalid_chars(kl_name)
-      self.kl = KLTypeInfo(kl_name, "")
-    if edk_name_toplevel:
-      self.edk = EDKTypeInfo(edk_name_toplevel, edk_name_local)
-    else:
-      edk_name = "_".join(nested_name)
-      edk_name = replace_invalid_chars(edk_name)
-      self.edk = EDKTypeInfo("::Fabric::EDK::KL::" + edk_name, edk_name)
+      if not edk_name:
+        assert not kl_name_suffix
+        edk_name = "_Kludge_EDK_" + kl_name_base
+    if edk_name:
+      self.edk = EDKTypeInfo(edk_name)
     self.lib = LibTypeInfo(lib_expr)
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis
     self._codec_lookup_rules = None
 
   def get_desc(self):
-    return self.kl.name.compound
+    return str(self.lib.expr)
     
   def build_codec_lookup_rules(self):
     return {

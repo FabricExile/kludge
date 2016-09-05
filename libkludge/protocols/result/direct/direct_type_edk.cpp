@@ -2,4 +2,4 @@
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
 
-{{result.type_info.edk.name.toplevel}}
+{{result.type_info.edk.name}}

@@ -32,11 +32,11 @@ class Func(Decl):
     self.params = []
   
   def get_edk_symbol_name(self):
-    base_edk_symbol_name = '__'.join(self.parent_namespace.nested_cpp_names + [self.cpp_name])
+    base_edk_symbol_name = self.name_kl
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     for param in self.params:
-      h.update(param.type_info.edk.name.toplevel)
+      h.update(param.type_info.edk.name)
     return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   def returns(self, cpp_type_name):
@@ -69,7 +69,7 @@ class Func(Decl):
 
   @property
   def name_cpp(self):
-    return "::" + "::".join(self.parent_namespace.nested_cpp_names + [self.cpp_name])
+    return "::".join(self.parent_namespace.nested_cpp_names + [self.cpp_name])
 
   def get_template_basename(self):
     return 'func'

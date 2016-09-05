@@ -13,7 +13,8 @@ class CStringTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      nested_name = ["String"],
+      kl_name_base = "String",
+      edk_name = "Fabric::EDK::KL::String",
       lib_expr = undq_cpp_type_expr,
       )
 

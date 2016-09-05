@@ -115,7 +115,7 @@ class Record(Decl):
       h = hashlib.md5()
       h.update(base_edk_symbol_name)
       for param in self.copy_params:
-        h.update(param.type_info.edk.name.toplevel)
+        h.update(param.type_info.edk.name)
       return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
     except Exception as e:
       print "Ex: " + str(e)
@@ -127,7 +127,7 @@ class Record(Decl):
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     for param in self.copy_params:
-      h.update(param.type_info.edk.name.toplevel)
+      h.update(param.type_info.edk.name)
     return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   def set_default_access(self, access):
@@ -186,7 +186,7 @@ class Record(Decl):
       h = hashlib.md5()
       h.update(self.base_edk_symbol_name)
       for param in self.params:
-        h.update(param.type_info.edk.name.toplevel)
+        h.update(param.type_info.edk.name)
       return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
 
     def get_test_name(self):
@@ -255,7 +255,7 @@ class Record(Decl):
       h = hashlib.md5()
       h.update(self.base_edk_symbol_name)
       for param in self.params:
-        h.update(param.type_info.edk.name.toplevel)
+        h.update(param.type_info.edk.name)
       return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
 
     def get_test_name(self):
@@ -438,7 +438,7 @@ class Record(Decl):
       h = hashlib.md5()
       h.update(self.base_edk_symbol_name)
       for param in self.params:
-        h.update(param.type_info.edk.name.toplevel)
+        h.update(param.type_info.edk.name)
       return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
 
     def get_test_name(self):
@@ -514,7 +514,7 @@ class Record(Decl):
       h = hashlib.md5()
       h.update(self.base_edk_symbol_name)
       for param in self.params:
-        h.update(param.type_info.edk.name.toplevel)
+        h.update(param.type_info.edk.name)
       return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
 
     def get_test_name(self):
@@ -576,7 +576,7 @@ class Record(Decl):
       h = hashlib.md5()
       h.update(self.base_edk_symbol_name)
       for param in self.params:
-        h.update(param.type_info.edk.name.toplevel)
+        h.update(param.type_info.edk.name)
       return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
 
     def get_test_name(self):

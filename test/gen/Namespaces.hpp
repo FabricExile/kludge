@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <assert.h>
+#include "Wrapper.hpp"
 
 inline char const *GlobalFunc() {
   return "From root namespace";
@@ -13,7 +14,7 @@ inline char const *GlobalFunc() {
 
 namespace NameSpace {
 
-class Class
+class Class : public RefCounter
 {
 public:
 

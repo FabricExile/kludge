@@ -12,7 +12,8 @@ class SimpleTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      nested_name = [type_name_kl],
+      kl_name_base = type_name_kl,
+      edk_name = "Fabric::EDK::KL::" + type_name_kl,
       lib_expr = undq_cpp_type_expr,
       )
 

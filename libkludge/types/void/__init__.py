@@ -14,8 +14,8 @@ class VoidTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      nested_name = [],
       lib_expr = Void(),
+      kl_name_base = '',
       )
 
   def build_codec_lookup_rules(self):

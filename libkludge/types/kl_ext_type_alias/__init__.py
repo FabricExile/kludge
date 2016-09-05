@@ -11,10 +11,8 @@ class KLExtTypeAliasTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      nested_name = nested_name,
-      lib_expr = undq_cpp_type_expr,
       kl_name_base = kl_type_name,
-      kl_name_suffix = '',
+      lib_expr = undq_cpp_type_expr,
       )
 
   def build_codec_lookup_rules(self):

@@ -315,6 +315,9 @@ class Component(object):
   def tranform_names(self, cb):
     pass
 
+  def __str__(self):
+    return self.get_desc()
+
   def __hash__(self):
     return hash(type(self))
 
@@ -399,6 +402,10 @@ class Named(Direct):
     return '::'.join(
       [component.get_desc() for component in self.components]
       ), ""
+
+  def extension(self, that):
+    assert isinstance(that, Named)
+    return Named(self.components + that.components)
 
   def __hash__(self):
     result = Direct.__hash__(self)

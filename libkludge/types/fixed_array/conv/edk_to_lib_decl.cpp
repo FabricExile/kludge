@@ -4,7 +4,7 @@
 
 {% set r = conv.type_info.lib.expr.range %}
 {% for i in r %}
-{{conv.child[0].type_info.edk.name.toplevel}} const &{{conv.child[0].value_name.edk}}__{{i}} = {{conv.value_name.edk}}[{{i}}];
+{{conv.child[0].type_info.edk.name}} const &{{conv.child[0].value_name.edk}}__{{i}} = {{conv.value_name.edk}}[{{i}}];
 {% endfor %}
 {{conv.type_info.lib.name.base}} {{conv.value_name.lib}}{{conv.type_info.lib.name.suffix}} =
 {

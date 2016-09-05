@@ -15,7 +15,7 @@ class StdVectorTypeInfo(TypeInfo):
       jinjenv,
       kl_name_base = element_dqti.type_info.kl.name.base,
       kl_name_suffix = "[]" + element_dqti.type_info.kl.name.suffix,
-      edk_name_toplevel = "::Fabric::EDK::KL::VariableArray< " + element_dqti.type_info.edk.name.toplevel + " >",
+      edk_name = "Fabric::EDK::KL::VariableArray< " + element_dqti.type_info.edk.name + " >",
       lib_expr = undq_cpp_type_expr,
       child_dqtis = [element_dqti]
       )

@@ -3,7 +3,7 @@
 {######################################################################}
 {% if forbid_copy %}
 {{this.value_name.edk}}.cpp_ptr = {{param.value_name.edk}}.cpp_ptr;
-const_cast< ::Fabric::EDK::KL::Traits< {{param.type_info.edk.name.toplevel}} >::IOParam >( {{param.value_name.edk}} ).cpp_ptr = NULL;
+const_cast< ::Fabric::EDK::KL::Traits< {{param.type_info.edk.name}} >::IOParam >( {{param.value_name.edk}} ).cpp_ptr = NULL;
 {% else %}
 if ( !{{this.value_name.edk}}.cpp_ptr )
 {

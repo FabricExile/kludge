@@ -23,10 +23,8 @@ class WrappedTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      nested_name = nested_name,
-      lib_expr = undq_cpp_type_expr,
       kl_name_base = kl_type_name,
-      kl_name_suffix = '',
+      lib_expr = undq_cpp_type_expr,
       )
     self.lib.is_abstract = is_abstract
     self.lib.no_copy_constructor = no_copy_constructor

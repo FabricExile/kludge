@@ -27,10 +27,10 @@ class Namespace:
     self.parent_namespace = parent_namespace
     self.cpp_name = cpp_name
     if parent_namespace:
-      self.nested_cpp_names = parent_namespace.nested_cpp_names + [cpp_name]
+      self.cpp_type_expr = parent_namespace.cpp_type_expr.extension(Named([Simple(cpp_name)]))
       self.nested_kl_names = parent_namespace.nested_cpp_names + [kl_name]
     else:
-      self.nested_cpp_names = []
+      self.cpp_type_expr = Named([])
       self.nested_kl_names = []
 
     for method_name in [
@@ -41,12 +41,16 @@ class Namespace:
       ]:
       setattr(self, method_name, getattr(ext, method_name))
 
+  @property
+  def nested_cpp_names(self):
+    return [str(component) for component in self.cpp_type_expr.components]
+  
   def create_child(self, cpp_name, kl_name):
-    self.namespace_mgr.add_nested_namespace(self.nested_cpp_names, cpp_name)
+    self.namespace_mgr.add_nested_namespace(self.cpp_type_expr, cpp_name)
     return Namespace(self.ext, self, cpp_name, kl_name)
   
   def resolve_cpp_type_expr(self, cpp_type_name):
-    return self.namespace_mgr.resolve_cpp_type_expr(self.nested_cpp_names, cpp_type_name)
+    return self.namespace_mgr.resolve_cpp_type_expr(self.cpp_type_expr, cpp_type_name)
 
   @property
   def cpp_type_expr_parser(self):
@@ -98,7 +102,7 @@ class Namespace:
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
     new_cpp_type_expr = Named([Simple(new_cpp_type_name)])
-    old_cpp_type_expr = self.namespace_mgr.resolve_cpp_type_expr([], old_cpp_type_name)
+    old_cpp_type_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
     self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
     new_kl_type_name = new_cpp_type_name
     old_dqti = self.type_mgr.get_dqti(old_cpp_type_expr)
@@ -112,15 +116,13 @@ class Namespace:
     kl_type_name = None,
     ):
     cpp_local_name = cpp_type_name
-    cpp_global_name = '::'.join(self.nested_cpp_names + [cpp_local_name])
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_global_name)
+    cpp_type_expr = self.cpp_type_expr.extension(self.cpp_type_expr_parser.parse(cpp_local_name))
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     self.type_mgr.add_selector(
       InPlaceSelector(
         self.jinjenv,
         kl_global_name,
-        self.nested_cpp_names + [cpp_local_name],
         cpp_type_expr,
         )
       )
@@ -133,7 +135,7 @@ class Namespace:
       )
     self.ext.decls.append(record)
     self.namespace_mgr.add_type(
-      self.nested_cpp_names,
+      self.cpp_type_expr,
       Named([cpp_type_expr.components[-1]]),
       cpp_type_expr,
       )
@@ -181,7 +183,7 @@ class Namespace:
       )
     self.ext.decls.append(record)
     self.namespace_mgr.add_type(
-      self.nested_cpp_names,
+      self.cpp_type_expr,
       Named([cpp_type_expr.components[-1]]),
       cpp_type_expr,
       )
@@ -229,7 +231,7 @@ class Namespace:
       )
     self.ext.decls.append(record)
     self.namespace_mgr.add_type(
-      self.nested_cpp_names,
+      self.cpp_type_expr,
       Named([cpp_type_expr.components[-1]]),
       cpp_type_expr,
       )
@@ -317,7 +319,7 @@ class Namespace:
       )
     self.ext.decls.append(enum)
     self.namespace_mgr.add_type(
-      self.nested_cpp_names,
+      self.cpp_type_expr,
       Named([cpp_type_expr.components[-1]]),
       cpp_type_expr,
       )

@@ -43,13 +43,6 @@ class ConvCodec:
       return "*"
     else:
       return ""
-  
-  @staticmethod
-  def make_safe_edk_name_toplevel(name):
-    if name.startswith("_KLUDGE_EDK_"):
-      return name
-    else:
-      return "_KLUDGE_EDK_" + name
 
   @staticmethod
   def make_safe_lib_name(name):

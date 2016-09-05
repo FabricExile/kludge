@@ -15,7 +15,7 @@ class FixedArrayTypeInfo(TypeInfo):
       jinjenv,
       kl_name_base = element_dqti.type_info.kl.name.base,
       kl_name_suffix = "[%u]%s" % (undq_cpp_type_expr.size, element_dqti.type_info.kl.name.suffix),
-      edk_name_toplevel = "::Fabric::EDK::KL::FixedArray< " + element_dqti.type_info.edk.name.toplevel + ", " + str(undq_cpp_type_expr.size) + " >",
+      edk_name = "Fabric::EDK::KL::FixedArray< " + element_dqti.type_info.edk.name + ", " + str(undq_cpp_type_expr.size) + " >",
       lib_expr = undq_cpp_type_expr,
       child_dqtis = [element_dqti]
       )

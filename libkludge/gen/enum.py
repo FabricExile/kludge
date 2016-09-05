@@ -18,16 +18,21 @@ class Enum(Decl):
 
   def __init__(
     self,
-    ext,
+    parent_namespace,
     desc,
+    cpp_local_name,
+    kl_local_name,
     type_info,
     values,
     are_values_namespaced = False,
     ):
-    Decl.__init__(self, ext, desc)
+    Decl.__init__(self, parent_namespace, desc)
     self.type_info = type_info
     self.values = values
-    self.are_values_namespaced = are_values_namespaced
+    if are_values_namespaced:
+      self.namespace = parent_namespace.create_child(cpp_local_name, kl_local_name)
+    else:
+      self.namespace = parent_namespace
 
   def get_test_name(self):
     return self.type_info.kl.name.compound

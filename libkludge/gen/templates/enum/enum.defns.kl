@@ -5,11 +5,7 @@
 {% block body %}
 alias Integer {{enum.type_info.kl.name.compound}};
 {% for value in enum.values %}
-{% if enum.are_values_namespaced %}
-const {{enum.type_info.kl.name.compound}} {{enum.type_info.kl.name.compound}}_{{value[0]}} = {{value[1]}};
-{% else %}
-const {{enum.type_info.kl.name.compound}} {{value[0]}} = {{value[1]}};
-{% endif %}
+const {{enum.type_info.kl.name.compound}} {{'_'.join(enum.namespace.nested_kl_names + [value[0]])}} = {{value[1]}};
 {% endfor %}
 
 {% endblock body %}

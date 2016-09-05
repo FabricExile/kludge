@@ -37,6 +37,18 @@ public:
   SubClass const &getSubClass() const
     { return _subClass; }
 
+  enum Enum { Foo, Bar };
+
+  static char const *DescEnum( Enum en )
+  {
+    switch ( en )
+    {
+      case Foo: return "Foo";
+      case Bar: return "Bar";
+      default: assert(false); return "**UNKNOWN**";
+    }
+  }
+
 private:
 
   SubClass _subClass;

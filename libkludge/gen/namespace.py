@@ -290,7 +290,8 @@ class Namespace:
         clean_values.append(value)
         cur_value = value[1]
       cur_value += 1
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
+    cpp_global_name = '::'.join(self.nested_cpp_names + [cpp_local_name])
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_global_name)
     assert isinstance(cpp_type_expr, Named)
     kl_local_name = self.maybe_generate_kl_local_name(kl_local_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
@@ -308,9 +309,16 @@ class Namespace:
         kl_global_name,
         ", ".join(["%s=%d"%(val[0], val[1]) for val in clean_values]),
         ),
+      cpp_local_name,
+      kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       clean_values,
       are_values_namespaced = are_values_namespaced,
       )
     self.ext.decls.append(enum)
+    self.namespace_mgr.add_type(
+      self.nested_cpp_names,
+      Named([cpp_type_expr.components[-1]]),
+      cpp_type_expr,
+      )
     return enum

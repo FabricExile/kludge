@@ -696,7 +696,7 @@ class Record(Decl):
 
   @property
   def kl_global_name(self):
-    return '_'.join(self.namespace.nested_kl_names + [self.kl_local_name])
+    return '_'.join(self.namespace.nested_kl_names)
 
   def get_template_basename(self):
     return 'record'

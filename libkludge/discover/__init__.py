@@ -2,7 +2,4 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import discover
-import generate
-
-commands = [discover, generate]
+from main import main, name, usage, description

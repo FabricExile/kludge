@@ -3,12 +3,12 @@
 #
 
 import sys, optparse
-from ext import Ext
-from libkludge import util
+# from parser import Parser
+import libkludge.util
 
-name = "generate"
-usage = "[OPTIONS] <name> <gen_script.kludge.py> [<gen_script.kludge.py>...]"
-description = "Generate KL extension from a Kludge script"
+name = "discover"
+usage = "[OPTIONS] <header.h> [<header.h> ...]"
+description = "Generate Kludge script stubs from C++ headers"
 
 def quit_with_usage(prog):
   print "Run '%s %s --help' for usage" % (prog, name)
@@ -37,18 +37,15 @@ def main(prog, args):
       )
   (opts, args) = opt_parser.parse_args(args=args)
   opts.verbosity = int(opts.verbosity)
-  if len(args) < 1:
-    util.error(opts, "Missing extension name")
+  headers = args
+  if len(headers) == 0:
+    util.error(opts, "Missing header to process")
     quit_with_usage(prog)
-  script_filenames = args[1:]
-  if len(script_filenames) == 0:
-    util.error(opts, "Missing script filename")
-    quit_with_usage(prog)
-  ext = Ext(
+  parser = Parser(
     name = args[0],
     opts = opts,
     )
-  for script_filename in script_filenames:
+  for script_filename in headers:
     ext.process(script_filename)
   ext.write()
   return 0

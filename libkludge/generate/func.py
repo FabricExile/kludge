@@ -8,7 +8,7 @@ from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
 from libkludge import cpp_type_expr_parser
 import hashlib
-import util
+from libkludge import util
 
 class Func(Decl):
   def __init__(

@@ -9,7 +9,7 @@ from namespace import Namespace
 from member_access import MemberAccess
 from this_access import ThisAccess
 from test import Test
-import util
+from libkludge import util
 
 class Ext:
 

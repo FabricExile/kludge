@@ -1,8 +1,8 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% import "gen/macros.cpp" as macros %}
-{% extends "gen/decl/decl.impls.cpp" %}
+{% import "generate/macros.cpp" as macros %}
+{% extends "generate/decl/decl.impls.cpp" %}
 {% block body %}
 FABRIC_EXT_EXPORT
 {{func.result_codec.render_direct_type_edk()}}

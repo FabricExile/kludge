@@ -41,7 +41,7 @@ class Ext:
           "types": jinja2.PrefixLoader({
               "builtin": jinja2.PackageLoader('__main__', 'libkludge/types'),
               }),
-          "gen": jinja2.PackageLoader('__main__', 'libkludge/gen/templates'),
+          "generate": jinja2.PackageLoader('__main__', 'libkludge/generate/templates'),
           }),
       )
     self.namespace_mgr = NamespaceMgr()
@@ -118,7 +118,7 @@ class Ext:
       filename = os.path.join(self.opts.outdir, self.name + '.' + lang)
       self.info("Writing %s" % (filename))
       with open(filename, 'w') as file:
-        self.jinjenv.get_template("gen/ext/ext." + lang).stream(ext=self).dump(file)
+        self.jinjenv.get_template("generate/ext/ext." + lang).stream(ext=self).dump(file)
 
   def add_cpp_flag(self, cpp_flag):
     self.cpp_flags.append(os.path.expandvars(cpp_flag))

@@ -5,12 +5,12 @@
 
 import os, pytest, subprocess, difflib
 
-test_gen_dir = os.path.join('test', 'gen')
+test_generate_dir = os.path.join('test', 'generate')
 test_tmp_dir_base = os.path.join('test', 'tmp')
 
 def collect_test_gen_kludge_py_basenames():
   result = []
-  for dirpath, _subdirs, filenames in os.walk(test_gen_dir):
+  for dirpath, _subdirs, filenames in os.walk(test_generate_dir):
       for filename in filenames:
           filebase_and_ext2, fileext1 = os.path.splitext(filename)
           if fileext1 == '.py':
@@ -22,7 +22,7 @@ def collect_test_gen_kludge_py_basenames():
 @pytest.mark.parametrize("kludge_py_basename", collect_test_gen_kludge_py_basenames())
 def test_kludge_py_basename(kludge_py_basename):
 
-  if os.path.isfile(os.path.join(test_gen_dir, kludge_py_basename + '.skip')):
+  if os.path.isfile(os.path.join(test_generate_dir, kludge_py_basename + '.skip')):
     return
 
   test_tmp_dir = os.path.join(test_tmp_dir_base, kludge_py_basename)
@@ -32,15 +32,15 @@ def test_kludge_py_basename(kludge_py_basename):
 
   assert subprocess.call(
     [
-      './kludge', 'gen',
+      './kludge', 'generate',
       '-o', test_tmp_dir,
       kludge_py_basename,
-      os.path.join(test_gen_dir, kludge_py_basename + '.kludge.py'),
+      os.path.join(test_generate_dir, kludge_py_basename + '.kludge.py'),
       ],
     ) == 0
 
   scons_env = os.environ.copy()
-  scons_env['CPPPATH'] = os.path.abspath(test_gen_dir)
+  scons_env['CPPPATH'] = os.path.abspath(test_generate_dir)
   assert subprocess.call(
     [
       'scons',

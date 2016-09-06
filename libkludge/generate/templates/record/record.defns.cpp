@@ -1,8 +1,9 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% extends "gen/decl/decl.defns.kl" %}
+{% import "generate/macros.cpp" as macros %}
+{% extends "generate/decl/decl.defns.cpp" %}
 {% block body %}
-alias {{alias.old_type_info.kl.name.base}} {{alias.new_kl_type_name}}{{alias.old_type_info.kl.name.suffix}};
+{{decl.mutable_this.render_defn_edk()}}
 
 {% endblock body %}

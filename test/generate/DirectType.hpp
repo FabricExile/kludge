@@ -80,12 +80,6 @@ public:
     _intValue = pri_intValue;
   }
 
-  void methodWithOptParams( int x, float y = 6.78 )
-  {
-    pri_intValue = x;
-    floatValue = y;
-  }
-
   operator bool() const
     { return !!pri_intValue; }
 

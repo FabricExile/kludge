@@ -1,9 +1,11 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% import "gen/macros.cpp" as macros %}
-{% extends "gen/decl/decl.defns.cpp" %}
+{% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
-{{decl.mutable_this.render_defn_edk()}}
+alias Integer {{enum.type_info.kl.name.compound}};
+{% for value in enum.values %}
+const {{enum.type_info.kl.name.compound}} {{'_'.join(enum.namespace.nested_kl_names + [value[0]])}} = {{value[1]}};
+{% endfor %}
 
 {% endblock body %}

@@ -6,16 +6,17 @@ import sys, optparse
 from ext import Ext
 import util
 
-usage = "gen [OPTIONS] <name> <gen_script.kludge.py> [<gen_script.kludge.py>...]"
+name = "generate"
+usage = "[OPTIONS] <name> <gen_script.kludge.py> [<gen_script.kludge.py>...]"
 description = "Generate KL extension from a Kludge script"
 
 def quit_with_usage(prog):
-  print "Run '%s gen --help' for usage" % prog
+  print "Run '%s %s --help' for usage" % (prog, name)
   sys.exit(1)
 
 def main(prog, args):
   opt_parser = optparse.OptionParser(
-      usage="%prog " + usage,
+      usage="%%prog %s %s" % (name, usage),
       description=description,
       )
   opt_parser.add_option(
@@ -51,3 +52,4 @@ def main(prog, args):
     for script_filename in script_filenames:
       ext.process(script_filename)
     ext.write()
+  return 0

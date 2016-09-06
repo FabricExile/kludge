@@ -1,12 +1,9 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% import "gen/macros.kl" as macros %}
-{% extends "gen/decl/decl.impls.kl" %}
+{% import "generate/macros.cpp" as macros %}
+{% extends "generate/decl/decl.defns.cpp" %}
 {% block body %}
-{{ func.result_codec.render_type_kl() }}
-{{ func.name_kl }}(
-    {{ macros.kl_param_list(func.params) | indent(4) }}
-    ) = "{{func.get_edk_symbol_name()}}";
+typedef Fabric::EDK::KL::SInt32 {{enum.type_info.edk.name}};
 
 {% endblock body %}

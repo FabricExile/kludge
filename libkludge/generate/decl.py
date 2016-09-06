@@ -52,5 +52,5 @@ class Decl(object):
   def render(self, context, lang):
     basename = self.get_template_basename()
     return self.ext.jinjenv.get_template(
-      'gen/'+basename+'/'+basename+'.'+context+'.'+lang
+      'generate/'+basename+'/'+basename+'.'+context+'.'+lang
       ).render({'decl': self, basename: self})

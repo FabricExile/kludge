@@ -1,7 +1,7 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% extends "gen/decl/decl.impls.kl" %}
+{% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 {######################################################################}
 {# Getters and Setters                                                #}

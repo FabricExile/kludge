@@ -15,6 +15,7 @@ class DirectTypeInfo(TypeInfo):
     self,
     jinjenv,
     kl_global_name,
+
     undq_cpp_type_expr,
     is_abstract,
     no_copy_constructor,

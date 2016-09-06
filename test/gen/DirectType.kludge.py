@@ -85,6 +85,20 @@ Class::Class(3.14, hello, -2)
 Class::~Class()
 """)
 
+ty.add_method('methodWithOptParams', None, ['int'], ['float'])\
+  .add_test("""
+Class c1(3.14, "hello", 4);
+c1.methodWithOptParams(14);
+report(c1.get_floatValue());
+c1.methodWithOptParams(7, -1.34);
+report(c1.get_floatValue());
+""", """
+Class::Class(3.14, hello, 4)
++6.78
+-1.34
+Class::~Class()
+""")
+
 dty = ext.add_direct_type('DerivedClass', extends='Class')
 dty.add_ctor(['int'])
 dty.add_const_method('newMethod', 'int')

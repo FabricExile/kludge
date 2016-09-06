@@ -207,7 +207,7 @@ class Record(Decl):
     def add_test(self, kl, out):
       self.ext.add_test(self.get_test_name(), kl, out)
   
-  def add_ctor(self, params = []):
+  def add_ctor(self, params=[], opt_params=[]):
     ctor = self.Ctor(self)
     assert isinstance(params, list)
     for param in params:
@@ -215,6 +215,11 @@ class Record(Decl):
     if len(ctor.params) == 0:
       self.include_empty_ctor = False
     self.ctors.append(ctor)
+    if len(opt_params) > 0:
+      self.add_ctor(
+        params + opt_params[0:1],
+        opt_params[1:]
+        )
     return ctor
 
   class Method(object):
@@ -291,6 +296,7 @@ class Record(Decl):
     name,
     returns = None,
     params = [],
+    opt_params = [],
     this_access = ThisAccess.const,
     ):
     assert isinstance(name, basestring)
@@ -301,16 +307,24 @@ class Record(Decl):
     assert isinstance(params, list)
     for param in params:
       method.add_param(param)
+    if len(opt_params) > 0:
+      self.add_method(
+        name,
+        returns,
+        params + opt_params[0:1],
+        opt_params[1:],
+        this_access
+        )
     return method
 
-  def add_const_method(self, name, returns=None, params=[]):
-    return self.add_method(name, returns, params, ThisAccess.const)
+  def add_const_method(self, name, returns=None, params=[], opt_params=[]):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.const)
 
-  def add_mutable_method(self, name, returns=None, params=[]):
-    return self.add_method(name, returns, params, ThisAccess.mutable)
+  def add_mutable_method(self, name, returns=None, params=[], opt_params=[]):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.mutable)
 
-  def add_static_method(self, name, returns=None, params=[]):
-    return self.add_method(name, returns, params, ThisAccess.static)
+  def add_static_method(self, name, returns=None, params=[], opt_params=[]):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.static)
 
   class UniOp(object):
 

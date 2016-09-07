@@ -858,6 +858,18 @@ class Parser(object):
     AccessSpecifier.PUBLIC: 'MemberAccess.public',
     }
 
+  def parse_method_access(
+    self,
+    ast_logger,
+    cursor,
+    ):
+    if cursor.is_const_method():
+      return "access=ThisAccess.const"
+    elif cursor.is_static_method():
+      return "access=ThisAccess.static"
+    else:
+      return "access=ThisAccess.mutable"
+
   def parse_record_decl(
     self,
     ast_logger,
@@ -917,21 +929,21 @@ class Parser(object):
                 )
               )
           elif child_cursor.spelling == "operator*":
-            print dir(child_cursor)
-            print child_cursor.access_specifier
             methods.append(
-              "ty_%s.add_deref('deref', '%s', access=)\n" % (
+              "ty_%s.add_deref('deref', '%s', %s)\n" % (
                 name,
                 child_cursor.result_type.spelling,
+                self.parse_method_access(child_ast_logger, child_cursor),
                 )
               )
           else:
             methods.append(
-              "ty_%s.add_method('%s', '%s', %s)%s\n" % (
+              "ty_%s.add_method('%s', '%s', %s, %s)%s\n" % (
                 name,
                 child_cursor.spelling,
                 child_cursor.result_type.spelling,
                 self.parse_params(child_ast_logger, child_cursor),
+                self.parse_method_access(child_ast_logger, child_cursor),
                 self.parse_comment(child_ast_logger, child_cursor),
                 )
               )
@@ -946,8 +958,7 @@ class Parser(object):
         decls.write(", extends='%s'" % extends)
       decls.write(")\n")
       for member in members:
-        decls.write(member)
-      decls.write("\n")
+        defns.write(member)
       for method in methods:
         defns.write(method)
       defns.write("\n")
@@ -958,36 +969,6 @@ class Parser(object):
       pass
     elif cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
       self.parse_record_decl(ast_logger, cursor, decls, defns)
-    # self.parse_children(ast_logger, cursor)
-    # elif cursor_kind == CursorKind.NAMESPACE:
-    #     nested_namespace_name = cursor.spelling
-    #     nested_namespace_path = self.namespace_mgr.add_nested_namespace(
-    #         current_namespace_path,
-    #         nested_namespace_name,
-    #         )
-    #     print "%sNAMESPACE %s" % (indent, "::".join(nested_namespace_path))
-    #     self.parse_children(include_filename, indent + "  ", nested_namespace_path, cursor)
-    # elif cursor_kind == CursorKind.NAMESPACE_ALIAS:
-    #     ns_alias_path = current_namespace_path + [cursor.displayname]
-    #     ns_path = []
-    #     for path in cursor.get_children():
-    #         ns_path += [path.displayname]
-    #     self.namespace_mgr.add_namespace_alias(ns_alias_path, ns_path)
-    # elif cursor_kind == CursorKind.UNEXPOSED_DECL:
-    #     self.parse_children(include_filename, indent, current_namespace_path, cursor)
-    # elif cursor_kind == CursorKind.MACRO_INSTANTIATION:
-    #     self.parse_MACRO_INSTANTIATION(include_filename, indent, current_namespace_path, cursor)
-    # elif cursor_kind == CursorKind.TYPEDEF_DECL:
-    #     self.parse_TYPEDEF_DECL(include_filename, indent, current_namespace_path, cursor)
-    # elif cursor_kind == CursorKind.CLASS_TEMPLATE:
-    #     # [andrew 20160519] ignore the template itself, only deal with specializations
-    #     pass
-    # elif cursor_kind == CursorKind.FUNCTION_DECL:
-    #     self.parse_FUNCTION_DECL(include_filename, indent, current_namespace_path, cursor)
-    # elif cursor_kind == CursorKind.USING_DIRECTIVE:
-    #     for child in cursor.get_children():
-    #         if child.kind == CursorKind.NAMESPACE_REF:
-    #             self.namespace_mgr.add_using_namespace(current_namespace_path, child.spelling.split("::"))
     else:
       self.warning("%s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind))
 

@@ -5,8 +5,6 @@ from libkludge.cpp_type_expr_parser import *
 
 class KLExtTypeAliasTypeInfo(TypeInfo):
 
-  can_in_place = True
-
   def __init__(self, jinjenv, undq_cpp_type_expr, kl_type_name):
     TypeInfo.__init__(
       self,

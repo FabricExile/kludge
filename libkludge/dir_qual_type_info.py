@@ -10,7 +10,3 @@ class DirQualTypeInfo:
 
   def get_desc(self):
     return "%s:%s" % (self.dir_qual.get_desc(), self.type_info.get_desc())
-
-  @property
-  def can_in_place(self):
-      return self.dir_qual.is_direct and self.type_info.can_in_place

@@ -19,7 +19,6 @@ class FixedArrayTypeInfo(TypeInfo):
       lib_expr = undq_cpp_type_expr,
       child_dqtis = [element_dqti]
       )
-    self.can_in_place = element_dqti.type_info.can_in_place
 
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)

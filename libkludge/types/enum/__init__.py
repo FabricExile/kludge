@@ -6,8 +6,6 @@ from libkludge.cpp_type_expr_parser import *
 
 class EnumTypeInfo(TypeInfo):
 
-  can_in_place = True
-
   def __init__(self, jinjenv, kl_type_name, undq_cpp_type_expr):
     TypeInfo.__init__(
       self,

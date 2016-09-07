@@ -5,8 +5,6 @@ from libkludge.cpp_type_expr_parser import *
 
 class InPlaceTypeInfo(TypeInfo):
 
-  can_in_place = True
-
   def __init__(
     self,
     jinjenv,

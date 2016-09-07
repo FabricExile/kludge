@@ -12,8 +12,6 @@ mutable_cpp_type_expr = PointerTo(Void())
 
 class ConstVoidPtrTypeInfo(TypeInfo):
 
-  can_in_place = True
-
   def __init__(self, jinjenv):
     TypeInfo.__init__(
       self,
@@ -29,8 +27,6 @@ class ConstVoidPtrTypeInfo(TypeInfo):
     return tds
 
 class MutableVoidPtrTypeInfo(TypeInfo):
-
-  can_in_place = True
 
   def __init__(self, jinjenv):
     TypeInfo.__init__(

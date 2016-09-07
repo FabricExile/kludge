@@ -43,8 +43,6 @@ class LibTypeInfo:
 
 class TypeInfo:
 
-  can_in_place = False
-
   def __init__(
     self,
     jinjenv,

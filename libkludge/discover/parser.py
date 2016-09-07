@@ -148,11 +148,12 @@ class Parser(object):
     decls,
     defns,
     ):
-    name = cursor.type.spelling
+    name = cursor.spelling
     child_obj = '%s_%s' % (obj, name)
     extends = None
     members = []
     methods = []
+    child_record_cursors = []
 
     has_child = False
     child_ast_logger = ast_logger.indent()
@@ -240,6 +241,8 @@ class Parser(object):
               )
       elif child_cursor.kind == CursorKind.DESTRUCTOR:
         pass
+      elif child_cursor.kind == CursorKind.CLASS_DECL or child_cursor.kind == CursorKind.STRUCT_DECL:
+        child_record_cursors.append(child_cursor)
       else:
         methods.append("# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
 
@@ -258,15 +261,32 @@ class Parser(object):
       for method in methods:
         print >>defns, method
       print >>defns, ""
+      for child_record_cursor in child_record_cursors:
+        child_ast_logger.log_cursor(child_record_cursor)
+        self.parse_record_decl(child_ast_logger, child_record_cursor, child_obj, decls, defns)
 
   def parse_function_decl(self, ast_logger, cursor, obj, decls, defns):
-    defns.write("%s.add_func('%s', '%s', %s)%s\n\n" % (
+    defns.write("# %s\n%s.add_func('%s', '%s', %s)%s\n\n" % (
+      self.location_desc(cursor.location),
       obj,
       cursor.spelling,
       cursor.result_type.spelling,
       self.parse_params(ast_logger, cursor),
       self.parse_comment(ast_logger, cursor),
       ))
+
+  def parse_namespace(self, ast_logger, cursor, obj, decls, defns):
+    name = cursor.spelling
+    child_obj = "%s_%s" % (obj, name)
+    print >>decls, "# %s\n%s = %s.add_namespace('%s')" % (
+      self.location_desc(cursor.location),
+      child_obj,
+      obj,
+      name,
+      )
+    child_ast_logger = ast_logger.indent()
+    for child_cursor in cursor.get_children():
+      self.parse_cursor(child_ast_logger, child_cursor, child_obj, decls, defns)
 
   def parse_cursor(self, ast_logger, cursor, obj, decls, defns):
     ast_logger.log_cursor(cursor)
@@ -276,6 +296,8 @@ class Parser(object):
       self.parse_record_decl(ast_logger, cursor, obj, decls, defns)
     elif cursor.kind == CursorKind.FUNCTION_DECL:
       self.parse_function_decl(ast_logger, cursor, obj, decls, defns)
+    elif cursor.kind == CursorKind.NAMESPACE:
+      self.parse_namespace(ast_logger, cursor, obj, decls, defns)
     else:
       print >>defns, "# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind)
 

@@ -95,6 +95,7 @@ def test_discover(basename):
   assert subprocess.call(
     [
       './kludge', 'discover',
+      '-I', test_generate_dir,
       '-o', test_tmp_dir,
       os.path.join(test_discover_dir, basename + '.hpp'),
       ],

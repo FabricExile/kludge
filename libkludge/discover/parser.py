@@ -12,7 +12,19 @@ class Parser(object):
   def __init__(self, name, opts):
     self.name = name
     self.opts = opts
-  
+    self.clang_opts = ['-x', 'c++']
+    if self.opts.clang_opts:
+      self.clang_opts.extend(self.opts.clang_opts)
+    if self.opts.cpppath:
+      for cppdir in self.opts.cpppath:
+          self.clang_opts.extend(["-I", self.expand_envvars(cppdir)])
+    self.clang_opts.extend(["-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/include/c++/v1')])
+    self.clang_opts.extend(["-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/lib/clang/3.9.0/include')])
+    if self.opts.cppdefines:
+      for cppdefine in self.opts.cppdefines:
+          self.clang_opts.extend(["-D", self.expand_envvars(cppdefine)])
+    self.info("Using Clang options: %s" % " ".join(self.clang_opts))
+
   def error(self, string):
     util.error(self.opts, string)
 
@@ -25,26 +37,17 @@ class Parser(object):
   def debug(self, string):
     util.debug(self.opts, string)
 
-  class Logger(object):
+  class ASTLogger(object):
 
-    def __init__(self, parser, indent=""):
+    def __init__(self, parser, prefix="AST:"):
       self.parser = parser
-      self.indent = indent
+      self.prefix = prefix
 
-    def error(self, string):
-      self.parser.error(self.indent + string)
-
-    def warning(self, string):
-      self.parser.warning(self.indent + string)
-
-    def info(self, string):
-      self.parser.info(self.indent + string)
-
-    def debug(self, string):
-      self.parser.debug(self.indent + string)
+    def log(self, string):
+      self.parser.debug(self.prefix + " " + string)
 
     def indent(self):
-      return Logger(self.parser, self.indent + " ")
+      return self.parser.ASTLogger(self.parser, self.prefix + ":")
 
   envvar_re = re.compile("\\${[A-Za-z_]+}")
 
@@ -71,28 +74,6 @@ class Parser(object):
 
   def process(self, filename):
     self.parse(self.expand_envvars(filename))
-
-  @staticmethod
-  def print_diag(diag):
-      msg = 'compile '
-      if diag.severity >= clang.cindex.Diagnostic.Fatal:
-          msg += 'FATAL ERROR'
-      elif diag.severity >= clang.cindex.Diagnostic.Error:
-          msg += 'error'
-      elif diag.severity >= clang.cindex.Diagnostic.Warning:
-          msg += 'warning'
-      elif diag.severity >= clang.cindex.Diagnostic.Note:
-          msg += 'note'
-      else:
-          msg += 'diag'
-
-      print msg + ': ' + diag.spelling + ' : ' + str(diag.location)
-      for fix in diag.fixits:
-          print '    ' + str(fix)
-
-      if diag.severity >= clang.cindex.Diagnostic.Fatal:
-          return False
-      return True
 
   @staticmethod
   def get_location(clang_location):
@@ -861,11 +842,12 @@ class Parser(object):
       CursorKind.INCLUSION_DIRECTIVE,
       ]
 
-  def parse_cursor(self, logger, cursor):
+  def parse_cursor(self, ast_logger, cursor):
       cursor_kind = cursor.kind
-      logger.debug("AST: %s %s %s" % (str(cursor_kind), cursor.displayname, str(cursor.location)))
+      ast_logger.log("%s %s %s:%d:%d" % (str(cursor_kind), cursor.displayname, cursor.location.file, cursor.location.line, cursor.location.column))
       if cursor_kind in Parser.ignored_cursor_kinds:
           pass
+      self.parse_children(ast_logger, cursor)
       # elif cursor_kind == CursorKind.NAMESPACE:
       #     nested_namespace_name = cursor.spelling
       #     nested_namespace_path = self.namespace_mgr.add_nested_namespace(
@@ -900,48 +882,47 @@ class Parser(object):
       # else:
       #     print "%sUnhandled %s at %s:%d" % (indent, cursor_kind, cursor.location.file, cursor.location.line)
 
-  def parse_children(self, include_filename, childIndent, current_namespace_path, cursor):
-      for childCursor in cursor.get_children():
-          self.parse_cursor(include_filename, childIndent, current_namespace_path, childCursor)
+  def parse_children(self, ast_logger, cursor):
+    child_ast_logger = ast_logger.indent()
+    for child_cursor in cursor.get_children():
+        self.parse_cursor(child_ast_logger, child_cursor)
+
+  clang_diag_desc = {
+    clang.cindex.Diagnostic.Fatal: "fatal",
+    clang.cindex.Diagnostic.Error: "error",
+    clang.cindex.Diagnostic.Warning: "warning",
+    clang.cindex.Diagnostic.Note: "note",
+    }
 
   def parse(self, filename):
-    logger = self.Logger(self)
+    ast_logger = self.ASTLogger(self)
 
-    logger.info("Parsing '%s'" % filename)
-
-    clang_opts = ['-x', 'c++']
-    if self.opts.clang_opts:
-      clang_opts.extend(self.opts.clang_opts)
-    if self.opts.cpppath:
-      for cppdir in self.opts.cpppath:
-          clang_opts.extend(["-I", self.expand_envvars(cppdir)])
-    if self.opts.cppdefines:
-      for cppdefine in self.opts.cppdefines:
-          clang_opts.extend(["-D", self.expand_envvars(cppdefine)])
-    logger.info("  using Clang opts: %s" % " ".join(clang_opts))
+    self.info("Parsing '%s'" % filename)
 
     clang_index = clang.cindex.Index.create()
     unit = clang_index.parse(
         filename,
-        [
-            "-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/include/c++/v1'),
-            "-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/lib/clang/3.9.0/include'),
-            ] + clang_opts,
+        self.clang_opts,
         None,
         clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
         # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
         )
 
-    skip = False
-    for d in unit.diagnostics:
-        skip = skip or not self.print_diag(d)
-
-    if skip:
-        logger.error("Fatal errors encountered; aborting")
+    fatal_error_count = 0
+    for diag in unit.diagnostics:
+      prefix = "%s:%d:%d: %s: " % (diag.location.file, diag.location.line, diag.location.column, self.clang_diag_desc[diag.severity])
+      self.info(prefix + diag.spelling)
+      space_prefix = ' ' * len(prefix)
+      for fixit in diag.fixits:
+        self.info(space_prefix + str(fixit))
+      if diag.severity >= clang.cindex.Diagnostic.Fatal:
+        fatal_error_count += 1
+    if fatal_error_count > 0:
+        self.error("Fatal compile errors encountered; aborting")
         return 0
 
     for cursor in unit.cursor.get_children():
         if hasattr(cursor.location.file, 'name') \
           and cursor.location.file.name != filename:
           continue
-        self.parse_cursor(logger, cursor)
+        self.parse_cursor(ast_logger, cursor)

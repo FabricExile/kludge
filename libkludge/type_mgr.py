@@ -24,7 +24,7 @@ class TypeMgr:
     self.add_selector(VoidSelector(jinjenv))
     self.add_selector(CStringSelector(jinjenv))  # must come before Simple so it matches char const *
     self.add_selector(VoidPtrSelector(jinjenv))
-    self.add_selector(SimpleSelector(jinjenv))
+    self.add_selector(SimpleDirectSelector(jinjenv))
     self.add_selector(StdStringSelector(jinjenv))
     self.add_selector(FixedArraySelector(jinjenv))
     self.add_selector(StdVectorSelector(jinjenv))

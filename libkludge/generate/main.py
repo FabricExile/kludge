@@ -16,27 +16,27 @@ def quit_with_usage(prog):
 
 def main(prog, args):
   opt_parser = optparse.OptionParser(
-      usage="%%prog %s %s" % (name, usage),
-      description=description,
-      )
+    usage="%%prog %s %s" % (name, usage),
+    description=description,
+    )
   opt_parser.add_option(
-      '-o', '--output-dir',
-      action='store',
-      default='.',
-      dest='outdir',
-      metavar='OUTDIR',
-      help="output directory (defaults to .)",
-      )
+    '-o', '--output-dir',
+    action='store',
+    default='.',
+    dest='outdir',
+    metavar='OUTDIR',
+    help="output directory (defaults to .)",
+    )
   opt_parser.add_option(
-      '-v', '--verbosity',
-      action='store',
-      default='2',
-      dest='verbosity',
-      metavar='VERBOSITY',
-      help="Verbosity of output (defaults to 2)",
-      )
+    '-v', '--verbosity',
+    type='int',
+    action='store',
+    default=2,
+    dest='verbosity',
+    metavar='VERBOSITY',
+    help="Verbosity of output (defaults to 2)",
+    )
   (opts, args) = opt_parser.parse_args(args=args)
-  opts.verbosity = int(opts.verbosity)
   if len(args) < 1:
     util.error(opts, "Missing extension name")
     quit_with_usage(prog)

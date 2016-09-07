@@ -37,6 +37,13 @@ def main(prog, args):
     help="Verbosity of output (defaults to 2)",
     )
   opt_parser.add_option(
+    '-s', '--skip-master',
+    action='store_true',
+    default=False,
+    dest='skip_master',
+    help="Skip generation of master .kludge.py script",
+    )
+  opt_parser.add_option(
     '-I', None,
     action='append',
     dest='cpppath',
@@ -49,6 +56,20 @@ def main(prog, args):
     dest='cppdefines',
     metavar='DEFINE',
     help="Define a preprocessor value",
+    )
+  opt_parser.add_option(
+    '-L', None,
+    action='append',
+    dest='libpath',
+    metavar='DIR',
+    help="Add directory to library path",
+    )
+  opt_parser.add_option(
+    '-l', None,
+    action='append',
+    dest='libs',
+    metavar='LIB',
+    help="Add libary for link",
     )
   opt_parser.add_option(
     '-C', '--clang-opt',

@@ -44,6 +44,7 @@ class Ext:
           "generate": jinja2.PackageLoader('__main__', 'libkludge/generate/templates'),
           }),
       )
+    setattr(self.jinjenv, 'opts', opts)
     self.namespace_mgr = NamespaceMgr()
     self.type_mgr = TypeMgr(self.jinjenv)
 

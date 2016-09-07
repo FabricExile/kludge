@@ -36,6 +36,13 @@ def main(prog, args):
     metavar='VERBOSITY',
     help="Verbosity of output (defaults to 2)",
     )
+  opt_parser.add_option(
+    '-d', '--debug-type-templates',
+    action='store_true',
+    default=False,
+    dest='debug_templates',
+    help="Include type template debug information in output",
+    )
   (opts, args) = opt_parser.parse_args(args=args)
   if len(args) < 1:
     util.error(opts, "Missing extension name")

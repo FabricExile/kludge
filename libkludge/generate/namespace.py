@@ -151,9 +151,9 @@ class Namespace:
   def add_direct_type(
     self,
     cpp_type_name,
-    kl_type_name = None,
-    extends = None,
-    forbid_copy = False,
+    kl_type_name=None,
+    extends=None,
+    forbid_copy=False,
     ):
     cpp_local_name = cpp_type_name
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)

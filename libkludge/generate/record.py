@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import inspect, hashlib
+import inspect, hashlib, abc
 from decl import Decl
 from test import Test
 from libkludge.member_access import MemberAccess
@@ -13,6 +13,333 @@ from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
 from libkludge.dir_qual_type_info import DirQualTypeInfo
+from libkludge.util import clean_comment
+
+class Methodlike(object):
+
+  def __init__(self, record):
+    self.record = record
+    self.comments = []
+  
+  @property
+  def ext(self):
+    return self.record.ext
+
+  def add_test(self, kl, out):
+    self.ext.add_test(self.get_test_name(), kl, out)
+    return self
+
+  def add_comment(self, comment):
+    self.comments.append(clean_comment(comment))
+    return self
+
+  @abc.abstractmethod
+  def get_test_name():
+    pass
+
+class Ctor(Methodlike):
+
+  def __init__(self, record):
+    Methodlike.__init__(self, record)
+    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+    self.base_edk_symbol_name = record.kl_global_name + '__ctor'
+    self.this = self.record.mutable_this
+    self.params = []
+  
+  @property
+  def edk_symbol_name(self):
+    h = hashlib.md5()
+    h.update(self.base_edk_symbol_name)
+    for param in self.params:
+      h.update(param.type_info.edk.name)
+    return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+  def get_test_name(self):
+    return self.base_edk_symbol_name
+
+  def add_param(self, cpp_type_name, name = None):
+    if not isinstance(name, basestring):
+      name = "arg%d" % len(self.params)
+    self.params.append(
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.resolve_cpp_type_expr(cpp_type_name)
+          ),
+        name
+        )
+      )
+    return self
+
+class Method(Methodlike):
+
+  def __init__(self, record, cpp_name, this_access=ThisAccess.const):
+    Methodlike.__init__(self, record)
+    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+    self.base_edk_symbol_name = record.kl_global_name + '__meth_' + cpp_name
+    self.result = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
+    self.cpp_name = cpp_name
+    self.this = self.record.mutable_this
+    self.params = []
+    self.this_access = this_access
+    self.is_const = self.this_access == ThisAccess.const
+    self.is_mutable = self.this_access == ThisAccess.mutable
+    self.is_static = self.this_access == ThisAccess.static
+  
+  @property
+  def kl_name(self):
+    return self.cpp_name
+
+  @property
+  def this_access_suffix(self):
+    if self.this_access == ThisAccess.const:
+      return '?'
+    elif self.this_access == ThisAccess.mutable:
+      return '!'
+    else:
+      assert False
+  
+  @property
+  def edk_symbol_name(self):
+    h = hashlib.md5()
+    h.update(self.base_edk_symbol_name)
+    for param in self.params:
+      h.update(param.type_info.edk.name)
+    return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+  def get_test_name(self):
+    return self.base_edk_symbol_name
+
+  def returns(self, cpp_type_name):
+    assert isinstance(cpp_type_name, basestring)
+    self.result = ResultCodec(
+      self.ext.type_mgr.get_dqti(
+        self.resolve_cpp_type_expr(cpp_type_name)
+        )
+      )
+    return self
+
+  def add_param(self, cpp_type_name, cpp_name = None):
+    assert isinstance(cpp_type_name, basestring)
+    if not isinstance(cpp_name, basestring):
+      cpp_name = "arg%d" % len(self.params)
+    self.params.append(
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.resolve_cpp_type_expr(cpp_type_name)
+          ),
+        cpp_name
+        )
+      )
+    return self
+
+class UniOp(Methodlike):
+
+  op_to_edk_op = {
+    "++": 'INC',
+    "--": 'DEC',
+  }
+
+  def __init__(
+    self,
+    record,
+    op,
+    kl_method_name,
+    result_cpp_type_name,
+    ):
+    Methodlike.__init__(self, record)
+    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+    self.base_edk_symbol_name = record.kl_global_name + '__uni_op_'+self.op_to_edk_op[op]
+    assert isinstance(kl_method_name, basestring)
+    self.kl_method_name = kl_method_name
+    self.op = op
+    self.this = record.mutable_this
+    assert isinstance(result_cpp_type_name, basestring)
+    self.result = ResultCodec(
+      self.ext.type_mgr.get_dqti(
+        self.resolve_cpp_type_expr(result_cpp_type_name)
+        )
+      )
+
+  @property
+  def ext(self):
+    return self.record.ext
+  
+  @property
+  def edk_symbol_name(self):
+    h = hashlib.md5()
+    h.update(self.base_edk_symbol_name)
+    return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+  def get_test_name(self):
+    return self.base_edk_symbol_name
+
+class BinOp(Methodlike):
+
+  op_to_edk_op = {
+    "+": 'ADD',
+    "-": 'SUB',
+    "*": 'MUL',
+    "/": 'DIV',
+    "%": 'MOD',
+    "==": 'EQ',
+    "!=": 'NE',
+    "<": 'LT',
+    "<=": 'LE',
+    ">": 'GT',
+    ">=": 'GE',
+    "===": 'EX_EQ',
+    "!==": 'EX_NE',
+    "|": 'BIT_OR',
+    "&": 'BIT_AND',
+    "^": 'BIT_XOR',
+    "<<": 'SHL',
+    ">>": 'SHR',
+  }
+
+  def __init__(
+    self,
+    record,
+    result_type,
+    op,
+    lhs_param_name,
+    lhs_param_type,
+    rhs_param_name,
+    rhs_param_type,
+    ):
+    Methodlike.__init__(self, record)
+    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+    self.base_edk_symbol_name = record.kl_global_name + '__bin_op_'+self.op_to_edk_op[op]
+    self.result = ResultCodec(
+      self.ext.type_mgr.get_dqti(
+        self.resolve_cpp_type_expr(result_type)
+        )
+      )
+    self.op = op
+    self.params = [
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.resolve_cpp_type_expr(lhs_param_type)
+          ),
+        lhs_param_name
+        ),
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.resolve_cpp_type_expr(rhs_param_type)
+          ),
+        rhs_param_name
+        ),
+      ]
+
+  @property
+  def ext(self):
+    return self.record.ext
+  
+  @property
+  def edk_symbol_name(self):
+    h = hashlib.md5()
+    h.update(self.base_edk_symbol_name)
+    for param in self.params:
+      h.update(param.type_info.edk.name)
+    return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+  def get_test_name(self):
+    return self.base_edk_symbol_name
+
+class AssOp(Methodlike):
+
+  op_to_edk_op = {
+    "=": 'SIMPLE',
+    "+=": 'ADD',
+    "-=": 'SUB',
+    "*=": 'MUL',
+    "/=": 'DIV',
+    "%=": 'MOD',
+    "|=": 'BIT_OR',
+    "&=": 'BIT_AND',
+    "^=": 'BIT_XOR',
+    "<<=": 'SHL',
+    ">>=": 'SHR',
+  }
+
+  def __init__(
+    self,
+    record,
+    op,
+    param_type,
+    param_name,
+    ):
+    Methodlike.__init__(self, record)
+    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+    self.base_edk_symbol_name = record.kl_global_name + '__ass_op_' + self.op_to_edk_op[op]
+    self.this = self.record.mutable_this
+    self.op = op
+    self.params = [
+      ParamCodec(
+        self.ext.type_mgr.get_dqti(
+          self.resolve_cpp_type_expr(param_type)
+          ),
+        param_name
+        ),
+      ]
+
+  @property
+  def ext(self):
+    return self.record.ext
+  
+  @property
+  def edk_symbol_name(self):
+    h = hashlib.md5()
+    h.update(self.base_edk_symbol_name)
+    for param in self.params:
+      h.update(param.type_info.edk.name)
+    return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+  def get_test_name(self):
+    return self.base_edk_symbol_name
+
+class Cast(Methodlike):
+
+  def __init__(
+    self,
+    record,
+    dst_cpp_type_name,
+    ):
+    Methodlike.__init__(self, record)
+    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+    assert isinstance(dst_cpp_type_name, basestring)
+    this_dqti = self.ext.type_mgr.get_dqti(
+      self.resolve_cpp_type_expr(dst_cpp_type_name)
+      )
+    self.base_edk_symbol_name = this_dqti.type_info.kl.name.compound + '__cast'
+    self.this = ThisCodec(
+      this_dqti.type_info,
+      [],
+      True, # is_mutable
+      )
+    self.params = [
+      ParamCodec(
+        DirQualTypeInfo(
+          DirQual(directions.Reference, qualifiers.Const),
+          record.const_this.type_info,
+          ),
+        "that"
+        ),
+      ]
+
+  @property
+  def ext(self):
+    return self.record.ext
+  
+  @property
+  def edk_symbol_name(self):
+    h = hashlib.md5()
+    h.update(self.base_edk_symbol_name)
+    for param in self.params:
+      h.update(param.type_info.edk.name)
+    return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
+
+  def get_test_name(self):
+    return self.base_edk_symbol_name
 
 class Record(Decl):
 
@@ -44,6 +371,7 @@ class Record(Decl):
     else:
       self.namespace = parent_namespace
 
+    self.comments = []
     self.members = []
     self.ctors = []
     self.methods = []
@@ -100,6 +428,11 @@ class Record(Decl):
   def resolve_cpp_type_expr(self, cpp_type_name):
     return self.namespace.resolve_cpp_type_expr(cpp_type_name)
 
+  def add_comment(self, comment):
+    self.comments.append(clean_comment(comment))
+    print str(self.comments)
+    return self
+
   @property
   def empty_ctor_edk_symbol_name(self):
     base_edk_symbol_name = self.kl_global_name + '__empty_ctor'
@@ -135,7 +468,7 @@ class Record(Decl):
   class Member(object):
 
     def __init__(self, record, cpp_name, dqti, getter_kl_name, setter_kl_name, access):
-      self._record = record
+      self.record = record
       self.cpp_name = cpp_name
       self.kl_name = cpp_name
       self.type_info = dqti.type_info
@@ -166,49 +499,9 @@ class Record(Decl):
     member = self.Member(self, cpp_name, dqti, getter, setter, access=access)
     self.members.append(member)
     return self
-
-  class Ctor(object):
-
-    def __init__(self, record):
-      self._record = record
-      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
-      self.base_edk_symbol_name = record.kl_global_name + '__ctor'
-      self.this = self._record.mutable_this
-      self.params = []
-
-    @property
-    def ext(self):
-      return self._record.ext
-    
-    @property
-    def edk_symbol_name(self):
-      h = hashlib.md5()
-      h.update(self.base_edk_symbol_name)
-      for param in self.params:
-        h.update(param.type_info.edk.name)
-      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
-
-    def get_test_name(self):
-      return self.base_edk_symbol_name
-
-    def add_param(self, cpp_type_name, name = None):
-      if not isinstance(name, basestring):
-        name = "arg%d" % len(self.params)
-      self.params.append(
-        ParamCodec(
-          self.ext.type_mgr.get_dqti(
-            self.resolve_cpp_type_expr(cpp_type_name)
-            ),
-          name
-          )
-        )
-      return self
-    
-    def add_test(self, kl, out):
-      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_ctor(self, params=[], opt_params=[]):
-    ctor = self.Ctor(self)
+    ctor = Ctor(self)
     assert isinstance(params, list)
     for param in params:
       ctor.add_param(param)
@@ -222,75 +515,6 @@ class Record(Decl):
         )
     return ctor
 
-  class Method(object):
-
-    def __init__(self, record, cpp_name, this_access=ThisAccess.const):
-      self._record = record
-      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
-      self.base_edk_symbol_name = record.kl_global_name + '__meth_' + cpp_name
-      self.result = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
-      self.cpp_name = cpp_name
-      self.this = self._record.mutable_this
-      self.params = []
-      self.this_access = this_access
-      self.is_const = self.this_access == ThisAccess.const
-      self.is_mutable = self.this_access == ThisAccess.mutable
-      self.is_static = self.this_access == ThisAccess.static
-
-    @property
-    def ext(self):
-      return self._record.ext
-    
-    @property
-    def kl_name(self):
-      return self.cpp_name
-
-    @property
-    def this_access_suffix(self):
-      if self.this_access == ThisAccess.const:
-        return '?'
-      elif self.this_access == ThisAccess.mutable:
-        return '!'
-      else:
-        assert False
-    
-    @property
-    def edk_symbol_name(self):
-      h = hashlib.md5()
-      h.update(self.base_edk_symbol_name)
-      for param in self.params:
-        h.update(param.type_info.edk.name)
-      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
-
-    def get_test_name(self):
-      return self.base_edk_symbol_name
-
-    def returns(self, cpp_type_name):
-      assert isinstance(cpp_type_name, basestring)
-      self.result = ResultCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(cpp_type_name)
-          )
-        )
-      return self
-
-    def add_param(self, cpp_type_name, cpp_name = None):
-      assert isinstance(cpp_type_name, basestring)
-      if not isinstance(cpp_name, basestring):
-        cpp_name = "arg%d" % len(self.params)
-      self.params.append(
-        ParamCodec(
-          self.ext.type_mgr.get_dqti(
-            self.resolve_cpp_type_expr(cpp_type_name)
-            ),
-          cpp_name
-          )
-        )
-      return self
-    
-    def add_test(self, kl, out):
-      self.ext.add_test(self.get_test_name(), kl, out)
-  
   def add_method(
     self,
     name,
@@ -300,7 +524,7 @@ class Record(Decl):
     this_access = ThisAccess.const,
     ):
     assert isinstance(name, basestring)
-    method = self.Method(self, name, this_access=this_access)
+    method = Method(self, name, this_access=this_access)
     self.methods.append(method)
     if returns:
       method.returns(returns)
@@ -325,50 +549,6 @@ class Record(Decl):
 
   def add_static_method(self, name, returns=None, params=[], opt_params=[]):
     return self.add_method(name, returns, params, opt_params, ThisAccess.static)
-
-  class UniOp(object):
-
-    op_to_edk_op = {
-      "++": 'INC',
-      "--": 'DEC',
-    }
-
-    def __init__(
-      self,
-      record,
-      op,
-      kl_method_name,
-      result_cpp_type_name,
-      ):
-      self._record = record
-      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
-      self.base_edk_symbol_name = record.kl_global_name + '__uni_op_'+self.op_to_edk_op[op]
-      assert isinstance(kl_method_name, basestring)
-      self.kl_method_name = kl_method_name
-      self.op = op
-      self.this = record.mutable_this
-      assert isinstance(result_cpp_type_name, basestring)
-      self.result = ResultCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(result_cpp_type_name)
-          )
-        )
-
-    @property
-    def ext(self):
-      return self._record.ext
-    
-    @property
-    def edk_symbol_name(self):
-      h = hashlib.md5()
-      h.update(self.base_edk_symbol_name)
-      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
-
-    def get_test_name(self):
-      return self.base_edk_symbol_name
-    
-    def add_test(self, kl, out):
-      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_uni_op(
     self,
@@ -376,7 +556,7 @@ class Record(Decl):
     kl_method_name,
     returns,
     ):
-    uni_op = self.UniOp(
+    uni_op = UniOp(
       self,
       op,
       kl_method_name,
@@ -384,81 +564,6 @@ class Record(Decl):
       )
     self.uni_ops.append(uni_op)
     return uni_op
-
-  class BinOp(object):
-
-    op_to_edk_op = {
-      "+": 'ADD',
-      "-": 'SUB',
-      "*": 'MUL',
-      "/": 'DIV',
-      "%": 'MOD',
-      "==": 'EQ',
-      "!=": 'NE',
-      "<": 'LT',
-      "<=": 'LE',
-      ">": 'GT',
-      ">=": 'GE',
-      "===": 'EX_EQ',
-      "!==": 'EX_NE',
-      "|": 'BIT_OR',
-      "&": 'BIT_AND',
-      "^": 'BIT_XOR',
-      "<<": 'SHL',
-      ">>": 'SHR',
-    }
-
-    def __init__(
-      self,
-      record,
-      result_type,
-      op,
-      lhs_param_name,
-      lhs_param_type,
-      rhs_param_name,
-      rhs_param_type,
-      ):
-      self._record = record
-      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
-      self.base_edk_symbol_name = record.kl_global_name + '__bin_op_'+self.op_to_edk_op[op]
-      self.result = ResultCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(result_type)
-          )
-        )
-      self.op = op
-      self.params = [
-        ParamCodec(
-          self.ext.type_mgr.get_dqti(
-            self.resolve_cpp_type_expr(lhs_param_type)
-            ),
-          lhs_param_name
-          ),
-        ParamCodec(
-          self.ext.type_mgr.get_dqti(
-            self.resolve_cpp_type_expr(rhs_param_type)
-            ),
-          rhs_param_name
-          ),
-        ]
-
-    @property
-    def ext(self):
-      return self._record.ext
-    
-    @property
-    def edk_symbol_name(self):
-      h = hashlib.md5()
-      h.update(self.base_edk_symbol_name)
-      for param in self.params:
-        h.update(param.type_info.edk.name)
-      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
-
-    def get_test_name(self):
-      return self.base_edk_symbol_name
-    
-    def add_test(self, kl, out):
-      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_bin_op(
     self,
@@ -480,61 +585,6 @@ class Record(Decl):
       )
     self.bin_ops.append(bin_op)
     return bin_op
-
-  class AssOp(object):
-
-    op_to_edk_op = {
-      "=": 'SIMPLE',
-      "+=": 'ADD',
-      "-=": 'SUB',
-      "*=": 'MUL',
-      "/=": 'DIV',
-      "%=": 'MOD',
-      "|=": 'BIT_OR',
-      "&=": 'BIT_AND',
-      "^=": 'BIT_XOR',
-      "<<=": 'SHL',
-      ">>=": 'SHR',
-    }
-
-    def __init__(
-      self,
-      record,
-      op,
-      param_type,
-      param_name,
-      ):
-      self._record = record
-      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
-      self.base_edk_symbol_name = record.kl_global_name + '__ass_op_' + self.op_to_edk_op[op]
-      self.this = self._record.mutable_this
-      self.op = op
-      self.params = [
-        ParamCodec(
-          self.ext.type_mgr.get_dqti(
-            self.resolve_cpp_type_expr(param_type)
-            ),
-          param_name
-          ),
-        ]
-
-    @property
-    def ext(self):
-      return self._record.ext
-    
-    @property
-    def edk_symbol_name(self):
-      h = hashlib.md5()
-      h.update(self.base_edk_symbol_name)
-      for param in self.params:
-        h.update(param.type_info.edk.name)
-      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
-
-    def get_test_name(self):
-      return self.base_edk_symbol_name
-    
-    def add_test(self, kl, out):
-      self.ext.add_test(self.get_test_name(), kl, out)
   
   def add_ass_op(
     self,
@@ -542,7 +592,7 @@ class Record(Decl):
     params,
     ):
     assert len(params) == 1
-    ass_op = self.AssOp(
+    ass_op = AssOp(
       self,
       op=op,
       param_name='arg',
@@ -550,59 +600,12 @@ class Record(Decl):
       )
     self.ass_ops.append(ass_op)
     return ass_op
-
-  class Cast(object):
-
-    def __init__(
-      self,
-      record,
-      dst_cpp_type_name,
-      ):
-      self._record = record
-      self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
-      assert isinstance(dst_cpp_type_name, basestring)
-      this_dqti = self.ext.type_mgr.get_dqti(
-        self.resolve_cpp_type_expr(dst_cpp_type_name)
-        )
-      self.base_edk_symbol_name = this_dqti.type_info.kl.name.compound + '__cast'
-      self.this = ThisCodec(
-        this_dqti.type_info,
-        [],
-        True, # is_mutable
-        )
-      self.params = [
-        ParamCodec(
-          DirQualTypeInfo(
-            DirQual(directions.Reference, qualifiers.Const),
-            record.const_this.type_info,
-            ),
-          "that"
-          ),
-        ]
-
-    @property
-    def ext(self):
-      return self._record.ext
-    
-    @property
-    def edk_symbol_name(self):
-      h = hashlib.md5()
-      h.update(self.base_edk_symbol_name)
-      for param in self.params:
-        h.update(param.type_info.edk.name)
-      return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
-
-    def get_test_name(self):
-      return self.base_edk_symbol_name
-    
-    def add_test(self, kl, out):
-      self.ext.add_test(self.get_test_name(), kl, out)
-  
+      
   def add_cast(
     self,
     dst,
     ):
-    cast = self.Cast(self, dst)
+    cast = Cast(self, dst)
     self.casts.append(cast)
     return cast
 

@@ -57,10 +57,10 @@ class TypeInfo:
     self,
     jinjenv,
     lib_expr,
-    kl_name_base = None,
-    kl_name_suffix = None,
-    edk_name = None,
-    child_dqtis = [],
+    kl_name_base=None,
+    kl_name_suffix=None,
+    edk_name=None,
+    child_dqtis=[],
     ):
     if kl_name_base is not None:
       if not kl_name_suffix:
@@ -105,7 +105,7 @@ class TypeInfo:
     template_path = "%s/%s.%s" % (self._resolve_proto_dir(proto, obj), obj, lang)
     # print "template_path = " + template_path
     content = self.jinjenv.get_template(template_path).render(env).strip()
-    if content:
-      content = "// %s\n%s" % (template_path, content)
+    if self.jinjenv.opts.debug_templates and content:
+      content = "/*%s:BEGIN*/%s/*%s:END*/" % (template_path, content, template_path)
     return content
 

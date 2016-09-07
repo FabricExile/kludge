@@ -80,3 +80,15 @@ def is_kl_keyword(name):
     "var",
     "while",
     ]
+
+def clean_comment(comment):
+    comment = comment.strip()
+    if comment.startswith('/*'):
+        return comment
+    safe_lines = []
+    for line in comment.splitlines():
+        if line.startswith('//'):
+            safe_lines.append(line)
+        else:
+            safe_lines.append('// ' + line)
+    return '\n'.join(safe_lines)

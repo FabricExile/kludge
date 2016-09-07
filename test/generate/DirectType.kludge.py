@@ -5,6 +5,7 @@
 ext.add_cpp_quoted_include('DirectType.hpp')
 
 ty = ext.add_direct_type('Class')
+ty.add_comment("""/// Test comment""")
 ty.set_default_access(MemberAccess.public)
 ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
@@ -13,6 +14,7 @@ ty.add_member('pri_intValue', 'int')
 
 ty.add_ctor()
 ty.add_ctor(['float', 'std::string const &', 'int'])\
+  .add_comment("""Another comment""")\
   .add_test("""
 Class c(3.14, "hello", 42);
 report("c.get_floatValue() = " + c.get_floatValue());

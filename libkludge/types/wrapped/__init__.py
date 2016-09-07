@@ -16,8 +16,6 @@ class WrappedTypeInfo(TypeInfo):
     jinjenv,
     kl_type_name,
     undq_cpp_type_expr,
-    is_abstract,
-    no_copy_constructor,
     ):
     TypeInfo.__init__(
       self,
@@ -25,8 +23,6 @@ class WrappedTypeInfo(TypeInfo):
       kl_name_base = kl_type_name,
       lib_expr = undq_cpp_type_expr,
       )
-    self.lib.is_abstract = is_abstract
-    self.lib.no_copy_constructor = no_copy_constructor
 
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)
@@ -44,14 +40,10 @@ class WrappedSelector(Selector):
     jinjenv,
     kl_type_name,
     cpp_type_expr,
-    is_abstract,
-    no_copy_constructor,
     ):
     Selector.__init__(self, jinjenv)
     self.kl_type_name = kl_type_name
     self.cpp_type_expr = cpp_type_expr
-    self.is_abstract = is_abstract
-    self.no_copy_constructor = no_copy_constructor
 
   def get_desc(self):
     return "Wrapped:%s" % str(self.cpp_type_expr)
@@ -65,7 +57,5 @@ class WrappedSelector(Selector):
           self.jinjenv,
           self.kl_type_name,
           self.cpp_type_expr,
-          self.is_abstract,
-          self.no_copy_constructor,
           )
         )

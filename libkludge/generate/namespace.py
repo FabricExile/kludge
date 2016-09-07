@@ -167,8 +167,6 @@ class Namespace:
         self.jinjenv,
         kl_global_name,
         cpp_type_expr,
-        False, #is_abstract,
-        False, #no_copy_constructor,
         )
       )
     record = Record(
@@ -225,8 +223,6 @@ class Namespace:
         self.jinjenv,
         kl_global_name,
         cpp_type_expr,
-        False, #is_abstract,
-        False, #no_copy_constructor,
         )
       )
     record = Record(

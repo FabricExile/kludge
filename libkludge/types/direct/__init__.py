@@ -17,8 +17,6 @@ class DirectTypeInfo(TypeInfo):
     kl_global_name,
 
     undq_cpp_type_expr,
-    is_abstract,
-    no_copy_constructor,
     kl_base_name=None,
     kl_suffix=None,
     ):
@@ -28,8 +26,6 @@ class DirectTypeInfo(TypeInfo):
       kl_name_base = kl_global_name,
       lib_expr = undq_cpp_type_expr,
       )
-    self.lib.is_abstract = is_abstract
-    self.lib.no_copy_constructor = no_copy_constructor
 
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)
@@ -45,14 +41,10 @@ class DirectSelector(Selector):
     jinjenv,
     kl_global_name,
     cpp_type_expr,
-    is_abstract,
-    no_copy_constructor,
     ):
     Selector.__init__(self, jinjenv)
     self.kl_global_name = kl_global_name
     self.cpp_type_expr = cpp_type_expr
-    self.is_abstract = is_abstract
-    self.no_copy_constructor = no_copy_constructor
 
   def get_desc(self):
     return "Direct:%s" % str(self.cpp_type_expr)
@@ -66,7 +58,5 @@ class DirectSelector(Selector):
           self.jinjenv,
           self.kl_global_name,
           undq_cpp_type_expr,
-          self.is_abstract,
-          self.no_copy_constructor,
           )
         )

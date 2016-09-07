@@ -40,14 +40,6 @@ class LibTypeInfo:
     self.expr = expr
     base, suffix = expr.build_desc()
     self.name = LibTypeName(base, suffix)
-    self.is_abstract = False
-    self.no_copy_constructor = False
-
-  @property
-  def var_as_pointer(self):
-    # FIXME [andrew 2016-07-20] required for Bullet
-    #return self.is_abstract or self.no_copy_constructor
-    return False
 
 class TypeInfo:
 

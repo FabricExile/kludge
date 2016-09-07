@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import os, sys, optparse, re, traceback
+import os, sys, optparse, re, traceback, StringIO
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 from libkludge import util
@@ -50,6 +50,12 @@ class Parser(object):
 
     def log_cursor(self, cursor):
       self.parser.debug("%s %s %s %s" % (self.prefix, str(cursor.kind), cursor.displayname, self.parser.location_desc(cursor.location)))
+
+    def log_children(self, cursor):
+      child_ast_logger = self.indent()
+      for child_cursor in cursor.get_children():
+        child_ast_logger.log_cursor(child_cursor)
+        child_ast_logger.log_children(child_cursor)
 
     def indent(self):
       return self.parser.ASTLogger(self.parser, self.prefix + ":")
@@ -817,25 +823,141 @@ class Parser(object):
       CursorKind.INCLUSION_DIRECTIVE,
       ]
 
-  def parse_record_decl(
+  def parse_params(
     self,
     ast_logger,
     cursor,
     ):
-    base_classes = []
-    if cursor.kind == CursorKind.CLASS_DECL:
-      current_member_access = MemberAccess.private
-    else:
-      current_member_access = MemberAccess.public
+    params = []
+    child_ast_logger = ast_logger.indent()
     for child_cursor in cursor.get_children():
-      pass
+      child_ast_logger.log_cursor(child_cursor)
+      if child_cursor.kind == CursorKind.PARM_DECL:
+        params.append(child_cursor.type.spelling)
+      elif child_cursor.kind == CursorKind.TYPE_REF:
+        pass
+      elif child_cursor.kind == CursorKind.NAMESPACE_REF:
+        pass
+      else:
+        self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
+    return "[%s]" % (', '.join(["'%s'" % param for param in params]))
 
-  def parse_cursor(self, ast_logger, cursor):
+  def parse_comment(
+    self,
+    ast_logger,
+    cursor,
+    ):
+    if cursor.raw_comment:
+      return '.add_comment("""%s""")' % cursor.raw_comment
+    else:
+      return ''
+
+  access_specifier_descs = {
+    AccessSpecifier.PRIVATE: 'MemberAccess.private',
+    AccessSpecifier.PROTECTED: 'MemberAccess.protected',
+    AccessSpecifier.PUBLIC: 'MemberAccess.public',
+    }
+
+  def parse_record_decl(
+    self,
+    ast_logger,
+    cursor,
+    decls,
+    defns,
+    ):
+    name = cursor.type.spelling
+    extends = None
+    members = []
+    methods = []
+
+    has_child = False
+    child_ast_logger = ast_logger.indent()
+    for child_cursor in cursor.get_children():
+      has_child = True
+      child_ast_logger.log_cursor(child_cursor)
+      if child_cursor.kind == CursorKind.CXX_BASE_SPECIFIER:
+        if extends:
+          self.warning("%s: Unable to handle multiple base classes" % self.location_desc(child_cursor.location))
+        extends = child_cursor.type.spelling
+      elif child_cursor.kind == CursorKind.CXX_ACCESS_SPEC_DECL:
+        pass
+      elif child_cursor.kind == CursorKind.FIELD_DECL:
+        members.append(
+          "ty_%s.add_member('%s', '%s', access=%s)\n" % (
+            name,
+            child_cursor.spelling,
+            child_cursor.type.spelling,
+            self.access_specifier_descs[child_cursor.access_specifier],
+            )
+          )
+      elif child_cursor.kind == CursorKind.CONSTRUCTOR:
+        if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
+          methods.append(
+            "ty_%s.add_ctor(%s)\n" % (
+              name,
+              self.parse_params(child_ast_logger, child_cursor)
+              )
+            )
+      elif child_cursor.kind == CursorKind.CXX_METHOD:
+        if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
+          if child_cursor.spelling == "operator=":
+            pass
+          elif child_cursor.spelling == "operator++":
+            methods.append(
+              "ty_%s.add_uni_op('++', 'inc', '%s')\n" % (
+                name,
+                child_cursor.result_type.spelling,
+                )
+              )
+          elif child_cursor.spelling == "operator--":
+            methods.append(
+              "ty_%s.add_uni_op('--', 'dec', '%s')\n" % (
+                name,
+                child_cursor.result_type.spelling,
+                )
+              )
+          elif child_cursor.spelling == "operator*":
+            print dir(child_cursor)
+            print child_cursor.access_specifier
+            methods.append(
+              "ty_%s.add_deref('deref', '%s', access=)\n" % (
+                name,
+                child_cursor.result_type.spelling,
+                )
+              )
+          else:
+            methods.append(
+              "ty_%s.add_method('%s', '%s', %s)%s\n" % (
+                name,
+                child_cursor.spelling,
+                child_cursor.result_type.spelling,
+                self.parse_params(child_ast_logger, child_cursor),
+                self.parse_comment(child_ast_logger, child_cursor),
+                )
+              )
+      elif child_cursor.kind == CursorKind.DESTRUCTOR:
+        pass
+      else:
+        self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
+
+    if has_child:
+      decls.write("ty_%s = ext.add_direct_type('%s'" % (name, name))
+      if extends:
+        decls.write(", extends='%s'" % extends)
+      decls.write(")\n")
+      for member in members:
+        decls.write(member)
+      decls.write("\n")
+      for method in methods:
+        defns.write(method)
+      defns.write("\n")
+
+  def parse_cursor(self, ast_logger, cursor, decls, defns):
     ast_logger.log_cursor(cursor)
     if cursor.kind in Parser.ignored_cursor_kinds:
       pass
     elif cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
-      self.parse_record_decl(ast_logger, cursor)
+      self.parse_record_decl(ast_logger, cursor, decls, defns)
     # self.parse_children(ast_logger, cursor)
     # elif cursor_kind == CursorKind.NAMESPACE:
     #     nested_namespace_name = cursor.spelling
@@ -867,12 +989,7 @@ class Parser(object):
     #         if child.kind == CursorKind.NAMESPACE_REF:
     #             self.namespace_mgr.add_using_namespace(current_namespace_path, child.spelling.split("::"))
     else:
-      self.warning("Unhandled %s at %s" % (cursor.kind, self.location_desc(cursor.location)))
-
-  def parse_children(self, ast_logger, cursor):
-    child_ast_logger = ast_logger.indent()
-    for child_cursor in cursor.get_children():
-        self.parse_cursor(child_ast_logger, child_cursor)
+      self.warning("%s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind))
 
   clang_diag_desc = {
     clang.cindex.Diagnostic.Fatal: "fatal",
@@ -914,8 +1031,13 @@ class Parser(object):
         self.error("Fatal compile errors encountered; aborting")
         return 0
 
+    decls = StringIO.StringIO()
+    defns = StringIO.StringIO()
     for cursor in unit.cursor.get_children():
         if hasattr(cursor.location.file, 'name') \
           and cursor.location.file.name != filename:
           continue
-        self.parse_cursor(ast_logger, cursor)
+        self.parse_cursor(ast_logger, cursor, decls, defns)
+    print "-" * 78
+    print decls.getvalue()
+    print defns.getvalue()

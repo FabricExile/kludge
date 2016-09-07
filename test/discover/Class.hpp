@@ -69,6 +69,7 @@ public:
 
   float getMulFloatValue( float x ) const { return x * floatValue; }
 
+  /// Export values
   void exportValues(
     float &_floatValue,
     std::string &_stringValue,

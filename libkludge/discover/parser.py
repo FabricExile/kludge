@@ -134,20 +134,22 @@ class Parser(object):
     cursor,
     ):
     if cursor.is_const_method():
-      return "access=ThisAccess.const"
+      return "this_access=ThisAccess.const"
     elif cursor.is_static_method():
-      return "access=ThisAccess.static"
+      return "this_access=ThisAccess.static"
     else:
-      return "access=ThisAccess.mutable"
+      return "this_access=ThisAccess.mutable"
 
   def parse_record_decl(
     self,
     ast_logger,
     cursor,
+    obj,
     decls,
     defns,
     ):
     name = cursor.type.spelling
+    child_obj = '%s_%s' % (obj, name)
     extends = None
     members = []
     methods = []
@@ -159,14 +161,15 @@ class Parser(object):
       child_ast_logger.log_cursor(child_cursor)
       if child_cursor.kind == CursorKind.CXX_BASE_SPECIFIER:
         if extends:
-          self.warning("%s: Unable to handle multiple base classes" % self.location_desc(child_cursor.location))
+          methods.append("# Kludge WARNING: %s: Unable to handle multiple base classes" % self.location_desc(child_cursor.location))
         extends = child_cursor.type.spelling
       elif child_cursor.kind == CursorKind.CXX_ACCESS_SPEC_DECL:
         pass
       elif child_cursor.kind == CursorKind.FIELD_DECL:
         members.append(
-          "ty_%s.add_member('%s', '%s', access=%s)\n" % (
-            name,
+          "# %s\n%s.add_member('%s', '%s', access=%s)" % (
+            self.location_desc(child_cursor.location),
+            child_obj,
             child_cursor.spelling,
             child_cursor.type.spelling,
             self.access_specifier_descs[child_cursor.access_specifier],
@@ -175,17 +178,21 @@ class Parser(object):
       elif child_cursor.kind == CursorKind.CONSTRUCTOR:
         if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
           methods.append(
-            "ty_%s.add_ctor(%s)\n" % (
-              name,
-              self.parse_params(child_ast_logger, child_cursor)
+            "# %s\n%s.add_ctor(%s)%s" % (
+              self.location_desc(child_cursor.location),
+              child_obj,
+              self.parse_params(child_ast_logger, child_cursor),
+              self.parse_comment(child_ast_logger, child_cursor),
               )
             )
       elif child_cursor.kind == CursorKind.CONVERSION_FUNCTION:
         if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
           methods.append(
-            "ty_%s.add_cast('%s')\n" % (
-              name,
-              child_cursor.result_type.spelling
+            "# %s\n%s.add_cast('%s')%s" % (
+              self.location_desc(child_cursor.location),
+              child_obj,
+              child_cursor.result_type.spelling,
+              self.parse_comment(child_ast_logger, child_cursor),
               )
             )
       elif child_cursor.kind == CursorKind.CXX_METHOD:
@@ -194,30 +201,36 @@ class Parser(object):
             pass
           elif child_cursor.spelling == "operator++":
             methods.append(
-              "ty_%s.add_uni_op('++', 'inc', '%s')\n" % (
-                name,
+              "# %s\n%s.add_uni_op('++', 'inc', '%s')%s" % (
+                self.location_desc(child_cursor.location),
+                child_obj,
                 child_cursor.result_type.spelling,
+                self.parse_comment(child_ast_logger, child_cursor),
                 )
               )
           elif child_cursor.spelling == "operator--":
             methods.append(
-              "ty_%s.add_uni_op('--', 'dec', '%s')\n" % (
-                name,
+              "# %s\n%s.add_uni_op('--', 'dec', '%s')%s" % (
+                self.location_desc(child_cursor.location),
+                child_obj,
                 child_cursor.result_type.spelling,
+                self.parse_comment(child_ast_logger, child_cursor),
                 )
               )
           elif child_cursor.spelling == "operator*":
             methods.append(
-              "ty_%s.add_deref('deref', '%s', %s)\n" % (
-                name,
+              "# %s\n%s.add_deref('deref', '%s', %s)" % (
+                self.location_desc(child_cursor.location),
+                child_obj,
                 child_cursor.result_type.spelling,
                 self.parse_method_access(child_ast_logger, child_cursor),
                 )
               )
           else:
             methods.append(
-              "ty_%s.add_method('%s', '%s', %s, %s)%s\n" % (
-                name,
+              "# %s\n%s.add_method('%s', '%s', %s, %s)%s" % (
+                self.location_desc(child_cursor.location),
+                child_obj,
                 child_cursor.spelling,
                 child_cursor.result_type.spelling,
                 self.parse_params(child_ast_logger, child_cursor),
@@ -228,37 +241,43 @@ class Parser(object):
       elif child_cursor.kind == CursorKind.DESTRUCTOR:
         pass
       else:
-        self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
+        methods.append("# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
 
     if has_child:
-      decls.write("ty_%s = ext.add_direct_type('%s'" % (name, name))
+      decls.write("# %s\n%s = %s.add_direct_type('%s'" % (
+        self.location_desc(cursor.location),
+        child_obj,
+        obj,
+        name,
+        ))
       if extends:
         decls.write(", extends='%s'" % extends)
       decls.write(")%s\n" % self.parse_comment(ast_logger, cursor))
       for member in members:
-        defns.write(member)
+        print >>decls, member
       for method in methods:
-        defns.write(method)
-      defns.write("\n")
+        print >>defns, method
+      print >>defns, ""
 
-  def parse_function_decl(self, ast_logger, cursor, decls, defns):
-    defns.write("ext.add_func('%s', '%s', %s)%s\n\n" % (
+  def parse_function_decl(self, ast_logger, cursor, obj, decls, defns):
+    defns.write("%s.add_func('%s', '%s', %s)%s\n\n" % (
+      obj,
       cursor.spelling,
       cursor.result_type.spelling,
       self.parse_params(ast_logger, cursor),
       self.parse_comment(ast_logger, cursor),
       ))
 
-  def parse_cursor(self, ast_logger, cursor, decls, defns):
+  def parse_cursor(self, ast_logger, cursor, obj, decls, defns):
     ast_logger.log_cursor(cursor)
     if cursor.kind in Parser.ignored_cursor_kinds:
       pass
     elif cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
-      self.parse_record_decl(ast_logger, cursor, decls, defns)
+      self.parse_record_decl(ast_logger, cursor, obj, decls, defns)
     elif cursor.kind == CursorKind.FUNCTION_DECL:
-      self.parse_function_decl(ast_logger, cursor, decls, defns)
+      self.parse_function_decl(ast_logger, cursor, obj, decls, defns)
     else:
-      self.warning("%s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind))
+      print >>defns, "# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind)
 
   clang_diag_desc = {
     clang.cindex.Diagnostic.Fatal: "fatal",
@@ -300,13 +319,36 @@ class Parser(object):
         self.error("Fatal compile errors encountered; aborting")
         return 0
 
-    decls = StringIO.StringIO()
-    defns = StringIO.StringIO()
-    for cursor in unit.cursor.get_children():
-        if hasattr(cursor.location.file, 'name') \
-          and cursor.location.file.name != filename:
-          continue
-        self.parse_cursor(ast_logger, cursor, decls, defns)
-    print "-" * 78
-    print decls.getvalue()
-    print defns.getvalue()
+    basename = os.path.basename(filename)
+    decls_basename = basename + '.decls.kludge.py'
+    decls_filename = os.path.join(self.opts.outdir, decls_basename)
+    defns_basename = basename + '.defns.kludge.py'
+    defns_filename = os.path.join(self.opts.outdir, defns_basename)
+    with open(decls_filename, "w") as decls:
+      self.info("Writing declarations to '%s'" % decls_filename)
+      print >>decls, "#" * 78
+      print >>decls, "## Automatically generated by Kludge"
+      print >>decls, "#" * 78
+      print >>decls
+
+      with open(defns_filename, "w") as defns:
+        self.info("Writing definitions to '%s'" % defns_filename)
+        print >>defns, "#" * 78
+        print >>defns, "## Automatically generated by Kludge"
+        print >>defns, "#" * 78
+        print >>defns
+
+        for cursor in unit.cursor.get_children():
+            if hasattr(cursor.location.file, 'name') \
+              and cursor.location.file.name != filename:
+              continue
+            self.parse_cursor(ast_logger, cursor, 'ext', decls, defns)
+    master_filename = os.path.join(self.opts.outdir, basename + '.kludge.py')
+    self.info("Writing master to '%s'" % master_filename)
+    with open(master_filename, "w") as master:
+      print >>master, "#" * 78
+      print >>master, "## Automatically generated by Kludge"
+      print >>master, "#" * 78
+      print >>master
+      print >>master, "include('%s')" % decls_basename
+      print >>master, "include('%s')" % defns_basename

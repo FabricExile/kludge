@@ -30,6 +30,7 @@ class Func(Decl):
 
     self.result_codec = ResultCodec(self.type_mgr.get_dqti(Void()))
     self.params = []
+    self.comments = []
   
   def get_edk_symbol_name(self):
     base_edk_symbol_name = self.name_kl
@@ -58,6 +59,10 @@ class Func(Decl):
         name
         )
       )
+    return self
+
+  def add_comment(self, comment):
+    self.comments.append(util.clean_comment(comment))
     return self
 
   def get_test_name(self):

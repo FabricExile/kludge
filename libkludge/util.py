@@ -87,6 +87,7 @@ def clean_comment(comment):
         return comment
     safe_lines = []
     for line in comment.splitlines():
+        line = line.strip()
         if line.startswith('//'):
             safe_lines.append(line)
         else:

@@ -34,7 +34,7 @@ class StdVectorSelector(Selector):
     return "StdVector"
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
+    undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
     if isinstance(undq_cpp_type_expr, Named) \
       and len(undq_cpp_type_expr.components) == 2 \
       and undq_cpp_type_expr.components[0] == Simple("std") \

@@ -35,7 +35,7 @@ class KLExtTypeAliasSelector(Selector):
     return "KLExtTypeAlias:%s" % str(self.cpp_type_expr)
     
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    undq_cpp_type_expr, dq = cpp_type_expr.get_undq_type_expr_and_dq()
+    undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
     if undq_cpp_type_expr == self.cpp_type_expr:
       return DirQualTypeInfo(
         dq,

@@ -12,5 +12,5 @@ class Selector(object):
     self.jinjenv = jinjenv
 
   @abc.abstractmethod
-  def maybe_create_dqti(self, type_mgr, cpp_type_expr):
+  def maybe_create_dqti(self, type_mgr, undq_cpp_type_expr, dq):
     pass

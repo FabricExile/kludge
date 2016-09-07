@@ -80,7 +80,7 @@ class Type:
   def build_unqualified_desc(self):
     pass
 
-  def get_undq_type_expr_and_dq(self):
+  def get_undq(self):
     if isinstance(self, Direct):
       direction = directions.Direct
       undq_cpp_type_expr = self
@@ -100,16 +100,14 @@ class Type:
 
     return (undq_cpp_type_expr, DirQual(direction, qualifier))
 
-  def get_as_dirqual(self, orig_type_expr):
+  def get_redq(self, dq):
     cpp_type_expr = self
-    if orig_type_expr.is_const:
-        cpp_type_expr = cpp_type_expr.make_const()
-    if isinstance(orig_type_expr, ReferenceTo) or \
-            isinstance(orig_type_expr, PointerTo):
-        if orig_type_expr.pointee.is_const:
-            cpp_type_expr = cpp_type_expr.make_const()
-        orig_type_expr.pointee = cpp_type_expr
-        cpp_type_expr = orig_type_expr
+    if dq.is_const:
+      cpp_type_expr = Const(cpp_type_expr)
+    if dq.is_reference:
+      cpp_type_expr = ReferenceTo(cpp_type_expr)
+    elif dq.is_pointer:
+      cpp_type_expr = PointerTo(cpp_type_expr)
     return cpp_type_expr
 
   def tranform_names(self, cb):

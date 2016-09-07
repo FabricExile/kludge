@@ -15,6 +15,10 @@ class DirQual:
     return self.direction == directions.Direct
   
   @property
+  def is_const(self):
+    return qualifiers.is_const(self.qualifier)
+  
+  @property
   def is_const_reference(self):
     return self.direction == directions.Reference and qualifiers.is_const(self.qualifier)
   

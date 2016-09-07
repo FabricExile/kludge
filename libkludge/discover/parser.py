@@ -106,6 +106,8 @@ class Parser(object):
         pass
       elif child_cursor.kind == CursorKind.NAMESPACE_REF:
         pass
+      elif child_cursor.kind == CursorKind.TEMPLATE_REF:
+        pass
       else:
         self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
     return "[%s]" % (', '.join(["'%s'" % param for param in params]))
@@ -232,12 +234,20 @@ class Parser(object):
       decls.write("ty_%s = ext.add_direct_type('%s'" % (name, name))
       if extends:
         decls.write(", extends='%s'" % extends)
-      decls.write(")\n")
+      decls.write(")%s\n" % self.parse_comment(ast_logger, cursor))
       for member in members:
         defns.write(member)
       for method in methods:
         defns.write(method)
       defns.write("\n")
+
+  def parse_function_decl(self, ast_logger, cursor, decls, defns):
+    defns.write("ext.add_func('%s', '%s', %s)%s\n\n" % (
+      cursor.spelling,
+      cursor.result_type.spelling,
+      self.parse_params(ast_logger, cursor),
+      self.parse_comment(ast_logger, cursor),
+      ))
 
   def parse_cursor(self, ast_logger, cursor, decls, defns):
     ast_logger.log_cursor(cursor)
@@ -245,6 +255,8 @@ class Parser(object):
       pass
     elif cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
       self.parse_record_decl(ast_logger, cursor, decls, defns)
+    elif cursor.kind == CursorKind.FUNCTION_DECL:
+      self.parse_function_decl(ast_logger, cursor, decls, defns)
     else:
       self.warning("%s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind))
 

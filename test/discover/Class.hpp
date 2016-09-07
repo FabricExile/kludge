@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+/// Class comment
 class Class {
 public:
 
@@ -69,7 +70,7 @@ public:
 
   float getMulFloatValue( float x ) const { return x * floatValue; }
 
-  /// Export values
+  /// Method comment
   void exportValues(
     float &_floatValue,
     std::string &_stringValue,
@@ -108,10 +109,12 @@ private:
   int pri_intValue;
 };
 
+/// Function comment
 Class ReturnClass() {
   return Class( 5.61, "foo", -43 );
 }
 
+/// Another function comment
 std::vector<Class> ReturnClassVec() {
   std::vector<Class> result;
   result.push_back( Class( 1.2, "bar", 64 ) );

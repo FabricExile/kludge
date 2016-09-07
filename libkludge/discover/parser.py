@@ -6,6 +6,7 @@ import os, sys, optparse, re, traceback
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 from libkludge import util
+from libkludge.member_access import MemberAccess
 
 class Parser(object):
 
@@ -37,14 +38,18 @@ class Parser(object):
   def debug(self, string):
     util.debug(self.opts, string)
 
+  @staticmethod
+  def location_desc(location):
+    return "%s:%d:%d" % (location.file, location.line, location.column)
+
   class ASTLogger(object):
 
     def __init__(self, parser, prefix="AST:"):
       self.parser = parser
       self.prefix = prefix
 
-    def log(self, string):
-      self.parser.debug(self.prefix + " " + string)
+    def log_cursor(self, cursor):
+      self.parser.debug("%s %s %s %s" % (self.prefix, str(cursor.kind), cursor.displayname, self.parser.location_desc(cursor.location)))
 
     def indent(self):
       return self.parser.ASTLogger(self.parser, self.prefix + ":")
@@ -110,25 +115,6 @@ class Parser(object):
     #             ]:
     #             return Parser.get_qualified_spelling(semantic_parent, separator) + separator + cursor.spelling
     #     return cursor.spelling
-
-  def dump_cursor(self, indent, cursor):
-      print indent + str(cursor.kind) + " " + cursor.displayname
-      print indent + "  " + str(cursor.location)
-      if cursor.kind == CursorKind.TYPEDEF_DECL:
-          print indent + "  underlying type: " + cursor.underlying_typedef_type.spelling
-          declaration = cursor.underlying_typedef_type.get_declaration()
-          if declaration:
-              print indent + "    [declaration]"
-              self.dump_cursor(indent + "    ", declaration)
-      if cursor.kind == CursorKind.TYPE_REF \
-          or cursor.kind == CursorKind.TEMPLATE_REF:
-          referenced = cursor.referenced
-          if referenced:
-              print indent + "  [referenced]"
-              self.dump_cursor(indent + "  ", referenced)
-      childIndent = indent + "."
-      for childCursor in cursor.get_children():
-          self.dump_cursor(childIndent, childCursor)
 
     # def maybe_parse_dependent_record_decl(self, indent, decl, template_param_types = []):
     #     if decl.kind == TypeKind.LVALUEREFERENCE or decl.kind == TypeKind.POINTER:
@@ -324,17 +310,6 @@ class Parser(object):
         #         print "  Reason: %s" % e
 
         # return instance_methods
-
-  # def parse_record_decl(
-      # self,
-      # include_filename,
-      # indent,
-      # current_namespace_path,
-      # cursor,
-      # template_param_types = [],
-      # cpp_specialized_type_name = None
-      # ):
-      # pass
     #     # print "---------------------------------------------------------------------"
     #     # traceback.print_stack(file=sys.stdout)
     #     # print "---------------------------------------------------------------------"
@@ -842,45 +817,57 @@ class Parser(object):
       CursorKind.INCLUSION_DIRECTIVE,
       ]
 
+  def parse_record_decl(
+    self,
+    ast_logger,
+    cursor,
+    ):
+    base_classes = []
+    if cursor.kind == CursorKind.CLASS_DECL:
+      current_member_access = MemberAccess.private
+    else:
+      current_member_access = MemberAccess.public
+    for child_cursor in cursor.get_children():
+      pass
+
   def parse_cursor(self, ast_logger, cursor):
-      cursor_kind = cursor.kind
-      ast_logger.log("%s %s %s:%d:%d" % (str(cursor_kind), cursor.displayname, cursor.location.file, cursor.location.line, cursor.location.column))
-      if cursor_kind in Parser.ignored_cursor_kinds:
-          pass
-      self.parse_children(ast_logger, cursor)
-      # elif cursor_kind == CursorKind.NAMESPACE:
-      #     nested_namespace_name = cursor.spelling
-      #     nested_namespace_path = self.namespace_mgr.add_nested_namespace(
-      #         current_namespace_path,
-      #         nested_namespace_name,
-      #         )
-      #     print "%sNAMESPACE %s" % (indent, "::".join(nested_namespace_path))
-      #     self.parse_children(include_filename, indent + "  ", nested_namespace_path, cursor)
-      # elif cursor_kind == CursorKind.NAMESPACE_ALIAS:
-      #     ns_alias_path = current_namespace_path + [cursor.displayname]
-      #     ns_path = []
-      #     for path in cursor.get_children():
-      #         ns_path += [path.displayname]
-      #     self.namespace_mgr.add_namespace_alias(ns_alias_path, ns_path)
-      # elif cursor_kind == CursorKind.UNEXPOSED_DECL:
-      #     self.parse_children(include_filename, indent, current_namespace_path, cursor)
-      # elif cursor_kind == CursorKind.MACRO_INSTANTIATION:
-      #     self.parse_MACRO_INSTANTIATION(include_filename, indent, current_namespace_path, cursor)
-      # elif cursor_kind == CursorKind.TYPEDEF_DECL:
-      #     self.parse_TYPEDEF_DECL(include_filename, indent, current_namespace_path, cursor)
-      # elif cursor_kind == CursorKind.CLASS_DECL or cursor_kind == CursorKind.STRUCT_DECL:
-      #     self.parse_record_decl(include_filename, indent, current_namespace_path, cursor)
-      # elif cursor_kind == CursorKind.CLASS_TEMPLATE:
-      #     # [andrew 20160519] ignore the template itself, only deal with specializations
-      #     pass
-      # elif cursor_kind == CursorKind.FUNCTION_DECL:
-      #     self.parse_FUNCTION_DECL(include_filename, indent, current_namespace_path, cursor)
-      # elif cursor_kind == CursorKind.USING_DIRECTIVE:
-      #     for child in cursor.get_children():
-      #         if child.kind == CursorKind.NAMESPACE_REF:
-      #             self.namespace_mgr.add_using_namespace(current_namespace_path, child.spelling.split("::"))
-      # else:
-      #     print "%sUnhandled %s at %s:%d" % (indent, cursor_kind, cursor.location.file, cursor.location.line)
+    ast_logger.log_cursor(cursor)
+    if cursor.kind in Parser.ignored_cursor_kinds:
+      pass
+    elif cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
+      self.parse_record_decl(ast_logger, cursor)
+    # self.parse_children(ast_logger, cursor)
+    # elif cursor_kind == CursorKind.NAMESPACE:
+    #     nested_namespace_name = cursor.spelling
+    #     nested_namespace_path = self.namespace_mgr.add_nested_namespace(
+    #         current_namespace_path,
+    #         nested_namespace_name,
+    #         )
+    #     print "%sNAMESPACE %s" % (indent, "::".join(nested_namespace_path))
+    #     self.parse_children(include_filename, indent + "  ", nested_namespace_path, cursor)
+    # elif cursor_kind == CursorKind.NAMESPACE_ALIAS:
+    #     ns_alias_path = current_namespace_path + [cursor.displayname]
+    #     ns_path = []
+    #     for path in cursor.get_children():
+    #         ns_path += [path.displayname]
+    #     self.namespace_mgr.add_namespace_alias(ns_alias_path, ns_path)
+    # elif cursor_kind == CursorKind.UNEXPOSED_DECL:
+    #     self.parse_children(include_filename, indent, current_namespace_path, cursor)
+    # elif cursor_kind == CursorKind.MACRO_INSTANTIATION:
+    #     self.parse_MACRO_INSTANTIATION(include_filename, indent, current_namespace_path, cursor)
+    # elif cursor_kind == CursorKind.TYPEDEF_DECL:
+    #     self.parse_TYPEDEF_DECL(include_filename, indent, current_namespace_path, cursor)
+    # elif cursor_kind == CursorKind.CLASS_TEMPLATE:
+    #     # [andrew 20160519] ignore the template itself, only deal with specializations
+    #     pass
+    # elif cursor_kind == CursorKind.FUNCTION_DECL:
+    #     self.parse_FUNCTION_DECL(include_filename, indent, current_namespace_path, cursor)
+    # elif cursor_kind == CursorKind.USING_DIRECTIVE:
+    #     for child in cursor.get_children():
+    #         if child.kind == CursorKind.NAMESPACE_REF:
+    #             self.namespace_mgr.add_using_namespace(current_namespace_path, child.spelling.split("::"))
+    else:
+      self.warning("Unhandled %s at %s" % (cursor.kind, self.location_desc(cursor.location)))
 
   def parse_children(self, ast_logger, cursor):
     child_ast_logger = ast_logger.indent()
@@ -908,8 +895,12 @@ class Parser(object):
         # clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
         )
 
+    displayed_separator = False
     fatal_error_count = 0
     for diag in unit.diagnostics:
+      if not displayed_separator:
+        print "-" * 78
+        displayed_separator = True
       prefix = "%s:%d:%d: %s: " % (diag.location.file, diag.location.line, diag.location.column, self.clang_diag_desc[diag.severity])
       self.info(prefix + diag.spelling)
       space_prefix = ' ' * len(prefix)
@@ -917,6 +908,8 @@ class Parser(object):
         self.info(space_prefix + str(fixit))
       if diag.severity >= clang.cindex.Diagnostic.Fatal:
         fatal_error_count += 1
+    if displayed_separator:
+      print "-" * 78
     if fatal_error_count > 0:
         self.error("Fatal compile errors encountered; aborting")
         return 0

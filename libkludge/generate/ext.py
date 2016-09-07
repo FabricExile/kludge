@@ -6,7 +6,7 @@ import os, jinja2, inspect
 from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
 from namespace import Namespace
-from member_access import MemberAccess
+from libkludge.member_access import MemberAccess
 from this_access import ThisAccess
 from test import Test
 from libkludge import util

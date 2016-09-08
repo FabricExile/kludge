@@ -11,6 +11,14 @@ class Decl(object):
     ):
     self.parent_namespace = parent_namespace
 
+    for method_name in [
+      'error',
+      'warning',
+      'info',
+      'debug',
+      ]:
+      setattr(self, method_name, getattr(parent_namespace, method_name))
+
   @property
   def ext(self):
     return self.parent_namespace.ext

@@ -8,15 +8,8 @@ class Decl(object):
   def __init__(
     self,
     parent_namespace,
-    desc,
     ):
     self.parent_namespace = parent_namespace
-    self.desc = desc
-    self.cpp_local_includes = []
-
-  def add_cpp_local_include(self, cpp_local_include):
-    self.cpp_local_includes.append(cpp_local_include)
-    return self
 
   @property
   def ext(self):
@@ -36,6 +29,10 @@ class Decl(object):
 
   def add_test(self, kl, out):
     self.ext.add_test(self.get_test_name(), kl, out)
+
+  @abc.abstractmethod
+  def get_desc(self):
+    pass
 
   @abc.abstractmethod
   def get_test_name(self):

@@ -14,6 +14,9 @@ class KLTypeName:
   def compound(self):
     return self.base + self.suffix
 
+  def __str__(self):
+    return self.compound
+
 class KLTypeInfo:
 
   def __init__(self, name_base, name_suffix):
@@ -33,6 +36,9 @@ class LibTypeName:
   @property
   def compound(self):
     return self.base + self.suffix
+
+  def __str__(self):
+    return self.compound
 
 class LibTypeInfo:
 
@@ -67,8 +73,11 @@ class TypeInfo:
     self._codec_lookup_rules = None
 
   def get_desc(self):
-    return str(self.lib.expr)
-    
+    return "KL[%s] EDK[%s] LIB[%s]" % (self.kl.name, self.edk.name, self.lib.name)
+  
+  def __str__(self):
+    return self.get_desc()
+
   def build_codec_lookup_rules(self):
     return {
       "conv": {"*": "protocols/conv/builtin/default"},

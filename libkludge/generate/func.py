@@ -14,26 +14,23 @@ class Func(Decl):
   def __init__(
     self,
     parent_namespace,
-    cpp_name,
-    kl_name = None,
+    cpp_global_name,
+    kl_global_name,
     ):
     Decl.__init__(
       self,
       parent_namespace,
-      "Global function '%s'" % cpp_name
       )
 
-    self.cpp_name = cpp_name
-    if not kl_name:
-      kl_name = cpp_name
-    self.kl_name = kl_name
+    self.cpp_global_name = cpp_global_name
+    self.kl_global_name = kl_global_name
 
     self.result_codec = ResultCodec(self.type_mgr.get_dqti(Void()))
     self.params = []
     self.comments = []
   
   def get_edk_symbol_name(self):
-    base_edk_symbol_name = self.name_kl
+    base_edk_symbol_name = self.kl_global_name
     h = hashlib.md5()
     h.update(base_edk_symbol_name)
     for param in self.params:
@@ -65,16 +62,11 @@ class Func(Decl):
     self.comments.append(util.clean_comment(comment))
     return self
 
+  def get_desc(self):
+    return "Function KL[%s] C++[%s]" % (self.kl_global_name, self.cpp_global_name)
+  
   def get_test_name(self):
-    return self.name_kl
-
-  @property
-  def name_kl(self):
-    return "_".join(self.parent_namespace.nested_kl_names + [self.kl_name])
-
-  @property
-  def name_cpp(self):
-    return "::".join(self.parent_namespace.nested_cpp_names + [self.cpp_name])
+    return self.kl_global_name
 
   def get_template_basename(self):
     return 'func'

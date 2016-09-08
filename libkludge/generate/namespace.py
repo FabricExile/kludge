@@ -97,8 +97,16 @@ class Namespace:
       and isinstance(cpp_type_expr.components[0], Simple)
     return self.create_child(cpp_type_expr.components[0], kl_name)
 
-  def add_func(self, name, returns=None, params=[]):
-    func = Func(self, name)
+  def add_func(self, cpp_name, returns=None, params=[], kl_name=None):
+    cpp_local_name = cpp_name
+    cpp_global_name = "::".join(self.nested_cpp_names + [cpp_local_name])
+
+    kl_local_name = kl_name
+    if not kl_local_name:
+      kl_local_name = cpp_local_name
+    kl_global_name = "_".join(self.nested_kl_names + [kl_local_name])
+
+    func = Func(self, cpp_global_name, kl_global_name)
     if returns:
       func.returns(returns)
     for param in params:
@@ -134,7 +142,7 @@ class Namespace:
       )
     record = Record(
       self,
-      "InPlaceType: %s -> %s" % (kl_global_name, str(cpp_type_expr)),
+      "InPlaceType",
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       child_namespace_component=cpp_type_expr.components[-1],
@@ -171,12 +179,7 @@ class Namespace:
       )
     record = Record(
       self,
-      "DirectType: %s -> %s [extends=%s forbid_copy=%s]" % (
-        kl_global_name,
-        str(cpp_type_expr),
-        extends,
-        forbid_copy,
-        ),
+      "DirectType[extends=%s forbid_copy=%s]" % (extends, forbid_copy),
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       extends=extends,
@@ -227,7 +230,7 @@ class Namespace:
       )
     record = Record(
       self,
-      "WrappedType: %s -> %s" % (kl_global_name, str(cpp_type_expr)),
+      "WrappedType[extends=%s]" % (extends),
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       extends=extends,
@@ -263,7 +266,7 @@ class Namespace:
       )
     record = Record(
       self,
-      "KLExtTypeAlias: %s -> %s[%s]" % (str(cpp_type_expr), kl_ext_name, kl_global_name),
+      "KLExtTypeAlias[ext=%s]",
       kl_global_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       include_empty_ctor = False,
@@ -316,11 +319,6 @@ class Namespace:
       child_namespace_component = None
     enum = Enum(
       self,
-      "Enum: %s -> %s : %s" % (
-        cpp_type_expr,
-        kl_global_name,
-        ", ".join(["%s=%d"%(val[0], val[1]) for val in clean_values]),
-        ),
       kl_local_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       clean_values,

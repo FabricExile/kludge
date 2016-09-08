@@ -3,6 +3,6 @@
 {######################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
-alias {{alias.old_type_info.kl.name.base}} {{alias.new_kl_type_name}}{{alias.old_type_info.kl.name.suffix}};
+alias {{alias.old_type_info.kl.name.base}} {{alias.new_kl_global_name}}{{alias.old_type_info.kl.name.suffix}};
 
 {% endblock body %}

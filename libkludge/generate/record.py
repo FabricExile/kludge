@@ -346,7 +346,7 @@ class Record(Decl):
   def __init__(
     self,
     parent_namespace,
-    desc,
+    record_desc,
     kl_local_name,
     this_type_info,
     extends = None,
@@ -358,7 +358,8 @@ class Record(Decl):
     forbid_copy = False,
     child_namespace_component = None,
     ):
-    Decl.__init__(self, parent_namespace, desc)
+    Decl.__init__(self, parent_namespace)
+    self.record_desc = record_desc
 
     if child_namespace_component:
       self.namespace = parent_namespace.create_child(child_namespace_component, kl_local_name)
@@ -424,6 +425,9 @@ class Record(Decl):
         'that'
         )
       ]
+
+  def get_desc(self):
+    return "%s: C++[%s] -> KL[%s]" % (self.record_desc, self.this_type_info.lib.expr, self.this_type_info.kl.name.compound)
   
   def resolve_cpp_type_expr(self, cpp_type_name):
     return self.namespace.resolve_cpp_type_expr(cpp_type_name)

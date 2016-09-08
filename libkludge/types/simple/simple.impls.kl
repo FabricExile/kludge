@@ -95,7 +95,7 @@ Boolean({{decl.kl_type_name}}ConstPtr ptr) {
 
 // Set the value at an offset into the array
 {{decl.kl_type_name}}Ptr.setAt(Index i, {{decl.kl_type_name}} v) {
-  {{decl.kl_type_name}}Ref(this.ptr.offset(i)->{ {{decl.kl_type_name}} }).set(v);
+  this.ptr.offset(i)->{ {{decl.kl_type_name}} } = v;
 }
 
 // Create a reference to a character

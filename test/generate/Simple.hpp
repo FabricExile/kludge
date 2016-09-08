@@ -119,6 +119,8 @@ inline void SimpleParams(
 }
 
 inline int SimpleValueResult() { return 42; }
+inline int const *SimpleConstPtrResult() { static int const val = 42; return &val; }
+inline int *SimpleMutablePtrResult() { static int val = 42; return &val; }
 inline int const &SimpleConstRefResult() { static int const val = 42; return val; }
 inline int &SimpleMutableRefResult() { static int val = 42; return val; }
 

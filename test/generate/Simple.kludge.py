@@ -185,6 +185,45 @@ report("SimpleValueResult() = " + SimpleValueResult());
 SimpleValueResult() = 42
 """)
 
+ext.add_func('SimpleConstPtrResult', 'int const *')\
+  .add_test("""
+SInt32ConstPtr ptr = SimpleConstPtrResult();
+report("SimpleConstPtrResult(): ptr = " + ptr);
+report("SimpleConstPtrResult(): ptr.isValid() = " + ptr.isValid());
+report("SimpleConstPtrResult(): Boolean(ptr) = " + Boolean(ptr));
+report("SimpleConstPtrResult(): ptr.deref() = " + ptr.deref());
+report("SimpleConstPtrResult(): ptr.getAt(0) = " + ptr.getAt(0));
+""", """
+SimpleConstPtrResult(): ptr = <Opaque>
+SimpleConstPtrResult(): ptr.isValid() = true
+SimpleConstPtrResult(): Boolean(ptr) = true
+SimpleConstPtrResult(): ptr.deref() = 42
+SimpleConstPtrResult(): ptr.getAt(0) = 42
+""")
+
+ext.add_func('SimpleMutablePtrResult', 'int *')\
+  .add_test("""
+SInt32Ptr ptr = SimpleMutablePtrResult();
+report("SimplePtrResult(): before: ptr = " + ptr);
+report("SimplePtrResult(): before: ptr.isValid() = " + ptr.isValid());
+report("SimplePtrResult(): before: Boolean(ptr) = " + Boolean(ptr));
+report("SimplePtrResult(): before: ptr.deref() = " + ptr.deref());
+report("SimplePtrResult(): before: ptr.getAt(0) = " + ptr.getAt(0));
+report("SimplePtrResult(): ptr.deref().set(-7)");
+ptr.deref().set(-7);
+report("SimplePtrResult(): before: ptr.deref() = " + ptr.deref());
+report("SimplePtrResult(): before: ptr.getAt(0) = " + ptr.getAt(0));
+""", """
+SimplePtrResult(): before: ptr = {ptr:<Opaque>}
+SimplePtrResult(): before: ptr.isValid() = true
+SimplePtrResult(): before: Boolean(ptr) = true
+SimplePtrResult(): before: ptr.deref() = 42
+SimplePtrResult(): before: ptr.getAt(0) = 42
+SimplePtrResult(): ptr.deref().set(-7)
+SimplePtrResult(): before: ptr.deref() = -7
+SimplePtrResult(): before: ptr.getAt(0) = -7
+""")
+
 ext.add_func('SimpleConstRefResult', 'int const &')\
   .add_test("""
 report("SimpleConstRefResult() = " + SimpleConstRefResult());
@@ -194,9 +233,14 @@ SimpleConstRefResult() = 42
 
 ext.add_func('SimpleMutableRefResult', 'int &')\
   .add_test("""
-report("SimpleMutableRefResult() = " + SimpleMutableRefResult());
+SInt32Ref result = SimpleMutableRefResult();
+report("SimpleMutableRefResult(): before: result = " + result);
+result.set(-7);
+result = SimpleMutableRefResult();
+report("SimpleMutableRefResult(): after: result = " + result);
 """, """
-SimpleMutableRefResult() = 42
+SimpleMutableRefResult(): before: result = 42
+SimpleMutableRefResult(): after: result = -7
 """)
 
 ext.add_func("SimpleObscure", 'long', ['signed short', 'long'])\

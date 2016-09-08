@@ -22,5 +22,5 @@ class Alias(Decl):
   def get_test_name(self):
     return self.new_kl_global_name
 
-  def get_template_basename(self):
-    return 'alias'
+  def get_template_path(self):
+    return 'generate/alias/alias'

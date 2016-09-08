@@ -44,5 +44,5 @@ class Enum(Decl):
   def get_kl_name(self):
     return self.type_info.kl.name.compound
 
-  def get_template_basename(self):
-    return 'enum'
+  def get_template_path(self):
+    return 'generate/enum/enum'

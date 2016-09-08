@@ -58,6 +58,6 @@ class Func(Decl):
   def get_test_name(self):
     return self.kl_global_name
 
-  def get_template_basename(self):
-    return 'func'
+  def get_template_path(self):
+    return 'generate/func/func'
   

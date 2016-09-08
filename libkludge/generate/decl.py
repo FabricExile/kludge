@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import abc
+import os, abc
 
 class Decl(object):
   def __init__(
@@ -47,11 +47,14 @@ class Decl(object):
     pass
 
   @abc.abstractmethod
-  def get_template_basename(self):
+  def get_template_path(self):
     pass
 
   def render(self, context, lang):
-    basename = self.get_template_basename()
+    path = self.get_template_path()
     return self.ext.jinjenv.get_template(
-      'generate/'+basename+'/'+basename+'.'+context+'.'+lang
-      ).render({'decl': self, basename: self})
+      path+'.'+context+'.'+lang
+      ).render({
+      'decl': self,
+      os.path.basename(path): self,
+      })

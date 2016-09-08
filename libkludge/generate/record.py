@@ -718,5 +718,5 @@ class Record(Decl):
   def kl_global_name(self):
     return '_'.join(self.namespace.nested_kl_names)
 
-  def get_template_basename(self):
-    return 'record'
+  def get_template_path(self):
+    return 'generate/record/record'

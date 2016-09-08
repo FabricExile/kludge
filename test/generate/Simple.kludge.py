@@ -6,36 +6,58 @@ ext.add_cpp_quoted_include('Simple.hpp')
 
 ext.add_func('SimpleParams', None, [
   'bool',
+  'bool const *',
+  'bool *',
   'bool const &',
   'bool &',
   'int8_t',
+  'int8_t const *',
+  'int8_t *',
   'int8_t const &',
   'int8_t &',
   'uint8_t',
+  'uint8_t const *',
+  'uint8_t *',
   'uint8_t const &',
   'uint8_t &',
   'int16_t',
+  'int16_t const *',
+  'int16_t *',
   'int16_t const &',
   'int16_t &',
   'uint16_t',
+  'uint16_t const *',
+  'uint16_t *',
   'uint16_t const &',
   'uint16_t &',
   'int32_t',
+  'int32_t const *',
+  'int32_t *',
   'int32_t const &',
   'int32_t &',
   'uint32_t',
+  'uint32_t const *',
+  'uint32_t *',
   'uint32_t const &',
   'uint32_t &',
   'int64_t',
+  'int64_t const *',
+  'int64_t *',
   'int64_t const &',
   'int64_t &',
   'uint64_t',
+  'uint64_t const *',
+  'uint64_t *',
   'uint64_t const &',
   'uint64_t &',
   'float',
+  'float const *',
+  'float *',
   'float const &',
   'float &',
   'double',
+  'double const *',
+  'double *',
   'double const &',
   'double &',
   ])\
@@ -64,38 +86,60 @@ report("Before: float32 = " + float32);
 report("Before: float64 = " + float64);
 SimpleParams(
   boolean,
+  BooleanConstPtr(boolean),
+  BooleanPtr(boolean),
   boolean,
-  boolean,
+  BooleanRef(boolean),
   sint8,
+  SInt8ConstPtr(sint8),
+  SInt8Ptr(sint8),
   sint8,
-  sint8,
+  SInt8Ref(sint8),
   uint8,
+  UInt8ConstPtr(uint8),
+  UInt8Ptr(uint8),
   uint8,
-  uint8,
+  UInt8Ref(uint8),
   sint16,
+  SInt16ConstPtr(sint16),
+  SInt16Ptr(sint16),
   sint16,
-  sint16,
+  SInt16Ref(sint16),
   uint16,
+  UInt16ConstPtr(uint16),
+  UInt16Ptr(uint16),
   uint16,
-  uint16,
+  UInt16Ref(uint16),
   sint32,
+  SInt32ConstPtr(sint32),
+  SInt32Ptr(sint32),
   sint32,
-  sint32,
+  SInt32Ref(sint32),
   uint32,
+  UInt32ConstPtr(uint32),
+  UInt32Ptr(uint32),
   uint32,
-  uint32,
+  UInt32Ref(uint32),
   sint64,
+  SInt64ConstPtr(sint64),
+  SInt64Ptr(sint64),
   sint64,
-  sint64,
+  SInt64Ref(sint64),
   uint64,
+  UInt64ConstPtr(uint64),
+  UInt64Ptr(uint64),
   uint64,
-  uint64,
+  UInt64Ref(uint64),
   float32,
+  Float32ConstPtr(float32),
+  Float32Ptr(float32),
   float32,
-  float32,
+  Float32Ref(float32),
   float64,
+  Float64ConstPtr(float64),
+  Float64Ptr(float64),
   float64,
-  float64,
+  Float64Ref(float64),
   );
 report("After: boolean = " + boolean);
 report("After: sint8 = " + sint8);
@@ -120,17 +164,17 @@ Before: sint64 = -1111111111111111
 Before: uint64 = 1111111111111111
 Before: float32 = +3.14159
 Before: float64 = +3.14159265358979
-After: boolean = true
-After: sint8 = -33
-After: uint8 = 33
-After: sint16 = -3333
-After: uint16 = 3333
-After: sint32 = -33333333
-After: uint32 = 33333333
-After: sint64 = -3333333333333333
-After: uint64 = 3333333333333333
-After: float32 = +9.42477
-After: float64 = +9.424777960769371
+After: boolean = false
+After: sint8 = -88
+After: uint8 = 88
+After: sint16 = -8888
+After: uint16 = 8888
+After: sint32 = -88888888
+After: uint32 = 88888888
+After: sint64 = -8888888888888888
+After: uint64 = 8888888888888888
+After: float32 = +25.13272
+After: float64 = +25.13274122871832
 """)
 
 

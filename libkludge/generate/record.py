@@ -40,13 +40,15 @@ class Methodlike(object):
 
 class Ctor(Methodlike):
 
-  def __init__(self, record):
+  def __init__(
+    self,
+    record,
+    params,
+    ):
     Methodlike.__init__(self, record)
-    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
-    self.resolve_dqti = record.resolve_dqti
     self.base_edk_symbol_name = record.kl_global_name + '__ctor'
     self.this = self.record.mutable_this
-    self.params = []
+    self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
   
   @property
   def edk_symbol_name(self):
@@ -59,27 +61,27 @@ class Ctor(Methodlike):
   def get_test_name(self):
     return self.base_edk_symbol_name
 
-  def add_param(self, param):
-    self.params.append(
-      massage_param(param).gen_codec(len(self.params), self.record.resolve_dqti)
-      )
-    return self
-
 class Method(Methodlike):
 
-  def __init__(self, record, cpp_name, this_access=ThisAccess.const):
+  def __init__(
+    self,
+    record,
+    cpp_name,
+    returns,
+    params,
+    this_access,
+    ):
     Methodlike.__init__(self, record)
-    self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
     self.base_edk_symbol_name = record.kl_global_name + '__meth_' + cpp_name
-    self.result = ResultCodec(self.ext.type_mgr.get_dqti(Void()))
     self.cpp_name = cpp_name
+    self.result = ResultCodec(record.resolve_dqti(returns))
+    self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
     self.this = self.record.mutable_this
-    self.params = []
     self.this_access = this_access
     self.is_const = self.this_access == ThisAccess.const
     self.is_mutable = self.this_access == ThisAccess.mutable
     self.is_static = self.this_access == ThisAccess.static
-  
+
   @property
   def kl_name(self):
     return self.cpp_name
@@ -103,22 +105,6 @@ class Method(Methodlike):
 
   def get_test_name(self):
     return self.base_edk_symbol_name
-
-  def returns(self, cpp_type_name):
-    assert isinstance(cpp_type_name, basestring)
-    self.result = ResultCodec(
-      self.ext.type_mgr.get_dqti(
-        self.resolve_cpp_type_expr(cpp_type_name)
-        )
-      )
-    return self
-
-  def add_param(self, param):
-    param = massage_param(param)
-    self.params.append(
-      param.gen_codec(len(self.params), self.record.resolve_dqti)
-      )
-    return self
 
 class UniOp(Methodlike):
 
@@ -495,19 +481,19 @@ class Record(Decl):
     return self
   
   def add_ctor(self, params=[], opt_params=[]):
-    ctor = Ctor(self)
-    assert isinstance(params, list)
-    for param in params:
-      ctor.add_param(param)
-    if len(ctor.params) == 0:
+    params = massage_params(params)
+    opt_params = massage_params(opt_params)
+
+    if len(params) == 0:
       self.include_empty_ctor = False
-    self.ctors.append(ctor)
-    if len(opt_params) > 0:
-      self.add_ctor(
-        params + opt_params[0:1],
-        opt_params[1:]
-        )
-    return ctor
+
+    result = None
+    for i in range(0, len(opt_params)+1):
+      ctor = Ctor(self, params + opt_params[0:i])
+      self.ctors.append(ctor)
+      if not result:
+        result = ctor
+    return result
 
   def add_method(
     self,
@@ -518,22 +504,18 @@ class Record(Decl):
     this_access = ThisAccess.const,
     ):
     assert isinstance(name, basestring)
-    method = Method(self, name, this_access=this_access)
-    self.methods.append(method)
-    if returns:
-      method.returns(returns)
-    assert isinstance(params, list)
-    for param in params:
-      method.add_param(param)
-    if len(opt_params) > 0:
-      self.add_method(
-        name,
-        returns,
-        params + opt_params[0:1],
-        opt_params[1:],
-        this_access
-        )
-    return method
+
+    returns = massage_returns(returns)
+    params = massage_params(params)
+    opt_params = massage_params(opt_params)
+
+    result = None
+    for i in range(0, len(opt_params)+1):
+      method = Method(self, name, returns, params + opt_params[0:i], this_access)
+      self.methods.append(method)
+      if not result:
+        result = method
+    return result
 
   def add_const_method(self, name, returns=None, params=[], opt_params=[]):
     return self.add_method(name, returns, params, opt_params, ThisAccess.const)

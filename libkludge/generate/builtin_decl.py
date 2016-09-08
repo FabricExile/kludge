@@ -15,6 +15,8 @@ class BuiltinDecl(Decl):
     ):
     Decl.__init__(self, parent_namespace)
     self.desc = desc
+    self.template_path = template_path
+    self.test_name = test_name
 
     for method_name in [
       'error',
@@ -32,11 +34,3 @@ class BuiltinDecl(Decl):
 
   def get_template_path(self):
     return self.template_path
-
-  def render(self, context, lang):
-    return self.ext.jinjenv.get_template(
-      self.get_template_path()+'.'+context+'.'+lang
-      ).render({
-      'decl': self,
-      os.path.basename(path): self,
-      })

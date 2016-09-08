@@ -24,7 +24,7 @@ class TypeMgr:
     self.add_selector(VoidSelector(ext))
     self.add_selector(CStringSelector(ext))  # must come before Simple so it matches char const *
     self.add_selector(VoidPtrSelector(ext))
-    self.add_selector(SimpleDirectSelector(ext))
+    self.add_selector(SimpleSelector(ext))
     self.add_selector(StdStringSelector(ext))
     self.add_selector(FixedArraySelector(ext))
     self.add_selector(StdVectorSelector(ext))
@@ -54,14 +54,16 @@ class TypeMgr:
 
     cpp_type_name = str(cpp_type_expr)
 
+    # print "type_mgr: Checking cache for %s" % cpp_type_name
     dqti = self._cpp_type_name_to_dqti.get(cpp_type_name)
     if dqti:
+      # print "type_mgr: Found cached conversion %s -> %s" % (cpp_type_name, dqti)
       return dqti
 
     for selector in self._selectors:
       dqti = selector.maybe_create_dqti(self, cpp_type_expr)
       if dqti:
-        print "Adding type conversion: %s -> %s" % (cpp_type_name, dqti.get_desc())
+        print "type_mgr: Adding conversion: %s -> %s" % (cpp_type_name, dqti)
         self._cpp_type_name_to_dqti[cpp_type_name] = dqti
         return dqti
 

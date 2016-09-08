@@ -10,3 +10,6 @@ class DirQualTypeInfo:
 
   def get_desc(self):
     return "%s:%s" % (self.dir_qual.get_desc(), self.type_info.get_desc())
+
+  def __str__(self):
+    return self.get_desc()

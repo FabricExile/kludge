@@ -470,5 +470,11 @@ class ReferenceTo(Indirect):
   def __copy__(self):
     return ReferenceTo(self.pointee)
 
+def Unsigned(ty):
+  return ty.make_unsigned()
+
+def Signed(ty):
+  return ty.make_signed()
+
 def Const(ty):
   return ty.make_const()

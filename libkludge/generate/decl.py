@@ -58,6 +58,11 @@ class Decl(object):
     template_vars = {'decl': self}
     for template_alias in self.get_template_aliases():
       template_vars.setdefault(template_alias, self)
-    return self.ext.jinjenv.get_template(
-      path+'.'+context+'.'+lang
-      ).render(template_vars)
+    try:
+      template = self.ext.jinjenv.get_template(path+'.'+context+'.'+lang)
+    except:
+      template = None
+    if template:
+      return template.render(template_vars)
+    else:
+      return ''

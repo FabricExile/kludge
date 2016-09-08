@@ -36,7 +36,7 @@ class Func(Decl):
     for param_index in range(0, len(params)):
       param = params[param_index]
       self.params.append(
-        param.gen_codec(param_index, self.type_mgr, self.cpp_type_expr_parser)
+        param.gen_codec(param_index, parent_namespace.resolve_dqti)
         )
     self.comments = []
   
@@ -61,3 +61,5 @@ class Func(Decl):
   def get_template_path(self):
     return 'generate/func/func'
   
+  def get_template_aliases(self):
+    return ['func']

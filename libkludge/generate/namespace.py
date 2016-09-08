@@ -9,6 +9,7 @@ from alias import Alias
 from enum import Enum
 from func import Func
 from param import Param
+from massage import *
 from libkludge.types import InPlaceSelector
 from libkludge.types import KLExtTypeAliasSelector
 from libkludge.types import DirectSelector
@@ -55,6 +56,9 @@ class Namespace:
   
   def resolve_cpp_type_expr(self, cpp_type_name):
     return self.namespace_mgr.resolve_cpp_type_expr(self.components, cpp_type_name)
+
+  def resolve_dqti(self, cpp_type_name):
+    return self.type_mgr.get_dqti(self.resolve_cpp_type_expr(cpp_type_name))
 
   @property
   def cpp_type_expr_parser(self):
@@ -107,22 +111,12 @@ class Namespace:
       kl_local_name = cpp_local_name
     kl_global_name = "_".join(self.nested_kl_names + [kl_local_name])
 
-    def massage_returns(returns):
-      if not returns:
-        returns = 'void'
-      return returns
-
-    def massage_param(param):
-      if isinstance(param, basestring):
-        param = Param('', param)
-      return param
-
     func = Func(
       self,
       cpp_global_name,
       kl_global_name,
       massage_returns(returns),
-      [massage_param(param) for param in params],
+      massage_params(params),
       )
     self.ext.decls.append(func)
     return func

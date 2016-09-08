@@ -46,3 +46,6 @@ class Enum(Decl):
 
   def get_template_path(self):
     return 'generate/enum/enum'
+
+  def get_template_aliases(self):
+    return ['enum']

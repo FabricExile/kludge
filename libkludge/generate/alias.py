@@ -24,3 +24,6 @@ class Alias(Decl):
 
   def get_template_path(self):
     return 'generate/alias/alias'
+
+  def get_template_aliases(self):
+    return ['alias']

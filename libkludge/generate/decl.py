@@ -50,11 +50,14 @@ class Decl(object):
   def get_template_path(self):
     pass
 
+  def get_template_aliases(self):
+    return []
+
   def render(self, context, lang):
     path = self.get_template_path()
+    template_vars = {'decl': self}
+    for template_alias in self.get_template_aliases():
+      template_vars.setdefault(template_alias, self)
     return self.ext.jinjenv.get_template(
       path+'.'+context+'.'+lang
-      ).render({
-      'decl': self,
-      os.path.basename(path): self,
-      })
+      ).render(template_vars)

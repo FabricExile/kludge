@@ -10,10 +10,8 @@ class Param(object):
     self.name = name
     self.cpp_type_name = cpp_type_name
 
-  def gen_codec(self, index, type_mgr, cpp_type_expr_parser):
+  def gen_codec(self, index, dqti_resolver):
     return ParamCodec(
-      type_mgr.get_dqti(
-        cpp_type_expr_parser.parse(self.cpp_type_name)
-        ),
+      dqti_resolver(self.cpp_type_name),
       "_arg%d" % index if not self.name else self.name
       )

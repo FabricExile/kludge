@@ -7,6 +7,7 @@ from decl import Decl
 from test import Test
 from libkludge.member_access import MemberAccess
 from this_access import ThisAccess
+from massage import *
 from libkludge.cpp_type_expr_parser import Void, DirQual, directions, qualifiers
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec
@@ -42,6 +43,7 @@ class Ctor(Methodlike):
   def __init__(self, record):
     Methodlike.__init__(self, record)
     self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
+    self.resolve_dqti = record.resolve_dqti
     self.base_edk_symbol_name = record.kl_global_name + '__ctor'
     self.this = self.record.mutable_this
     self.params = []
@@ -57,16 +59,9 @@ class Ctor(Methodlike):
   def get_test_name(self):
     return self.base_edk_symbol_name
 
-  def add_param(self, cpp_type_name, name = None):
-    if not isinstance(name, basestring):
-      name = "arg%d" % len(self.params)
+  def add_param(self, param):
     self.params.append(
-      ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(cpp_type_name)
-          ),
-        name
-        )
+      massage_param(param).gen_codec(len(self.params), self.record.resolve_dqti)
       )
     return self
 
@@ -118,17 +113,10 @@ class Method(Methodlike):
       )
     return self
 
-  def add_param(self, cpp_type_name, cpp_name = None):
-    assert isinstance(cpp_type_name, basestring)
-    if not isinstance(cpp_name, basestring):
-      cpp_name = "arg%d" % len(self.params)
+  def add_param(self, param):
+    param = massage_param(param)
     self.params.append(
-      ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(cpp_type_name)
-          ),
-        cpp_name
-        )
+      param.gen_codec(len(self.params), self.record.resolve_dqti)
       )
     return self
 
@@ -371,6 +359,8 @@ class Record(Decl):
           setattr(self, namespace_method[0], namespace_method[1])
     else:
       self.namespace = parent_namespace
+    for method_name in ['resolve_cpp_type_expr', 'resolve_dqti']:
+      setattr(self, method_name, getattr(self.namespace, method_name))
 
     self.comments = []
     self.members = []
@@ -720,3 +710,6 @@ class Record(Decl):
 
   def get_template_path(self):
     return 'generate/record/record'
+
+  def get_template_aliases(self):
+    return ['record']

@@ -19,19 +19,19 @@ class DirQual:
     return qualifiers.is_const(self.qualifier)
   
   @property
-  def is_const_reference(self):
+  def is_const_ref(self):
     return self.direction == directions.Reference and qualifiers.is_const(self.qualifier)
   
   @property
-  def is_const_pointer(self):
+  def is_const_ptr(self):
     return self.direction == directions.Pointer and qualifiers.is_const(self.qualifier)
   
   @property
-  def is_mutable_reference(self):
+  def is_mutable_ref(self):
     return self.direction == directions.Reference and qualifiers.is_mutable(self.qualifier)
   
   @property
-  def is_mutable_pointer(self):
+  def is_mutable_ptr(self):
     return self.direction == directions.Pointer and qualifiers.is_mutable(self.qualifier)
   
   @property
@@ -53,17 +53,20 @@ class DirQual:
   def get_desc(self):
     if self.is_direct:
       return "direct"
-    if self.is_const_reference:
-      return "const_reference"
-    if self.is_const_pointer:
-      return "const_pointer"
-    if self.is_mutable_reference:
-      return "mutable_reference"
-    if self.is_mutable_pointer:
-      return "mutable_pointer"
+    if self.is_const_ref:
+      return "const_ref"
+    if self.is_const_ptr:
+      return "const_ptr"
+    if self.is_mutable_ref:
+      return "mutable_ref"
+    if self.is_mutable_ptr:
+      return "mutable_ptr"
+
+  def __str__(self):
+    return self.get_desc()
 
 direct = DirQual(directions.Direct, qualifiers.Unqualified)
-const_reference = DirQual(directions.Reference, qualifiers.Const)
-const_pointer = DirQual(directions.Pointer, qualifiers.Const)
-mutable_reference = DirQual(directions.Reference, qualifiers.Unqualified)
-mutable_pointer = DirQual(directions.Pointer, qualifiers.Unqualified)
+const_ref = DirQual(directions.Reference, qualifiers.Const)
+const_ptr = DirQual(directions.Pointer, qualifiers.Const)
+mutable_ref = DirQual(directions.Reference, qualifiers.Unqualified)
+mutable_ptr = DirQual(directions.Pointer, qualifiers.Unqualified)

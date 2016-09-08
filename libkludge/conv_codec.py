@@ -12,8 +12,8 @@ class ConvCodec:
     self.is_mutable_indirect = dqti.dir_qual.is_mutable_indirect
     self.is_pointer = dqti.dir_qual.is_pointer
     self.is_reference = dqti.dir_qual.is_reference
-    self.is_mutable_reference = dqti.dir_qual.is_mutable_reference
-    self.is_mutable_pointer = dqti.dir_qual.is_mutable_pointer
+    self.is_mutable_ref = dqti.dir_qual.is_mutable_ref
+    self.is_mutable_ptr = dqti.dir_qual.is_mutable_ptr
     self.child = []
     for i in range(0, len(self.type_info.child_dqtis)):
       self.child.append(

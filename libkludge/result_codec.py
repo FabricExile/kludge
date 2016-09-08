@@ -11,8 +11,8 @@ class ResultCodec:
     self.value_name = result_cpp_value_name
     self.is_pointer = dqti.dir_qual.is_pointer
     self.is_reference = dqti.dir_qual.is_reference
-    self.is_mutable_reference = dqti.dir_qual.is_mutable_reference
-    self.is_mutable_pointer = dqti.dir_qual.is_mutable_pointer
+    self.is_mutable_ref = dqti.dir_qual.is_mutable_ref
+    self.is_mutable_ptr = dqti.dir_qual.is_mutable_ptr
     self.conv = ConvCodec(dqti, result_cpp_value_name)
 
   @property

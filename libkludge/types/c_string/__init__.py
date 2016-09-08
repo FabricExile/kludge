@@ -27,7 +27,7 @@ class CStringTypeInfo(TypeInfo):
 class CStringSelector(Selector):
 
   direct_cpp_type_expr = PointerTo(Const(Char()))
-  const_reference_cpp_type_expr = ReferenceTo(Const(PointerTo(Const(Char()))))
+  const_ref_cpp_type_expr = ReferenceTo(Const(PointerTo(Const(Char()))))
 
   def __init__(self, ext):
     Selector.__init__(self, ext)
@@ -41,8 +41,8 @@ class CStringSelector(Selector):
         dir_qual.direct,
         CStringTypeInfo(self.jinjenv, cpp_type_expr.make_unqualified())
         )
-    if cpp_type_expr == self.const_reference_cpp_type_expr:
+    if cpp_type_expr == self.const_ref_cpp_type_expr:
       return DirQualTypeInfo(
-        dir_qual.const_reference,
+        dir_qual.const_ref,
         CStringTypeInfo(self.jinjenv, cpp_type_expr.pointee.make_unqualified())
         )

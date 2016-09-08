@@ -58,7 +58,7 @@ class StdMapSelector(Selector):
       key_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.components[1].params[0])
       value_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.components[1].params[1])
       return DirQualTypeInfo(
-        dir_qual.const_reference,
+        dir_qual.const_ref,
         StdMapTypeInfo(
           self.jinjenv,
           cpp_type_expr.pointee.make_unqualified(),

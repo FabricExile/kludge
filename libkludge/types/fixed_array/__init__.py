@@ -49,7 +49,7 @@ class FixedArraySelector(Selector):
       and cpp_type_expr.pointee.is_const:
       element_dqti = type_mgr.get_dqti(cpp_type_expr.pointee.element)
       return DirQualTypeInfo(
-        dir_qual.const_reference,
+        dir_qual.const_ref,
         FixedArrayTypeInfo(
           self.jinjenv,
           cpp_type_expr.pointee.make_unqualified(),

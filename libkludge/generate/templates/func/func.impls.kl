@@ -4,7 +4,7 @@
 {% import "generate/macros.kl" as macros %}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
-{{ func.result_codec.render_type_kl() }}
+{{ func.result.render_type_kl() }}
 {{ func.kl_global_name }}(
     {{ macros.kl_param_list(func.params) | indent(4) }}
     ) = "{{func.get_edk_symbol_name()}}";

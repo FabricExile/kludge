@@ -14,16 +14,14 @@ UInt32
 42
 """)
 
-ext.add_func('ReturnAliasValue')\
-  .returns('AliasType')\
+ext.add_func('ReturnAliasValue', 'AliasType')\
   .add_test("""
 report("ReturnAliasValue() = " + ReturnAliasValue());
 """, """
 ReturnAliasValue() = 63
 """)
 
-ext.add_func('TakeAliasType')\
-  .add_param('AliasType')\
+ext.add_func('TakeAliasType', None, ['AliasType'])\
   .add_test("""
 AliasType alias_value = 42;
 TakeAliasType(alias_value);
@@ -32,8 +30,7 @@ report("<empty>");
 <empty>
 """)
 
-ext.add_func('TakeAliasTypeRef')\
-  .add_param('AliasType &')\
+ext.add_func('TakeAliasTypeRef', None, ['AliasType &'])\
   .add_test("""
 AliasType alias_value = 42;
 TakeAliasTypeRef(alias_value);
@@ -42,8 +39,7 @@ report("<empty>");
 <empty>
 """)
 
-ext.add_func('TakeAliasTypeConstRef')\
-  .add_param('AliasType const &')\
+ext.add_func('TakeAliasTypeConstRef', None, ['AliasType const &'])\
   .add_test("""
 AliasType alias_value = 42;
 TakeAliasTypeConstRef(alias_value);

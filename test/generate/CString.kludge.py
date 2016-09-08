@@ -4,26 +4,21 @@
 
 ext.add_cpp_quoted_include('CString.hpp')
 
-ext.add_func('CStringParams')\
-  .returns('const char *')\
-  .add_param('char const *')\
-  .add_param('char const * const &')\
+ext.add_func('CStringParams', 'const char *', ['char const *', 'char const * const &'])\
   .add_test("""
 report("CStringParams('value', 'constRef') = " + CStringParams('value', 'constRef'));
 """, """
 CStringParams('value', 'constRef') = valueconstRef
 """)
 
-ext.add_func('CStringValueReturn')\
-  .returns('char const *')\
+ext.add_func('CStringValueReturn', 'char const *')\
   .add_test("""
 report("CStringValueReturn() = " + CStringValueReturn());
 """, """
 CStringValueReturn() = value
 """)
 
-ext.add_func('CStringConstRefReturn')\
-  .returns('char const * const &')\
+ext.add_func('CStringConstRefReturn', 'char const * const &')\
   .add_test("""
 report("CStringConstRefReturn() = " + CStringConstRefReturn());
 """, """

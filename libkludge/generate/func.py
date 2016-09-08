@@ -16,6 +16,8 @@ class Func(Decl):
     parent_namespace,
     cpp_global_name,
     kl_global_name,
+    returns_cpp_type_expr,
+    params,
     ):
     Decl.__init__(
       self,
@@ -25,8 +27,17 @@ class Func(Decl):
     self.cpp_global_name = cpp_global_name
     self.kl_global_name = kl_global_name
 
-    self.result_codec = ResultCodec(self.type_mgr.get_dqti(Void()))
+    self.result = ResultCodec(
+      self.type_mgr.get_dqti(
+        self.cpp_type_expr_parser.parse(returns_cpp_type_expr)
+        )
+      )
     self.params = []
+    for param_index in range(0, len(params)):
+      param = params[param_index]
+      self.params.append(
+        param.gen_codec(param_index, self.type_mgr, self.cpp_type_expr_parser)
+        )
     self.comments = []
   
   def get_edk_symbol_name(self):
@@ -36,27 +47,6 @@ class Func(Decl):
     for param in self.params:
       h.update(param.type_info.edk.name)
     return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
-
-  def returns(self, cpp_type_name):
-    self.result_codec = ResultCodec(
-      self.type_mgr.get_dqti(
-        self.cpp_type_expr_parser.parse(cpp_type_name)
-        )
-      )
-    return self
-
-  def add_param(self, cpp_type_name, name = None):
-    if not isinstance(name, basestring):
-      name = "arg%d" % len(self.params)
-    self.params.append(
-      ParamCodec(
-        self.type_mgr.get_dqti(
-          self.cpp_type_expr_parser.parse(cpp_type_name)
-          ),
-        name
-        )
-      )
-    return self
 
   def add_comment(self, comment):
     self.comments.append(util.clean_comment(comment))

@@ -4,7 +4,8 @@
 
 ext.add_cpp_quoted_include('StdVector.hpp')
 
-ext.add_func('ReturnSecond').returns('float').add_param('std::vector<float>').add_test("""
+ext.add_func('ReturnSecond', 'float', ['std::vector<float>'])\
+  .add_test("""
 Float32 a[];
 a.push(3.14);
 a.push(5.34);
@@ -15,7 +16,8 @@ a = [+3.14,+5.34]
 ReturnSecond(a) = +5.34
 """)
 
-ext.add_func('ReturnSecondSecond').returns('char const *').add_param('std::vector< std::vector<char const *> > const &').add_test("""
+ext.add_func('ReturnSecondSecond', 'char const *', ['std::vector< std::vector<char const *> > const &'])\
+  .add_test("""
 String b[][];
 b.resize(2);
 b[0].resize(2);
@@ -31,7 +33,8 @@ b = [["foo","bar"],["baz","buzzy"]]
 ReturnSecondSecond(b) = buzzy
 """)
 
-ext.add_func('ReturnStringArrayArray').returns('std::vector< std::vector<std::string> >').add_test("""
+ext.add_func('ReturnStringArrayArray', 'std::vector< std::vector<std::string> >')\
+  .add_test("""
 report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
 """, """
 ReturnStringArrayArray() = [["hello","there","my","friend"],["hello","there","my","friend"],["hello","there","my","friend"]]
@@ -39,13 +42,15 @@ ReturnStringArrayArray() = [["hello","there","my","friend"],["hello","there","my
 
 ext.add_alias('StringVector', 'std::vector< std::string >')
 
-ext.add_func('GetStringVector').returns('StringVector').add_test("""
+ext.add_func('GetStringVector', 'StringVector')\
+  .add_test("""
 report("GetStringVector() = " + GetStringVector());
 """, """
 GetStringVector() = ["hello","world"]
 """)
 
-ext.add_func('AppendToStringVector').add_param('std::vector<std::string> &').add_test("""
+ext.add_func('AppendToStringVector', None, ['std::vector<std::string> &'])\
+  .add_test("""
 String s[];
 s.push("before append");
 AppendToStringVector(s);

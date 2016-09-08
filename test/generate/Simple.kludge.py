@@ -4,40 +4,41 @@
 
 ext.add_cpp_quoted_include('Simple.hpp')
 
-ext.add_func('SimpleParams')\
-  .add_param('bool')\
-  .add_param('bool const &')\
-  .add_param('bool &')\
-  .add_param('int8_t')\
-  .add_param('int8_t const &')\
-  .add_param('int8_t &')\
-  .add_param('uint8_t')\
-  .add_param('uint8_t const &')\
-  .add_param('uint8_t &')\
-  .add_param('int16_t')\
-  .add_param('int16_t const &')\
-  .add_param('int16_t &')\
-  .add_param('uint16_t')\
-  .add_param('uint16_t const &')\
-  .add_param('uint16_t &')\
-  .add_param('int32_t')\
-  .add_param('int32_t const &')\
-  .add_param('int32_t &')\
-  .add_param('uint32_t')\
-  .add_param('uint32_t const &')\
-  .add_param('uint32_t &')\
-  .add_param('int64_t')\
-  .add_param('int64_t const &')\
-  .add_param('int64_t &')\
-  .add_param('uint64_t')\
-  .add_param('uint64_t const &')\
-  .add_param('uint64_t &')\
-  .add_param('float')\
-  .add_param('float const &')\
-  .add_param('float &')\
-  .add_param('double')\
-  .add_param('double const &')\
-  .add_param('double &')\
+ext.add_func('SimpleParams', None, [
+  'bool',
+  'bool const &',
+  'bool &',
+  'int8_t',
+  'int8_t const &',
+  'int8_t &',
+  'uint8_t',
+  'uint8_t const &',
+  'uint8_t &',
+  'int16_t',
+  'int16_t const &',
+  'int16_t &',
+  'uint16_t',
+  'uint16_t const &',
+  'uint16_t &',
+  'int32_t',
+  'int32_t const &',
+  'int32_t &',
+  'uint32_t',
+  'uint32_t const &',
+  'uint32_t &',
+  'int64_t',
+  'int64_t const &',
+  'int64_t &',
+  'uint64_t',
+  'uint64_t const &',
+  'uint64_t &',
+  'float',
+  'float const &',
+  'float &',
+  'double',
+  'double const &',
+  'double &',
+  ])\
   .add_test("""
 Boolean boolean;
 SInt8 sint8 = -11s8;
@@ -133,45 +134,35 @@ After: float64 = +9.424777960769371
 """)
 
 
-ext.add_func('SimpleValueResult')\
-  .returns('int')\
+ext.add_func('SimpleValueResult', 'int')\
   .add_test("""
 report("SimpleValueResult() = " + SimpleValueResult());
 """, """
 SimpleValueResult() = 42
 """)
 
-ext.add_func('SimpleConstRefResult')\
-  .returns('int const &')\
+ext.add_func('SimpleConstRefResult', 'int const &')\
   .add_test("""
 report("SimpleConstRefResult() = " + SimpleConstRefResult());
 """, """
 SimpleConstRefResult() = 42
 """)
 
-ext.add_func('SimpleMutableRefResult')\
-  .returns('int &')\
+ext.add_func('SimpleMutableRefResult', 'int &')\
   .add_test("""
 report("SimpleMutableRefResult() = " + SimpleMutableRefResult());
 """, """
 SimpleMutableRefResult() = 42
 """)
 
-ext.add_func("SimpleObscure")\
-  .returns('long')\
-  .add_param('signed short')\
-  .add_param('long')\
+ext.add_func("SimpleObscure", 'long', ['signed short', 'long'])\
   .add_test("""
 report("SimpleObscure(56, 89) = " + SimpleObscure(56, 89));
 """, """
 SimpleObscure(56, 89) = 145
 """)
 
-ext.add_func("SimpleObscure")\
-  .returns('long')\
-  .add_param('signed short')\
-  .add_param('long')\
-  .add_param('long long')\
+ext.add_func("SimpleObscure", 'long', ['signed short', 'long', 'long long'])\
   .add_test("""
 report("SimpleObscure(56, 89, 1) = " + SimpleObscure(56, 89, 1));
 """, """

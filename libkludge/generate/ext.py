@@ -8,6 +8,7 @@ from libkludge.type_mgr import TypeMgr
 from namespace import Namespace
 from libkludge.member_access import MemberAccess
 from this_access import ThisAccess
+from param import Param
 from test import Test
 from libkludge import util
 
@@ -89,6 +90,7 @@ class Ext:
   def process(self, filename):
     glbls = {
       'ext': self,
+      'Param': Param,
       'ThisAccess': ThisAccess,
       'MemberAccess': MemberAccess,
       }

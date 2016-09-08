@@ -8,6 +8,7 @@ from record import Record
 from alias import Alias
 from enum import Enum
 from func import Func
+from param import Param
 from libkludge.types import InPlaceSelector
 from libkludge.types import KLExtTypeAliasSelector
 from libkludge.types import DirectSelector
@@ -106,11 +107,23 @@ class Namespace:
       kl_local_name = cpp_local_name
     kl_global_name = "_".join(self.nested_kl_names + [kl_local_name])
 
-    func = Func(self, cpp_global_name, kl_global_name)
-    if returns:
-      func.returns(returns)
-    for param in params:
-      func.add_param(param)
+    def massage_returns(returns):
+      if not returns:
+        returns = 'void'
+      return returns
+
+    def massage_param(param):
+      if isinstance(param, basestring):
+        param = Param('', param)
+      return param
+
+    func = Func(
+      self,
+      cpp_global_name,
+      kl_global_name,
+      massage_returns(returns),
+      [massage_param(param) for param in params],
+      )
     self.ext.decls.append(func)
     return func
 

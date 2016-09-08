@@ -34,10 +34,6 @@ class Decl(object):
   def namespace_mgr(self):
     return self.parent_namespace.namespace_mgr
 
-  @property
-  def location(self):
-    return None
-
   def add_test(self, kl, out):
     self.ext.add_test(self.get_test_name(), kl, out)
 

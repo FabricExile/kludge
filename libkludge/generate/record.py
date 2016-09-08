@@ -578,7 +578,7 @@ class Record(Decl):
     if not params:
       params = [self.this_type_info.lib.name.compound + ' const &', self.this_type_info.lib.name.compound + ' const &']
     assert len(params) == 2
-    bin_op = self.BinOp(
+    bin_op = BinOp(
       self,
       result_type=returns,
       op=op,

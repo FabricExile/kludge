@@ -127,7 +127,7 @@ class Namespace:
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     self.type_mgr.add_selector(
       InPlaceSelector(
-        self.jinjenv,
+        self,
         kl_global_name,
         cpp_type_expr,
         )
@@ -164,7 +164,7 @@ class Namespace:
       extends = self.cpp_type_expr_to_record[extends_cpp_type_expr]
     self.type_mgr.add_selector(
       DirectSelector(
-        self.jinjenv,
+        self,
         kl_global_name,
         cpp_type_expr,
         )
@@ -220,7 +220,7 @@ class Namespace:
       extends = self.cpp_type_expr_to_record[extends_cpp_type_expr]
     self.type_mgr.add_selector(
       WrappedSelector(
-        self.jinjenv,
+        self,
         kl_global_name,
         cpp_type_expr,
         )
@@ -256,7 +256,7 @@ class Namespace:
     assert isinstance(kl_global_name, basestring)
     self.type_mgr.add_selector(
       KLExtTypeAliasSelector(
-        self.jinjenv,
+        self,
         cpp_type_expr,
         kl_global_name,
         )
@@ -305,7 +305,7 @@ class Namespace:
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     self.type_mgr.add_selector(
       EnumSelector(
-        self.jinjenv,
+        self,
         cpp_type_expr,
         kl_global_name,
         )

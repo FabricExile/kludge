@@ -24,8 +24,8 @@ class KLExtTypeAliasTypeInfo(TypeInfo):
 
 class KLExtTypeAliasSelector(Selector):
 
-  def __init__(self, jinjenv, cpp_type_expr, kl_type_name):
-    Selector.__init__(self, jinjenv)
+  def __init__(self, ext, cpp_type_expr, kl_type_name):
+    Selector.__init__(self, ext)
     self.cpp_type_expr = cpp_type_expr
     self.kl_type_name = kl_type_name
 

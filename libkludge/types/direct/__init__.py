@@ -36,11 +36,11 @@ class DirectSelector(Selector):
 
   def __init__(
     self,
-    jinjenv,
+    ext,
     kl_global_name,
     cpp_type_expr,
     ):
-    Selector.__init__(self, jinjenv)
+    Selector.__init__(self, ext)
     self.kl_global_name = kl_global_name
     self.cpp_type_expr = cpp_type_expr
 

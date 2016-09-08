@@ -35,11 +35,11 @@ class WrappedSelector(Selector):
 
   def __init__(
     self,
-    jinjenv,
+    ext,
     kl_type_name,
     cpp_type_expr,
     ):
-    Selector.__init__(self, jinjenv)
+    Selector.__init__(self, ext)
     self.kl_type_name = kl_type_name
     self.cpp_type_expr = cpp_type_expr
 

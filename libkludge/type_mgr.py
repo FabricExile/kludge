@@ -14,21 +14,21 @@ from cpp_type_expr_parser import *
 
 class TypeMgr:
 
-  def __init__(self, jinjenv):
+  def __init__(self, ext):
     self._selectors = []
 
     self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
     self._cpp_type_name_to_dqti = {}
 
     # Order is very important here!
-    self.add_selector(VoidSelector(jinjenv))
-    self.add_selector(CStringSelector(jinjenv))  # must come before Simple so it matches char const *
-    self.add_selector(VoidPtrSelector(jinjenv))
-    self.add_selector(SimpleDirectSelector(jinjenv))
-    self.add_selector(StdStringSelector(jinjenv))
-    self.add_selector(FixedArraySelector(jinjenv))
-    self.add_selector(StdVectorSelector(jinjenv))
-    self.add_selector(StdMapSelector(jinjenv))
+    self.add_selector(VoidSelector(ext))
+    self.add_selector(CStringSelector(ext))  # must come before Simple so it matches char const *
+    self.add_selector(VoidPtrSelector(ext))
+    self.add_selector(SimpleDirectSelector(ext))
+    self.add_selector(StdStringSelector(ext))
+    self.add_selector(FixedArraySelector(ext))
+    self.add_selector(StdVectorSelector(ext))
+    self.add_selector(StdMapSelector(ext))
 
   def add_selector(self, codec):
     print "Registered conversion selector: %s" % codec.get_desc()

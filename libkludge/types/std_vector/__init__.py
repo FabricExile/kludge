@@ -27,8 +27,8 @@ class StdVectorTypeInfo(TypeInfo):
 
 class StdVectorSelector(Selector):
 
-  def __init__(self, jinjenv):
-    Selector.__init__(self, jinjenv)
+  def __init__(self, ext):
+    Selector.__init__(self, ext)
 
   def get_desc(self):
     return "StdVector"

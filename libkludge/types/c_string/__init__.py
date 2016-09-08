@@ -29,8 +29,8 @@ class CStringSelector(Selector):
   direct_cpp_type_expr = PointerTo(Const(Char()))
   const_reference_cpp_type_expr = ReferenceTo(Const(PointerTo(Const(Char()))))
 
-  def __init__(self, jinjenv):
-    Selector.__init__(self, jinjenv)
+  def __init__(self, ext):
+    Selector.__init__(self, ext)
 
   def get_desc(self):
     return "CString"

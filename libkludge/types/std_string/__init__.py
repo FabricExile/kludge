@@ -26,8 +26,8 @@ class StdStringTypeInfo(TypeInfo):
 
 class StdStringSelector(Selector):
 
-  def __init__(self, jinjenv):
-    Selector.__init__(self, jinjenv)
+  def __init__(self, ext):
+    Selector.__init__(self, ext)
     self.cpp_type_expr = Named([
       Simple('std'),
       Simple('string'),

@@ -101,7 +101,7 @@ class Parser(object):
     for child_cursor in cursor.get_children():
       child_ast_logger.log_cursor(child_cursor)
       if child_cursor.kind == CursorKind.PARM_DECL:
-        params.append(child_cursor.type.spelling)
+        params.append((child_cursor.spelling, child_cursor.type.spelling))
       elif child_cursor.kind == CursorKind.TYPE_REF:
         pass
       elif child_cursor.kind == CursorKind.NAMESPACE_REF:
@@ -110,7 +110,7 @@ class Parser(object):
         pass
       else:
         self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
-    return "[%s]" % (', '.join(["'%s'" % param for param in params]))
+    return "[%s]" % (', '.join(["Param('%s', '%s')" % param for param in params]))
 
   def parse_comment(
     self,

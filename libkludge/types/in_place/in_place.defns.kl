@@ -3,20 +3,28 @@
 {######################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
-struct {{decl.kl_type_name}}ConstPtr permits {{decl.kl_type_name}}ConstRef {
-  protected Data ptr; // actual {{decl.cpp_type_expr}} const *
+{% if not decl.is_simple %}
+struct {{decl.type_info.direct.kl.name}} {
+{% for member in decl.record.members %}
+  {{"public" if member.is_public() else "private"}} {{member.type_info.kl.name.base}} {{member.kl_name}}{{member.type_info.kl.name.suffix}};
+{% endfor %}
 };
 
-struct {{decl.kl_type_name}}Ptr : {{decl.kl_type_name}}ConstPtr {
+{% endif %}
+struct {{decl.type_info.const_ptr.kl.name}} permits {{decl.type_info.const_ref.kl.name}} {
+  protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
 };
 
-struct {{decl.kl_type_name}}ConstRef {
-  protected Data ptr; // actual {{decl.cpp_type_expr}} const *
-  protected {{decl.kl_type_name}} value; // used in the "local" case where we construct a {{decl.kl_type_name}}ConstRef from a {{decl.kl_type_name}}
-  protected Boolean is_local; // ""
+struct {{decl.type_info.mutable_ptr.kl.name}} : {{decl.type_info.const_ptr.kl.name}} {
 };
 
-struct {{decl.kl_type_name}}Ref : {{decl.kl_type_name}}ConstRef {
+struct {{decl.type_info.const_ref.kl.name}} {
+  protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
+  protected {{decl.type_info.direct.kl.name}} value; // used in the "local" case where we construct a {{decl.type_info.const_ref.kl.name}} from a {{decl.type_info.direct.kl.name}}
+  protected Boolean is_local; // see value ^^
+};
+
+struct {{decl.type_info.mutable_ref.kl.name}} : {{decl.type_info.const_ref.kl.name}} {
 };
 
 {% endblock body %}

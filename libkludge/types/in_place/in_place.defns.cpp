@@ -3,27 +3,27 @@
 {######################################################################}
 {% extends "generate/decl/decl.defns.cpp" %}
 {% block body %}
-struct Fabric_EDK_KL_{{decl.kl_type_name}}ConstPtr
+struct {{decl.type_info.const_ptr.edk.name}}
 {
-  {{decl.cpp_type_expr}} const *cpp_ptr;
+  {{decl.type_info.const_ptr.lib.name}} cpp_ptr;
 };
 
-struct Fabric_EDK_KL_{{decl.kl_type_name}}MutablePtr
+struct {{decl.type_info.mutable_ptr.edk.name}}
 {
-  {{decl.cpp_type_expr}} *cpp_ptr;
+  {{decl.type_info.mutable_ptr.lib.name}} cpp_ptr;
 };
 
-struct Fabric_EDK_KL_{{decl.kl_type_name}}ConstRef
+struct {{decl.type_info.const_ref.edk.name}}
 {
-  {{decl.cpp_type_expr}} const *cpp_ptr;
-  {{decl.cpp_type_expr}} value;
+  {{decl.type_info.const_ptr.lib.name}} cpp_ptr;
+  {{decl.type_info.direct.lib.name}} value;
   bool is_local;
 };
 
-struct Fabric_EDK_KL_{{decl.kl_type_name}}MutableRef
+struct {{decl.type_info.mutable_ref.edk.name}}
 {
-  {{decl.cpp_type_expr}} *cpp_ptr;
-  {{decl.cpp_type_expr}} value;
+  {{decl.type_info.mutable_ptr.lib.name}} cpp_ptr;
+  {{decl.type_info.direct.lib.name}} value;
   bool is_local;
 };
 

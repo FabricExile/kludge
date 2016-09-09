@@ -3,9 +3,12 @@
 {######################################################################}
 {% extends "generate/decl/decl.fwds.cpp" %}
 {% block body %}
-struct Fabric_EDK_KL_{{decl.kl_type_name}}ConstPtr;
-struct Fabric_EDK_KL_{{decl.kl_type_name}}MutablePtr;
-struct Fabric_EDK_KL_{{decl.kl_type_name}}ConstRef;
-struct Fabric_EDK_KL_{{decl.kl_type_name}}MutableRef;
+{% if not decl.is_simple %}
+typedef {{decl.type_info.direct.edk.name}} {{decl.type_info.direct.edk.name}};
+{% endif %}
+struct {{decl.type_info.const_ptr.edk.name}};
+struct {{decl.type_info.mutable_ptr.edk.name}};
+struct {{decl.type_info.const_ref.edk.name}};
+struct {{decl.type_info.mutable_ref.edk.name}};
 
 {% endblock body %}

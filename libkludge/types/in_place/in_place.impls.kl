@@ -4,44 +4,44 @@
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 // Given an io value, take a pointer to the value
-{{decl.kl_type_name}}ConstPtr(io {{decl.kl_type_name}} value) {
+{{decl.type_info.const_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
   this.ptr = value.data();
 }
 
 // Given an external array, take a pointer to the first element
-{{decl.kl_type_name}}ConstPtr({{decl.kl_type_name}} array<>) {
+{{decl.type_info.const_ptr.kl.name}}({{decl.type_info.direct.kl.name}} array<>) {
   this.ptr = array.data();
 }
 
 // Is valid.  Check for null pointer
-Boolean {{decl.kl_type_name}}ConstPtr.isValid() {
+Boolean {{decl.type_info.const_ptr.kl.name}}.isValid() {
   return !!this.ptr;
 }
 
-Boolean({{decl.kl_type_name}}ConstPtr ptr) {
+Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
   this = ptr.isValid();
 }
 
 // Indexing operation
-{{decl.kl_type_name}}ConstRef {{decl.kl_type_name}}ConstPtr.getAt(Index i) {
-  return {{decl.kl_type_name}}ConstRef(this, i);
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.getAt(Index i) {
+  return {{decl.type_info.const_ref.kl.name}}(this, i);
 }
 
 // Deref the pointer
-{{decl.kl_type_name}}ConstRef {{decl.kl_type_name}}ConstPtr.deref() {
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.deref() {
   return this.getAt(0);
 }
 
-{% if decl.kl_type_name == 'SInt8' %}
+{% if decl.type_info.direct.kl.name.base == 'SInt8' %}
 // Given a String, take a pointer to the bytes of the string
-{{decl.kl_type_name}}ConstPtr(String s) {
+{{decl.type_info.const_ptr.kl.name}}(String s) {
   this.ptr = s.data();
 }
 
 // Convert to a string
-// Note that this can potentially crash.  Converting a {{decl.kl_type_name}}ConstPtr to
+// Note that this can potentially crash.  Converting a {{decl.type_info.const_ptr.kl.name}} to
 // a String is not always safe, just as it is not always safe in C++
-{{decl.kl_type_name}}ConstPtr.appendDesc(io String s) {
+{{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   Count size = 0;
   while (this.getAt(size))
     ++size;
@@ -52,48 +52,48 @@ Boolean({{decl.kl_type_name}}ConstPtr ptr) {
 }
 {% else %}
 // Convert to a string
-{{decl.kl_type_name}}ConstPtr.appendDesc(io String s) {
+{{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   s += this.ptr;
 }
 {% endif %}
 
 // Given an io value, take a pointer to the value
-{{decl.kl_type_name}}Ptr(io {{decl.kl_type_name}} value) {
+{{decl.type_info.mutable_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
   this.ptr = value.data();
 }
 
 // Given an io external array, take a pointer to the first element
-{{decl.kl_type_name}}Ptr({{decl.kl_type_name}} ea<>) {
+{{decl.type_info.mutable_ptr.kl.name}}({{decl.type_info.direct.kl.name}} ea<>) {
   this.ptr = ea.data();
 }
 
-// Same as for {{decl.kl_type_name}}ConstPtr, but returning a non-const ref
-{{decl.kl_type_name}}Ref {{decl.kl_type_name}}Ptr.getAt(Index i) {
-  return {{decl.kl_type_name}}Ref(this.ptr.offset(i)->{ {{decl.kl_type_name}} });
+// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.getAt(Index i) {
+  return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} });
 }
 
-// Same as for {{decl.kl_type_name}}ConstPtr, but returning a non-const ref
-{{decl.kl_type_name}}Ref {{decl.kl_type_name}}Ptr.deref() {
+// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.deref() {
   return this.getAt(0);
 }
 
 // Set the value at an offset into the array
-{{decl.kl_type_name}}Ptr.setAt(Index i, {{decl.kl_type_name}} v) {
-  this.ptr.offset(i)->{ {{decl.kl_type_name}} } = v;
+{{decl.type_info.mutable_ptr.kl.name}}.setAt(Index i, {{decl.type_info.direct.kl.name}} v) {
+  this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
 }
 
 // Create a reference to a character
-// Since {{decl.kl_type_name}} is passed by value, we need a trick to own
+// Since {{decl.type_info.direct.kl.name}} is passed by value, we need a trick to own
 // storage for it.  This would be necessary for other "pass by value"
 // types but never for structures, which we can always take a pointer to.
-{{decl.kl_type_name}}ConstRef({{decl.kl_type_name}} value) {
+{{decl.type_info.const_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
   this.ptr = this.value.data();
   this.value = value;
   this.is_local = true;
 }
 
 // Copy ctor
-{{decl.kl_type_name}}ConstRef({{decl.kl_type_name}}ConstRef that) {
+{{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ref.kl.name}} that) {
   if (that.is_local) {
     this.ptr = this.value.data();
     this.value = that.value;
@@ -103,7 +103,7 @@ Boolean({{decl.kl_type_name}}ConstPtr ptr) {
 }
 
 // Assigment
-{{decl.kl_type_name}}ConstRef.=({{decl.kl_type_name}}ConstRef that) {
+{{decl.type_info.const_ref.kl.name}}.=({{decl.type_info.const_ref.kl.name}} that) {
   if (that.is_local) {
     this.ptr = this.value.data();
     this.value = that.value;
@@ -112,57 +112,57 @@ Boolean({{decl.kl_type_name}}ConstPtr ptr) {
   else this.ptr = that.ptr;
 }
 
-// Construct from an io {{decl.kl_type_name}}; just take the pointer
-{{decl.kl_type_name}}ConstRef(io {{decl.kl_type_name}} value) {
+// Construct from an io {{decl.type_info.direct.kl.name}}; just take the pointer
+{{decl.type_info.const_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
   this.ptr = value.data();
 }
 
-// Construct from a {{decl.kl_type_name}}ConstPtr and an offset; used
-// for {{decl.kl_type_name}}ConstPtr.getAt
-{{decl.kl_type_name}}ConstRef({{decl.kl_type_name}}ConstPtr ptr, Index offset) {
+// Construct from a {{decl.type_info.const_ptr.kl.name}} and an offset; used
+// for {{decl.type_info.const_ptr.kl.name}}.getAt
+{{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ptr.kl.name}} ptr, Index offset) {
   this.ptr = ptr.ptr.offset(offset);
 }
 
-// Get the {{decl.kl_type_name}} value
-{{decl.kl_type_name}} {{decl.kl_type_name}}ConstRef.get() {
-  return this.ptr->{ {{decl.kl_type_name}} };
+// Get the {{decl.type_info.direct.kl.name}} value
+{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.get() {
+  return this.ptr->{ {{decl.type_info.direct.kl.name}} };
 }
 
-// Cast from {{decl.kl_type_name}}ConstRef to {{decl.kl_type_name}}
-{{decl.kl_type_name}}({{decl.kl_type_name}}ConstRef ref) {
+// Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
+{{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
   this = ref.get();
 }
 
 // Convert to String
-{{decl.kl_type_name}}ConstRef.appendDesc(io String s) {
+{{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
   s += this.get();
 }
 
-{% if decl.kl_type_name != 'Boolean' %}
+{% if decl.type_info.direct.kl.name.base != 'Boolean' %}
 
 // Convert to Boolean
-Boolean({{decl.kl_type_name}}ConstRef ref) {
+Boolean({{decl.type_info.const_ref.kl.name}} ref) {
   this = Boolean(ref.get());
 }
 {% endif %}
 
-// Construct a {{decl.kl_type_name}}Ref from an io {{decl.kl_type_name}}
-{{decl.kl_type_name}}Ref(io {{decl.kl_type_name}} value) {
+// Construct a {{decl.type_info.mutable_ref.kl.name}} from an io {{decl.type_info.direct.kl.name}}
+{{decl.type_info.mutable_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
   this.ptr = value.data();
 }
 
 // Set the value
-{{decl.kl_type_name}}Ref.set({{decl.kl_type_name}} value) {
-  this.ptr->{ {{decl.kl_type_name}} } = value;
+{{decl.type_info.mutable_ref.kl.name}}.set({{decl.type_info.direct.kl.name}} value) {
+  this.ptr->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 
-// Assignment of {{decl.kl_type_name}}
-{{decl.kl_type_name}}Ref.=({{decl.kl_type_name}} value) {
+// Assignment of {{decl.type_info.direct.kl.name}}
+{{decl.type_info.mutable_ref.kl.name}}.=({{decl.type_info.direct.kl.name}} value) {
   this.set(value);
 }
 
 // Convert to String
-{{decl.kl_type_name}}Ref.appendDesc(io String s) {
+{{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
   s += this.get();
 }
 

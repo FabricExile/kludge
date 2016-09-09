@@ -4,11 +4,11 @@
 {% extends "generate/decl/decl.fwds.kl" %}
 {% block body %}
 {% if not decl.is_simple %}
-struct {{decl.kl_type_name}};
+struct {{decl.type_info.direct.kl.name}};
 {% endif %}
-struct {{decl.kl_type_name}}ConstRef;
-struct {{decl.kl_type_name}}Ref;
-struct {{decl.kl_type_name}}ConstPtr;
-struct {{decl.kl_type_name}}Ptr;
+struct {{decl.type_info.const_ptr.kl.name}};
+struct {{decl.type_info.mutable_ptr.kl.name}};
+struct {{decl.type_info.const_ref.kl.name}};
+struct {{decl.type_info.mutable_ref.kl.name}};
 
 {% endblock body %}

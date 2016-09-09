@@ -11,7 +11,7 @@ from libkludge.generate.builtin_decl import BuiltinDecl
 
 class InPlaceDirectTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, undq_cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
     if is_simple:
       edk_name = "Fabric::EDK::KL::" + kl_type_name
     else:
@@ -21,7 +21,7 @@ class InPlaceDirectTypeInfo(TypeInfo):
       jinjenv,
       kl_name_base = kl_type_name,
       edk_name = edk_name,
-      lib_expr = undq_cpp_type_expr,
+      lib_expr = cpp_type_expr,
       )
     self.is_simple = is_simple
 
@@ -41,13 +41,13 @@ class InPlaceDirectTypeInfo(TypeInfo):
 
 class InPlaceConstRefTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, undq_cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
     TypeInfo.__init__(
       self,
       jinjenv,
       kl_name_base = kl_type_name + "ConstRef",
       edk_name = "Fabric_EDK_KL_" + kl_type_name + "ConstRef",
-      lib_expr = ReferenceTo(Const(undq_cpp_type_expr)),
+      lib_expr = ReferenceTo(Const(cpp_type_expr)),
       )
 
   def build_codec_lookup_rules(self):
@@ -58,13 +58,13 @@ class InPlaceConstRefTypeInfo(TypeInfo):
 
 class InPlaceMutableRefTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, undq_cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
     TypeInfo.__init__(
       self,
       jinjenv,
       kl_name_base = kl_type_name + "Ref",
       edk_name = "Fabric_EDK_KL_" + kl_type_name + "MutableRef",
-      lib_expr = ReferenceTo(undq_cpp_type_expr),
+      lib_expr = ReferenceTo(cpp_type_expr),
       )
 
   def build_codec_lookup_rules(self):
@@ -75,13 +75,13 @@ class InPlaceMutableRefTypeInfo(TypeInfo):
 
 class InPlaceConstPtrTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, undq_cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
     TypeInfo.__init__(
       self,
       jinjenv,
       kl_name_base = kl_type_name + "ConstPtr",
       edk_name = "Fabric_EDK_KL_" + kl_type_name + "ConstPtr",
-      lib_expr = PointerTo(Const(undq_cpp_type_expr)),
+      lib_expr = PointerTo(Const(cpp_type_expr)),
       )
 
   def build_codec_lookup_rules(self):
@@ -92,13 +92,13 @@ class InPlaceConstPtrTypeInfo(TypeInfo):
 
 class InPlaceMutablePtrTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, undq_cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
     TypeInfo.__init__(
       self,
       jinjenv,
       kl_name_base = kl_type_name + "Ptr",
       edk_name = "Fabric_EDK_KL_" + kl_type_name + "MutablePtr",
-      lib_expr = PointerTo(undq_cpp_type_expr),
+      lib_expr = PointerTo(cpp_type_expr),
       )
 
   def build_codec_lookup_rules(self):
@@ -107,36 +107,42 @@ class InPlaceMutablePtrTypeInfo(TypeInfo):
     tds["result"]["*"] = "protocols/result/builtin/indirect"
     return tds
 
+in_place_type_info_class_map = {
+  'direct': InPlaceDirectTypeInfo,
+  'const_ref': InPlaceConstRefTypeInfo,
+  'mutable_ref': InPlaceMutableRefTypeInfo,
+  'const_ptr': InPlaceConstPtrTypeInfo,
+  'mutable_ptr': InPlaceMutablePtrTypeInfo,
+  }
+
 class InPlaceBuiltinDecl(BuiltinDecl):
 
-  def __init__(self, ext, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, ext, is_simple, ti_set):
     BuiltinDecl.__init__(
       self,
       ext.root_namespace,
-      desc="InPlace %s" % (kl_type_name),
+      desc="InPlace %s" % (ti_set.direct),
       template_path="types/builtin/in_place/in_place",
-      test_name="InPlace_%s" % (kl_type_name),
+      test_name="InPlace_%s" % (ti_set.direct.kl.name),
       )
-    self.kl_type_name = kl_type_name
-    self.cpp_type_expr = cpp_type_expr
     self.is_simple = is_simple
+    self.type_info = ti_set
 
 class InPlaceSpec(object):
 
-  def __init__(self, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, kl_type_name, cpp_type_expr, is_simple, record=None):
     self.kl_type_name = kl_type_name
     self.cpp_type_expr = cpp_type_expr
     self.is_simple = is_simple
+    self.record = record
+
+class InPlaceTypeInfoSet(object):
+  
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
+    for name, klass in in_place_type_info_class_map.iteritems():
+      setattr(self, name, klass(jinjenv, kl_type_name, cpp_type_expr, is_simple))
 
 class InPlaceSelector(Selector):
-
-  dq_desc_to_ti_class = {
-    'direct': InPlaceDirectTypeInfo,
-    'const_ref': InPlaceConstRefTypeInfo,
-    'mutable_ref': InPlaceMutableRefTypeInfo,
-    'const_ptr': InPlaceConstPtrTypeInfo,
-    'mutable_ptr': InPlaceMutablePtrTypeInfo,
-    }
 
   def __init__(self, ext):
     Selector.__init__(self, ext)
@@ -183,14 +189,15 @@ class InPlaceSelector(Selector):
       #######################################################################
       }
 
-    self.ti_cache = {}
-    self.decl_cache = {}
+    self.ti_set_cache = {}
 
   def get_desc(self):
     return "InPlace"
 
-  def register(self, kl_type_name, cpp_type_expr):
-    self.cpp_type_expr_to_spec[cpp_type_expr] = InPlaceSpec(kl_type_name, cpp_type_expr, False)
+  def register(self, kl_type_name, cpp_type_expr, record):
+    self.cpp_type_expr_to_spec[cpp_type_expr] = InPlaceSpec(
+      kl_type_name, cpp_type_expr, False, record
+      )
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
@@ -201,17 +208,12 @@ class InPlaceSelector(Selector):
       undq_cpp_type_expr = spec.cpp_type_expr
       is_simple = spec.is_simple
 
-      ti_cache_key = "%s:%s" % (dq.get_desc(), kl_type_name)
-      ti = self.ti_cache.get(ti_cache_key)
-      if not ti:
-        ti = self.dq_desc_to_ti_class[dq.get_desc()](self.jinjenv, kl_type_name, undq_cpp_type_expr, is_simple)
-        self.ti_cache.setdefault(ti_cache_key, ti)
+      ti_set_cache_key = kl_type_name
+      ti_set = self.ti_set_cache.get(ti_set_cache_key)
+      if not ti_set:
+        ti_set = InPlaceTypeInfoSet(self.jinjenv, kl_type_name, undq_cpp_type_expr, is_simple)
+        self.ti_set_cache.setdefault(ti_set_cache_key, ti_set)
+        self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, ti_set))
 
-      decl_cache_key = kl_type_name
-      decl = self.decl_cache.get(decl_cache_key)
-      if not decl:
-        decl = InPlaceBuiltinDecl(self.ext, kl_type_name, undq_cpp_type_expr, is_simple)
-        self.decl_cache.setdefault(decl_cache_key, decl)
-        self.ext.decls.append(decl)
-
+      ti = getattr(ti_set, dq.get_desc())
       return DirQualTypeInfo(DirQual(directions.Direct, qualifiers.Unqualified), ti)

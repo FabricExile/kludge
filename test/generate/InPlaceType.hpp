@@ -42,6 +42,9 @@ public:
   float publicConstMethod() const { return floatValue; }
   float publicMutableMethod() { return floatValue; }
 
+  void publicVoidConstMethod() const {}
+  void publicVoidMutableMethod() {}
+
   std::string getDesc() const {
     char buf[256];
     snprintf( buf, 256, "intValue:%d floatValue:%f", intValue, floatValue );

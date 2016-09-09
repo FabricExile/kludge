@@ -32,6 +32,8 @@ ty.set_default_access(MemberAccess.private)
 ty.add_member('floatValue', 'float')
 ty.add_const_method('publicConstMethod', 'float')
 ty.add_mutable_method('publicMutableMethod', 'float')
+ty.add_const_method('publicVoidConstMethod')
+ty.add_mutable_method('publicVoidMutableMethod')
 ty.add_method('GetStaticFloat', 'float', this_access=ThisAccess.static)\
   .add_test("""
 report(Class_GetStaticFloat());
@@ -41,8 +43,12 @@ report(Class_GetStaticFloat());
 ty.add_get_ind_op('int').add_test("""
 Class c(-7, 3.14);
 report(c.getAt(56));
+Class_CxxConstRef cr = Make_Class_CxxConstRef(c);
+report(cr.getAt(56));
 """, """
 Class::Class(-7, 3.14)
+Class::operator[] const(56)
+-7
 Class::operator[] const(56)
 -7
 Class::~Class()
@@ -91,6 +97,40 @@ cp.publicConstMethod() = -8.9
 mp.get_intValue() = 14
 mp.publicConstMethod() = -8.9
 mp.publicMutableMethod() = -8.9
+Class::~Class()
+""")
+ty.add_test("""
+Class c(14, -8.9);
+report("c.publicVoidConstMethod()");
+c.publicVoidConstMethod();
+report("c.publicVoidMutableMethod()");
+c.publicVoidMutableMethod();
+Class_CxxConstRef cr = Make_Class_CxxConstRef(c);
+report("cr.publicVoidConstMethod()");
+cr.publicVoidConstMethod();
+Class_CxxRef mr = Make_Class_CxxRef(c);
+report("mr.publicVoidConstMethod()");
+mr.publicVoidConstMethod();
+report("mr.publicVoidMutableMethod()");
+mr.publicVoidMutableMethod();
+Class_CxxConstPtr cp = Make_Class_CxxConstPtr(c);
+report("cp.publicVoidConstMethod()");
+cp.publicVoidConstMethod();
+Class_CxxPtr mp = Make_Class_CxxPtr(c);
+report("mp.publicVoidConstMethod()");
+mp.publicVoidConstMethod();
+report("mp.publicVoidMutableMethod()");
+mp.publicVoidMutableMethod();
+""", """
+Class::Class(14, -8.9)
+c.publicVoidConstMethod()
+c.publicVoidMutableMethod()
+cr.publicVoidConstMethod()
+mr.publicVoidConstMethod()
+mr.publicVoidMutableMethod()
+cp.publicVoidConstMethod()
+mp.publicVoidConstMethod()
+mp.publicVoidMutableMethod()
 Class::~Class()
 """)
 ext.add_func('ReturnClass', 'Class')\

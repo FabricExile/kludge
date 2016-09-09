@@ -11,10 +11,28 @@
 {% for member in record.members %}
 {% if member.is_public() %}
 {% if member.has_getter() %}
-{{member.type_info.kl.name.compound}} {{type_info.kl.name.compound}}.{{member.getter_kl_name}}() = "{{member.get_getter_edk_symbol_name(type_info)}}";
+{{member.type_info.kl.name}} {{type_info.kl.name}}.{{member.getter_kl_name}}()
+{% if is_direct %}
+  = "{{member.get_getter_edk_symbol_name(type_info)}}";
+{% else %}
+{
+    if (Fabric_Guarded && !this.ptr)
+        throw "Call of {{type_info.kl.name}}.{{member.getter_kl_name}} on invalid {{type_info.kl.name}}";
+    return this.ptr->{ {{record.kl_global_name}} }.{{member.getter_kl_name}}();
+}
+{% endif %}
 {% endif %}
 {% if member.has_setter() and allow_mutable_methods %}
-{{type_info.kl.name.compound}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}}) = "{{member.get_setter_edk_symbol_name(type_info)}}";
+{{type_info.kl.name}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}})
+{% if is_direct %}
+  = "{{member.get_setter_edk_symbol_name(type_info)}}";
+{% else %}
+{
+    if (Fabric_Guarded && !this.ptr)
+        throw "Call of {{type_info.kl.name}}.{{member.setter_kl_name}} on invalid {{type_info.kl.name}}";
+    this.ptr->{ {{record.kl_global_name}} }.{{member.setter_kl_name}}(value);
+}
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -26,11 +44,11 @@
 // Constructors and Destructor
 ////////////////////////////////////////////////////////////////////////
 {% if record.include_empty_ctor %}
-{{type_info.kl.name.compound}}() = "{{record.empty_ctor_edk_symbol_name}}";
+{{type_info.kl.name}}() = "{{record.empty_ctor_edk_symbol_name}}";
 
 {% endif %}
 {% if record.include_copy_ctor %}
-{{type_info.kl.name.compound}}(
+{{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.get_copy_ctor_edk_symbol_name(type_info)}}";
 
@@ -39,7 +57,7 @@
 {% for comment in ctor.comments %}
 {{comment}}
 {% endfor %}
-{{type_info.kl.name.compound}}(
+{{type_info.kl.name}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -47,7 +65,7 @@
 
 {% endfor %}
 {% if record.include_dtor %}
-~{{type_info.kl.name.compound}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
+~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
 
 {% endif %}
 {% endif %}
@@ -63,17 +81,30 @@
 {% for comment in method.comments %}
 {{comment}}
 {% endfor %}
-{{method.result.type_info.kl.name.compound}}
+{{method.result.render_type_kl()}}
 {% if method.is_static %}
-{{type_info.kl.name.compound}}_{{method.kl_name}}(
+{{type_info.kl.name}}_{{method.kl_name}}(
 {% else %}
-{{type_info.kl.name.compound}}.{{method.kl_name}}{{method.this_access_suffix}}(
+{{type_info.kl.name}}.{{method.kl_name}}{{method.this_access_suffix}}(
 {% endif %}
     {% for param in method.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
-    ) = "{{method.get_edk_symbol_name(type_info)}}";
-
+    )
+{% if is_direct %}
+ = "{{method.get_edk_symbol_name(type_info)}}";
+{% else %}
+{
+    if (Fabric_Guarded && !this.ptr)
+        throw "Call of {{type_info.kl.name}}.{{method.kl_name}} on invalid {{type_info.kl.name}}";
+    {{method.result.render_return_kl()}}
+    this.ptr->{ {{record.kl_global_name}} }.{{method.kl_name}}(
+        {% for param in method.params %}
+        {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
+        {% endfor %}
+        );
+}
+{% endif %}
 {% endif %}
 {% endfor %}
 {% endif %}
@@ -86,8 +117,8 @@
 {% for comment in uni_op.comments %}
 {{comment}}
 {% endfor %}
-{{uni_op.result.type_info.kl.name.compound}}
-{{uni_op.this.type_info.kl.name.compound}}.{{uni_op.kl_method_name}}!(
+{{uni_op.result.type_info.kl.name}}
+{{uni_op.this.type_info.kl.name}}.{{uni_op.kl_method_name}}!(
     ) = "{{uni_op.get_edk_symbol_name(type_info)}}";
 
 {% endfor %}
@@ -101,7 +132,7 @@
 {% for comment in bin_op.comments %}
 {{comment}}
 {% endfor %}
-{{bin_op.result.type_info.kl.name.compound}}
+{{bin_op.result.type_info.kl.name}}
 {{bin_op.op}}(
     {{bin_op.params[0].render_kl() | indent(4)}},
     {{bin_op.params[1].render_kl() | indent(4)}}
@@ -118,13 +149,13 @@
 {% for comment in ass_op.comments %}
 {{comment}}
 {% endfor %}
-{{ass_op.this.type_info.kl.name.compound}}.{{ass_op.op}}(
+{{ass_op.this.type_info.kl.name}}.{{ass_op.op}}(
     {{ass_op.params[0].render_kl() | indent(4)}}
     ) = "{{ass_op.get_edk_symbol_name(type_info)}}";
 
 {% endfor %}
 {% if record.include_simple_ass_op %}
-{{type_info.kl.name.compound}}.=(
+{{type_info.kl.name}}.=(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.get_simple_ass_op_edk_symbol_name(type_info)}}";
 
@@ -139,7 +170,7 @@
 {% for comment in cast.comments %}
 {{comment}}
 {% endfor %}
-{{cast.this.type_info.kl.name.compound}}(
+{{cast.this.type_info.kl.name}}(
     {{cast.params[0].render_kl() | indent(4)}}
     ) = "{{cast.get_edk_symbol_name(type_info)}}";
 
@@ -150,8 +181,8 @@
 // {{type_info}}
 // Deref
 ////////////////////////////////////////////////////////////////////////
-{{record.deref_result.type_info.kl.name.compound}}
-{{record.deref_this.type_info.kl.name.compound}}.{{record.deref_kl_method_name}}(
+{{record.deref_result.type_info.kl.name}}
+{{record.deref_this.type_info.kl.name}}.{{record.deref_kl_method_name}}(
     ) = "{{record.get_deref_edk_symbol_name(type_info)}}";
 
 {% endif %}
@@ -160,12 +191,25 @@
 // {{type_info}}
 // getAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
-{{record.get_ind_op_result.type_info.kl.name.compound}}
-{{type_info.kl.name.compound}}.getAt(
+{{record.get_ind_op_result.type_info.kl.name}}
+{{type_info.kl.name}}.getAt(
     {% for param in record.get_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
-    ) = "{{record.get_get_ind_op_edk_symbol_name(type_info)}}";
+    )
+{% if is_direct %}
+  = "{{record.get_get_ind_op_edk_symbol_name(type_info)}}";
+{% else %}
+{
+    if (Fabric_Guarded && !this.ptr)
+        throw "Call of {{type_info.kl.name}}.getAt on invalid {{type_info.kl.name}}";
+    return this.ptr->{ {{record.kl_global_name}} }.getAt(
+        {% for param in record.get_ind_op_params %}
+        {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
+        {% endfor %}
+        );
+}
+{% endif %}
 
 {% endif %}
 {% if record.set_ind_op_params and allow_mutable_methods %}
@@ -173,11 +217,24 @@
 // {{type_info}}
 // setAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
-{{type_info.kl.name.compound}}.setAt(
+{{type_info.kl.name}}.setAt(
     {% for param in record.set_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
-    ) = "{{record.get_set_ind_op_edk_symbol_name(type_info)}}";
+    )
+{% if is_direct %}
+  = "{{record.get_set_ind_op_edk_symbol_name(type_info)}}";
+{% else %}
+{
+    if (Fabric_Guarded && !this.ptr)
+        throw "Call of {{type_info.kl.name}}.setAt on invalid {{type_info.kl.name}}";
+    this.ptr->{ {{record.kl_global_name}} }.setAt(
+        {% for param in record.set_ind_op_params %}
+        {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
+        {% endfor %}
+        );
+}
+{% endif %}
 
 {% endif %}
 {% endblock body %}

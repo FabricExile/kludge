@@ -4,7 +4,8 @@
 {% import "generate/macros.cpp" as macros %}
 {% extends "generate/decl/decl.impls.cpp" %}
 {% block body %}
-{% if record.include_getters_setters or not is_direct %}
+{% if is_direct %}
+{% if record.include_getters_setters %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Getters and Setters
@@ -51,7 +52,6 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% endfor %}
 {% endif %}
-{% if is_direct %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Constructors and Destructor
@@ -101,7 +101,6 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
-{% endif %}
 {% if record.has_methods %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
@@ -136,7 +135,7 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {% endif %}
 {% endfor %}
 {% endif %}
-{% if is_direct and record.has_uni_ops() %}
+{% if record.has_uni_ops() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Unary Operators
@@ -155,7 +154,7 @@ FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
 
 {% endfor %}
 {% endif %}
-{% if is_direct and record.has_bin_ops() %}
+{% if record.has_bin_ops() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Binary Operators
@@ -175,7 +174,7 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 
 {% endfor %}
 {% endif %}
-{% if is_direct and record.include_simple_ass_op %}
+{% if record.include_simple_ass_op %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Simple Assignment Operator
@@ -190,7 +189,7 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
-{% if is_direct and record.has_ass_ops() %}
+{% if record.has_ass_ops() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Other Assignment Operators
@@ -210,7 +209,7 @@ FABRIC_EXT_EXPORT void
 
 {% endfor %}
 {% endif %}
-{% if is_direct and record.has_casts() %}
+{% if record.has_casts() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Casts
@@ -285,5 +284,6 @@ FABRIC_EXT_EXPORT void
     {{macros.cpp_call_post(None, record.set_ind_op_params) | indent(4)}}
 }
 
+{% endif %}
 {% endif %}
 {% endblock body %}

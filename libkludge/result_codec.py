@@ -39,6 +39,9 @@ class ResultCodec:
   def render_type_kl(self):
     return self._render("type_kl", "kl")
 
+  def render_return_kl(self):
+    return self._render("return_kl", "kl")
+
   def render_direct_type_edk(self):
     return self._render("direct_type_edk", "cpp")
 

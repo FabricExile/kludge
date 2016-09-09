@@ -188,6 +188,7 @@ class InPlaceBuiltinDecl(BuiltinDecl):
           'allow_static_methods': is_direct,
           'allow_mutable_methods': is_direct or is_mutable_ptr or is_mutable_ref,
           'allow_const_methods': True,
+          'is_ptr': is_const_ptr or is_mutable_ptr,
           })
     return result
 

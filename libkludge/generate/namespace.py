@@ -143,6 +143,7 @@ class Namespace:
     record = Record(
       self,
       "InPlaceType",
+      kl_global_name,
       kl_local_name,
       child_namespace_component=cpp_type_expr.components[-1],
       )

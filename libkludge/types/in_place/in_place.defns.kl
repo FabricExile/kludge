@@ -1,7 +1,7 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% extends "generate/decl/decl.impls.kl" %}
+{% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
 struct {{decl.kl_type_name}}ConstPtr permits {{decl.kl_type_name}}ConstRef {
   protected Data ptr; // actual {{decl.cpp_type_expr}} const *

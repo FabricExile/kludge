@@ -80,8 +80,6 @@ class InPlaceConstRefTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
-    tds["repr"]["ref"] = "types/builtin/in_place/ref/repr"
-    tds["repr"]["member_ref"] = "types/builtin/in_place/ref/repr"
     return tds
 
 class InPlaceMutableRefTypeInfo(TypeInfo):
@@ -99,8 +97,6 @@ class InPlaceMutableRefTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
-    tds["repr"]["ref"] = "types/builtin/in_place/ref/repr"
-    tds["repr"]["member_ref"] = "types/builtin/in_place/ref/repr"
     return tds
 
 class InPlaceConstPtrTypeInfo(TypeInfo):
@@ -118,8 +114,6 @@ class InPlaceConstPtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ptr/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
-    tds["repr"]["ref"] = "types/builtin/in_place/ptr/repr"
-    tds["repr"]["member_ref"] = "types/builtin/in_place/ptr/repr"
     return tds
 
 class InPlaceMutablePtrTypeInfo(TypeInfo):
@@ -137,8 +131,6 @@ class InPlaceMutablePtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ptr/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
-    tds["repr"]["ref"] = "types/builtin/in_place/ptr/repr"
-    tds["repr"]["member_ref"] = "types/builtin/in_place/ptr/repr"
     return tds
 
 in_place_type_info_class_map = {

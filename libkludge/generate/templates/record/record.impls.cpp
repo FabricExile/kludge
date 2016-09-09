@@ -6,7 +6,7 @@
 {% block body %}
 {% if record.include_getters_setters or not is_direct %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Getters and Setters
 ////////////////////////////////////////////////////////////////////////
 
@@ -15,18 +15,18 @@
 {% if member.has_getter() %}
 FABRIC_EXT_EXPORT
 {{member.result.render_direct_type_edk()}}
-{{record.this_type_info.kl.name.compound}}_GET_{{member.cpp_name}}(
+{{type_info.kl.name.compound}}_GET_{{member.cpp_name}}(
     {% set indirect_param_edk = member.result.render_indirect_param_edk() %}
     {% if indirect_param_edk %}
       {{indirect_param_edk | indent(4)}},
     {% endif %}
-    {{record.const_this.render_param_edk() | indent(4)}}
+    {{record.get_const_this(type_info).render_param_edk() | indent(4)}}
     )
 {
     {{member.result.render_indirect_init_edk() | indent(4)}}
 
     {{member.result.render_decl_and_assign_lib_begin() | indent(4)}}
-        {{record.const_this.render_member_ref(member.cpp_name) | indent(8)}}
+        {{record.get_const_this(type_info).render_member_ref(member.cpp_name) | indent(8)}}
         {{member.result.render_decl_and_assign_lib_end() | indent(4)}}
 
     {{member.result.render_indirect_lib_to_edk() | indent(4)}}
@@ -36,14 +36,14 @@ FABRIC_EXT_EXPORT
 {% endif %}
 {% if member.has_setter() %}
 FABRIC_EXT_EXPORT void
-{{record.this_type_info.kl.name.compound}}_SET_{{member.cpp_name}}(
-    {{record.mutable_this.render_param_edk() | indent(4)}},
+{{type_info.kl.name.compound}}_SET_{{member.cpp_name}}(
+    {{record.get_mutable_this(type_info).render_param_edk() | indent(4)}},
     {{member.param.render_edk() | indent(4)}}
     )
 {
     {{member.param.render_edk_to_lib_decl() | indent(4)}}
 
-    {{record.mutable_this.render_member_ref(member.cpp_name)}} =
+    {{record.get_mutable_this(type_info).render_member_ref(member.cpp_name)}} =
         {{member.param.render_lib()}};
 }
         
@@ -51,42 +51,42 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% endfor %}
 {% endif %}
-{% if not is_direct %}
+{% if is_direct %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Constructors and Destructor
 ////////////////////////////////////////////////////////////////////////
 
 {% if record.include_empty_ctor %}
 FABRIC_EXT_EXPORT void
 {{record.empty_ctor_edk_symbol_name}}(
-    {{macros.edk_param_list(None, record.mutable_this, None) | indent(4)}}
+    {{macros.edk_param_list(None, record.get_mutable_this(type_info), None) | indent(4)}}
     )
 {
-    {{record.mutable_this.render_empty_ctor() | indent(4)}}
+    {{record.get_mutable_this(type_info).render_empty_ctor() | indent(4)}}
 }
 
 {% endif %}
 {% if record.include_copy_ctor %}
 FABRIC_EXT_EXPORT void
 {{record.copy_ctor_edk_symbol_name}}(
-    {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
+    {{macros.edk_param_list(None, record.get_mutable_this(type_info), [record.get_copy_param(type_info)]) | indent(4)}}
     )
 {
-    {{record.mutable_this.render_copy_ctor(record.copy_params[0], record.forbid_copy) | indent(4)}}
+    {{record.get_mutable_this(type_info).render_copy_ctor(record.get_copy_param(type_info), record.forbid_copy) | indent(4)}}
 }
 
 {% endif %}
 {% for ctor in record.ctors %}
 FABRIC_EXT_EXPORT void
 {{ctor.edk_symbol_name}}(
-    {{macros.edk_param_list(None, ctor.this, ctor.params) | indent(4)}}
+    {{macros.edk_param_list(None, ctor.get_this(type_info), ctor.params) | indent(4)}}
     )
 {
     {{macros.cpp_call_pre(None, ctor.params) | indent(4)}}
-    {{record.mutable_this.render_new_begin() | indent(4)}}
+    {{record.get_mutable_this(type_info).render_new_begin() | indent(4)}}
         {{macros.cpp_call_args(ctor.params) | indent(8)}}
-        {{record.mutable_this.render_new_end() | indent(8)}}
+        {{record.get_mutable_this(type_info).render_new_end() | indent(8)}}
     {{macros.cpp_call_post(None, ctor.params) | indent(4)}}
 }
 
@@ -94,46 +94,49 @@ FABRIC_EXT_EXPORT void
 {% if record.include_dtor %}
 FABRIC_EXT_EXPORT void
 {{record.dtor_edk_symbol_name}}(
-    {{record.mutable_this.render_param_edk()}}
+    {{record.get_mutable_this(type_info).render_param_edk()}}
     )
 {
-    {{record.mutable_this.render_delete()}}
+    {{record.get_mutable_this(type_info).render_delete()}}
 }
 
 {% endif %}
 {% endif %}
-{% if len(record.methods) > 0 %}
+{% if record.has_methods %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Methods
 ////////////////////////////////////////////////////////////////////////
 
 {% for method in record.methods %}
+{% if not method.is_static or is_direct %}
 FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {{method.edk_symbol_name}}(
 {% if method.is_static %}
     {{macros.edk_param_list(method.result, None, method.params) | indent(4)}}
 {% else %}
-    {{macros.edk_param_list(method.result, method.this, method.params) | indent(4)}}
+    {{macros.edk_param_list(method.result, method.get_this(), method.params) | indent(4)}}
 {% endif %}
     )
 {
     {{macros.cpp_call_pre(method.result, method.params) | indent(4)}}
 
 {% if method.is_static %}
-    {{method.this.render_class_name_cpp()}}::{{method.cpp_name}}(
+    {{record.get_mutable_this(type_info).render_class_name_cpp()}}::{{method.cpp_name}}(
 {% else %}
-    {{method.this.render_member_ref(method.cpp_name)}}(
+    {{method.get_this(type_info).render_member_ref(method.cpp_name)}}(
 {% endif %}
         {{macros.cpp_call_args(method.params) | indent(8)}}
         )
     {{macros.cpp_call_post(method.result, method.params) | indent(4)}}
 }
 
+{% endif %}
 {% endfor %}
-{% if is_direct and len(record.uni_ops) > 0 %}
+{% endif %}
+{% if is_direct and record.has_uni_ops() %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Unary Operators
 ////////////////////////////////////////////////////////////////////////
 
@@ -150,9 +153,9 @@ FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
 
 {% endfor %}
 {% endif %}
-{% if is_direct and len(record.bin_ops) > 0 %}
+{% if is_direct and record.has_bin_ops() %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Binary Operators
 ////////////////////////////////////////////////////////////////////////
 
@@ -170,10 +173,25 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 
 {% endfor %}
 {% endif %}
-{% if is_direct and len(record.ass_ops) > 0 %}
+{% if is_direct and record.include_simple_ass_op %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
-// Assignment Operators
+// {{type_info}}
+// Simple Assignment Operator
+////////////////////////////////////////////////////////////////////////
+
+FABRIC_EXT_EXPORT void
+{{record.simple_ass_op_edk_symbol_name}}(
+    {{macros.edk_param_list(None, record.get_mutable_this(type_info), [record.get_copy_param(type_info)]) | indent(4)}}
+    )
+{
+    {{record.get_mutable_this(type_info).render_simple_ass_op(record.get_copy_param(type_info), record.forbid_copy) | indent(4)}}
+}
+
+{% endif %}
+{% if is_direct and record.has_ass_ops() %}
+////////////////////////////////////////////////////////////////////////
+// {{type_info}}
+// Other Assignment Operators
 ////////////////////////////////////////////////////////////////////////
 
 {% for ass_op in record.ass_ops %}
@@ -189,20 +207,10 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endfor %}
-{% if record.include_simple_ass_op %}
-FABRIC_EXT_EXPORT void
-{{record.simple_ass_op_edk_symbol_name}}(
-    {{macros.edk_param_list(None, record.mutable_this, record.copy_params) | indent(4)}}
-    )
-{
-    {{record.mutable_this.render_simple_ass_op(record.copy_params[0], record.forbid_copy) | indent(4)}}
-}
-
 {% endif %}
-{% endif %}
-{% if is_direct and len(record.casts) > 0 %}
+{% if is_direct and record.has_casts() %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Casts
 ////////////////////////////////////////////////////////////////////////
 
@@ -221,12 +229,12 @@ FABRIC_EXT_EXPORT void
 
 {% endfor %}
 {% endif %}
+{% if record.deref_kl_method_name %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Deref
 ////////////////////////////////////////////////////////////////////////
 
-{% if record.deref_kl_method_name %}
 FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
 {{record.deref_edk_symbol_name}}(
     {{macros.edk_param_list(record.deref_result, record.deref_this, None) | indent(4)}}
@@ -240,17 +248,17 @@ FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
 {% endif %}
 {% if record.get_ind_op_result %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // getAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
 {{record.get_ind_op_edk_symbol_name}}(
-    {{macros.edk_param_list(record.get_ind_op_result, record.get_ind_op_this, record.get_ind_op_params) | indent(4)}}
+    {{macros.edk_param_list(record.get_ind_op_result, record.get_get_ind_op_this(type_info), record.get_ind_op_params) | indent(4)}}
     )
 {
     {{macros.cpp_call_pre(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
-        {{record.get_ind_op_this.render_ref() | indent(8)}}[
+        {{record.get_get_ind_op_this(type_info).render_ref() | indent(8)}}[
             {{record.get_ind_op_params[0].render_lib() | indent(12)}}
             ]
     {{macros.cpp_call_post(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
@@ -259,17 +267,17 @@ FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
 {% endif %}
 {% if record.set_ind_op_params %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
-// etAt(Index) Operator
+// {{type_info}}
+// setAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT void
 {{record.set_ind_op_edk_symbol_name}}(
-    {{macros.edk_param_list(None, record.set_ind_op_this, record.set_ind_op_params) | indent(4)}}
+    {{macros.edk_param_list(None, record.get_set_ind_op_this(type_info), record.set_ind_op_params) | indent(4)}}
     )
 {
     {{macros.cpp_call_pre(None, record.set_ind_op_params) | indent(4)}}
-    {{record.set_ind_op_this.render_ref() | indent(4)}}[
+    {{record.get_set_ind_op_this(type_info).render_ref() | indent(4)}}[
         {{record.set_ind_op_params[0].render_lib() | indent(8)}}
         ] = {{record.set_ind_op_params[1].render_lib() | indent(8)}}
     {{macros.cpp_call_post(None, record.set_ind_op_params) | indent(4)}}

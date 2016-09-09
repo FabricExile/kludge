@@ -23,22 +23,22 @@
 }
 
 // Is valid.  Check for null pointer
-Boolean {{decl.type_info.const_ptr.kl.name}}.ptrIsValid() {
+Boolean {{decl.type_info.const_ptr.kl.name}}.cxxPtrIsValid() {
   return !!this.ptr;
 }
 
 Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
-  this = ptr.ptrIsValid();
+  this = ptr.cxxPtrIsValid();
 }
 
 // Indexing operation
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.ptrGetAt(Index i) {
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt(Index i) {
   return {{decl.type_info.const_ref.kl.name}}(this, i);
 }
 
 // Deref the pointer
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.ptrDeref() {
-  return this.ptrGetAt(0);
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxPtrDeref() {
+  return this.cxxPtrGetAt(0);
 }
 
 {% if decl.type_info.direct.kl.name.base == 'SInt8' %}
@@ -52,7 +52,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 // a String is not always safe, just as it is not always safe in C++
 {{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   Count size = 0;
-  while (this.ptrGetAt(size))
+  while (this.cxxPtrGetAt(size))
     ++size;
   UInt8 bytes<>(this.ptr, size);
   String ss;
@@ -77,17 +77,17 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 }
 
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.ptrGetAt(Index i) {
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt(Index i) {
   return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} });
 }
 
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.ptrDeref() {
-  return this.ptrGetAt(0);
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrDeref() {
+  return this.cxxPtrGetAt(0);
 }
 
 // Set the value at an offset into the array
-{{decl.type_info.mutable_ptr.kl.name}}.ptrSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
+{{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
   this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
 }
 
@@ -127,31 +127,31 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 }
 
 // Construct from a {{decl.type_info.const_ptr.kl.name}} and an offset; used
-// for {{decl.type_info.const_ptr.kl.name}}.ptrGetAt
+// for {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt
 {{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ptr.kl.name}} ptr, Index offset) {
   this.ptr = ptr.ptr.offset(offset);
 }
 
 // Get the {{decl.type_info.direct.kl.name}} value
-{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.refGet() {
+{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxRefGet() {
   return this.ptr->{ {{decl.type_info.direct.kl.name}} };
 }
 
 // Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
 {{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
-  this = ref.refGet();
+  this = ref.cxxRefGet();
 }
 
 // Convert to String
 {{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
-  s += this.refGet();
+  s += this.cxxRefGet();
 }
 
 {% if decl.type_info.direct.kl.name.base != 'Boolean' %}
 
 // Convert to Boolean
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
-  this = Boolean(ref.refGet());
+  this = Boolean(ref.cxxRefGet());
 }
 {% endif %}
 
@@ -161,18 +161,18 @@ Boolean({{decl.type_info.const_ref.kl.name}} ref) {
 }
 
 // Set the value
-{{decl.type_info.mutable_ref.kl.name}}.refSet({{decl.type_info.direct.kl.name}} value) {
+{{decl.type_info.mutable_ref.kl.name}}.cxxRefSet({{decl.type_info.direct.kl.name}} value) {
   this.ptr->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 
 // Assignment of {{decl.type_info.direct.kl.name}}
 {{decl.type_info.mutable_ref.kl.name}}.=({{decl.type_info.direct.kl.name}} value) {
-  this.refSet(value);
+  this.cxxRefSet(value);
 }
 
 // Convert to String
 {{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
-  s += this.refGet();
+  s += this.cxxRefGet();
 }
 
 {% endblock body %}

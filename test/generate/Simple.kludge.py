@@ -86,60 +86,60 @@ report("Before: float32 = " + float32);
 report("Before: float64 = " + float64);
 SimpleParams(
   boolean,
-  BooleanConstPtr(boolean),
-  BooleanPtr(boolean),
+  Boolean_CxxConstPtr(boolean),
+  Boolean_CxxPtr(boolean),
   boolean,
-  BooleanRef(boolean),
+  Boolean_CxxRef(boolean),
   sint8,
-  SInt8ConstPtr(sint8),
-  SInt8Ptr(sint8),
+  SInt8_CxxConstPtr(sint8),
+  SInt8_CxxPtr(sint8),
   sint8,
-  SInt8Ref(sint8),
+  SInt8_CxxRef(sint8),
   uint8,
-  UInt8ConstPtr(uint8),
-  UInt8Ptr(uint8),
+  UInt8_CxxConstPtr(uint8),
+  UInt8_CxxPtr(uint8),
   uint8,
-  UInt8Ref(uint8),
+  UInt8_CxxRef(uint8),
   sint16,
-  SInt16ConstPtr(sint16),
-  SInt16Ptr(sint16),
+  SInt16_CxxConstPtr(sint16),
+  SInt16_CxxPtr(sint16),
   sint16,
-  SInt16Ref(sint16),
+  SInt16_CxxRef(sint16),
   uint16,
-  UInt16ConstPtr(uint16),
-  UInt16Ptr(uint16),
+  UInt16_CxxConstPtr(uint16),
+  UInt16_CxxPtr(uint16),
   uint16,
-  UInt16Ref(uint16),
+  UInt16_CxxRef(uint16),
   sint32,
-  SInt32ConstPtr(sint32),
-  SInt32Ptr(sint32),
+  SInt32_CxxConstPtr(sint32),
+  SInt32_CxxPtr(sint32),
   sint32,
-  SInt32Ref(sint32),
+  SInt32_CxxRef(sint32),
   uint32,
-  UInt32ConstPtr(uint32),
-  UInt32Ptr(uint32),
+  UInt32_CxxConstPtr(uint32),
+  UInt32_CxxPtr(uint32),
   uint32,
-  UInt32Ref(uint32),
+  UInt32_CxxRef(uint32),
   sint64,
-  SInt64ConstPtr(sint64),
-  SInt64Ptr(sint64),
+  SInt64_CxxConstPtr(sint64),
+  SInt64_CxxPtr(sint64),
   sint64,
-  SInt64Ref(sint64),
+  SInt64_CxxRef(sint64),
   uint64,
-  UInt64ConstPtr(uint64),
-  UInt64Ptr(uint64),
+  UInt64_CxxConstPtr(uint64),
+  UInt64_CxxPtr(uint64),
   uint64,
-  UInt64Ref(uint64),
+  UInt64_CxxRef(uint64),
   float32,
-  Float32ConstPtr(float32),
-  Float32Ptr(float32),
+  Float32_CxxConstPtr(float32),
+  Float32_CxxPtr(float32),
   float32,
-  Float32Ref(float32),
+  Float32_CxxRef(float32),
   float64,
-  Float64ConstPtr(float64),
-  Float64Ptr(float64),
+  Float64_CxxConstPtr(float64),
+  Float64_CxxPtr(float64),
   float64,
-  Float64Ref(float64),
+  Float64_CxxRef(float64),
   );
 report("After: boolean = " + boolean);
 report("After: sint8 = " + sint8);
@@ -187,41 +187,41 @@ SimpleValueResult() = 42
 
 ext.add_func('SimpleConstPtrResult', 'int const *')\
   .add_test("""
-SInt32ConstPtr ptr = SimpleConstPtrResult();
+SInt32_CxxConstPtr ptr = SimpleConstPtrResult();
 report("SimpleConstPtrResult(): ptr = " + ptr);
-report("SimpleConstPtrResult(): ptr.ptrIsValid() = " + ptr.ptrIsValid());
+report("SimpleConstPtrResult(): ptr.cxxPtrIsValid() = " + ptr.cxxPtrIsValid());
 report("SimpleConstPtrResult(): Boolean(ptr) = " + Boolean(ptr));
-report("SimpleConstPtrResult(): ptr.ptrDeref() = " + ptr.ptrDeref());
-report("SimpleConstPtrResult(): ptr.ptrGetAt(0) = " + ptr.ptrGetAt(0));
+report("SimpleConstPtrResult(): ptr.cxxPtrDeref() = " + ptr.cxxPtrDeref());
+report("SimpleConstPtrResult(): ptr.cxxPtrGetAt(0) = " + ptr.cxxPtrGetAt(0));
 """, """
 SimpleConstPtrResult(): ptr = <Opaque>
-SimpleConstPtrResult(): ptr.ptrIsValid() = true
+SimpleConstPtrResult(): ptr.cxxPtrIsValid() = true
 SimpleConstPtrResult(): Boolean(ptr) = true
-SimpleConstPtrResult(): ptr.ptrDeref() = 42
-SimpleConstPtrResult(): ptr.ptrGetAt(0) = 42
+SimpleConstPtrResult(): ptr.cxxPtrDeref() = 42
+SimpleConstPtrResult(): ptr.cxxPtrGetAt(0) = 42
 """)
 
 ext.add_func('SimpleMutablePtrResult', 'int *')\
   .add_test("""
-SInt32Ptr ptr = SimpleMutablePtrResult();
+SInt32_CxxPtr ptr = SimpleMutablePtrResult();
 report("SimplePtrResult(): before: ptr = " + ptr);
-report("SimplePtrResult(): before: ptr.ptrIsValid() = " + ptr.ptrIsValid());
+report("SimplePtrResult(): before: ptr.cxxPtrIsValid() = " + ptr.cxxPtrIsValid());
 report("SimplePtrResult(): before: Boolean(ptr) = " + Boolean(ptr));
-report("SimplePtrResult(): before: ptr.ptrDeref() = " + ptr.ptrDeref());
-report("SimplePtrResult(): before: ptr.ptrGetAt(0) = " + ptr.ptrGetAt(0));
-report("SimplePtrResult(): ptr.ptrDeref().refSet(-7)");
-ptr.ptrDeref().refSet(-7);
-report("SimplePtrResult(): before: ptr.ptrDeref() = " + ptr.ptrDeref());
-report("SimplePtrResult(): before: ptr.ptrGetAt(0) = " + ptr.ptrGetAt(0));
+report("SimplePtrResult(): before: ptr.cxxPtrDeref() = " + ptr.cxxPtrDeref());
+report("SimplePtrResult(): before: ptr.cxxPtrGetAt(0) = " + ptr.cxxPtrGetAt(0));
+report("SimplePtrResult(): ptr.cxxPtrDeref().cxxRefSet(-7)");
+ptr.cxxPtrDeref().cxxRefSet(-7);
+report("SimplePtrResult(): before: ptr.cxxPtrDeref() = " + ptr.cxxPtrDeref());
+report("SimplePtrResult(): before: ptr.cxxPtrGetAt(0) = " + ptr.cxxPtrGetAt(0));
 """, """
 SimplePtrResult(): before: ptr = {ptr:<Opaque>}
-SimplePtrResult(): before: ptr.ptrIsValid() = true
+SimplePtrResult(): before: ptr.cxxPtrIsValid() = true
 SimplePtrResult(): before: Boolean(ptr) = true
-SimplePtrResult(): before: ptr.ptrDeref() = 42
-SimplePtrResult(): before: ptr.ptrGetAt(0) = 42
-SimplePtrResult(): ptr.ptrDeref().refSet(-7)
-SimplePtrResult(): before: ptr.ptrDeref() = -7
-SimplePtrResult(): before: ptr.ptrGetAt(0) = -7
+SimplePtrResult(): before: ptr.cxxPtrDeref() = 42
+SimplePtrResult(): before: ptr.cxxPtrGetAt(0) = 42
+SimplePtrResult(): ptr.cxxPtrDeref().cxxRefSet(-7)
+SimplePtrResult(): before: ptr.cxxPtrDeref() = -7
+SimplePtrResult(): before: ptr.cxxPtrGetAt(0) = -7
 """)
 
 ext.add_func('SimpleConstRefResult', 'int const &')\
@@ -233,15 +233,22 @@ SimpleConstRefResult() = 42
 
 ext.add_func('SimpleMutableRefResult', 'int &')\
   .add_test("""
-SInt32Ref result = SimpleMutableRefResult();
+SInt32_CxxRef result = SimpleMutableRefResult();
 report("SimpleMutableRefResult(): before: result = " + result);
-result.refSet(-7);
+result.cxxRefSet(-7);
 result = SimpleMutableRefResult();
 report("SimpleMutableRefResult(): after: result = " + result);
 """, """
 SimpleMutableRefResult(): before: result = 42
 SimpleMutableRefResult(): after: result = -7
 """)
+
+# ext.add_func('GetCString', 'char const *')\
+#   .add_test("""
+# SInt8_CxxConstPtr ptr = GetCString();
+# report("GetCString: ptr = " + ptr);
+# """, """
+# """)
 
 ext.add_func("SimpleObscure", 'long', ['signed short', 'long'])\
   .add_test("""

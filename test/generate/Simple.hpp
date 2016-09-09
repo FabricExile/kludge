@@ -134,3 +134,8 @@ inline long SimpleObscure(
   long longVal,
   long long longLongVal
   ) { return signedShortVal + longVal + longLongVal; }
+
+inline const char *GetCString()
+{
+  return "Hello, world!";
+}

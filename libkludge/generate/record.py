@@ -61,7 +61,7 @@ class Ctor(Methodlike):
     return self.base_edk_symbol_name    
 
   def get_this(self, type_info):
-    return record.get_this(type_info, True)
+    return self.record.get_this(type_info, True)
 
 class Method(Methodlike):
 
@@ -109,7 +109,7 @@ class Method(Methodlike):
 
   def get_this(self, type_info):
     assert this_access != ThisAccess.static
-    return record.get_this(type_info, this_access == ThisAccess.mutable)
+    return self.record.get_this(type_info, this_access == ThisAccess.mutable)
 
 class UniOp(Methodlike):
 
@@ -152,7 +152,7 @@ class UniOp(Methodlike):
     return self.base_edk_symbol_name
 
   def get_this(self, type_info):
-    return record.get_this(type_info, True)
+    return self.record.get_this(type_info, True)
 
 class BinOp(Methodlike):
 
@@ -278,7 +278,7 @@ class AssOp(Methodlike):
     return self.base_edk_symbol_name
 
   def get_this(self, type_info):
-    return record.get_this(type_info, True)
+    return self.record.get_this(type_info, True)
 
 class Cast(Methodlike):
 
@@ -384,6 +384,12 @@ class Record(Decl):
   def get_this(self, type_info, is_mutable):
     return ThisCodec(type_info, is_mutable)
 
+  def get_const_this(self, type_info):
+    return self.get_this(type_info, False)
+    
+  def get_mutable_this(self, type_info):
+    return self.get_this(type_info, True)
+    
   def get_copy_param(self, type_info):
     return ParamCodec(
       DirQualTypeInfo(DirQual(directions.Direct, qualifiers.Unqualified), type_info),
@@ -565,6 +571,9 @@ class Record(Decl):
     self.get_ind_op_this_access = this_access
     return self
 
+  def get_get_ind_op_this(self, type_info):
+    return self.get_this(type_info, self.get_ind_op_this_access == ThisAccess.mutable)
+
   def add_set_ind_op(
     self,
     value_cpp_type_name,
@@ -586,6 +595,9 @@ class Record(Decl):
       ]
     self.set_ind_op_this_access = this_access
     return self
+
+  def get_set_ind_op_this(self, type_info):
+    return self.get_this(type_info, self.set_ind_op_this_access == ThisAccess.mutable)
 
   def add_deref(
     self,

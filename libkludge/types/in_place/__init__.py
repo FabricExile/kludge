@@ -45,8 +45,8 @@ class InPlaceConstRefTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "ConstRef",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "ConstRef",
+      kl_name_base = kl_type_name + "_CxxConstRef",
+      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxConstRef",
       lib_expr = ReferenceTo(Const(cpp_type_expr)),
       )
 
@@ -62,8 +62,8 @@ class InPlaceMutableRefTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "Ref",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "MutableRef",
+      kl_name_base = kl_type_name + "_CxxRef",
+      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxMutableRef",
       lib_expr = ReferenceTo(cpp_type_expr),
       )
 
@@ -79,8 +79,8 @@ class InPlaceConstPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "ConstPtr",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "ConstPtr",
+      kl_name_base = kl_type_name + "_CxxConstPtr",
+      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxConstPtr",
       lib_expr = PointerTo(Const(cpp_type_expr)),
       )
 
@@ -96,8 +96,8 @@ class InPlaceMutablePtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "Ptr",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "MutablePtr",
+      kl_name_base = kl_type_name + "_CxxPtr",
+      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxMutablePtr",
       lib_expr = PointerTo(cpp_type_expr),
       )
 

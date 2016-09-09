@@ -17,7 +17,7 @@
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.{{member.getter_kl_name}} on invalid {{type_info.kl.name}}";
+        throw "Call of {{type_info.kl.name}}.{{member.getter_kl_name}} on null {{type_info.kl.name}}";
     return this.ptr->{ {{record.kl_global_name}} }.{{member.getter_kl_name}}();
 }
 {% endif %}
@@ -29,7 +29,7 @@
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.{{member.setter_kl_name}} on invalid {{type_info.kl.name}}";
+        throw "Call of {{type_info.kl.name}}.{{member.setter_kl_name}} on null {{type_info.kl.name}}";
     this.ptr->{ {{record.kl_global_name}} }.{{member.setter_kl_name}}(value);
 }
 {% endif %}
@@ -96,7 +96,7 @@
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.{{method.kl_name}} on invalid {{type_info.kl.name}}";
+        throw "Call of {{type_info.kl.name}}.{{method.kl_name}} on null {{type_info.kl.name}}";
     {{method.result.render_return_kl()}}
     this.ptr->{ {{record.kl_global_name}} }.{{method.kl_name}}(
         {% for param in method.params %}
@@ -202,7 +202,7 @@
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.getAt on invalid {{type_info.kl.name}}";
+        throw "Call of {{type_info.kl.name}}.getAt on null {{type_info.kl.name}}";
     return this.ptr->{ {{record.kl_global_name}} }.getAt(
         {% for param in record.get_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
@@ -227,7 +227,7 @@
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.setAt on invalid {{type_info.kl.name}}";
+        throw "Call of {{type_info.kl.name}}.setAt on null {{type_info.kl.name}}";
     this.ptr->{ {{record.kl_global_name}} }.setAt(
         {% for param in record.set_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}

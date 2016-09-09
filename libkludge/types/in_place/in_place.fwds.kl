@@ -3,6 +3,9 @@
 {######################################################################}
 {% extends "generate/decl/decl.fwds.kl" %}
 {% block body %}
+{% if not decl.is_simple %}
+struct {{decl.kl_type_name}};
+{% endif %}
 struct {{decl.kl_type_name}}ConstRef;
 struct {{decl.kl_type_name}}Ref;
 struct {{decl.kl_type_name}}ConstPtr;

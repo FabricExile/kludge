@@ -4,12 +4,11 @@
 
 from void import VoidSelector  
 from void_ptr import VoidPtrSelector  
-from simple import SimpleSelector  
-from c_string import CStringSelector
+# from c_string import CStringSelector
 from std_string import StdStringSelector
-from fixed_array import FixedArraySelector
+# from fixed_array import FixedArraySelector
 from std_vector import StdVectorSelector
-from std_map import StdMapSelector
+# from std_map import StdMapSelector
 from in_place import InPlaceSelector
 from direct import DirectSelector
 from wrapped import WrappedSelector

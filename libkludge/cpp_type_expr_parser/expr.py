@@ -478,3 +478,6 @@ def Signed(ty):
 
 def Const(ty):
   return ty.make_const()
+
+def SimpleNamed(name):
+  return Named([Simple(name)])

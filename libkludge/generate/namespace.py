@@ -140,13 +140,7 @@ class Namespace:
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
-    self.type_mgr.add_selector(
-      InPlaceSelector(
-        self,
-        kl_global_name,
-        cpp_type_expr,
-        )
-      )
+    self.type_mgr.in_place_selector.register(kl_global_name, cpp_type_expr)
     record = Record(
       self,
       "InPlaceType",

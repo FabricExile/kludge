@@ -3,22 +3,6 @@
 {######################################################################}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
-struct {{decl.kl_type_name}}ConstPtr permits {{decl.kl_type_name}}ConstRef {
-  protected Data ptr; // actual {{decl.cpp_type_expr}} const *
-};
-
-struct {{decl.kl_type_name}}Ptr : {{decl.kl_type_name}}ConstPtr {
-};
-
-struct {{decl.kl_type_name}}ConstRef {
-  protected Data ptr; // actual {{decl.cpp_type_expr}} const *
-  protected {{decl.kl_type_name}} value; // used in the "local" case where we construct a {{decl.kl_type_name}}ConstRef from a {{decl.kl_type_name}}
-  protected Boolean is_local; // ""
-};
-
-struct {{decl.kl_type_name}}Ref : {{decl.kl_type_name}}ConstRef {
-};
-
 // Given an io value, take a pointer to the value
 {{decl.kl_type_name}}ConstPtr(io {{decl.kl_type_name}} value) {
   this.ptr = value.data();

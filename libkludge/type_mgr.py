@@ -8,8 +8,6 @@ from value_name import ValueName
 from type_info import TypeInfo
 from dir_qual_type_info import DirQualTypeInfo
 from param_codec import ParamCodec
-# import clang.cindex
-# import clang_helpers
 from cpp_type_expr_parser import *
 
 class TypeMgr:
@@ -20,15 +18,16 @@ class TypeMgr:
     self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
     self._cpp_type_name_to_dqti = {}
 
+    self.in_place_selector = InPlaceSelector(ext)
+    
     # Order is very important here!
     self.add_selector(VoidSelector(ext))
-    self.add_selector(CStringSelector(ext))  # must come before Simple so it matches char const *
     self.add_selector(VoidPtrSelector(ext))
-    self.add_selector(SimpleSelector(ext))
+    self.add_selector(self.in_place_selector)
     self.add_selector(StdStringSelector(ext))
-    self.add_selector(FixedArraySelector(ext))
+    # self.add_selector(FixedArraySelector(ext))
     self.add_selector(StdVectorSelector(ext))
-    self.add_selector(StdMapSelector(ext))
+    # self.add_selector(StdMapSelector(ext))
 
   def add_selector(self, codec):
     print "Registered conversion selector: %s" % codec.get_desc()

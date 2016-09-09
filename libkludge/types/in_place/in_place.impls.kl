@@ -40,6 +40,8 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 // Indexing operation
 {{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt(Index index) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt on invalid {{decl.type_info.const_ptr.kl.name}}";
   {{decl.type_info.direct.kl.name}} ea<>(this.ptr, index + 1);
   return Make_{{decl.type_info.const_ref.kl.name}}(ea[index]);
 }
@@ -93,6 +95,8 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
 {{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt(Index index) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt on invalid {{decl.type_info.mutable_ptr.kl.name}}";
   {{decl.type_info.direct.kl.name}} ea<>(this.ptr, index + 1);
   return Make_{{decl.type_info.mutable_ref.kl.name}}(ea[index]);
 }
@@ -104,13 +108,9 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 // Set the value at an offset into the array
 {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt on invalid {{decl.type_info.mutable_ptr.kl.name}}";
   this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
-}
-
-// Create a reference to a temporary {{decl.type_info.direct.kl.name}}
-{{decl.type_info.const_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
-  report('temp');
-  this.ptr = value.data();
 }
 
 // Given an in value, take a ConstRef to the value
@@ -142,6 +142,8 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 // Get the {{decl.type_info.direct.kl.name}} value
 {{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxRefGet() {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.const_ref.kl.name}}.cxxRefGet on invalid {{decl.type_info.const_ref.kl.name}}";
   return this.ptr->{ {{decl.type_info.direct.kl.name}} };
 }
 
@@ -155,7 +157,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
   s += this.cxxRefGet();
 }
 
-{% if decl.type_info.direct.kl.name.base != 'Boolean' %}
+{% if decl.is_simple and decl.type_info.direct.kl.name.base != 'Boolean' %}
 
 // Convert to Boolean
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
@@ -182,6 +184,8 @@ Boolean({{decl.type_info.const_ref.kl.name}} ref) {
 
 // Set the value
 {{decl.type_info.mutable_ref.kl.name}}.cxxRefSet({{decl.type_info.direct.kl.name}} value) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxxRefSet on invalid {{decl.type_info.mutable_ref.kl.name}}";
   this.ptr->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 

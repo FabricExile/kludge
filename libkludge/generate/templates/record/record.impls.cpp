@@ -15,7 +15,7 @@
 {% if member.has_getter() %}
 FABRIC_EXT_EXPORT
 {{member.result.render_direct_type_edk()}}
-{{type_info.kl.name.compound}}_GET_{{member.cpp_name}}(
+{{member.get_getter_edk_symbol_name(type_info)}}(
     {% set indirect_param_edk = member.result.render_indirect_param_edk() %}
     {% if indirect_param_edk %}
       {{indirect_param_edk | indent(4)}},
@@ -34,9 +34,9 @@ FABRIC_EXT_EXPORT
 }
 
 {% endif %}
-{% if member.has_setter() %}
+{% if member.has_setter() and allow_mutable_methods %}
 FABRIC_EXT_EXPORT void
-{{type_info.kl.name.compound}}_SET_{{member.cpp_name}}(
+{{member.get_setter_edk_symbol_name(type_info)}}(
     {{record.get_mutable_this(type_info).render_param_edk() | indent(4)}},
     {{member.param.render_edk() | indent(4)}}
     )
@@ -59,7 +59,7 @@ FABRIC_EXT_EXPORT void
 
 {% if record.include_empty_ctor %}
 FABRIC_EXT_EXPORT void
-{{record.empty_ctor_edk_symbol_name}}(
+{{record.get_empty_ctor_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(None, record.get_mutable_this(type_info), None) | indent(4)}}
     )
 {
@@ -69,7 +69,7 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% if record.include_copy_ctor %}
 FABRIC_EXT_EXPORT void
-{{record.copy_ctor_edk_symbol_name}}(
+{{record.get_copy_ctor_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(None, record.get_mutable_this(type_info), [record.get_copy_param(type_info)]) | indent(4)}}
     )
 {
@@ -79,7 +79,7 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% for ctor in record.ctors %}
 FABRIC_EXT_EXPORT void
-{{ctor.edk_symbol_name}}(
+{{ctor.get_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(None, ctor.get_this(type_info), ctor.params) | indent(4)}}
     )
 {
@@ -93,7 +93,7 @@ FABRIC_EXT_EXPORT void
 {% endfor %}
 {% if record.include_dtor %}
 FABRIC_EXT_EXPORT void
-{{record.dtor_edk_symbol_name}}(
+{{record.get_dtor_edk_symbol_name(type_info)}}(
     {{record.get_mutable_this(type_info).render_param_edk()}}
     )
 {
@@ -109,13 +109,15 @@ FABRIC_EXT_EXPORT void
 ////////////////////////////////////////////////////////////////////////
 
 {% for method in record.methods %}
-{% if not method.is_static or is_direct %}
+{% if (method.is_static and allow_static_methods)
+    or (method.is_mutable and allow_mutable_methods)
+    or (method.is_const and allow_const_methods) %}
 FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
-{{method.edk_symbol_name}}(
+{{method.get_edk_symbol_name(type_info)}}(
 {% if method.is_static %}
     {{macros.edk_param_list(method.result, None, method.params) | indent(4)}}
 {% else %}
-    {{macros.edk_param_list(method.result, method.get_this(), method.params) | indent(4)}}
+    {{macros.edk_param_list(method.result, method.get_this(type_info), method.params) | indent(4)}}
 {% endif %}
     )
 {
@@ -142,7 +144,7 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 
 {% for uni_op in record.uni_ops %}
 FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
-{{uni_op.edk_symbol_name}}(
+{{uni_op.get_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(uni_op.result, uni_op.this, None) | indent(4)}}
     )
 {
@@ -161,7 +163,7 @@ FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
 
 {% for bin_op in record.bin_ops %}
 FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
-{{bin_op.edk_symbol_name}}(
+{{bin_op.get_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(bin_op.result, None, bin_op.params) | indent(4)}}
     )
 {
@@ -180,7 +182,7 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT void
-{{record.simple_ass_op_edk_symbol_name}}(
+{{record.get_simple_ass_op_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(None, record.get_mutable_this(type_info), [record.get_copy_param(type_info)]) | indent(4)}}
     )
 {
@@ -196,7 +198,7 @@ FABRIC_EXT_EXPORT void
 
 {% for ass_op in record.ass_ops %}
 FABRIC_EXT_EXPORT void
-{{ass_op.edk_symbol_name}}(
+{{ass_op.get_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(None, ass_op.this, ass_op.params) | indent(4)}}
     )
 {
@@ -216,7 +218,7 @@ FABRIC_EXT_EXPORT void
 
 {% for cast in record.casts %}
 FABRIC_EXT_EXPORT void
-{{cast.edk_symbol_name}}(
+{{cast.get_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(None, cast.this, cast.params) | indent(4)}}
     )
 {
@@ -236,7 +238,7 @@ FABRIC_EXT_EXPORT void
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
-{{record.deref_edk_symbol_name}}(
+{{record.get_deref_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(record.deref_result, record.deref_this, None) | indent(4)}}
     )
 {
@@ -253,7 +255,7 @@ FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
-{{record.get_ind_op_edk_symbol_name}}(
+{{record.get_get_ind_op_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(record.get_ind_op_result, record.get_get_ind_op_this(type_info), record.get_ind_op_params) | indent(4)}}
     )
 {
@@ -265,14 +267,14 @@ FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
 }
 
 {% endif %}
-{% if record.set_ind_op_params %}
+{% if record.set_ind_op_params and allow_mutable_methods %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // setAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT void
-{{record.set_ind_op_edk_symbol_name}}(
+{{record.get_set_ind_op_edk_symbol_name(type_info)}}(
     {{macros.edk_param_list(None, record.get_set_ind_op_this(type_info), record.set_ind_op_params) | indent(4)}}
     )
 {

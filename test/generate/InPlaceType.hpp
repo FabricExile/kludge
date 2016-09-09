@@ -39,7 +39,8 @@ public:
     return *this;
   }
 
-  float publicMethod() { return floatValue; }
+  float publicConstMethod() const { return floatValue; }
+  float publicMutableMethod() { return floatValue; }
 
   std::string getDesc() const {
     char buf[256];

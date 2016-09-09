@@ -80,6 +80,8 @@ class InPlaceConstRefTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["ref"] = "types/builtin/in_place/ref/repr"
+    tds["repr"]["member_ref"] = "types/builtin/in_place/ref/repr"
     return tds
 
 class InPlaceMutableRefTypeInfo(TypeInfo):
@@ -97,6 +99,8 @@ class InPlaceMutableRefTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["ref"] = "types/builtin/in_place/ref/repr"
+    tds["repr"]["member_ref"] = "types/builtin/in_place/ref/repr"
     return tds
 
 class InPlaceConstPtrTypeInfo(TypeInfo):
@@ -114,6 +118,8 @@ class InPlaceConstPtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ptr/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["ref"] = "types/builtin/in_place/ptr/repr"
+    tds["repr"]["member_ref"] = "types/builtin/in_place/ptr/repr"
     return tds
 
 class InPlaceMutablePtrTypeInfo(TypeInfo):
@@ -131,6 +137,8 @@ class InPlaceMutablePtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/in_place/ptr/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["ref"] = "types/builtin/in_place/ptr/repr"
+    tds["repr"]["member_ref"] = "types/builtin/in_place/ptr/repr"
     return tds
 
 in_place_type_info_class_map = {
@@ -158,10 +166,28 @@ class InPlaceBuiltinDecl(BuiltinDecl):
   def render_method_impls(self, lang):
     result = ''
     if self.record:
-      for index, type_info in enumerate([self.type_info.direct]):
+      for index, type_info in enumerate([
+        self.type_info.direct,
+        self.type_info.const_ptr,
+        self.type_info.mutable_ptr,
+        self.type_info.const_ref,
+        self.type_info.mutable_ref,
+        ]):
+        is_direct = index == 0
+        is_const_ptr = index == 1
+        is_mutable_ptr = index == 2
+        is_const_ref = index == 3
+        is_mutable_ref = index == 4
         result += self.record.render('impls', lang, {
           'type_info': type_info,
-          'is_direct': index == 0,
+          'is_direct': is_direct,
+          'is_const_ptr': is_const_ptr,
+          'is_mutable_ptr': is_mutable_ptr,
+          'is_const_ref': is_const_ref,
+          'is_mutable_ref': is_mutable_ref,
+          'allow_static_methods': is_direct,
+          'allow_mutable_methods': is_direct or is_mutable_ptr or is_mutable_ref,
+          'allow_const_methods': True,
           })
     return result
 

@@ -5,16 +5,16 @@
 {% block body %}
 {% if record.include_getters_setters or not is_direct %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Getters and Setters
 ////////////////////////////////////////////////////////////////////////
 {% for member in record.members %}
 {% if member.is_public() %}
 {% if member.has_getter() %}
-{{member.type_info.kl.name.compound}} {{record.this_type_info.kl.name.compound}}.{{member.getter_kl_name}}() = "{{record.this_type_info.kl.name.compound}}_GET_{{member.cpp_name}}";
+{{member.type_info.kl.name.compound}} {{type_info.kl.name.compound}}.{{member.getter_kl_name}}() = "{{type_info.kl.name.compound}}_GET_{{member.cpp_name}}";
 {% endif %}
 {% if member.has_setter() %}
-{{record.this_type_info.kl.name.compound}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}}) = "{{record.this_type_info.kl.name.compound}}_SET_{{member.cpp_name}}";
+{{type_info.kl.name.compound}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}}) = "{{type_info.kl.name.compound}}_SET_{{member.cpp_name}}";
 {% endif %}
 {% endif %}
 
@@ -22,16 +22,16 @@
 {% endif %}
 {% if is_direct %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Constructors and Destructor
 ////////////////////////////////////////////////////////////////////////
 {% if record.include_empty_ctor %}
-{{record.this_type_info.kl.name.compound}}() = "{{record.empty_ctor_edk_symbol_name}}";
+{{type_info.kl.name.compound}}() = "{{record.empty_ctor_edk_symbol_name}}";
 
 {% endif %}
 {% if record.include_copy_ctor %}
-{{record.this_type_info.kl.name.compound}}(
-    {{record.copy_params[0].render_kl() | indent(4)}}
+{{type_info.kl.name.compound}}(
+    {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.copy_ctor_edk_symbol_name}}";
 
 {% endif %}
@@ -39,7 +39,7 @@
 {% for comment in ctor.comments %}
 {{comment}}
 {% endfor %}
-{{ctor.this.type_info.kl.name.compound}}(
+{{type_info.kl.name.compound}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -47,13 +47,13 @@
 
 {% endfor %}
 {% if record.include_dtor %}
-~{{record.this_type_info.kl.name.compound}}() = "{{record.dtor_edk_symbol_name}}";
+~{{type_info.kl.name.compound}}() = "{{record.dtor_edk_symbol_name}}";
 
 {% endif %}
 {% endif %}
-{% if len(record.methods) > 0 %}
+{% if record.has_methods() %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Methods
 ////////////////////////////////////////////////////////////////////////
 {% for method in record.methods %}
@@ -62,9 +62,9 @@
 {% endfor %}
 {{method.result.type_info.kl.name.compound}}
 {% if method.is_static %}
-{{method.this.type_info.kl.name.compound}}_{{method.kl_name}}(
+{{type_info.kl.name.compound}}_{{method.kl_name}}(
 {% else %}
-{{method.this.type_info.kl.name.compound}}.{{method.kl_name}}{{method.this_access_suffix}}(
+{{type_info.kl.name.compound}}.{{method.kl_name}}{{method.this_access_suffix}}(
 {% endif %}
     {% for param in method.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
@@ -73,9 +73,9 @@
 
 {% endfor %}
 {% endif %}
-{% if is_direct and len(record.uni_ops) > 0 %}
+{% if is_direct and record.has_uni_ops %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Unary Operators
 ////////////////////////////////////////////////////////////////////////
 {% for uni_op in record.uni_ops %}
@@ -87,9 +87,10 @@
     ) = "{{uni_op.edk_symbol_name}}";
 
 {% endfor %}
-{% if is_direct and len(record.bin_ops) > 0 %}
+{% endif %}
+{% if is_direct and record.has_bin_ops %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Binary Operators
 ////////////////////////////////////////////////////////////////////////
 {% for bin_op in record.bin_ops %}
@@ -103,9 +104,10 @@
     ) = "{{bin_op.edk_symbol_name}}";
 
 {% endfor %}
-{% if is_direct and len(record.ass_ops) > 0 %}
+{% endif %}
+{% if is_direct and record.has_ass_ops %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Assignment Operators
 ////////////////////////////////////////////////////////////////////////
 {% for ass_op in record.ass_ops %}
@@ -118,15 +120,15 @@
 
 {% endfor %}
 {% if record.include_simple_ass_op %}
-{{record.this_type_info.kl.name.compound}}.=(
-    {{record.copy_params[0].render_kl() | indent(4)}}
+{{type_info.kl.name.compound}}.=(
+    {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.simple_ass_op_edk_symbol_name}}";
 
 {% endif %}
 {% endif %}
-{% if is_direct and len(record.casts) > 0 %}
+{% if is_direct and record.has_casts() %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Casts
 ////////////////////////////////////////////////////////////////////////
 {% for cast in record.casts %}
@@ -141,7 +143,7 @@
 {% endif %}
 {% if is_direct and record.deref_kl_method_name %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // Deref
 ////////////////////////////////////////////////////////////////////////
 {{record.deref_result.type_info.kl.name.compound}}
@@ -151,11 +153,11 @@
 {% endif %}
 {% if record.get_ind_op_result %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // getAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 {{record.get_ind_op_result.type_info.kl.name.compound}}
-{{record.get_ind_op_this.type_info.kl.name.compound}}.getAt(
+{{type_info.kl.name.compound}}.getAt(
     {% for param in record.get_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -164,10 +166,10 @@
 {% endif %}
 {% if record.set_ind_op_params %}
 ////////////////////////////////////////////////////////////////////////
-// {{this_type_info}}
+// {{type_info}}
 // setAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
-{{record.set_ind_op_this.type_info.kl.name.compound}}.setAt(
+{{type_info.kl.name.compound}}.setAt(
     {% for param in record.set_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}

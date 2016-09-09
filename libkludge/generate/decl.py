@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import os, abc
+import os, abc, jinja2
 
 class Decl(object):
   def __init__(
@@ -61,8 +61,9 @@ class Decl(object):
     for k, v in extras.iteritems():
       template_vars.setdefault(k, v)
     try:
-      template = self.ext.jinjenv.get_template(path+'.'+context+'.'+lang)
-    except:
+      template_path = path+'.'+context+'.'+lang
+      template = self.ext.jinjenv.get_template(template_path)
+    except jinja2.TemplateNotFound:
       template = None
     if template:
       return template.render(template_vars)

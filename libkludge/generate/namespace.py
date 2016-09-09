@@ -153,6 +153,7 @@ class Namespace:
       cpp_type_expr,
       )
     self.cpp_type_expr_to_record[cpp_type_expr] = record
+    self.type_mgr.get_dqti(cpp_type_expr)
     return record
 
   def add_direct_type(

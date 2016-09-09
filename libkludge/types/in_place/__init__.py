@@ -117,7 +117,7 @@ in_place_type_info_class_map = {
 
 class InPlaceBuiltinDecl(BuiltinDecl):
 
-  def __init__(self, ext, is_simple, ti_set):
+  def __init__(self, ext, is_simple, ti_set, record):
     BuiltinDecl.__init__(
       self,
       ext.root_namespace,
@@ -127,6 +127,17 @@ class InPlaceBuiltinDecl(BuiltinDecl):
       )
     self.is_simple = is_simple
     self.type_info = ti_set
+    self.record = record
+
+  def render_method_impls(self, lang):
+    result = ''
+    if self.record:
+      for index, type_info in enumerate([self.type_info.direct]):
+        result += self.record.render('impls', lang, {
+          'type_info': type_info,
+          'is_direct': index == 0,
+          })
+    return result
 
 class InPlaceSpec(object):
 
@@ -207,13 +218,14 @@ class InPlaceSelector(Selector):
       kl_type_name = spec.kl_type_name
       undq_cpp_type_expr = spec.cpp_type_expr
       is_simple = spec.is_simple
+      record = spec.record
 
       ti_set_cache_key = kl_type_name
       ti_set = self.ti_set_cache.get(ti_set_cache_key)
       if not ti_set:
         ti_set = InPlaceTypeInfoSet(self.jinjenv, kl_type_name, undq_cpp_type_expr, is_simple)
         self.ti_set_cache.setdefault(ti_set_cache_key, ti_set)
-        self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, ti_set))
+        self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, ti_set, record))
 
       ti = getattr(ti_set, dq.get_desc())
       return DirQualTypeInfo(DirQual(directions.Direct, qualifiers.Unqualified), ti)

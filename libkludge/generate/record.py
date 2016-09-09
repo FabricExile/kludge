@@ -47,7 +47,6 @@ class Ctor(Methodlike):
     ):
     Methodlike.__init__(self, record)
     self.base_edk_symbol_name = record.kl_global_name + '__ctor'
-    self.this = self.record.mutable_this
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
   
   @property
@@ -59,7 +58,10 @@ class Ctor(Methodlike):
     return "_".join([self.ext.name, self.base_edk_symbol_name, h.hexdigest()])
 
   def get_test_name(self):
-    return self.base_edk_symbol_name
+    return self.base_edk_symbol_name    
+
+  def get_this(self, type_info):
+    return record.get_this(type_info, True)
 
 class Method(Methodlike):
 
@@ -76,7 +78,6 @@ class Method(Methodlike):
     self.cpp_name = cpp_name
     self.result = ResultCodec(record.resolve_dqti(returns))
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
-    self.this = self.record.mutable_this
     self.this_access = this_access
     self.is_const = self.this_access == ThisAccess.const
     self.is_mutable = self.this_access == ThisAccess.mutable
@@ -106,6 +107,10 @@ class Method(Methodlike):
   def get_test_name(self):
     return self.base_edk_symbol_name
 
+  def get_this(self, type_info):
+    assert this_access != ThisAccess.static
+    return record.get_this(type_info, this_access == ThisAccess.mutable)
+
 class UniOp(Methodlike):
 
   op_to_edk_op = {
@@ -126,7 +131,6 @@ class UniOp(Methodlike):
     assert isinstance(kl_method_name, basestring)
     self.kl_method_name = kl_method_name
     self.op = op
-    self.this = record.mutable_this
     assert isinstance(result_cpp_type_name, basestring)
     self.result = ResultCodec(
       self.ext.type_mgr.get_dqti(
@@ -146,6 +150,9 @@ class UniOp(Methodlike):
 
   def get_test_name(self):
     return self.base_edk_symbol_name
+
+  def get_this(self, type_info):
+    return record.get_this(type_info, True)
 
 class BinOp(Methodlike):
 
@@ -245,7 +252,6 @@ class AssOp(Methodlike):
     Methodlike.__init__(self, record)
     self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
     self.base_edk_symbol_name = record.kl_global_name + '__ass_op_' + self.op_to_edk_op[op]
-    self.this = self.record.mutable_this
     self.op = op
     self.params = [
       ParamCodec(
@@ -270,6 +276,9 @@ class AssOp(Methodlike):
 
   def get_test_name(self):
     return self.base_edk_symbol_name
+
+  def get_this(self, type_info):
+    return record.get_this(type_info, True)
 
 class Cast(Methodlike):
 
@@ -372,6 +381,15 @@ class Record(Decl):
     self.get_ind_op_params = None
     self.set_ind_op_params = None
 
+  def get_this(self, type_info, is_mutable):
+    return ThisCodec(type_info, is_mutable)
+
+  def get_copy_param(self, type_info):
+    return ParamCodec(
+      DirQualTypeInfo(DirQual(directions.Direct, qualifiers.Unqualified), type_info),
+      "that"
+      )
+
   def get_desc(self):
     return "Record"
   
@@ -382,35 +400,6 @@ class Record(Decl):
     self.comments.append(clean_comment(comment))
     print str(self.comments)
     return self
-
-  @property
-  def empty_ctor_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_global_name + '__empty_ctor'
-    h = hashlib.md5()
-    h.update(base_edk_symbol_name)
-    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
-  
-  @property
-  def copy_ctor_edk_symbol_name(self):
-    try:
-      base_edk_symbol_name = self.kl_global_name + '__copy_ctor'
-      h = hashlib.md5()
-      h.update(base_edk_symbol_name)
-      for param in self.copy_params:
-        h.update(param.type_info.edk.name)
-      return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
-    except Exception as e:
-      print "Ex: " + str(e)
-      raise e
-
-  @property
-  def simple_ass_op_edk_symbol_name(self):
-    base_edk_symbol_name = self.kl_global_name + '__simple_ass_op'
-    h = hashlib.md5()
-    h.update(base_edk_symbol_name)
-    for param in self.copy_params:
-      h.update(param.type_info.edk.name)
-    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
 
   def set_default_access(self, access):
     self.default_access = access
@@ -573,10 +562,7 @@ class Record(Decl):
         'index'
         ),
       ]
-    if this_access == ThisAccess.mutable:
-      self.get_ind_op_this = self.mutable_this
-    else:
-      self.get_ind_op_this = self.const_this
+    self.get_ind_op_this_access = this_access
     return self
 
   def add_set_ind_op(
@@ -598,10 +584,7 @@ class Record(Decl):
         'value'
         ),
       ]
-    if this_access == ThisAccess.const:
-      self.set_ind_op_this = self.const_this
-    else:
-      self.set_ind_op_this = self.mutable_this
+    self.set_ind_op_this_access = this_access
     return self
 
   def add_deref(
@@ -619,11 +602,29 @@ class Record(Decl):
         self.resolve_cpp_type_expr(returns)
         )
       )
-    if this_access == ThisAccess.mutable:
-      self.deref_this = self.mutable_this
-    else:
-      self.deref_this = self.const_this
+    self.deref_this_access = this_access
     return self
+    
+  @property
+  def empty_ctor_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_global_name + '__empty_ctor'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
+    
+  @property
+  def copy_ctor_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_global_name + '__copy_ctor'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
+    
+  @property
+  def simple_ass_op_edk_symbol_name(self):
+    base_edk_symbol_name = self.kl_global_name + '__simple_ass_op'
+    h = hashlib.md5()
+    h.update(base_edk_symbol_name)
+    return "_".join([self.ext.name, base_edk_symbol_name, h.hexdigest()])
     
   @property
   def deref_edk_symbol_name(self):
@@ -665,3 +666,21 @@ class Record(Decl):
 
   def get_template_aliases(self):
     return ['record']
+
+  def has_ctors(self):
+    return len(self.ctors) > 0
+
+  def has_methods(self):
+    return len(self.methods) > 0
+
+  def has_uni_ops(self):
+    return len(self.uni_ops) > 0
+
+  def has_bin_ops(self):
+    return len(self.bin_ops) > 0
+
+  def has_ass_ops(self):
+    return len(self.ass_ops) > 0
+
+  def has_casts(self):
+    return len(self.casts) > 0

@@ -3,6 +3,15 @@
 {######################################################################}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
+{{decl.render_method_impls('kl')}}
+////////////////////////////////////////////////////////////////////////
+// {{decl.type_info.const_ptr.kl.name}}
+// {{decl.type_info.mutable_ptr.kl.name}}
+// {{decl.type_info.const_ref.kl.name}}
+// {{decl.type_info.mutable_ref.kl.name}}
+// Wrapper methods
+////////////////////////////////////////////////////////////////////////
+
 // Given an io value, take a pointer to the value
 {{decl.type_info.const_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
   this.ptr = value.data();

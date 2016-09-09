@@ -10,13 +10,11 @@ class ThisCodec:
   def __init__(
     self,
     type_info,
-    members,
     is_mutable,
     extends_this = None,
     ):
     self.value_name = this_cpp_value_name
     self.type_info = type_info
-    self.members = members
     self.is_mutable = is_mutable
     self.extends_this = extends_this
 

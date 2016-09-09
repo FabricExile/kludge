@@ -16,6 +16,17 @@ c.intValue = -7
 c.get_intValue() = -7
 Class::~Class()
 """)
+ty.add_test("""
+Class c1(6, 1.3);
+Class c2(c1);
+c1 = c2;
+""", """
+Class::Class(6, 1.3)
+Class::Class(Class const &)
+Class::operator=(Class const &)
+Class::~Class()
+Class::~Class()
+""")
 ty.add_member('intValue', 'int')
 ty.set_default_access(MemberAccess.private)
 ty.add_member('floatValue', 'float')
@@ -82,19 +93,18 @@ mp.publicConstMethod() = -8.9
 mp.publicMutableMethod() = -8.9
 Class::~Class()
 """)
-
-#   Class( Class const &that )
-#     : intValue( that.intValue ), floatValue( that.floatValue )
-#     {}
-
-#   Class &operator=( Class const &that )
-#   {
-#     intValue = that.intValue;
-#     floatValue = that.floatValue;
-#     return *this;
-#   }
-
-#   float publicMethod() { return floatValue; }
+ext.add_func('ReturnClass', 'Class')\
+  .add_test("""
+Class c1 = ReturnClass();
+report("ReturnClass: c1 = " + c1);
+""", """
+Class::Class()
+Class::Class(92, 6.74)
+Class::operator=(Class const &)
+Class::~Class()
+ReturnClass: c1 = {intValue:92,floatValue:+6.74}
+Class::~Class()
+""")
 
 #   std::string getDesc() const {
 #     char buf[256];
@@ -102,47 +112,9 @@ Class::~Class()
 #     return std::string( buf );
 #   }
 
-# protected:
-
-#   float protectedMethod() { return floatValue; }
-
-# private:
-
-#   float privateMethod() { return floatValue; }
-
-# public:
-
-#   int intValue;
-
-# private:
-
-#   float floatValue;
-# };
-
-# Class ReturnClass() {
-#   return Class( 92, 6.74 );
-# }
-
 # std::vector<Class> ReturnClassVec() {
 #   std::vector<Class> result;
 #   result.push_back( Class( 3, 3.14 ) );
 #   result.push_back( Class( -14, -3.45 ) );
 #   return result;
-# }
-
-# #endif
-# require InPlaceStruct;
-
-# operator entry() {
-#   Class value;
-#   report("ReturnClass() = " + ReturnClass());
-#   report("ReturnClassVec() = " + ReturnClassVec());
-#   value = ReturnClass();
-#   report("value.intValue = " + value.intValue);
-#   report("value.getDesc() = " + value.getDesc());
-#   Class constructor1(1, 2.2);
-#   report("constructor1.getDesc() = " + constructor1.getDesc());
-#   Class constructor2(constructor1);
-#   report("constructor2.getDesc() = " + constructor2.getDesc());
-#   report("Class::GetStaticFloat() = " + Class_GetStaticFloat());
 # }

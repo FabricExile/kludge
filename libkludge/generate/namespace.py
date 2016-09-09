@@ -180,7 +180,6 @@ class Namespace:
       self,
       "DirectType[extends=%s forbid_copy=%s]" % (extends, forbid_copy),
       kl_local_name,
-      self.type_mgr.get_dqti(cpp_type_expr).type_info,
       extends=extends,
       forbid_copy=forbid_copy,
       child_namespace_component=cpp_type_expr.components[-1],

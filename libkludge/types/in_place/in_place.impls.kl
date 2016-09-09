@@ -14,22 +14,22 @@
 }
 
 // Is valid.  Check for null pointer
-Boolean {{decl.type_info.const_ptr.kl.name}}.isValid() {
+Boolean {{decl.type_info.const_ptr.kl.name}}.ptrIsValid() {
   return !!this.ptr;
 }
 
 Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
-  this = ptr.isValid();
+  this = ptr.ptrIsValid();
 }
 
 // Indexing operation
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.getAt(Index i) {
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.ptrGetAt(Index i) {
   return {{decl.type_info.const_ref.kl.name}}(this, i);
 }
 
 // Deref the pointer
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.deref() {
-  return this.getAt(0);
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.ptrDeref() {
+  return this.ptrGetAt(0);
 }
 
 {% if decl.type_info.direct.kl.name.base == 'SInt8' %}
@@ -43,7 +43,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 // a String is not always safe, just as it is not always safe in C++
 {{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   Count size = 0;
-  while (this.getAt(size))
+  while (this.ptrGetAt(size))
     ++size;
   UInt8 bytes<>(this.ptr, size);
   String ss;
@@ -68,17 +68,17 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 }
 
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.getAt(Index i) {
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.ptrGetAt(Index i) {
   return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} });
 }
 
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.deref() {
-  return this.getAt(0);
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.ptrDeref() {
+  return this.ptrGetAt(0);
 }
 
 // Set the value at an offset into the array
-{{decl.type_info.mutable_ptr.kl.name}}.setAt(Index i, {{decl.type_info.direct.kl.name}} v) {
+{{decl.type_info.mutable_ptr.kl.name}}.ptrSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
   this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
 }
 
@@ -118,31 +118,31 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 }
 
 // Construct from a {{decl.type_info.const_ptr.kl.name}} and an offset; used
-// for {{decl.type_info.const_ptr.kl.name}}.getAt
+// for {{decl.type_info.const_ptr.kl.name}}.ptrGetAt
 {{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ptr.kl.name}} ptr, Index offset) {
   this.ptr = ptr.ptr.offset(offset);
 }
 
 // Get the {{decl.type_info.direct.kl.name}} value
-{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.get() {
+{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.refGet() {
   return this.ptr->{ {{decl.type_info.direct.kl.name}} };
 }
 
 // Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
 {{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
-  this = ref.get();
+  this = ref.refGet();
 }
 
 // Convert to String
 {{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
-  s += this.get();
+  s += this.refGet();
 }
 
 {% if decl.type_info.direct.kl.name.base != 'Boolean' %}
 
 // Convert to Boolean
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
-  this = Boolean(ref.get());
+  this = Boolean(ref.refGet());
 }
 {% endif %}
 
@@ -152,18 +152,18 @@ Boolean({{decl.type_info.const_ref.kl.name}} ref) {
 }
 
 // Set the value
-{{decl.type_info.mutable_ref.kl.name}}.set({{decl.type_info.direct.kl.name}} value) {
+{{decl.type_info.mutable_ref.kl.name}}.refSet({{decl.type_info.direct.kl.name}} value) {
   this.ptr->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 
 // Assignment of {{decl.type_info.direct.kl.name}}
 {{decl.type_info.mutable_ref.kl.name}}.=({{decl.type_info.direct.kl.name}} value) {
-  this.set(value);
+  this.refSet(value);
 }
 
 // Convert to String
 {{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
-  s += this.get();
+  s += this.refGet();
 }
 
 {% endblock body %}

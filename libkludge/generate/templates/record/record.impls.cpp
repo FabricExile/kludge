@@ -4,11 +4,12 @@
 {% import "generate/macros.cpp" as macros %}
 {% extends "generate/decl/decl.impls.cpp" %}
 {% block body %}
+{% if record.include_getters_setters or not is_direct %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Getters and Setters
 ////////////////////////////////////////////////////////////////////////
 
-{% if record.include_getters_setters %}
 {% for member in record.members %}
 {% if member.is_public() %}
 {% if member.has_getter() %}
@@ -50,7 +51,9 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% endfor %}
 {% endif %}
+{% if not is_direct %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Constructors and Destructor
 ////////////////////////////////////////////////////////////////////////
 
@@ -98,7 +101,10 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
+{% endif %}
+{% if len(record.methods) > 0 %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Methods
 ////////////////////////////////////////////////////////////////////////
 
@@ -125,7 +131,9 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 }
 
 {% endfor %}
+{% if is_direct and len(record.uni_ops) > 0 %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Unary Operators
 ////////////////////////////////////////////////////////////////////////
 
@@ -141,7 +149,10 @@ FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
 }
 
 {% endfor %}
+{% endif %}
+{% if is_direct and len(record.bin_ops) > 0 %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Binary Operators
 ////////////////////////////////////////////////////////////////////////
 
@@ -158,7 +169,10 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 }
 
 {% endfor %}
+{% endif %}
+{% if is_direct and len(record.ass_ops) > 0 %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Assignment Operators
 ////////////////////////////////////////////////////////////////////////
 
@@ -185,7 +199,10 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
+{% endif %}
+{% if is_direct and len(record.casts) > 0 %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Casts
 ////////////////////////////////////////////////////////////////////////
 
@@ -203,7 +220,9 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endfor %}
+{% endif %}
 ////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
 // Deref
 ////////////////////////////////////////////////////////////////////////
 
@@ -219,11 +238,12 @@ FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
 }
 
 {% endif %}
+{% if record.get_ind_op_result %}
 ////////////////////////////////////////////////////////////////////////
-// Index Operators
+// {{this_type_info}}
+// getAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 
-{% if record.get_ind_op_result %}
 FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
 {{record.get_ind_op_edk_symbol_name}}(
     {{macros.edk_param_list(record.get_ind_op_result, record.get_ind_op_this, record.get_ind_op_params) | indent(4)}}
@@ -238,6 +258,11 @@ FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
 
 {% endif %}
 {% if record.set_ind_op_params %}
+////////////////////////////////////////////////////////////////////////
+// {{this_type_info}}
+// etAt(Index) Operator
+////////////////////////////////////////////////////////////////////////
+
 FABRIC_EXT_EXPORT void
 {{record.set_ind_op_edk_symbol_name}}(
     {{macros.edk_param_list(None, record.set_ind_op_this, record.set_ind_op_params) | indent(4)}}

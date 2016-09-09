@@ -53,11 +53,13 @@ class Decl(object):
   def get_template_aliases(self):
     return []
 
-  def render(self, context, lang):
+  def render(self, context, lang, extras={}):
     path = self.get_template_path()
     template_vars = {'decl': self}
     for template_alias in self.get_template_aliases():
       template_vars.setdefault(template_alias, self)
+    for k, v in extras.iteritems():
+      template_vars.setdefault(k, v)
     try:
       template = self.ext.jinjenv.get_template(path+'.'+context+'.'+lang)
     except:

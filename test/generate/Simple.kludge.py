@@ -189,39 +189,39 @@ ext.add_func('SimpleConstPtrResult', 'int const *')\
   .add_test("""
 SInt32ConstPtr ptr = SimpleConstPtrResult();
 report("SimpleConstPtrResult(): ptr = " + ptr);
-report("SimpleConstPtrResult(): ptr.isValid() = " + ptr.isValid());
+report("SimpleConstPtrResult(): ptr.ptrIsValid() = " + ptr.ptrIsValid());
 report("SimpleConstPtrResult(): Boolean(ptr) = " + Boolean(ptr));
-report("SimpleConstPtrResult(): ptr.deref() = " + ptr.deref());
-report("SimpleConstPtrResult(): ptr.getAt(0) = " + ptr.getAt(0));
+report("SimpleConstPtrResult(): ptr.ptrDeref() = " + ptr.ptrDeref());
+report("SimpleConstPtrResult(): ptr.ptrGetAt(0) = " + ptr.ptrGetAt(0));
 """, """
 SimpleConstPtrResult(): ptr = <Opaque>
-SimpleConstPtrResult(): ptr.isValid() = true
+SimpleConstPtrResult(): ptr.ptrIsValid() = true
 SimpleConstPtrResult(): Boolean(ptr) = true
-SimpleConstPtrResult(): ptr.deref() = 42
-SimpleConstPtrResult(): ptr.getAt(0) = 42
+SimpleConstPtrResult(): ptr.ptrDeref() = 42
+SimpleConstPtrResult(): ptr.ptrGetAt(0) = 42
 """)
 
 ext.add_func('SimpleMutablePtrResult', 'int *')\
   .add_test("""
 SInt32Ptr ptr = SimpleMutablePtrResult();
 report("SimplePtrResult(): before: ptr = " + ptr);
-report("SimplePtrResult(): before: ptr.isValid() = " + ptr.isValid());
+report("SimplePtrResult(): before: ptr.ptrIsValid() = " + ptr.ptrIsValid());
 report("SimplePtrResult(): before: Boolean(ptr) = " + Boolean(ptr));
-report("SimplePtrResult(): before: ptr.deref() = " + ptr.deref());
-report("SimplePtrResult(): before: ptr.getAt(0) = " + ptr.getAt(0));
-report("SimplePtrResult(): ptr.deref().set(-7)");
-ptr.deref().set(-7);
-report("SimplePtrResult(): before: ptr.deref() = " + ptr.deref());
-report("SimplePtrResult(): before: ptr.getAt(0) = " + ptr.getAt(0));
+report("SimplePtrResult(): before: ptr.ptrDeref() = " + ptr.ptrDeref());
+report("SimplePtrResult(): before: ptr.ptrGetAt(0) = " + ptr.ptrGetAt(0));
+report("SimplePtrResult(): ptr.ptrDeref().refSet(-7)");
+ptr.ptrDeref().refSet(-7);
+report("SimplePtrResult(): before: ptr.ptrDeref() = " + ptr.ptrDeref());
+report("SimplePtrResult(): before: ptr.ptrGetAt(0) = " + ptr.ptrGetAt(0));
 """, """
 SimplePtrResult(): before: ptr = {ptr:<Opaque>}
-SimplePtrResult(): before: ptr.isValid() = true
+SimplePtrResult(): before: ptr.ptrIsValid() = true
 SimplePtrResult(): before: Boolean(ptr) = true
-SimplePtrResult(): before: ptr.deref() = 42
-SimplePtrResult(): before: ptr.getAt(0) = 42
-SimplePtrResult(): ptr.deref().set(-7)
-SimplePtrResult(): before: ptr.deref() = -7
-SimplePtrResult(): before: ptr.getAt(0) = -7
+SimplePtrResult(): before: ptr.ptrDeref() = 42
+SimplePtrResult(): before: ptr.ptrGetAt(0) = 42
+SimplePtrResult(): ptr.ptrDeref().refSet(-7)
+SimplePtrResult(): before: ptr.ptrDeref() = -7
+SimplePtrResult(): before: ptr.ptrGetAt(0) = -7
 """)
 
 ext.add_func('SimpleConstRefResult', 'int const &')\
@@ -235,7 +235,7 @@ ext.add_func('SimpleMutableRefResult', 'int &')\
   .add_test("""
 SInt32Ref result = SimpleMutableRefResult();
 report("SimpleMutableRefResult(): before: result = " + result);
-result.set(-7);
+result.refSet(-7);
 result = SimpleMutableRefResult();
 report("SimpleMutableRefResult(): after: result = " + result);
 """, """

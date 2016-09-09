@@ -322,7 +322,6 @@ class Record(Decl):
     parent_namespace,
     record_desc,
     kl_local_name,
-    this_type_info,
     extends = None,
     include_empty_ctor = True,
     include_copy_ctor = True,
@@ -361,27 +360,6 @@ class Record(Decl):
 
     self.kl_local_name = kl_local_name
     self.this_value_name = this_cpp_value_name
-    self.this_type_info = this_type_info
-    if extends:
-      extends_const_this = extends.const_this
-    else:
-      extends_const_this = None
-    self.const_this = ThisCodec(
-      this_type_info,
-      self.members,
-      False,
-      extends_this = extends_const_this
-      )
-    if extends:
-      extends_mutable_this = extends.mutable_this
-    else:
-      extends_mutable_this = None
-    self.mutable_this = ThisCodec(
-      this_type_info,
-      self.members,
-      True,
-      extends_this = extends_mutable_this
-      )
     self.extends = extends
     self.default_access = MemberAccess.public
     self.include_empty_ctor = include_empty_ctor
@@ -393,17 +371,9 @@ class Record(Decl):
     self.get_ind_op_result = None
     self.get_ind_op_params = None
     self.set_ind_op_params = None
-    copy_param_cpp_type_name = this_type_info.lib.name.compound + ' const &'
-    copy_param_cpp_type_expr = self.resolve_cpp_type_expr(copy_param_cpp_type_name)
-    self.copy_params = [
-      ParamCodec(
-        self.ext.type_mgr.get_dqti(copy_param_cpp_type_expr),
-        'that'
-        )
-      ]
 
   def get_desc(self):
-    return "%s: C++[%s] -> KL[%s]" % (self.record_desc, self.this_type_info.lib.expr, self.this_type_info.kl.name.compound)
+    return "Record"
   
   def resolve_cpp_type_expr(self, cpp_type_name):
     return self.namespace.resolve_cpp_type_expr(cpp_type_name)

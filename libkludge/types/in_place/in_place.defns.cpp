@@ -16,15 +16,11 @@ struct {{decl.type_info.mutable_ptr.edk.name}}
 struct {{decl.type_info.const_ref.edk.name}}
 {
   {{decl.type_info.const_ptr.lib.name}} cpp_ptr;
-  {{decl.type_info.direct.lib.name}} value;
-  bool is_local;
 };
 
 struct {{decl.type_info.mutable_ref.edk.name}}
 {
   {{decl.type_info.mutable_ptr.lib.name}} cpp_ptr;
-  {{decl.type_info.direct.lib.name}} value;
-  bool is_local;
 };
 
 {% endblock body %}

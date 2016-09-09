@@ -86,60 +86,60 @@ report("Before: float32 = " + float32);
 report("Before: float64 = " + float64);
 SimpleParams(
   boolean,
-  Boolean_CxxConstPtr(boolean),
-  Boolean_CxxPtr(boolean),
-  boolean,
-  Boolean_CxxRef(boolean),
+  Make_Boolean_CxxConstPtr(boolean),
+  Make_Boolean_CxxPtr(boolean),
+  Make_Boolean_CxxConstRef(boolean),
+  Make_Boolean_CxxRef(boolean),
   sint8,
-  SInt8_CxxConstPtr(sint8),
-  SInt8_CxxPtr(sint8),
-  sint8,
-  SInt8_CxxRef(sint8),
+  Make_SInt8_CxxConstPtr(sint8),
+  Make_SInt8_CxxPtr(sint8),
+  Make_SInt8_CxxConstRef(sint8),
+  Make_SInt8_CxxRef(sint8),
   uint8,
-  UInt8_CxxConstPtr(uint8),
-  UInt8_CxxPtr(uint8),
-  uint8,
-  UInt8_CxxRef(uint8),
+  Make_UInt8_CxxConstPtr(uint8),
+  Make_UInt8_CxxPtr(uint8),
+  Make_UInt8_CxxConstRef(uint8),
+  Make_UInt8_CxxRef(uint8),
   sint16,
-  SInt16_CxxConstPtr(sint16),
-  SInt16_CxxPtr(sint16),
-  sint16,
-  SInt16_CxxRef(sint16),
+  Make_SInt16_CxxConstPtr(sint16),
+  Make_SInt16_CxxPtr(sint16),
+  Make_SInt16_CxxConstRef(sint16),
+  Make_SInt16_CxxRef(sint16),
   uint16,
-  UInt16_CxxConstPtr(uint16),
-  UInt16_CxxPtr(uint16),
-  uint16,
-  UInt16_CxxRef(uint16),
+  Make_UInt16_CxxConstPtr(uint16),
+  Make_UInt16_CxxPtr(uint16),
+  Make_UInt16_CxxConstRef(uint16),
+  Make_UInt16_CxxRef(uint16),
   sint32,
-  SInt32_CxxConstPtr(sint32),
-  SInt32_CxxPtr(sint32),
-  sint32,
-  SInt32_CxxRef(sint32),
+  Make_SInt32_CxxConstPtr(sint32),
+  Make_SInt32_CxxPtr(sint32),
+  Make_SInt32_CxxConstRef(sint32),
+  Make_SInt32_CxxRef(sint32),
   uint32,
-  UInt32_CxxConstPtr(uint32),
-  UInt32_CxxPtr(uint32),
-  uint32,
-  UInt32_CxxRef(uint32),
+  Make_UInt32_CxxConstPtr(uint32),
+  Make_UInt32_CxxPtr(uint32),
+  Make_UInt32_CxxConstRef(uint32),
+  Make_UInt32_CxxRef(uint32),
   sint64,
-  SInt64_CxxConstPtr(sint64),
-  SInt64_CxxPtr(sint64),
-  sint64,
-  SInt64_CxxRef(sint64),
+  Make_SInt64_CxxConstPtr(sint64),
+  Make_SInt64_CxxPtr(sint64),
+  Make_SInt64_CxxConstRef(sint64),
+  Make_SInt64_CxxRef(sint64),
   uint64,
-  UInt64_CxxConstPtr(uint64),
-  UInt64_CxxPtr(uint64),
-  uint64,
-  UInt64_CxxRef(uint64),
+  Make_UInt64_CxxConstPtr(uint64),
+  Make_UInt64_CxxPtr(uint64),
+  Make_UInt64_CxxConstRef(uint64),
+  Make_UInt64_CxxRef(uint64),
   float32,
-  Float32_CxxConstPtr(float32),
-  Float32_CxxPtr(float32),
-  float32,
-  Float32_CxxRef(float32),
+  Make_Float32_CxxConstPtr(float32),
+  Make_Float32_CxxPtr(float32),
+  Make_Float32_CxxConstRef(float32),
+  Make_Float32_CxxRef(float32),
   float64,
-  Float64_CxxConstPtr(float64),
-  Float64_CxxPtr(float64),
-  float64,
-  Float64_CxxRef(float64),
+  Make_Float64_CxxConstPtr(float64),
+  Make_Float64_CxxPtr(float64),
+  Make_Float64_CxxConstRef(float64),
+  Make_Float64_CxxRef(float64),
   );
 report("After: boolean = " + boolean);
 report("After: sint8 = " + sint8);
@@ -165,16 +165,16 @@ Before: uint64 = 1111111111111111
 Before: float32 = +3.14159
 Before: float64 = +3.14159265358979
 After: boolean = false
-After: sint8 = -88
-After: uint8 = 88
-After: sint16 = -8888
-After: uint16 = 8888
-After: sint32 = -88888888
-After: uint32 = 88888888
-After: sint64 = -8888888888888888
-After: uint64 = 8888888888888888
-After: float32 = +25.13272
-After: float64 = +25.13274122871832
+After: sint8 = -110
+After: uint8 = 110
+After: sint16 = -11110
+After: uint16 = 11110
+After: sint32 = -111111110
+After: uint32 = 111111110
+After: sint64 = -11111111111111110
+After: uint64 = 11111111111111110
+After: float32 = +31.4159
+After: float64 = +31.4159265358979
 """)
 
 
@@ -243,12 +243,13 @@ SimpleMutableRefResult(): before: result = 42
 SimpleMutableRefResult(): after: result = -7
 """)
 
-# ext.add_func('GetCString', 'char const *')\
-#   .add_test("""
-# SInt8_CxxConstPtr ptr = GetCString();
-# report("GetCString: ptr = " + ptr);
-# """, """
-# """)
+ext.add_func('GetCString', 'char const *')\
+  .add_test("""
+CxxCharConstPtr ptr = GetCString();
+report("GetCString: ptr = " + ptr);
+""", """
+GetCString: ptr = Hello, world!
+""")
 
 ext.add_func("SimpleObscure", 'long', ['signed short', 'long'])\
   .add_test("""

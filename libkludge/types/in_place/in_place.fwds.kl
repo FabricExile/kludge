@@ -5,6 +5,8 @@
 {% block body %}
 {% if not decl.is_simple %}
 struct {{decl.type_info.direct.kl.name}};
+{% elif decl.type_info.direct.kl.name.base == 'CxxChar' %}
+alias SInt8 {{decl.type_info.direct.kl.name}};
 {% endif %}
 struct {{decl.type_info.const_ptr.kl.name}};
 struct {{decl.type_info.mutable_ptr.kl.name}};

@@ -9,18 +9,44 @@ from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
 from libkludge.generate.builtin_decl import BuiltinDecl
 
+builtin_kl_type_names = [
+  'Boolean',
+  'SInt8',
+  'UInt8',
+  'SInt16',
+  'UInt16',
+  'SInt32',
+  'UInt32',
+  'SInt64',
+  'UInt64',
+  'Float32',
+  'Float64',
+  ]
+
+def build_kl_name_base(kl_type_name, suffix):
+  if not suffix:
+    return kl_type_name
+  if kl_type_name.startswith('Cxx'):
+    return kl_type_name + suffix
+  return kl_type_name + '_Cxx' + suffix
+
+def build_edk_name(kl_type_name, suffix, is_simple):
+  if kl_type_name in builtin_kl_type_names and not suffix:
+    return "Fabric::EDK::KL::" + kl_type_name
+  if not suffix:
+    return kl_type_name
+  if kl_type_name.startswith('Cxx'):
+    return kl_type_name + suffix
+  return kl_type_name + '_Cxx' + suffix
+
 class InPlaceDirectTypeInfo(TypeInfo):
 
   def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
-    if is_simple:
-      edk_name = "Fabric::EDK::KL::" + kl_type_name
-    else:
-      edk_name = "Fabric_EDK_KL_" + kl_type_name
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name,
-      edk_name = edk_name,
+      kl_name_base = build_kl_name_base(kl_type_name, ''),
+      edk_name = build_edk_name(kl_type_name, '', is_simple),
       lib_expr = cpp_type_expr,
       )
     self.is_simple = is_simple
@@ -45,8 +71,8 @@ class InPlaceConstRefTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "_CxxConstRef",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxConstRef",
+      kl_name_base = build_kl_name_base(kl_type_name, 'ConstRef'),
+      edk_name = build_edk_name(kl_type_name, 'ConstRef', is_simple),
       lib_expr = ReferenceTo(Const(cpp_type_expr)),
       )
 
@@ -62,8 +88,8 @@ class InPlaceMutableRefTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "_CxxRef",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxMutableRef",
+      kl_name_base = build_kl_name_base(kl_type_name, 'Ref'),
+      edk_name = build_edk_name(kl_type_name, 'MutableRef', is_simple),
       lib_expr = ReferenceTo(cpp_type_expr),
       )
 
@@ -79,8 +105,8 @@ class InPlaceConstPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "_CxxConstPtr",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxConstPtr",
+      kl_name_base = build_kl_name_base(kl_type_name, 'ConstPtr'),
+      edk_name = build_edk_name(kl_type_name, 'ConstPtr', is_simple),
       lib_expr = PointerTo(Const(cpp_type_expr)),
       )
 
@@ -96,8 +122,8 @@ class InPlaceMutablePtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name + "_CxxPtr",
-      edk_name = "Fabric_EDK_KL_" + kl_type_name + "_CxxMutablePtr",
+      kl_name_base = build_kl_name_base(kl_type_name, 'Ptr'),
+      edk_name = build_edk_name(kl_type_name, 'MutablePtr', is_simple),
       lib_expr = PointerTo(cpp_type_expr),
       )
 
@@ -159,6 +185,7 @@ class InPlaceSelector(Selector):
     Selector.__init__(self, ext)
 
     boolean_spec = InPlaceSpec("Boolean", Bool(), True)
+    char_spec = InPlaceSpec("CxxChar", Char(), True)
     sint8_spec = InPlaceSpec("SInt8", SimpleNamed("int8_t"), True)
     uint8_spec = InPlaceSpec("UInt8", SimpleNamed("uint8_t"), True)
     sint16_spec = InPlaceSpec("SInt16", SimpleNamed("int16_t"), True)
@@ -172,7 +199,7 @@ class InPlaceSelector(Selector):
 
     self.cpp_type_expr_to_spec = {
       Bool(): boolean_spec,
-      Char(): sint8_spec,
+      Char(): char_spec,
       SimpleNamed("int8_t"): sint8_spec,
       Unsigned(Char()): uint8_spec,
       SimpleNamed("uint8_t"): uint8_spec,

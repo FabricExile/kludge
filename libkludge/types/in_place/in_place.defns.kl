@@ -20,8 +20,6 @@ struct {{decl.type_info.mutable_ptr.kl.name}} : {{decl.type_info.const_ptr.kl.na
 
 struct {{decl.type_info.const_ref.kl.name}} {
   protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
-  protected {{decl.type_info.direct.kl.name}} value; // used in the "local" case where we construct a {{decl.type_info.const_ref.kl.name}} from a {{decl.type_info.direct.kl.name}}
-  protected Boolean is_local; // see value ^^
 };
 
 struct {{decl.type_info.mutable_ref.kl.name}} : {{decl.type_info.const_ref.kl.name}} {

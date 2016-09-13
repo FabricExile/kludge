@@ -57,6 +57,7 @@ class TypeInfo:
     kl_name_suffix=None,
     edk_name=None,
     child_dqtis=[],
+    record=None,
     ):
     if kl_name_base is not None:
       if not kl_name_suffix:
@@ -70,6 +71,7 @@ class TypeInfo:
     self.lib = LibTypeInfo(lib_expr)
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis
+    self.record = record
     self._codec_lookup_rules = None
 
   def get_desc(self):

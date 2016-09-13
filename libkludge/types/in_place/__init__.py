@@ -41,13 +41,14 @@ def build_edk_name(kl_type_name, suffix, is_simple):
 
 class InPlaceDirectTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = build_kl_name_base(kl_type_name, ''),
-      edk_name = build_edk_name(kl_type_name, '', is_simple),
-      lib_expr = cpp_type_expr,
+      kl_name_base=build_kl_name_base(kl_type_name, ''),
+      edk_name=build_edk_name(kl_type_name, '', is_simple),
+      lib_expr=cpp_type_expr,
+      record=record,
       )
     self.is_simple = is_simple
 
@@ -67,13 +68,14 @@ class InPlaceDirectTypeInfo(TypeInfo):
 
 class InPlaceConstRefTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = build_kl_name_base(kl_type_name, 'ConstRef'),
-      edk_name = build_edk_name(kl_type_name, 'ConstRef', is_simple),
-      lib_expr = ReferenceTo(Const(cpp_type_expr)),
+      kl_name_base=build_kl_name_base(kl_type_name, 'ConstRef'),
+      edk_name=build_edk_name(kl_type_name, 'ConstRef', is_simple),
+      lib_expr=ReferenceTo(Const(cpp_type_expr)),
+      record=record,
       )
 
   def build_codec_lookup_rules(self):
@@ -84,13 +86,14 @@ class InPlaceConstRefTypeInfo(TypeInfo):
 
 class InPlaceMutableRefTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = build_kl_name_base(kl_type_name, 'Ref'),
-      edk_name = build_edk_name(kl_type_name, 'MutableRef', is_simple),
-      lib_expr = ReferenceTo(cpp_type_expr),
+      kl_name_base=build_kl_name_base(kl_type_name, 'Ref'),
+      edk_name=build_edk_name(kl_type_name, 'MutableRef', is_simple),
+      lib_expr=ReferenceTo(cpp_type_expr),
+      record=record,
       )
 
   def build_codec_lookup_rules(self):
@@ -101,13 +104,14 @@ class InPlaceMutableRefTypeInfo(TypeInfo):
 
 class InPlaceConstPtrTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = build_kl_name_base(kl_type_name, 'ConstPtr'),
-      edk_name = build_edk_name(kl_type_name, 'ConstPtr', is_simple),
-      lib_expr = PointerTo(Const(cpp_type_expr)),
+      kl_name_base=build_kl_name_base(kl_type_name, 'ConstPtr'),
+      edk_name=build_edk_name(kl_type_name, 'ConstPtr', is_simple),
+      lib_expr=PointerTo(Const(cpp_type_expr)),
+      record=record,
       )
 
   def build_codec_lookup_rules(self):
@@ -118,13 +122,14 @@ class InPlaceConstPtrTypeInfo(TypeInfo):
 
 class InPlaceMutablePtrTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = build_kl_name_base(kl_type_name, 'Ptr'),
-      edk_name = build_edk_name(kl_type_name, 'MutablePtr', is_simple),
-      lib_expr = PointerTo(cpp_type_expr),
+      kl_name_base=build_kl_name_base(kl_type_name, 'Ptr'),
+      edk_name=build_edk_name(kl_type_name, 'MutablePtr', is_simple),
+      lib_expr=PointerTo(cpp_type_expr),
+      record=record,
       )
 
   def build_codec_lookup_rules(self):
@@ -194,9 +199,9 @@ class InPlaceSpec(object):
 
 class InPlaceTypeInfoSet(object):
   
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
     for name, klass in in_place_type_info_class_map.iteritems():
-      setattr(self, name, klass(jinjenv, kl_type_name, cpp_type_expr, is_simple))
+      setattr(self, name, klass(jinjenv, kl_type_name, cpp_type_expr, is_simple, record))
 
 class InPlaceSelector(Selector):
 
@@ -269,7 +274,13 @@ class InPlaceSelector(Selector):
       ti_set_cache_key = kl_type_name
       ti_set = self.ti_set_cache.get(ti_set_cache_key)
       if not ti_set:
-        ti_set = InPlaceTypeInfoSet(self.jinjenv, kl_type_name, undq_cpp_type_expr, is_simple)
+        ti_set = InPlaceTypeInfoSet(
+          self.jinjenv,
+          kl_type_name,
+          undq_cpp_type_expr,
+          is_simple,
+          record,
+          )
         self.ti_set_cache.setdefault(ti_set_cache_key, ti_set)
         self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, ti_set, record))
 

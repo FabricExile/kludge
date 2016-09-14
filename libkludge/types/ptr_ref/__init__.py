@@ -130,30 +130,33 @@ class PtrRefBuiltinDecl(BuiltinDecl):
 
   def render_method_impls(self, lang):
     result = ''
-    for index, type_info in enumerate([
-      self.type_info.const_ptr,
-      self.type_info.mutable_ptr,
-      self.type_info.const_ref,
-      self.type_info.mutable_ref,
-      ]):
-      if type_info.record:
-        is_direct = False
-        is_const_ptr = index == 0
-        is_mutable_ptr = index == 1
-        is_const_ref = index == 2
-        is_mutable_ref = index == 3
-        result += type_info.record.render('impls', lang, {
-          'type_info': type_info,
-          'is_direct': is_direct,
-          'is_const_ptr': is_const_ptr,
-          'is_mutable_ptr': is_mutable_ptr,
-          'is_const_ref': is_const_ref,
-          'is_mutable_ref': is_mutable_ref,
-          'allow_static_methods': is_direct,
-          'allow_mutable_methods': is_direct or is_mutable_ptr or is_mutable_ref,
-          'allow_const_methods': True,
-          'is_ptr': is_const_ptr or is_mutable_ptr,
-          })
+    if self.type_info.direct.record:
+      records = self.type_info.direct.record.get_nested_records()
+      print str(records)
+      for index, type_info in enumerate([
+        self.type_info.const_ptr,
+        self.type_info.mutable_ptr,
+        self.type_info.const_ref,
+        self.type_info.mutable_ref,
+        ]):
+        for record in records:
+          is_direct = False
+          is_const_ptr = index == 0
+          is_mutable_ptr = index == 1
+          is_const_ref = index == 2
+          is_mutable_ref = index == 3
+          result += record.render('impls', lang, {
+            'type_info': type_info,
+            'is_direct': is_direct,
+            'is_const_ptr': is_const_ptr,
+            'is_mutable_ptr': is_mutable_ptr,
+            'is_const_ref': is_const_ref,
+            'is_mutable_ref': is_mutable_ref,
+            'allow_static_methods': is_direct,
+            'allow_mutable_methods': is_direct or is_mutable_ptr or is_mutable_ref,
+            'allow_const_methods': True,
+            'is_ptr': is_const_ptr or is_mutable_ptr,
+            })
     return result
 
 class PtrRefTypeInfoSet(object):

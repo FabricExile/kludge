@@ -304,10 +304,10 @@ class Member(object):
     self.param = ParamCodec(dqti, cpp_name)
     self.getter_kl_name = getter_kl_name
     if not self.getter_kl_name is None and self.getter_kl_name == '':
-      self.getter_kl_name = 'get_' + cpp_name
+      self.getter_kl_name = 'cxxGet_' + cpp_name
     self.setter_kl_name = setter_kl_name
     if not self.setter_kl_name is None and self.setter_kl_name == '':
-      self.setter_kl_name = 'set_' + cpp_name
+      self.setter_kl_name = 'cxxSet_' + cpp_name
     self.access = access
 
   def has_getter(self):
@@ -368,6 +368,7 @@ class Record(Decl):
 
     self.kl_local_name = kl_local_name
     self.this_value_name = this_cpp_value_name
+    assert extends is None or isinstance(extends, Record)
     self.extends = extends
     self.default_access = MemberAccess.public
     self.include_empty_ctor = include_empty_ctor
@@ -379,6 +380,14 @@ class Record(Decl):
     self.get_ind_op_result = None
     self.get_ind_op_params = None
     self.set_ind_op_params = None
+
+  def get_nested_records(self):
+    result = []
+    record = self
+    while record:
+      result = [record] + result
+      record = record.extends
+    return result
 
   def get_this(self, type_info, is_mutable):
     return ThisCodec(type_info, is_mutable)

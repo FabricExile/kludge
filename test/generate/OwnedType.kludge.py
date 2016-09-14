@@ -17,12 +17,12 @@ ty.add_ctor(['float', 'std::string const &', 'int'])\
   .add_comment("""Another comment""")\
   .add_test("""
 Class c(3.14, "hello", 42);
-report("c.get_floatValue() = " + c.get_floatValue());
-report("c.get_stringValue() = " + c.get_stringValue());
+report("c.cxxGet_floatValue() = " + c.cxxGet_floatValue());
+report("c.cxxGet_stringValue() = " + c.cxxGet_stringValue());
 """, """
 Class::Class(3.14, hello, 42)
-c.get_floatValue() = +3.14
-c.get_stringValue() = hello
+c.cxxGet_floatValue() = +3.14
+c.cxxGet_stringValue() = hello
 Class::~Class()
 """)
 ty.add_mutable_method('publicMethod', 'std::string const &')\

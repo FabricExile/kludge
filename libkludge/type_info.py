@@ -3,6 +3,7 @@
 #
 
 from symbol_helpers import replace_invalid_chars
+from libkludge.generate.record import Record
 
 class KLTypeName:
 
@@ -73,7 +74,9 @@ class TypeInfo:
     self.lib = LibTypeInfo(lib_expr)
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis
+    assert extends is None or isinstance(extends, TypeInfo)
     self.extends = extends
+    assert record is None or isinstance(record, Record)
     self.record = record
     self.is_simple = is_simple
     self._codec_lookup_rules = None

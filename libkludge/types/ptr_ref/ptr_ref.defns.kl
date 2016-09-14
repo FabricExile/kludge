@@ -1,0 +1,20 @@
+{######################################################################}
+{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
+{######################################################################}
+{% extends "generate/decl/decl.defns.kl" %}
+{% block body %}
+struct {{decl.type_info.const_ptr.kl.name}} permits {{decl.type_info.const_ref.kl.name}} {
+  protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
+};
+
+struct {{decl.type_info.mutable_ptr.kl.name}} : {{decl.type_info.const_ptr.kl.name}} {
+};
+
+struct {{decl.type_info.const_ref.kl.name}} {
+  protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
+};
+
+struct {{decl.type_info.mutable_ref.kl.name}} : {{decl.type_info.const_ref.kl.name}} {
+};
+
+{% endblock body %}

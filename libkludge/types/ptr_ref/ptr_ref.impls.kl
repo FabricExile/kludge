@@ -1,0 +1,202 @@
+{######################################################################}
+{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
+{######################################################################}
+{% extends "generate/decl/decl.impls.kl" %}
+{% block body %}
+{{decl.render_method_impls('kl')}}
+////////////////////////////////////////////////////////////////////////
+// {{decl.type_info.const_ptr.kl.name}}
+// {{decl.type_info.mutable_ptr.kl.name}}
+// {{decl.type_info.const_ref.kl.name}}
+// {{decl.type_info.mutable_ref.kl.name}}
+// Wrapper methods
+////////////////////////////////////////////////////////////////////////
+
+// Given an in value, take a pointer to the value
+{{decl.type_info.const_ptr.kl.name}} Make_{{decl.type_info.const_ptr.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.const_ptr.kl.name}}(ea);
+}
+
+// Given an io value, take a pointer to the value
+{{decl.type_info.const_ptr.kl.name}} Make_{{decl.type_info.const_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.const_ptr.kl.name}}(ea);
+}
+
+// Given an external array, take a pointer to the first element
+{{decl.type_info.const_ptr.kl.name}}({{decl.type_info.direct.kl.name}} array<>) {
+  this.ptr = array.data();
+}
+
+// Is valid.  Check for null pointer
+Boolean {{decl.type_info.const_ptr.kl.name}}.cxxPtrIsValid() {
+  return !!this.ptr;
+}
+
+Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
+  this = ptr.cxxPtrIsValid();
+}
+
+// Indexing operation
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt(Index index) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt on null {{decl.type_info.const_ptr.kl.name}}";
+  {{decl.type_info.direct.kl.name}} ea<>(this.ptr, index + 1);
+  return Make_{{decl.type_info.const_ref.kl.name}}(ea[index]);
+}
+
+// Deref the pointer
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxPtrDeref() {
+  return this.cxxPtrGetAt(0);
+}
+
+{% if decl.type_info.direct.kl.name.base == 'CxxChar' %}
+// Given a String, take a pointer to the bytes of the string
+{{decl.type_info.const_ptr.kl.name}}(String s) {
+  this.ptr = s.data();
+}
+
+// Convert to a string
+// Note that this can potentially crash.  Converting a {{decl.type_info.const_ptr.kl.name}} to
+// a String is not always safe, just as it is not always safe in C++
+{{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
+  Count size = 0;
+  while (this.cxxPtrGetAt(size))
+    ++size;
+  UInt8 bytes<>(this.ptr, size);
+  String ss;
+  ss.setFrom(bytes);
+  s += ss;
+}
+{% else %}
+// Convert to a string
+{{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
+  s += this.ptr;
+}
+{% endif %}
+
+// Given an in value, take a pointer to the value
+{{decl.type_info.mutable_ptr.kl.name}} Make_{{decl.type_info.mutable_ptr.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.mutable_ptr.kl.name}}(ea);
+}
+
+// Given an io value, take a pointer to the value
+{{decl.type_info.mutable_ptr.kl.name}} Make_{{decl.type_info.mutable_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.mutable_ptr.kl.name}}(ea);
+}
+
+// Given an io external array, take a pointer to the first element
+{{decl.type_info.mutable_ptr.kl.name}}({{decl.type_info.direct.kl.name}} ea<>) {
+  this.ptr = ea.data();
+}
+
+// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt(Index index) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
+  {{decl.type_info.direct.kl.name}} ea<>(this.ptr, index + 1);
+  return Make_{{decl.type_info.mutable_ref.kl.name}}(ea[index]);
+}
+
+// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrDeref() {
+  return this.cxxPtrGetAt(0);
+}
+
+// Set the value at an offset into the array
+{{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
+  this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
+}
+
+// Given an in value, take a ConstRef to the value
+{{decl.type_info.const_ref.kl.name}} Make_{{decl.type_info.const_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.const_ref.kl.name}}(ea);
+}
+
+// Given an io value, take a ConstRef to the value
+{{decl.type_info.const_ref.kl.name}} Make_{{decl.type_info.const_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.const_ref.kl.name}}(ea);
+}
+
+// Given an io external array, take a pointer to the first element
+{{decl.type_info.const_ref.kl.name}}({{decl.type_info.direct.kl.name}} ea<>) {
+  this.ptr = ea.data();
+}
+
+// Copy ctor
+{{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ref.kl.name}} that) {
+  this.ptr = that.ptr;
+}
+
+// Assigment
+{{decl.type_info.const_ref.kl.name}}.=({{decl.type_info.const_ref.kl.name}} that) {
+  this.ptr = that.ptr;
+}
+
+// Get the {{decl.type_info.direct.kl.name}} value
+{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxRefGet() {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.const_ref.kl.name}}.cxxRefGet on null {{decl.type_info.const_ref.kl.name}}";
+  return this.ptr->{ {{decl.type_info.direct.kl.name}} };
+}
+
+// Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
+{{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
+  this = ref.cxxRefGet();
+}
+
+// Convert to String
+{{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
+  s += this.cxxRefGet();
+}
+
+{% if decl.type_info.direct.is_simple and decl.type_info.direct.kl.name.base != 'Boolean' %}
+
+// Convert to Boolean
+Boolean({{decl.type_info.const_ref.kl.name}} ref) {
+  this = Boolean(ref.cxxRefGet());
+}
+{% endif %}
+
+// Given an in value, take a ConstRef to the value
+{{decl.type_info.mutable_ref.kl.name}} Make_{{decl.type_info.mutable_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.mutable_ref.kl.name}}(ea);
+}
+
+// Given an io value, take a ConstRef to the value
+{{decl.type_info.mutable_ref.kl.name}} Make_{{decl.type_info.mutable_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
+  {{decl.type_info.direct.kl.name}} ea<>(value.data(), 1);
+  return {{decl.type_info.mutable_ref.kl.name}}(ea);
+}
+
+// Given an io external array, take a pointer to the first element
+{{decl.type_info.mutable_ref.kl.name}}({{decl.type_info.direct.kl.name}} ea<>) {
+  this.ptr = ea.data();
+}
+
+// Set the value
+{{decl.type_info.mutable_ref.kl.name}}.cxxRefSet({{decl.type_info.direct.kl.name}} value) {
+  if (Fabric_Guarded && !this.ptr)
+    throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxxRefSet on null {{decl.type_info.mutable_ref.kl.name}}";
+  this.ptr->{ {{decl.type_info.direct.kl.name}} } = value;
+}
+
+// Assignment of {{decl.type_info.direct.kl.name}}
+{{decl.type_info.mutable_ref.kl.name}}.=({{decl.type_info.direct.kl.name}} value) {
+  this.cxxRefSet(value);
+}
+
+// Convert to String
+{{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
+  s += this.cxxRefGet();
+}
+
+{% endblock body %}

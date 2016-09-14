@@ -58,6 +58,7 @@ class TypeInfo:
     edk_name=None,
     child_dqtis=[],
     record=None,
+    is_simple=False,
     ):
     if kl_name_base is not None:
       if not kl_name_suffix:
@@ -72,6 +73,7 @@ class TypeInfo:
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis
     self.record = record
+    self.is_simple = is_simple
     self._codec_lookup_rules = None
 
   def get_desc(self):

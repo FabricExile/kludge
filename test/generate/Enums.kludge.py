@@ -18,7 +18,7 @@ DescribeGlobalEnum(ValueOne);
 DescribeGlobalEnum(ValueSeventeen);
 DescribeGlobalEnum(ReturnGlobalEnum());
 GlobalEnum e;
-SetGlobalEnum(e);
+SetGlobalEnum(Make_GlobalEnum_CxxRef(e));
 DescribeGlobalEnum(e);
 """, """
 DescribeGlobalEnum: e=ValueOne

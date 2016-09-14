@@ -23,170 +23,68 @@ builtin_kl_type_names = [
   'Float64',
   ]
 
-def build_kl_name_base(kl_type_name, suffix):
-  if not suffix:
-    return kl_type_name
-  if kl_type_name.startswith('Cxx'):
-    return kl_type_name + suffix
-  return kl_type_name + '_Cxx' + suffix
-
-def build_edk_name(kl_type_name, suffix, is_simple):
-  if kl_type_name in builtin_kl_type_names and not suffix:
+def build_edk_name(kl_type_name):
+  if kl_type_name in builtin_kl_type_names:
     return "Fabric::EDK::KL::" + kl_type_name
-  if not suffix:
+  else:
     return kl_type_name
-  if kl_type_name.startswith('Cxx'):
-    return kl_type_name + suffix
-  return kl_type_name + '_Cxx' + suffix
 
-class InPlaceDirectTypeInfo(TypeInfo):
+class InPlaceTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
+  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, record, is_simple):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base=build_kl_name_base(kl_type_name, ''),
-      edk_name=build_edk_name(kl_type_name, '', is_simple),
+      kl_name_base=kl_type_name,
+      edk_name=build_edk_name(kl_type_name),
       lib_expr=cpp_type_expr,
       record=record,
+      is_simple=is_simple,
       )
-    self.is_simple = is_simple
+    pass
 
   def build_codec_lookup_rules(self):
     tds = TypeInfo.build_codec_lookup_rules(self)
     if self.is_simple:
-      tds["conv"]["*"] = "types/builtin/in_place/direct/simple/conv"
+      tds["conv"]["*"] = "types/builtin/in_place/simple/conv"
       tds["result"]["*"] = "protocols/result/builtin/direct"
-      tds["repr"]["new_begin"] = "types/builtin/in_place/direct/simple/repr"
+      tds["repr"]["new_begin"] = "types/builtin/in_place/simple/repr"
     else:
       tds["conv"]["*"] = "protocols/conv/builtin/none"
       tds["result"]["*"] = "protocols/result/builtin/indirect"
-      tds["result"]["decl_and_assign_lib_begin"] = "types/builtin/in_place/direct/complex/result"
-      tds["result"]["decl_and_assign_lib_end"] = "types/builtin/in_place/direct/complex/result"
-      tds["result"]["indirect_lib_to_edk"] = "types/builtin/in_place/direct/complex/result"
+      tds["result"]["decl_and_assign_lib_begin"] = "types/builtin/in_place/complex/result"
+      tds["result"]["decl_and_assign_lib_end"] = "types/builtin/in_place/complex/result"
+      tds["result"]["indirect_lib_to_edk"] = "types/builtin/in_place/complex/result"
     return tds
-
-class InPlaceConstRefTypeInfo(TypeInfo):
-
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
-    TypeInfo.__init__(
-      self,
-      jinjenv,
-      kl_name_base=build_kl_name_base(kl_type_name, 'ConstRef'),
-      edk_name=build_edk_name(kl_type_name, 'ConstRef', is_simple),
-      lib_expr=ReferenceTo(Const(cpp_type_expr)),
-      record=record,
-      )
-
-  def build_codec_lookup_rules(self):
-    tds = TypeInfo.build_codec_lookup_rules(self)
-    tds["conv"]["*"] = "types/builtin/in_place/ref/conv"
-    tds["result"]["*"] = "protocols/result/builtin/indirect"
-    return tds
-
-class InPlaceMutableRefTypeInfo(TypeInfo):
-
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
-    TypeInfo.__init__(
-      self,
-      jinjenv,
-      kl_name_base=build_kl_name_base(kl_type_name, 'Ref'),
-      edk_name=build_edk_name(kl_type_name, 'MutableRef', is_simple),
-      lib_expr=ReferenceTo(cpp_type_expr),
-      record=record,
-      )
-
-  def build_codec_lookup_rules(self):
-    tds = TypeInfo.build_codec_lookup_rules(self)
-    tds["conv"]["*"] = "types/builtin/in_place/ref/conv"
-    tds["result"]["*"] = "protocols/result/builtin/indirect"
-    return tds
-
-class InPlaceConstPtrTypeInfo(TypeInfo):
-
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
-    TypeInfo.__init__(
-      self,
-      jinjenv,
-      kl_name_base=build_kl_name_base(kl_type_name, 'ConstPtr'),
-      edk_name=build_edk_name(kl_type_name, 'ConstPtr', is_simple),
-      lib_expr=PointerTo(Const(cpp_type_expr)),
-      record=record,
-      )
-
-  def build_codec_lookup_rules(self):
-    tds = TypeInfo.build_codec_lookup_rules(self)
-    tds["conv"]["*"] = "types/builtin/in_place/ptr/conv"
-    tds["result"]["*"] = "protocols/result/builtin/indirect"
-    return tds
-
-class InPlaceMutablePtrTypeInfo(TypeInfo):
-
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
-    TypeInfo.__init__(
-      self,
-      jinjenv,
-      kl_name_base=build_kl_name_base(kl_type_name, 'Ptr'),
-      edk_name=build_edk_name(kl_type_name, 'MutablePtr', is_simple),
-      lib_expr=PointerTo(cpp_type_expr),
-      record=record,
-      )
-
-  def build_codec_lookup_rules(self):
-    tds = TypeInfo.build_codec_lookup_rules(self)
-    tds["conv"]["*"] = "types/builtin/in_place/ptr/conv"
-    tds["result"]["*"] = "protocols/result/builtin/indirect"
-    return tds
-
-in_place_type_info_class_map = {
-  'direct': InPlaceDirectTypeInfo,
-  'const_ref': InPlaceConstRefTypeInfo,
-  'mutable_ref': InPlaceMutableRefTypeInfo,
-  'const_ptr': InPlaceConstPtrTypeInfo,
-  'mutable_ptr': InPlaceMutablePtrTypeInfo,
-  }
 
 class InPlaceBuiltinDecl(BuiltinDecl):
 
-  def __init__(self, ext, is_simple, ti_set, record):
+  def __init__(self, ext, is_simple, type_info):
     BuiltinDecl.__init__(
       self,
       ext.root_namespace,
-      desc="InPlace %s" % (ti_set.direct),
+      desc="InPlace %s" % (type_info),
       template_path="types/builtin/in_place/in_place",
-      test_name="InPlace_%s" % (ti_set.direct.kl.name),
+      test_name="InPlace_%s" % (type_info.kl.name),
       )
     self.is_simple = is_simple
-    self.type_info = ti_set
-    self.record = record
+    self.type_info = type_info
 
   def render_method_impls(self, lang):
     result = ''
-    if self.record:
-      for index, type_info in enumerate([
-        self.type_info.direct,
-        self.type_info.const_ptr,
-        self.type_info.mutable_ptr,
-        self.type_info.const_ref,
-        self.type_info.mutable_ref,
-        ]):
-        is_direct = index == 0
-        is_const_ptr = index == 1
-        is_mutable_ptr = index == 2
-        is_const_ref = index == 3
-        is_mutable_ref = index == 4
-        result += self.record.render('impls', lang, {
-          'type_info': type_info,
-          'is_direct': is_direct,
-          'is_const_ptr': is_const_ptr,
-          'is_mutable_ptr': is_mutable_ptr,
-          'is_const_ref': is_const_ref,
-          'is_mutable_ref': is_mutable_ref,
-          'allow_static_methods': is_direct,
-          'allow_mutable_methods': is_direct or is_mutable_ptr or is_mutable_ref,
-          'allow_const_methods': True,
-          'is_ptr': is_const_ptr or is_mutable_ptr,
-          })
+    if self.type_info.record:
+      result += self.type_info.record.render('impls', lang, {
+        'type_info': self.type_info,
+        'is_direct': True,
+        'is_const_ptr': False,
+        'is_mutable_ptr': False,
+        'is_const_ref': False,
+        'is_mutable_ref': False,
+        'allow_static_methods': True,
+        'allow_mutable_methods': True,
+        'allow_const_methods': True,
+        'is_ptr': False,
+        })
     return result
 
 class InPlaceSpec(object):
@@ -197,13 +95,9 @@ class InPlaceSpec(object):
     self.is_simple = is_simple
     self.record = record
 
-class InPlaceTypeInfoSet(object):
-  
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, is_simple, record):
-    for name, klass in in_place_type_info_class_map.iteritems():
-      setattr(self, name, klass(jinjenv, kl_type_name, cpp_type_expr, is_simple, record))
-
 class InPlaceSelector(Selector):
+
+  should_create_ptr_ref = True
 
   def __init__(self, ext):
     Selector.__init__(self, ext)
@@ -251,7 +145,7 @@ class InPlaceSelector(Selector):
       #######################################################################
       }
 
-    self.ti_set_cache = {}
+    self.type_info_cache = {}
 
   def get_desc(self):
     return "InPlace"
@@ -263,26 +157,25 @@ class InPlaceSelector(Selector):
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
+    if dq.is_direct:
+      spec = self.cpp_type_expr_to_spec.get(undq_cpp_type_expr)
+      if spec:
+        kl_type_name = spec.kl_type_name
+        undq_cpp_type_expr = spec.cpp_type_expr
+        is_simple = spec.is_simple
+        record = spec.record
 
-    spec = self.cpp_type_expr_to_spec.get(undq_cpp_type_expr)
-    if spec:
-      kl_type_name = spec.kl_type_name
-      undq_cpp_type_expr = spec.cpp_type_expr
-      is_simple = spec.is_simple
-      record = spec.record
+        type_info_cache_key = kl_type_name
+        type_info = self.type_info_cache.get(type_info_cache_key)
+        if not type_info:
+          type_info = InPlaceTypeInfo(
+            self.jinjenv,
+            kl_type_name,
+            undq_cpp_type_expr,
+            record,
+            is_simple,
+            )
+          self.type_info_cache.setdefault(type_info_cache_key, type_info)
+          self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, type_info))
 
-      ti_set_cache_key = kl_type_name
-      ti_set = self.ti_set_cache.get(ti_set_cache_key)
-      if not ti_set:
-        ti_set = InPlaceTypeInfoSet(
-          self.jinjenv,
-          kl_type_name,
-          undq_cpp_type_expr,
-          is_simple,
-          record,
-          )
-        self.ti_set_cache.setdefault(ti_set_cache_key, ti_set)
-        self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, ti_set, record))
-
-      ti = getattr(ti_set, dq.get_desc())
-      return DirQualTypeInfo(DirQual(directions.Direct, qualifiers.Unqualified), ti)
+        return DirQualTypeInfo(dq, type_info)

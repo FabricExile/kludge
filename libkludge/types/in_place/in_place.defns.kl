@@ -5,10 +5,17 @@
 {% block body %}
 {% if not decl.is_simple %}
 struct {{decl.type_info.kl.name}} {
+{% if decl.type_info.extends %}
+  : public {{decl.type_info.extends.edk.name}}
+{% endif %}
 {% for member in decl.type_info.record.members %}
   {{"public" if member.is_public() else "private"}} {{member.type_info.kl.name.base}} {{member.kl_name}}{{member.type_info.kl.name.suffix}};
 {% endfor %}
 };
 
 {% endif %}
+inline UInt64 __CxxSize_{{decl.type_info.kl.name}}() {
+  return {{decl.type_info.kl.name}}().dataSize();
+}
+
 {% endblock body %}

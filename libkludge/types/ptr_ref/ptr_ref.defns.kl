@@ -7,14 +7,30 @@ struct {{decl.type_info.const_ptr.kl.name}} permits {{decl.type_info.const_ref.k
   protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
 };
 
+inline UInt64 __CxxSize_{{decl.type_info.const_ptr.kl.name}}() {
+  return Data().dataSize();
+}
+
 struct {{decl.type_info.mutable_ptr.kl.name}} : {{decl.type_info.const_ptr.kl.name}} {
 };
+
+inline UInt64 __CxxSize_{{decl.type_info.mutable_ptr.kl.name}}() {
+  return Data().dataSize();
+}
 
 struct {{decl.type_info.const_ref.kl.name}} {
   protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
 };
 
+inline UInt64 __CxxSize_{{decl.type_info.const_ref.kl.name}}() {
+  return Data().dataSize();
+}
+
 struct {{decl.type_info.mutable_ref.kl.name}} : {{decl.type_info.const_ref.kl.name}} {
 };
+
+inline UInt64 __CxxSize_{{decl.type_info.mutable_ref.kl.name}}() {
+  return Data().dataSize();
+}
 
 {% endblock body %}

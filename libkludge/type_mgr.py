@@ -18,12 +18,16 @@ class TypeMgr:
     self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
     self._cpp_type_name_to_dqti = {}
 
-    self.in_place_selector = InPlaceSelector(ext)
+    self.selectors = {
+      'owned': OwnedSelector(ext),
+      'in_place': InPlaceSelector(ext),
+      }
     
     # Order is very important here!
     self.add_selector(VoidSelector(ext))
     self.add_selector(VoidPtrSelector(ext))
-    self.add_selector(self.in_place_selector)
+    self.add_selector(self.selectors['in_place'])
+    self.add_selector(self.selectors['owned'])
     self.add_selector(StdStringSelector(ext))
     # self.add_selector(FixedArraySelector(ext))
     self.add_selector(StdVectorSelector(ext))

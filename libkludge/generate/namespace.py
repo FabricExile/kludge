@@ -10,9 +10,7 @@ from enum import Enum
 from func import Func
 from param import Param
 from massage import *
-from libkludge.types import InPlaceSelector
 from libkludge.types import KLExtTypeAliasSelector
-from libkludge.types import DirectSelector
 from libkludge.types import WrappedSelector
 from libkludge.types import EnumSelector
 
@@ -76,10 +74,6 @@ class Namespace:
   def jinjenv(self):
     return self.ext.jinjenv
 
-  @property
-  def cpp_type_expr_to_record(self):
-    return self.ext.cpp_type_expr_to_record
-
   def maybe_generate_kl_local_name(self, kl_local_name, cpp_type_expr):
     if not kl_local_name:
       assert isinstance(cpp_type_expr, Named)
@@ -131,38 +125,12 @@ class Namespace:
     self.ext.decls.append(alias)
     return alias
 
-  def add_in_place_type(
-    self,
-    cpp_type_name,
-    kl_type_name = None,
-    ):
-    cpp_local_name = cpp_type_name
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
-    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
-    kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
-    record = Record(
-      self,
-      "InPlaceType",
-      kl_global_name,
-      kl_local_name,
-      child_namespace_component=cpp_type_expr.components[-1],
-      )
-    self.type_mgr.in_place_selector.register(kl_global_name, cpp_type_expr, record)
-    self.namespace_mgr.add_type(
-      self.components,
-      cpp_type_expr.components[-1],
-      cpp_type_expr,
-      )
-    self.cpp_type_expr_to_record[cpp_type_expr] = record
-    self.type_mgr.get_dqti(cpp_type_expr)
-    return record
-
-  def add_direct_type(
+  def add_type(
     self,
     cpp_type_name,
     kl_type_name=None,
     extends=None,
-    forbid_copy=False,
+    variant='owned',
     ):
     cpp_local_name = cpp_type_name
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
@@ -170,30 +138,48 @@ class Namespace:
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     if extends:
       extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-      extends = self.cpp_type_expr_to_record[extends_cpp_type_expr]
-    self.type_mgr.add_selector(
-      DirectSelector(
-        self,
-        kl_global_name,
-        cpp_type_expr,
-        )
-      )
+      extends = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
     record = Record(
       self,
-      "DirectType[extends=%s forbid_copy=%s]" % (extends, forbid_copy),
+      kl_global_name,
       kl_local_name,
-      extends=extends,
-      forbid_copy=forbid_copy,
       child_namespace_component=cpp_type_expr.components[-1],
       )
-    self.ext.decls.append(record)
+    selector = self.type_mgr.selectors[variant]
+    selector.register(kl_global_name, cpp_type_expr, extends, record)
     self.namespace_mgr.add_type(
       self.components,
       cpp_type_expr.components[-1],
       cpp_type_expr,
       )
-    self.cpp_type_expr_to_record[cpp_type_expr] = record
+    self.type_mgr.get_dqti(cpp_type_expr)
     return record
+
+  def add_owned_type(
+    self,
+    cpp_type_name,
+    kl_type_name=None,
+    extends=None,
+    ):
+    return self.add_type(
+      cpp_type_name=cpp_type_name,
+      kl_type_name=kl_type_name,
+      extends=extends,
+      variant='owned',
+      )
+
+  def add_in_place_type(
+    self,
+    cpp_type_name,
+    kl_type_name=None,
+    extends=None,
+    ):
+    return self.add_type(
+      cpp_type_name=cpp_type_name,
+      kl_type_name=kl_type_name,
+      extends=extends,
+      variant='in_place',
+      )
 
   def add_wrapped_type(
     self,
@@ -242,7 +228,6 @@ class Namespace:
       cpp_type_expr.components[0].params[0].components[-1],
       cpp_type_expr,
       )
-    self.cpp_type_expr_to_record[cpp_type_expr] = record
     return record
 
   def add_kl_ext_type_alias(
@@ -281,7 +266,6 @@ class Namespace:
       cpp_type_expr.components[-1],
       cpp_type_expr,
       )
-    self.cpp_type_expr_to_record[cpp_type_expr] = record
     return record
 
   def add_enum(

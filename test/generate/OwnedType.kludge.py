@@ -2,9 +2,9 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-ext.add_cpp_quoted_include('DirectType.hpp')
+ext.add_cpp_quoted_include('OwnedType.hpp')
 
-ty = ext.add_direct_type('Class')
+ty = ext.add_owned_type('Class')
 ty.add_comment("""/// Test comment""")
 ty.set_default_access(MemberAccess.public)
 ty.add_member('floatValue', 'float')
@@ -25,7 +25,7 @@ c.get_floatValue() = +3.14
 c.get_stringValue() = hello
 Class::~Class()
 """)
-ty.add_method('publicMethod', 'std::string const &')\
+ty.add_mutable_method('publicMethod', 'std::string const &')\
   .add_test("""
 Class c(3.14, "hello", 42);
 report("c.publicMethod() = " + c.publicMethod());
@@ -40,7 +40,8 @@ ty.add_method(
   params = ['Class const &'],
   this_access = ThisAccess.static,
   ).add_test("""
-Class_PrintValues(Class(1.32, "hoo", 23));
+Class c(1.32, "hoo", 23);
+Class_PrintValues(Make_Class_CxxConstRef(c));
 """, """
 Class::Class(1.32, hoo, 23)
 1.32 hoo 23
@@ -86,7 +87,7 @@ Class::Class(3.14, hello, -2)
 Class::~Class()
 """)
 
-dty = ext.add_direct_type('DerivedClass', extends='Class')
+dty = ext.add_owned_type('DerivedClass', extends='Class')
 dty.add_ctor(['int'])
 dty.add_const_method('newMethod', 'int')
 dty.add_test("""

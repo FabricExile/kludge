@@ -250,7 +250,7 @@ class Parser(object):
     if has_child:
       for decl_warning in decl_warnings:
         print >>decls, decl_warning
-      decls.write("# %s\n%s = %s.add_direct_type('%s'" % (
+      decls.write("# %s\n%s = %s.add_owned_type('%s'" % (
         self.location_desc(cursor.location),
         child_obj,
         obj,

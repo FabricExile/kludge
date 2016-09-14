@@ -1,8 +1,0 @@
-{######################################################################}
-{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
-{######################################################################}
-struct {{this.type_info.kl.name.compound}} {
-{% for member in this.members %}
-  {{"public" if member.is_public() else "private"}} {{member.type_info.kl.name.base}} {{member.kl_name}}{{member.type_info.kl.name.suffix}};
-{% endfor %}
-};

@@ -3,9 +3,13 @@
 {######################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
-alias Integer {{enum.type_info.kl.name.compound}};
+alias Integer {{enum.type_info.kl.name}};
 {% for value in enum.values %}
-const {{enum.type_info.kl.name.compound}} {{'_'.join(enum.namespace.nested_kl_names + [value[0]])}} = {{value[1]}};
+const {{enum.type_info.kl.name}} {{'_'.join(enum.namespace.nested_kl_names + [value[0]])}} = {{value[1]}};
 {% endfor %}
+
+inline UInt64 __CxxSize_{{enum.type_info.kl.name}}() {
+  return Integer().dataSize();
+}
 
 {% endblock body %}

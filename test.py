@@ -34,7 +34,7 @@ def test_generate(basename):
     [
       './kludge', 'generate',
       '-o', test_tmp_dir,
-      '--debug-type-templates',
+      # '--debug-type-templates',
       basename,
       os.path.join(test_generate_dir, basename + '.kludge.py'),
       ],

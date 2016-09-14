@@ -44,7 +44,7 @@
 // Constructors and Destructor
 ////////////////////////////////////////////////////////////////////////
 {% if record.include_empty_ctor %}
-{{type_info.kl.name}}() = "{{record.empty_ctor_edk_symbol_name}}";
+{{type_info.kl.name}}() = "{{record.get_empty_ctor_edk_symbol_name(type_info)}}";
 
 {% endif %}
 {% if record.include_copy_ctor %}
@@ -118,7 +118,7 @@
 {{comment}}
 {% endfor %}
 {{uni_op.result.type_info.kl.name}}
-{{uni_op.this.type_info.kl.name}}.{{uni_op.kl_method_name}}!(
+{{type_info.kl.name}}.{{uni_op.kl_method_name}}!(
     ) = "{{uni_op.get_edk_symbol_name(type_info)}}";
 
 {% endfor %}
@@ -171,7 +171,7 @@
 {{comment}}
 {% endfor %}
 {{cast.this.type_info.kl.name}}(
-    {{cast.params[0].render_kl() | indent(4)}}
+    {{cast.get_param(type_info).render_kl() | indent(4)}}
     ) = "{{cast.get_edk_symbol_name(type_info)}}";
 
 {% endfor %}
@@ -182,7 +182,7 @@
 // Deref
 ////////////////////////////////////////////////////////////////////////
 {{record.deref_result.type_info.kl.name}}
-{{record.deref_this.type_info.kl.name}}.{{record.deref_kl_method_name}}(
+{{type_info.kl.name}}.{{record.deref_kl_method_name}}(
     ) = "{{record.get_deref_edk_symbol_name(type_info)}}";
 
 {% endif %}

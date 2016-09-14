@@ -136,7 +136,7 @@ class UniOp(Methodlike):
     return self.record.kl_global_name + '__uni_op_' + self.op_to_edk_op[self.op]
 
   def get_this(self, type_info):
-    return self.record.get_this(type_info, True)
+    return self.record.get_mutable_this(type_info)
 
 class BinOp(Methodlike):
 
@@ -268,28 +268,30 @@ class Cast(Methodlike):
       )
     self.this = ThisCodec(
       this_dqti.type_info,
-      [],
-      True, # is_mutable
+      is_mutable=True,
       )
-    self.params = [
-      ParamCodec(
-        DirQualTypeInfo(
-          DirQual(directions.Reference, qualifiers.Const),
-          record.const_this.type_info,
-          ),
-        "that"
-        ),
-      ]
 
   @property
   def ext(self):
     return self.record.ext
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('cast', type_info, self.params)
+    return self.record.gen_edk_symbol_name('cast', type_info, self.get_params(type_info))
 
   def get_test_name(self):
     return self.record.kl_global_name + '__cast'
+
+  def get_param(self, type_info):
+    return ParamCodec(
+      DirQualTypeInfo(
+        DirQual(directions.Direct, qualifiers.Unqualified),
+        type_info,
+        ),
+      "that"
+      )
+
+  def get_params(self, type_info):
+    return [self.get_param(type_info)]
 
 class Member(object):
 
@@ -328,7 +330,6 @@ class Record(Decl):
   def __init__(
     self,
     parent_namespace,
-    record_desc,
     kl_local_name,
     extends = None,
     include_empty_ctor = True,
@@ -340,7 +341,6 @@ class Record(Decl):
     child_namespace_component = None,
     ):
     Decl.__init__(self, parent_namespace)
-    self.record_desc = record_desc
 
     if child_namespace_component:
       self.namespace = parent_namespace.create_child(child_namespace_component, kl_local_name)
@@ -589,6 +589,10 @@ class Record(Decl):
       )
     self.deref_this_access = this_access
     return self
+
+  def get_deref_this(self, type_info):
+    assert self.deref_this_access != ThisAccess.static
+    return self.get_this(type_info, self.deref_this_access == ThisAccess.mutable)
 
   def gen_edk_symbol_name(self, name, type_info, params=[]):
     h = hashlib.md5()

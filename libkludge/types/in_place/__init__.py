@@ -27,11 +27,18 @@ def build_edk_name(kl_type_name):
   if kl_type_name in builtin_kl_type_names:
     return "Fabric::EDK::KL::" + kl_type_name
   else:
-    return kl_type_name
+    return "Fabric_EDK_KL_" + kl_type_name
 
 class InPlaceTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, kl_type_name, cpp_type_expr, record, is_simple):
+  def __init__(
+    self,
+    jinjenv,
+    kl_type_name,
+    cpp_type_expr,
+    record,
+    is_simple,
+    ):
     TypeInfo.__init__(
       self,
       jinjenv,
@@ -41,13 +48,13 @@ class InPlaceTypeInfo(TypeInfo):
       record=record,
       is_simple=is_simple,
       )
-    pass
 
   def build_codec_lookup_rules(self):
     tds = TypeInfo.build_codec_lookup_rules(self)
     if self.is_simple:
       tds["conv"]["*"] = "types/builtin/in_place/simple/conv"
       tds["result"]["*"] = "protocols/result/builtin/direct"
+      tds["repr"]["*"] = "protocols/repr/builtin/in_place"
       tds["repr"]["new_begin"] = "types/builtin/in_place/simple/repr"
     else:
       tds["conv"]["*"] = "protocols/conv/builtin/none"
@@ -55,6 +62,7 @@ class InPlaceTypeInfo(TypeInfo):
       tds["result"]["decl_and_assign_lib_begin"] = "types/builtin/in_place/complex/result"
       tds["result"]["decl_and_assign_lib_end"] = "types/builtin/in_place/complex/result"
       tds["result"]["indirect_lib_to_edk"] = "types/builtin/in_place/complex/result"
+      tds["repr"]["*"] = "protocols/repr/builtin/in_place"
     return tds
 
 class InPlaceBuiltinDecl(BuiltinDecl):
@@ -89,7 +97,7 @@ class InPlaceBuiltinDecl(BuiltinDecl):
 
 class InPlaceSpec(object):
 
-  def __init__(self, kl_type_name, cpp_type_expr, is_simple, record=None):
+  def __init__(self, kl_type_name, cpp_type_expr, extends, record, is_simple=False):
     self.kl_type_name = kl_type_name
     self.cpp_type_expr = cpp_type_expr
     self.is_simple = is_simple
@@ -102,18 +110,18 @@ class InPlaceSelector(Selector):
   def __init__(self, ext):
     Selector.__init__(self, ext)
 
-    boolean_spec = InPlaceSpec("Boolean", Bool(), True)
-    char_spec = InPlaceSpec("CxxChar", Char(), True)
-    sint8_spec = InPlaceSpec("SInt8", SimpleNamed("int8_t"), True)
-    uint8_spec = InPlaceSpec("UInt8", SimpleNamed("uint8_t"), True)
-    sint16_spec = InPlaceSpec("SInt16", SimpleNamed("int16_t"), True)
-    uint16_spec = InPlaceSpec("UInt16", SimpleNamed("uint16_t"), True)
-    sint32_spec = InPlaceSpec("SInt32", SimpleNamed("int32_t"), True)
-    uint32_spec = InPlaceSpec("UInt32", SimpleNamed("uint32_t"), True)
-    sint64_spec = InPlaceSpec("SInt64", SimpleNamed("int64_t"), True)
-    uint64_spec = InPlaceSpec("UInt64", SimpleNamed("uint64_t"), True)
-    float32_spec = InPlaceSpec("Float32", Float(), True)
-    float64_spec = InPlaceSpec("Float64", Double(), True)
+    boolean_spec = InPlaceSpec("Boolean", Bool(), None, None, True)
+    char_spec = InPlaceSpec("CxxChar", Char(), None, None, True)
+    sint8_spec = InPlaceSpec("SInt8", SimpleNamed("int8_t"), None, None, True)
+    uint8_spec = InPlaceSpec("UInt8", SimpleNamed("uint8_t"), None, None, True)
+    sint16_spec = InPlaceSpec("SInt16", SimpleNamed("int16_t"), None, None, True)
+    uint16_spec = InPlaceSpec("UInt16", SimpleNamed("uint16_t"), None, None, True)
+    sint32_spec = InPlaceSpec("SInt32", SimpleNamed("int32_t"), None, None, True)
+    uint32_spec = InPlaceSpec("UInt32", SimpleNamed("uint32_t"), None, None, True)
+    sint64_spec = InPlaceSpec("SInt64", SimpleNamed("int64_t"), None, None, True)
+    uint64_spec = InPlaceSpec("UInt64", SimpleNamed("uint64_t"), None, None, True)
+    float32_spec = InPlaceSpec("Float32", Float(), None, None, True)
+    float64_spec = InPlaceSpec("Float64", Double(), None, None, True)
 
     self.cpp_type_expr_to_spec = {
       Bool(): boolean_spec,
@@ -150,9 +158,9 @@ class InPlaceSelector(Selector):
   def get_desc(self):
     return "InPlace"
 
-  def register(self, kl_type_name, cpp_type_expr, record):
+  def register(self, kl_type_name, cpp_type_expr, extends, record):
     self.cpp_type_expr_to_spec[cpp_type_expr] = InPlaceSpec(
-      kl_type_name, cpp_type_expr, False, record
+      kl_type_name, cpp_type_expr, extends, record
       )
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):

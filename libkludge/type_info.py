@@ -57,6 +57,7 @@ class TypeInfo:
     kl_name_suffix=None,
     edk_name=None,
     child_dqtis=[],
+    extends=None,
     record=None,
     is_simple=False,
     ):
@@ -72,6 +73,7 @@ class TypeInfo:
     self.lib = LibTypeInfo(lib_expr)
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis
+    self.extends = extends
     self.record = record
     self.is_simple = is_simple
     self._codec_lookup_rules = None
@@ -88,7 +90,7 @@ class TypeInfo:
       "result": {"*": "protocols/result/builtin/indirect"},
       "param": {"*": "protocols/param/builtin/default"},
       "self": {"*": "protocols/self/builtin/default"},
-      "repr": {"*": "protocols/repr/builtin/default"},
+      "repr": {"*": "protocols/repr/builtin/in_place"},
       }
 
   def _resolve_proto_dir(self, proto, obj):
@@ -112,3 +114,8 @@ class TypeInfo:
       content = "/*%s:BEGIN*/%s/*%s:END*/" % (template_path, content, template_path)
     return content
 
+  def render_get_underlying_ptr(self, expr):
+    return self._render("repr", "get_underlying_ptr", "kl", {
+      "type_info": self,
+      "expr": expr,
+      })

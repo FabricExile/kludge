@@ -144,11 +144,11 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {% for uni_op in record.uni_ops %}
 FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
 {{uni_op.get_edk_symbol_name(type_info)}}(
-    {{macros.edk_param_list(uni_op.result, uni_op.this, None) | indent(4)}}
+    {{macros.edk_param_list(uni_op.result, uni_op.get_this(type_info), None) | indent(4)}}
     )
 {
     {{macros.cpp_call_pre(uni_op.result, None) | indent(4)}}
-        {{uni_op.op}}{{uni_op.this.render_ref()}}
+        {{uni_op.op}}{{uni_op.get_this(type_info).render_ref()}}
     {{macros.cpp_call_post(uni_op.result, None) | indent(4)}}
 }
 
@@ -218,14 +218,14 @@ FABRIC_EXT_EXPORT void
 {% for cast in record.casts %}
 FABRIC_EXT_EXPORT void
 {{cast.get_edk_symbol_name(type_info)}}(
-    {{macros.edk_param_list(None, cast.this, cast.params) | indent(4)}}
+    {{macros.edk_param_list(None, cast.this, cast.get_params(type_info)) | indent(4)}}
     )
 {
-    {{macros.cpp_call_pre(None, cast.params) | indent(4)}}
+    {{macros.cpp_call_pre(None, cast.get_params(type_info)) | indent(4)}}
     {{cast.this.render_new_begin() | indent(4)}}
-        {{macros.cpp_call_args(cast.params) | indent(8)}}
+        {{macros.cpp_call_args(cast.get_params(type_info)) | indent(8)}}
         {{cast.this.render_new_end() | indent(8)}}
-    {{macros.cpp_call_post(None, cast.params) | indent(4)}}
+    {{macros.cpp_call_post(None, cast.get_params(type_info)) | indent(4)}}
 }
 
 {% endfor %}
@@ -238,11 +238,11 @@ FABRIC_EXT_EXPORT void
 
 FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
 {{record.get_deref_edk_symbol_name(type_info)}}(
-    {{macros.edk_param_list(record.deref_result, record.deref_this, None) | indent(4)}}
+    {{macros.edk_param_list(record.deref_result, record.get_deref_this(type_info), None) | indent(4)}}
     )
 {
     {{macros.cpp_call_pre(record.deref_result, None) | indent(4)}}
-        *{{record.deref_this.render_ref() | indent(8)}}
+        *{{record.get_deref_this(type_info).render_ref() | indent(8)}}
     {{macros.cpp_call_post(record.deref_result, None) | indent(4)}}
 }
 

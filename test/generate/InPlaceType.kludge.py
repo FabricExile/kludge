@@ -146,6 +146,24 @@ ReturnClass: c1 = {intValue:92,floatValue:+6.74}
 Class::~Class()
 """)
 
+dty = ext.add_in_place_type('DerivedClass', extends='Class')
+dty.add_member('shortValue', 'short')
+dty.add_ctor(['int', 'float', 'short'])
+dty.add_const_method('anotherPublicMethod', 'short')\
+  .add_test("""
+DerivedClass dc(5, -1.34e9, 56);
+report("dc.shortValue = " + dc.shortValue);
+report("dc.anotherPublicMethod() = " + dc.anotherPublicMethod());
+""", """
+Class::Class(5, -1.34e+09)
+DerivedClass::DerivedClass(5, -1.34e+09, 56)
+dc.shortValue = 56
+dc.anotherPublicMethod() = -168
+DerivedClass::~DerivedClass()
+Class::~Class()
+Class::~Class()
+""")
+
 #   std::string getDesc() const {
 #     char buf[256];
 #     snprintf( buf, 256, "intValue:%d floatValue:%f", intValue, floatValue );

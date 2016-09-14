@@ -92,3 +92,43 @@ std::vector<Class> ReturnClassVec() {
   result.push_back( Class( -14, -3.45 ) );
   return result;
 }
+
+class DerivedClass : public Class
+{
+public:
+  
+  DerivedClass()
+  {
+    std::cout<< "DerivedClass::DerivedClass()\n" << std::flush;
+  }
+  DerivedClass( int _intValue, float _floatValue, short _shortValue )
+    : Class( _intValue, _floatValue )
+    , shortValue( _shortValue )
+  {
+    std::cout<< "DerivedClass::DerivedClass(" << _intValue << ", " << _floatValue << ", " << _shortValue << ")\n" << std::flush;
+  }
+  DerivedClass( DerivedClass const &that )
+    : Class( that )
+    , shortValue( that.shortValue )
+  {
+    std::cout<< "DerivedClass::DerivedClass(DerivedClass const &)\n" << std::flush;
+  }
+  ~DerivedClass()
+  {
+    std::cout<< "DerivedClass::~DerivedClass()\n" << std::flush;
+  }
+
+  DerivedClass &operator=( DerivedClass const &that )
+  {
+    std::cout<< "DerivedClass::operator=(DerivedClass const &)\n" << std::flush;
+    *(Class *)this = (Class const &)that;
+    shortValue = that.shortValue;
+    return *this;
+  }
+
+  short anotherPublicMethod() const { return shortValue * -3; }
+
+public:
+
+  short shortValue;
+};

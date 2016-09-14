@@ -36,6 +36,7 @@ class InPlaceTypeInfo(TypeInfo):
     jinjenv,
     kl_type_name,
     cpp_type_expr,
+    extends,
     record,
     is_simple,
     ):
@@ -45,6 +46,7 @@ class InPlaceTypeInfo(TypeInfo):
       kl_name_base=kl_type_name,
       edk_name=build_edk_name(kl_type_name),
       lib_expr=cpp_type_expr,
+      extends=extends,
       record=record,
       is_simple=is_simple,
       )
@@ -101,6 +103,7 @@ class InPlaceSpec(object):
     self.kl_type_name = kl_type_name
     self.cpp_type_expr = cpp_type_expr
     self.is_simple = is_simple
+    self.extends = extends
     self.record = record
 
 class InPlaceSelector(Selector):
@@ -171,6 +174,7 @@ class InPlaceSelector(Selector):
         kl_type_name = spec.kl_type_name
         undq_cpp_type_expr = spec.cpp_type_expr
         is_simple = spec.is_simple
+        extends = spec.extends
         record = spec.record
 
         type_info_cache_key = kl_type_name
@@ -180,8 +184,9 @@ class InPlaceSelector(Selector):
             self.jinjenv,
             kl_type_name,
             undq_cpp_type_expr,
-            record,
-            is_simple,
+            extends=extends,
+            record=record,
+            is_simple=is_simple,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
           self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, type_info))

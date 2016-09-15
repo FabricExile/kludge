@@ -6,7 +6,7 @@ ext.add_cpp_quoted_include('Namespaces.hpp')
 
 ext.add_func('GlobalFunc', 'char const *')
 ns = ext.add_namespace('NameSpace')
-cl = ns.add_wrapped_type('Wrapper<Class>')
+cl = ns.add_wrapped_type('Wrapper', 'Class')
 scl = cl.add_in_place_type('SubClass')
 scl.add_member('x', 'int')
 scl.add_ctor(['int'])

@@ -4,26 +4,9 @@
 
 from libkludge.type_info import TypeInfo
 from libkludge.selector import Selector
+from libkludge.generate.record import Record
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
-
-class StdVectorTypeInfo(TypeInfo):
-
-  def __init__(self, jinjenv, undq_cpp_type_expr, element_dqti):
-    TypeInfo.__init__(
-      self,
-      jinjenv,
-      kl_name_base = element_dqti.type_info.kl.name.base,
-      kl_name_suffix = "[]" + element_dqti.type_info.kl.name.suffix,
-      edk_name = "Fabric::EDK::KL::VariableArray< " + element_dqti.type_info.edk.name + " >",
-      lib_expr = undq_cpp_type_expr,
-      child_dqtis = [element_dqti]
-      )
-
-  def build_codec_lookup_rules(self):
-    rules = TypeInfo.build_codec_lookup_rules(self)
-    rules["conv"]["*"] = "types/builtin/std_vector/conv"
-    return rules
 
 class StdVectorSelector(Selector):
 
@@ -35,18 +18,66 @@ class StdVectorSelector(Selector):
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
-    if isinstance(undq_cpp_type_expr, Named) \
+    if dq.is_direct \
+      and isinstance(undq_cpp_type_expr, Named) \
       and len(undq_cpp_type_expr.components) == 2 \
       and undq_cpp_type_expr.components[0] == Simple("std") \
       and isinstance(undq_cpp_type_expr.components[1], Template) \
       and undq_cpp_type_expr.components[1].name == "vector" \
       and len(undq_cpp_type_expr.components[1].params) == 1:
-      element_dqti = type_mgr.get_dqti(undq_cpp_type_expr.components[1].params[0])
-      return DirQualTypeInfo(
-        dq,
-        StdVectorTypeInfo(
-          self.jinjenv,
-          undq_cpp_type_expr,
-          element_dqti,
-          )
+      element_type_info = type_mgr.get_dqti(undq_cpp_type_expr.components[1].params[0]).type_info
+      element_cpp_type_name = element_type_info.lib.name.compound
+      element_kl_type_name = element_type_info.kl.name.compound
+      kl_type_name = element_kl_type_name + '_StdVector'
+      record = Record(
+        self.ext.root_namespace,
+        child_namespace_component=undq_cpp_type_expr.components[0],
+        child_namespace_kl_name=kl_type_name,
         )
+      record.add_ctor([])
+      record.add_ctor(['size_t'])
+      record.add_ctor([element_cpp_type_name + ' const *', element_cpp_type_name + ' const *'])
+      record.add_const_method('size', 'size_t')
+      record.add_mutable_method('reserve', None, ['size_t'])
+      record.add_mutable_method('push_back', None, [element_cpp_type_name])
+      record.add_get_ind_op(element_cpp_type_name + ' const &')
+      record.add_set_ind_op(element_cpp_type_name + ' const &')
+      record.add_mutable_method('pop_back')
+      self.ext.add_kl_epilog("""
+inline %s Make_%s(%s array<>) {
+  return %s(%s_CxxConstPtr(array, 0), %s_CxxConstPtr(array, 2));
+}
+""" % (
+  kl_type_name,
+  kl_type_name,
+  element_kl_type_name,
+  kl_type_name,
+  element_kl_type_name,
+  element_kl_type_name,
+  ))
+      self.ext.add_kl_epilog("""
+inline %s[] Make_%s_VariableArray(%s vec) {
+  UInt32 size = UInt32(vec.size());
+  %s result[];
+  result.reserve(size);
+  for (Index i = 0; i < size; ++i)  {
+    %s_CxxConstRef ptr = vec.getAt(i);
+    result.push(ptr.cxxRefGet());
+  }
+  return result;
+}
+""" % (
+  element_kl_type_name,
+  element_kl_type_name,
+  kl_type_name,
+  element_kl_type_name,
+  element_kl_type_name,
+  ))
+      type_mgr.selectors['owned'].register(
+        kl_type_name=kl_type_name,
+        kl_type_name_for_derivatives=kl_type_name,
+        cpp_type_expr=undq_cpp_type_expr,
+        extends=None,
+        record=record,
+        )
+      return None

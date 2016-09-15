@@ -10,8 +10,9 @@ class EnumTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      kl_name_base = kl_type_name,
-      lib_expr = undq_cpp_type_expr,
+      kl_name_base=kl_type_name,
+      lib_expr=undq_cpp_type_expr,
+      is_simple=True,
       )
 
   def build_codec_lookup_rules(self):

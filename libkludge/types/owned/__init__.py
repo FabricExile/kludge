@@ -91,7 +91,14 @@ class OwnedSelector(Selector):
     self.cpp_type_expr_to_spec = {}
     self.type_info_cache = {}
 
-  def register(self, kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record):
+  def register(
+    self,
+    kl_type_name,
+    kl_type_name_for_derivatives,
+    cpp_type_expr,
+    extends,
+    record,
+    ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = OwnedSpec(
       kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record
       )

@@ -167,6 +167,9 @@ class PtrRefTypeInfoSet(object):
     for name, klass in type_info_class_map.iteritems():
       setattr(self, name, klass(jinjenv, undq_type_info_for_derivatives))
 
+  def get_indirects(self):
+    return [self.const_ptr, self.mutable_ptr, self.const_ref, self.mutable_ref]
+
 class PtrRefSelector(Selector):
 
   def __init__(self, ext):

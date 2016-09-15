@@ -13,7 +13,7 @@ FABRIC_EXT_EXPORT
     {{macros.cpp_call_pre(func.result, func.params) | indent(4)}}
     {{func.cpp_global_name | indent(4)}}(
         {{macros.cpp_call_args(func.params)}}
-        );
+        )
     {{macros.cpp_call_post(func.result, func.params) | indent(4)}}
 }
 

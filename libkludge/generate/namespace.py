@@ -235,35 +235,45 @@ class Namespace:
 
     return direct_alias
 
+  def generate_type(self, cpp_local_name):
+    cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
+    self.type_mgr.get_dqti(cpp_local_expr)
+
   def add_type(
     self,
-    cpp_local_expr,
-    kl_local_name,
+    cpp_local_expr=None,
+    cpp_global_expr=None,
+    kl_local_name=None,
     kl_local_name_for_derivatives=None,
     extends_type_info=None,
     variant='owned',
+    record=None,
     ):
-    assert isinstance(cpp_local_expr, Named)
-    cpp_type_expr = cpp_local_expr.prefix(self.components)
+    if not cpp_global_expr:
+      assert isinstance(cpp_local_expr, Named)
+      cpp_global_expr = cpp_local_expr.prefix(self.components)
+    assert isinstance(cpp_global_expr, Named)
+
     assert isinstance(kl_local_name, basestring)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     if not kl_local_name_for_derivatives:
       kl_local_name_for_derivatives = kl_local_name
     kl_global_name_for_derivatives = '_'.join(self.nested_kl_names + [kl_local_name_for_derivatives])
-    record = Record(
-      self,
-      child_namespace_component=cpp_type_expr.components[-1],
-      child_namespace_kl_name=kl_local_name,
-      extends=(extends_type_info and extends_type_info.record),
-      )
+    if not record:
+      record = Record(
+        self,
+        child_namespace_component=cpp_global_expr.components[-1],
+        child_namespace_kl_name=kl_local_name_for_derivatives,
+        extends=(extends_type_info and extends_type_info.record),
+        )
     selector = self.type_mgr.selectors[variant]
-    selector.register(kl_global_name, kl_global_name_for_derivatives, cpp_type_expr, extends_type_info, record)
+    selector.register(kl_global_name, kl_global_name_for_derivatives, cpp_global_expr, extends_type_info, record)
     self.namespace_mgr.add_type(
       self.components,
-      cpp_type_expr.components[-1],
-      cpp_type_expr,
+      cpp_global_expr.components[-1],
+      cpp_global_expr,
       )
-    self.type_mgr.get_dqti(cpp_type_expr)
+    self.type_mgr.get_dqti(cpp_global_expr)
     return record
 
   def add_owned_type(
@@ -319,8 +329,9 @@ class Namespace:
     owned_cpp_local_expr = cpp_local_expr
     owned_kl_local_name = 'Raw_' + kl_local_name
     if extends:
-      owned_extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-      owned_extends_type_info = self.type_mgr.get_dqti(owned_extends_cpp_type_expr).type_info
+      owned_extends_cpp_local_expr = self.cpp_type_expr_parser.parse(extends)
+      owned_extends_type_info = self.type_mgr.get_dqti(owned_extends_cpp_local_expr).type_info
+      owned_extends_cpp_global_expr = owned_extends_type_info.lib.expr
     else:
       owned_extends_type_info = None
     owned = self.add_type(
@@ -330,23 +341,23 @@ class Namespace:
       extends_type_info=owned_extends_type_info,
       variant='owned',
       )
+    owned_cpp_global_expr = self.type_mgr.get_dqti(owned_cpp_local_expr).type_info.lib.expr
 
-    wrapped_cpp_local_expr = Named([Template(cpp_wrapper_name, [cpp_local_expr])])
+    wrapped_cpp_global_expr = Named([Template(cpp_wrapper_name, [owned_cpp_global_expr])])
     wrapped_kl_local_name = 'Wrapped_' + kl_local_name
     if extends:
-      wrapped_extends_cpp_type_expr = self.cpp_type_expr_parser.parse('%s< %s >' % (cpp_wrapper_name, extends))
-      wrapped_extends_type_info = self.type_mgr.get_dqti(wrapped_extends_cpp_type_expr).type_info
+      wrapped_extends_cpp_global_expr = Named([Template(cpp_wrapper_name, [owned_extends_cpp_global_expr])])
+      wrapped_extends_type_info = self.type_mgr.get_dqti(wrapped_extends_cpp_global_expr).type_info
     else:
       wrapped_extends_type_info = None
-    wrapped = self.add_type(
-      cpp_local_expr=wrapped_cpp_local_expr,
+    return self.add_type(
+      cpp_global_expr=wrapped_cpp_global_expr,
       kl_local_name=kl_local_name,
       kl_local_name_for_derivatives=wrapped_kl_local_name,
       extends_type_info=wrapped_extends_type_info,
       variant='wrapped',
+      record=owned,
       )
-
-    return wrapped
 
   def add_kl_ext_type_alias(
     self,

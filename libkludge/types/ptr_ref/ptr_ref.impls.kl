@@ -12,31 +12,57 @@
 // Wrapper methods
 ////////////////////////////////////////////////////////////////////////
 
-// Given an in value, take a pointer to the value
-{{decl.type_info.const_ptr.kl.name}} Make_{{decl.type_info.const_ptr.kl.name}}({{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.const_ptr.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
+////////////////////////////////////////////////////////////////////////
+// Construction
+////////////////////////////////////////////////////////////////////////
 
-// Given an io value, take a pointer to the value
-{{decl.type_info.const_ptr.kl.name}} Make_{{decl.type_info.const_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.const_ptr.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
-
-// Given an external array, take a pointer to the first element
-{{decl.type_info.const_ptr.kl.name}}(Data data) {
+{% for type_info in decl.type_info.get_indirects() %}
+{{type_info.kl.name}}(Data data) {
   this.ptr = data;
 }
 
-{% if not decl.type_info.direct.is_simple %}
-{{decl.type_info.const_ptr.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} array<>) {
+  this.ptr = array.data();
+}
+
+{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} array<>, Index index) {
+  this.ptr = array.data().offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}());
+}
+
+{% if decl.type_info.direct.is_simple %}
+struct Make_{{type_info.kl.name}} permits {{type_info.kl.name}} {
+  private Data ptr;
+  private {{decl.type_info.direct.kl.name}} value;
+};
+
+Make_{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  this.ptr = this.value.data();
+  this.value = value;
+}
+
+Make_{{type_info.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
+  this.ptr = value.data();
+}
+
+{{type_info.kl.name}}(Make_{{type_info.kl.name}} maker) {
+  this.ptr = maker.ptr;
+}
+{% else %}
+{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} value) {
   this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
 }
 
+{{type_info.kl.name}} Make_{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  return {{type_info.kl.name}}(
+    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
+    );
+}
 {% endif %}
+{% endfor %}
+
+////////////////////////////////////////////////////////////////////////
+// Others
+////////////////////////////////////////////////////////////////////////
 
 // Is valid.  Check for null pointer
 Boolean {{decl.type_info.const_ptr.kl.name}}.cxxPtrIsValid() {
@@ -84,32 +110,6 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 }
 {% endif %}
 
-// Given an in value, take a pointer to the value
-{{decl.type_info.mutable_ptr.kl.name}} Make_{{decl.type_info.mutable_ptr.kl.name}}({{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.mutable_ptr.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
-
-// Given an io value, take a pointer to the value
-{{decl.type_info.mutable_ptr.kl.name}} Make_{{decl.type_info.mutable_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.mutable_ptr.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
-
-// Given an io external array, take a pointer to the first element
-{{decl.type_info.mutable_ptr.kl.name}}(Data data) {
-  this.ptr = data;
-}
-
-{% if not decl.type_info.direct.is_simple %}
-{{decl.type_info.mutable_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
-  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
-}
-
-{% endif %}
-
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
 {{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
@@ -128,32 +128,6 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
     throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
   this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
 }
-
-// Given an in value, take a ConstRef to the value
-{{decl.type_info.const_ref.kl.name}} Make_{{decl.type_info.const_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.const_ref.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
-
-// Given an io value, take a ConstRef to the value
-{{decl.type_info.const_ref.kl.name}} Make_{{decl.type_info.const_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.const_ref.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
-
-// Given an io external array, take a pointer to the first element
-{{decl.type_info.const_ref.kl.name}}(Data cpp_ptr) {
-  this.ptr = cpp_ptr;
-}
-
-{% if not decl.type_info.direct.is_simple %}
-{{decl.type_info.const_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
-  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
-}
-
-{% endif %}
 
 // Copy ctor
 {{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ref.kl.name}} that) {
@@ -188,32 +162,6 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
   this = Boolean(ref.cxxRefGet());
 }
-{% endif %}
-
-// Given an in value, take a ConstRef to the value
-{{decl.type_info.mutable_ref.kl.name}} Make_{{decl.type_info.mutable_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.mutable_ref.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
-
-// Given an io value, take a ConstRef to the value
-{{decl.type_info.mutable_ref.kl.name}} Make_{{decl.type_info.mutable_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
-  return {{decl.type_info.mutable_ref.kl.name}}(
-    {{decl.type_info.direct.render_get_underlying_ptr('value')}}
-    );
-}
-
-// Given an io external array, take a pointer to the first element
-{{decl.type_info.mutable_ref.kl.name}}(Data data) {
-  this.ptr = data;
-}
-
-{% if not decl.type_info.direct.is_simple %}
-{{decl.type_info.mutable_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
-  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
-}
-
 {% endif %}
 
 // Set the value

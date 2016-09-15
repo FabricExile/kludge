@@ -39,7 +39,7 @@ inline std::vector< std::vector<std::string> > ReturnStringArrayArray()
 
 typedef std::vector< std::string > StringVector;
 
-StringVector GetStringVector()
+inline StringVector GetStringVector()
 {
   StringVector s;
   s.push_back("hello");
@@ -47,7 +47,15 @@ StringVector GetStringVector()
   return s;
 }
 
-void AppendToStringVector( std::vector<std::string> &v )
+inline void AppendToStringVector( std::vector<std::string> &v )
 {
   v.push_back("appended string");
+}
+
+inline std::vector<int> ReturnIntVec()
+{
+  std::vector<int> result;
+  result.push_back(-7);
+  result.push_back(42);
+  return result;
 }

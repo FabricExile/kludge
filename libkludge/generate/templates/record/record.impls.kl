@@ -217,7 +217,7 @@
 // {{type_info}}
 // setAt(Index) Operator
 ////////////////////////////////////////////////////////////////////////
-{{type_info.kl.name}}.setAt(
+{{type_info.kl.name}}.setAt!(
     {% for param in record.set_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}

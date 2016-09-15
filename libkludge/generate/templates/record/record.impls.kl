@@ -237,4 +237,15 @@
 {% endif %}
 
 {% endif %}
+{% if is_direct and record.has_kls() %}
+////////////////////////////////////////////////////////////////////////
+// {{type_info}}
+// Additional KL code
+////////////////////////////////////////////////////////////////////////
+
+{% for kl in record.kls %}
+{{kl.render(type_info)}}
+
+{% endfor %}
+{% endif %}
 {% endblock body %}

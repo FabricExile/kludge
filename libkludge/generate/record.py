@@ -324,7 +324,19 @@ class Member(object):
 
   def get_setter_edk_symbol_name(self, ti):
     return self.record.gen_edk_symbol_name('setter_' + self.cpp_name, ti)
-  
+
+class KL(object):
+
+  def __init__(self, record, code, vars):
+    self.template = record.ext.jinjenv.from_string(code)
+    self.vars = vars
+
+  def render(self, type_info):
+    vars = {'type_name': type_info.kl.name.compound}
+    for k, v in self.vars.iteritems():
+      vars[k] = v
+    return self.template.render(vars).strip()
+
 class Record(Decl):
 
   def __init__(
@@ -366,6 +378,7 @@ class Record(Decl):
     self.casts = []
     self.deref_kl_method_name = None
     self.deref_result = None
+    self.kls = []
 
     self.this_value_name = this_cpp_value_name
     assert extends is None or isinstance(extends, Record)
@@ -531,6 +544,17 @@ class Record(Decl):
     cast = Cast(self, dst)
     self.casts.append(cast)
     return cast
+
+  def add_kl(
+    self,
+    code,
+    **kwargs
+    ):
+    self.kls.append(KL(self, code, kwargs))
+    return self
+
+  def has_kls(self):
+    return len(self.kls) > 0
 
   def add_get_ind_op(
     self,

@@ -43,36 +43,25 @@ class StdVectorSelector(Selector):
       record.add_get_ind_op(element_cpp_type_name + ' const &')
       record.add_set_ind_op(element_cpp_type_name + ' const &')
       record.add_mutable_method('pop_back')
-      self.ext.add_kl_epilog("""
-inline %s Make_%s(%s array<>) {
-  return %s(%s_CxxConstPtr(array, 0), %s_CxxConstPtr(array, 2));
+      record.add_kl("""
+inline {{type_name}} Make_{{type_name}}({{element_type_name}} array<>) {
+  return {{type_name}}(
+    {{element_type_name}}_CxxConstPtr(array, 0),
+    {{element_type_name}}_CxxConstPtr(array, 2)
+    );
 }
-""" % (
-  kl_type_name,
-  kl_type_name,
-  element_kl_type_name,
-  kl_type_name,
-  element_kl_type_name,
-  element_kl_type_name,
-  ))
-      self.ext.add_kl_epilog("""
-inline %s[] Make_%s_VariableArray(%s vec) {
+
+inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_name}} vec) {
   UInt32 size = UInt32(vec.size());
-  %s result[];
+  {{element_type_name}} result[];
   result.reserve(size);
   for (Index i = 0; i < size; ++i)  {
-    %s_CxxConstRef ptr = vec.getAt(i);
+    {{element_type_name}}_CxxConstRef ptr = vec.getAt(i);
     result.push(ptr.cxxRefGet());
   }
   return result;
 }
-""" % (
-  element_kl_type_name,
-  element_kl_type_name,
-  kl_type_name,
-  element_kl_type_name,
-  element_kl_type_name,
-  ))
+""", element_type_name=element_kl_type_name)
       type_mgr.selectors['owned'].register(
         kl_type_name=kl_type_name,
         kl_type_name_for_derivatives=kl_type_name,

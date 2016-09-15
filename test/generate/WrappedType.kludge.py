@@ -8,17 +8,17 @@ ty = ext.add_wrapped_type('Wrapper<Class>')
 ty.add_ctor(['float', 'std::string const &', 'int'])\
   .add_test("""
 Class c(3.14, "hello", 42);
-report("c.get_floatValue() = " + c.get_floatValue());
-report("c.get_stringValue() = " + c.get_stringValue());
+report("c.GET_floatValue() = " + c.GET_floatValue());
+report("c.GET_stringValue() = " + c.GET_stringValue());
 """, """
 Class::Class(3.14, hello, 42)
 Wrapper::Wrapper(Ty *)
-c.get_floatValue() = +3.14
-c.get_stringValue() = hello
+c.GET_floatValue() = +3.14
+c.GET_stringValue() = hello
 Wrapper::~Wrapper()
 Class::~Class()
 """)
-ty.add_method('publicMethod', 'std::string const &')\
+ty.add_mutable_method('publicMethod', 'std::string const &')\
   .add_test("""
 Class c(3.14, "hello", 42);
 report("c.publicMethod() = " + c.publicMethod());
@@ -39,7 +39,7 @@ ty.add_method(
   params = ['Wrapper<Class> const &'],
   this_access = ThisAccess.static,
   ).add_test("""
-Class_PrintValues(Class(1.32, "hoo", 23));
+Class_PrintValues(Make_Class_CxxConstRef(Class(1.32, "hoo", 23)));
 """, """
 Class::Class(1.32, hoo, 23)
 Wrapper::Wrapper(Ty *)

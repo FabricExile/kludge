@@ -8,6 +8,6 @@ if ( {{this.value_name.edk}}.cpp_ptr )
 }
 if ( {{param.value_name.edk}}.cpp_ptr )
   {{this.value_name.edk}}.cpp_ptr =
-    new ::{{this.base_this.type_info.lib.name.base}}(
+    new ::{{this.base_type_info.lib.name.base}}(
       {{param.value_name.edk}}.cpp_ptr->operator->()
       );

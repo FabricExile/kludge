@@ -11,19 +11,15 @@ class ThisCodec:
     self,
     type_info,
     is_mutable,
-    extends_this = None,
     ):
     self.value_name = this_cpp_value_name
     self.type_info = type_info
     self.is_mutable = is_mutable
-    self.extends_this = extends_this
 
   @property
-  def base_this(self):
-    if self.extends_this:
-      return self.extends_this.base_this
-    return self
-
+  def base_type_info(self):
+    return self.type_info.base_type_info
+  
   def render_param_edk(self):
     return self.type_info._render("self", "param_edk", "cpp", {
       "this": self,

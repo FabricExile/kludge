@@ -304,10 +304,10 @@ class Member(object):
     self.param = ParamCodec(dqti, cpp_name)
     self.getter_kl_name = getter_kl_name
     if not self.getter_kl_name is None and self.getter_kl_name == '':
-      self.getter_kl_name = 'cxxGet_' + cpp_name
+      self.getter_kl_name = 'GET_' + cpp_name
     self.setter_kl_name = setter_kl_name
     if not self.setter_kl_name is None and self.setter_kl_name == '':
-      self.setter_kl_name = 'cxxSet_' + cpp_name
+      self.setter_kl_name = 'SET_' + cpp_name
     self.access = access
 
   def has_getter(self):

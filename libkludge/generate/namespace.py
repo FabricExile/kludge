@@ -132,6 +132,7 @@ class Namespace:
     extends=None,
     variant='owned',
     ):
+    selector = self.type_mgr.selectors[variant]
     cpp_local_name = cpp_type_name
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
@@ -145,7 +146,6 @@ class Namespace:
       child_namespace_component=cpp_type_expr.components[-1],
       extends=(extends and extends.record),
       )
-    selector = self.type_mgr.selectors[variant]
     selector.register(kl_global_name, cpp_type_expr, extends, record)
     self.namespace_mgr.add_type(
       self.components,
@@ -184,51 +184,57 @@ class Namespace:
   def add_wrapped_type(
     self,
     cpp_type_name,
-    kl_type_name = None,
-    extends = None
+    kl_type_name=None,
+    extends=None,
     ):
-    cpp_local_name = cpp_type_name
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
-    assert isinstance(cpp_type_expr, Named) \
-      and len(cpp_type_expr.components) == 1 \
-      and isinstance(cpp_type_expr.components[0], Template) \
-      and len(cpp_type_expr.components[0].params) == 1 \
-      and isinstance(cpp_type_expr.components[0].params[0], Named) \
-      and len(cpp_type_expr.components[0].params[0].components) >= 1 \
-      and isinstance(cpp_type_expr.components[0].params[0].components[-1], Simple)
-    cpp_type_expr = Named([
-      Template(
-        cpp_type_expr.components[0].name,
-        [cpp_type_expr.components[0].params[0].prefix(self.components)],
-        )
-      ])
-    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
-    kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
-    if extends:
-      extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-      extends = self.cpp_type_expr_to_record[extends_cpp_type_expr]
-    self.type_mgr.add_selector(
-      WrappedSelector(
-        self,
-        kl_global_name,
-        cpp_type_expr,
-        )
-      )
-    record = Record(
-      self,
-      "WrappedType[extends=%s]" % (extends),
-      kl_local_name,
-      self.type_mgr.get_dqti(cpp_type_expr).type_info,
+    return self.add_type(
+      cpp_type_name=cpp_type_name,
+      kl_type_name=kl_type_name,
       extends=extends,
-      child_namespace_component=cpp_type_expr.components[0].params[0].components[-1],
+      variant='wrapped',
       )
-    self.ext.decls.append(record)
-    self.namespace_mgr.add_type(
-      self.components,
-      cpp_type_expr.components[0].params[0].components[-1],
-      cpp_type_expr,
-      )
-    return record
+
+  # def add_wrapped_type(
+  #   self,
+  #   cpp_type_name,
+  #   kl_type_name = None,
+  #   extends = None
+  #   ):
+  #   cpp_local_name = cpp_type_name
+  #   cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
+  #   cpp_type_expr = Named([
+  #     Template(
+  #       cpp_type_expr.components[0].name,
+  #       [cpp_type_expr.components[0].params[0].prefix(self.components)],
+  #       )
+  #     ])
+  #   kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
+  #   kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
+  #   if extends:
+  #     extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
+  #     extends = self.cpp_type_expr_to_record[extends_cpp_type_expr]
+  #   self.type_mgr.add_selector(
+  #     WrappedSelector(
+  #       self,
+  #       kl_global_name,
+  #       cpp_type_expr,
+  #       )
+  #     )
+  #   record = Record(
+  #     self,
+  #     "WrappedType[extends=%s]" % (extends),
+  #     kl_local_name,
+  #     self.type_mgr.get_dqti(cpp_type_expr).type_info,
+  #     extends=extends,
+  #     child_namespace_component=cpp_type_expr.components[0].params[0].components[-1],
+  #     )
+  #   self.ext.decls.append(record)
+  #   self.namespace_mgr.add_type(
+  #     self.components,
+  #     cpp_type_expr.components[0].params[0].components[-1],
+  #     cpp_type_expr,
+  #     )
+  #   return record
 
   def add_kl_ext_type_alias(
     self,

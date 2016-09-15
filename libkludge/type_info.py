@@ -81,6 +81,12 @@ class TypeInfo:
     self.is_simple = is_simple
     self._codec_lookup_rules = None
 
+  @property
+  def base_type_info(self):
+    if self.extends:
+      return self.extends.base_type_info
+    return self
+
   def get_desc(self):
     return "KL[%s] EDK[%s] LIB[%s]" % (self.kl.name, self.edk.name, self.lib.name)
   

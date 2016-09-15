@@ -32,8 +32,7 @@ class TypeMgr:
     self.add_selector(self.selectors['in_place'])
     self.add_selector(self.selectors['owned'])
     self.add_selector(self.selectors['wrapped'])
-    # self.add_selector(FixedArraySelector(ext))
-    # self.add_selector(StdMapSelector(ext))
+    self.add_selector(FixedArraySelector(ext))
     self.add_selector(PtrRefSelector(ext))
 
   def add_selector(self, codec):

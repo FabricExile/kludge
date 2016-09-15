@@ -44,6 +44,7 @@ class ConstRefTypeInfo(TypeInfo):
       lib_expr=ReferenceTo(Const(undq_type_info.lib.expr)),
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
+      direct_type_info=undq_type_info,
       )
 
   def build_codec_lookup_rules(self):
@@ -63,6 +64,7 @@ class MutableRefTypeInfo(TypeInfo):
       lib_expr=ReferenceTo(undq_type_info.lib.expr),
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
+      direct_type_info=undq_type_info,
       )
 
   def build_codec_lookup_rules(self):
@@ -82,6 +84,7 @@ class ConstPtrTypeInfo(TypeInfo):
       lib_expr=PointerTo(Const(undq_type_info.lib.expr)),
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
+      direct_type_info=undq_type_info,
       )
 
   def build_codec_lookup_rules(self):
@@ -101,6 +104,7 @@ class MutablePtrTypeInfo(TypeInfo):
       lib_expr=PointerTo(undq_type_info.lib.expr),
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
+      direct_type_info=undq_type_info,
       )
 
   def build_codec_lookup_rules(self):
@@ -132,7 +136,6 @@ class PtrRefBuiltinDecl(BuiltinDecl):
     result = ''
     if self.type_info.direct.record:
       records = self.type_info.direct.record.get_nested_records()
-      print str(records)
       for index, type_info in enumerate([
         self.type_info.const_ptr,
         self.type_info.mutable_ptr,

@@ -3,7 +3,7 @@
 {######################################################################}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
-{% if record.include_getters_setters or not is_direct %}
+{% if record.include_getters_setters or not type_info.is_direct %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Getters and Setters
@@ -12,25 +12,25 @@
 {% if member.is_public() %}
 {% if member.has_getter() %}
 {{member.type_info.kl.name}} {{type_info.kl.name}}.{{member.getter_kl_name}}()
-{% if is_direct %}
+{% if type_info.is_direct %}
   = "{{member.get_getter_edk_symbol_name(type_info)}}";
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.{{member.getter_kl_name}} on null {{type_info.kl.name}}";
-    return this.ptr->{ {{record.kl_global_name}} }.{{member.getter_kl_name}}();
+    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{member.getter_kl_name}}();
 }
 {% endif %}
 {% endif %}
 {% if member.has_setter() and allow_mutable_methods %}
 {{type_info.kl.name}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}})
-{% if is_direct %}
+{% if type_info.is_direct %}
   = "{{member.get_setter_edk_symbol_name(type_info)}}";
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.{{member.setter_kl_name}} on null {{type_info.kl.name}}";
-    this.ptr->{ {{record.kl_global_name}} }.{{member.setter_kl_name}}(value);
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{member.setter_kl_name}}(value);
 }
 {% endif %}
 {% endif %}
@@ -38,7 +38,7 @@
 
 {% endfor %}
 {% endif %}
-{% if is_direct %}
+{% if type_info.is_direct %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Constructors and Destructor
@@ -91,14 +91,14 @@
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     )
-{% if is_direct %}
+{% if type_info.is_direct %}
  = "{{method.get_edk_symbol_name(type_info)}}";
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.{{method.kl_name}} on null {{type_info.kl.name}}";
     {{method.result.render_return_kl()}}
-    this.ptr->{ {{record.kl_global_name}} }.{{method.kl_name}}(
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{method.kl_name}}(
         {% for param in method.params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}
@@ -108,7 +108,7 @@
 {% endif %}
 {% endfor %}
 {% endif %}
-{% if is_direct and record.has_uni_ops %}
+{% if type_info.is_direct and record.has_uni_ops %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Unary Operators
@@ -123,7 +123,7 @@
 
 {% endfor %}
 {% endif %}
-{% if is_direct and record.has_bin_ops %}
+{% if type_info.is_direct and record.has_bin_ops %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Binary Operators
@@ -140,7 +140,7 @@
 
 {% endfor %}
 {% endif %}
-{% if is_direct and record.has_ass_ops %}
+{% if type_info.is_direct and record.has_ass_ops %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Assignment Operators
@@ -161,7 +161,7 @@
 
 {% endif %}
 {% endif %}
-{% if is_direct and record.has_casts() %}
+{% if type_info.is_direct and record.has_casts() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Casts
@@ -176,7 +176,7 @@
 
 {% endfor %}
 {% endif %}
-{% if is_direct and record.deref_kl_method_name %}
+{% if type_info.is_direct and record.deref_kl_method_name %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Deref
@@ -197,13 +197,13 @@
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     )
-{% if is_direct %}
+{% if type_info.is_direct %}
   = "{{record.get_get_ind_op_edk_symbol_name(type_info)}}";
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.getAt on null {{type_info.kl.name}}";
-    return this.ptr->{ {{record.kl_global_name}} }.getAt(
+    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.getAt(
         {% for param in record.get_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}
@@ -222,13 +222,13 @@
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     )
-{% if is_direct %}
+{% if type_info.is_direct %}
   = "{{record.get_set_ind_op_edk_symbol_name(type_info)}}";
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.setAt on null {{type_info.kl.name}}";
-    this.ptr->{ {{record.kl_global_name}} }.setAt(
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.setAt(
         {% for param in record.set_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}
@@ -237,7 +237,7 @@
 {% endif %}
 
 {% endif %}
-{% if is_direct and record.has_kls() %}
+{% if type_info.is_direct and record.has_kls() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Additional KL code

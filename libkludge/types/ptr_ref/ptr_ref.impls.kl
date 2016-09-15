@@ -143,7 +143,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 {{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxRefGet() {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.const_ref.kl.name}}.cxxRefGet on null {{decl.type_info.const_ref.kl.name}}";
-  return this.ptr->{ {{decl.type_info.direct.kl.name}} };
+  return {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} };
 }
 
 // Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
@@ -151,11 +151,14 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
   this = ref.cxxRefGet();
 }
 
+{# Horrible Hack #}
+{% if decl.type_info.const_ref.kl.name.compound != 'StdString_CxxConstRef' %}
 // Convert to String
 {{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
   s += this.cxxRefGet();
 }
 
+{% endif %}
 {% if decl.type_info.direct.is_simple and decl.type_info.direct.kl.name.base != 'Boolean' %}
 
 // Convert to Boolean
@@ -168,7 +171,7 @@ Boolean({{decl.type_info.const_ref.kl.name}} ref) {
 {{decl.type_info.mutable_ref.kl.name}}.cxxRefSet({{decl.type_info.direct.kl.name}} value) {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxxRefSet on null {{decl.type_info.mutable_ref.kl.name}}";
-  this.ptr->{ {{decl.type_info.direct.kl.name}} } = value;
+  {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 
 // Assignment of {{decl.type_info.direct.kl.name}}

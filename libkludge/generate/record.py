@@ -66,19 +66,19 @@ class Method(Methodlike):
     returns,
     params,
     this_access,
+    kl_name=None,
     ):
     Methodlike.__init__(self, record)
     self.cpp_name = cpp_name
+    if not kl_name:
+      kl_name = cpp_name
+    self.kl_name = kl_name
     self.result = ResultCodec(record.resolve_dqti(returns))
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
     self.this_access = this_access
     self.is_const = self.this_access == ThisAccess.const
     self.is_mutable = self.this_access == ThisAccess.mutable
     self.is_static = self.this_access == ThisAccess.static
-
-  @property
-  def kl_name(self):
-    return self.cpp_name
 
   @property
   def this_access_suffix(self):
@@ -458,10 +458,11 @@ class Record(Decl):
   def add_method(
     self,
     name,
-    returns = None,
-    params = [],
-    opt_params = [],
-    this_access = ThisAccess.const,
+    returns=None,
+    params=[],
+    opt_params=[],
+    this_access=ThisAccess.const,
+    kl_name=None,
     ):
     assert isinstance(name, basestring)
 
@@ -471,20 +472,27 @@ class Record(Decl):
 
     result = None
     for i in range(0, len(opt_params)+1):
-      method = Method(self, name, returns, params + opt_params[0:i], this_access)
+      method = Method(
+        self,
+        name,
+        returns,
+        params + opt_params[0:i],
+        this_access=this_access,
+        kl_name=kl_name,
+        )
       self.methods.append(method)
       if not result:
         result = method
     return result
 
-  def add_const_method(self, name, returns=None, params=[], opt_params=[]):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.const)
+  def add_const_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.const, kl_name=kl_name)
 
-  def add_mutable_method(self, name, returns=None, params=[], opt_params=[]):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.mutable)
+  def add_mutable_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.mutable, kl_name=kl_name)
 
-  def add_static_method(self, name, returns=None, params=[], opt_params=[]):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.static)
+  def add_static_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.static, kl_name=kl_name)
   
   def add_uni_op(
     self,

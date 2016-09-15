@@ -13,7 +13,7 @@ ty.set_default_access(MemberAccess.private)
 ty.add_member('pri_intValue', 'int')
 
 ty.add_ctor()
-ty.add_ctor(['float', 'std::string const &', 'int'])\
+ty.add_ctor(['float', 'char const *', 'int'])\
   .add_comment("""Another comment""")\
   .add_test("""
 Class c(3.14, "hello", 42);

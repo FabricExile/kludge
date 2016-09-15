@@ -64,6 +64,7 @@ class TypeInfo:
     extends=None,
     record=None,
     is_simple=False,
+    direct_type_info=None,
     ):
     if kl_name_base is not None:
       if not kl_name_suffix:
@@ -87,7 +88,12 @@ class TypeInfo:
     assert record is None or isinstance(record, Record)
     self.record = record
     self.is_simple = is_simple
+    self.direct = direct_type_info
     self._codec_lookup_rules = None
+
+  @property
+  def is_direct(self):
+    return self.direct is None
 
   def for_derivatives(self):
     result = copy.copy(self)
@@ -142,6 +148,12 @@ class TypeInfo:
 
   def render_get_underlying_ptr(self, expr):
     return self._render("repr", "get_underlying_ptr", "kl", {
+      "type_info": self,
+      "expr": expr,
+      })
+
+  def render_indirect_to_direct(self, expr):
+    return self._render("repr", "indirect_to_direct", "kl", {
       "type_info": self,
       "expr": expr,
       })

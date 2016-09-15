@@ -141,8 +141,8 @@ class Namespace:
       extends = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
     record = Record(
       self,
-      kl_local_name,
       child_namespace_component=cpp_type_expr.components[-1],
+      child_namespace_kl_name=kl_local_name,
       extends=(extends and extends.record),
       )
     selector.register(kl_global_name, cpp_type_expr, extends, record)
@@ -215,7 +215,6 @@ class Namespace:
     record = Record(
       self,
       "KLExtTypeAlias[ext=%s]",
-      kl_global_name,
       self.type_mgr.get_dqti(cpp_type_expr).type_info,
       include_empty_ctor = False,
       include_copy_ctor = False,

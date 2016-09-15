@@ -330,20 +330,21 @@ class Record(Decl):
   def __init__(
     self,
     parent_namespace,
-    kl_local_name,
-    extends = None,
-    include_empty_ctor = True,
-    include_copy_ctor = True,
-    include_simple_ass_op = True,
-    include_getters_setters = True,
-    include_dtor = True,
-    forbid_copy = False,
-    child_namespace_component = None,
+    extends=None,
+    include_empty_ctor=True,
+    include_copy_ctor=True,
+    include_simple_ass_op=True,
+    include_getters_setters=True,
+    include_dtor=True,
+    forbid_copy=False,
+    child_namespace_component=None,
+    child_namespace_kl_name=None,
     ):
     Decl.__init__(self, parent_namespace)
 
     if child_namespace_component:
-      self.namespace = parent_namespace.create_child(child_namespace_component, kl_local_name)
+      assert isinstance(child_namespace_kl_name, basestring)
+      self.namespace = parent_namespace.create_child(child_namespace_component, child_namespace_kl_name)
       for namespace_method in inspect.getmembers(
         self.namespace,
         predicate = inspect.ismethod,
@@ -366,7 +367,6 @@ class Record(Decl):
     self.deref_kl_method_name = None
     self.deref_result = None
 
-    self.kl_local_name = kl_local_name
     self.this_value_name = this_cpp_value_name
     assert extends is None or isinstance(extends, Record)
     self.extends = extends

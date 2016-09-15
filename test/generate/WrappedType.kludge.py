@@ -34,6 +34,11 @@ ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
 ty.set_default_access(MemberAccess.private)
 ty.add_member('pri_intValue', 'int')
+# ty.add_method(
+#   'PrintValues',
+#   params = ['Class const *'],
+#   this_access = ThisAccess.static,
+#   )
 ty.add_method(
   'PrintValues',
   params = ['Wrapper<Class> const &'],

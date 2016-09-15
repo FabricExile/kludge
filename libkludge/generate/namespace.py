@@ -133,8 +133,7 @@ class Namespace:
     variant='owned',
     ):
     selector = self.type_mgr.selectors[variant]
-    cpp_local_name = cpp_type_name
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
+    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name).prefix(self.components)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     if extends:
@@ -193,48 +192,6 @@ class Namespace:
       extends=extends,
       variant='wrapped',
       )
-
-  # def add_wrapped_type(
-  #   self,
-  #   cpp_type_name,
-  #   kl_type_name = None,
-  #   extends = None
-  #   ):
-  #   cpp_local_name = cpp_type_name
-  #   cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
-  #   cpp_type_expr = Named([
-  #     Template(
-  #       cpp_type_expr.components[0].name,
-  #       [cpp_type_expr.components[0].params[0].prefix(self.components)],
-  #       )
-  #     ])
-  #   kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
-  #   kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
-  #   if extends:
-  #     extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-  #     extends = self.cpp_type_expr_to_record[extends_cpp_type_expr]
-  #   self.type_mgr.add_selector(
-  #     WrappedSelector(
-  #       self,
-  #       kl_global_name,
-  #       cpp_type_expr,
-  #       )
-  #     )
-  #   record = Record(
-  #     self,
-  #     "WrappedType[extends=%s]" % (extends),
-  #     kl_local_name,
-  #     self.type_mgr.get_dqti(cpp_type_expr).type_info,
-  #     extends=extends,
-  #     child_namespace_component=cpp_type_expr.components[0].params[0].components[-1],
-  #     )
-  #   self.ext.decls.append(record)
-  #   self.namespace_mgr.add_type(
-  #     self.components,
-  #     cpp_type_expr.components[0].params[0].components[-1],
-  #     cpp_type_expr,
-  #     )
-  #   return record
 
   def add_kl_ext_type_alias(
     self,

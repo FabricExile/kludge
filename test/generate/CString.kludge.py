@@ -6,7 +6,7 @@ ext.add_cpp_quoted_include('CString.hpp')
 
 ext.add_func('CStringParams', 'const char *', ['char const *', 'char const * const &'])\
   .add_test("""
-report("CStringParams('value', 'constRef') = " + CStringParams('value', 'constRef'));
+report("CStringParams('value', 'constRef') = " + CStringParams('value', Make_CxxCharConstPtrConstRef('constRef')));
 """, """
 CStringParams('value', 'constRef') = valueconstRef
 """)

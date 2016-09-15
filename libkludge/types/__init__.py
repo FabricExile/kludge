@@ -4,7 +4,6 @@
 
 from void import VoidSelector  
 from void_ptr import VoidPtrSelector  
-# from c_string import CStringSelector
 from std_string import StdStringSelector
 # from fixed_array import FixedArraySelector
 from std_vector import StdVectorSelector

@@ -3,7 +3,7 @@
 #
 
 import os, jinja2
-from libkludge.cpp_type_expr_parser import Named, Component, Simple, Template, iscomponentlist
+from libkludge.cpp_type_expr_parser import *
 from record import Record
 from alias import Alias
 from enum import Enum
@@ -116,14 +116,124 @@ class Namespace:
     return func
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
-    new_cpp_type_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
-    old_cpp_type_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
-    self.type_mgr.add_alias(new_cpp_type_expr, old_cpp_type_expr)
-    new_kl_type_name = new_cpp_type_name
-    old_dqti = self.type_mgr.get_dqti(old_cpp_type_expr)
-    alias = Alias(self, new_kl_type_name, old_dqti.type_info)
-    self.ext.decls.append(alias)
-    return alias
+    direct_new_cpp_type_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
+    direct_old_cpp_type_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
+    self.type_mgr.add_alias(direct_new_cpp_type_expr, direct_old_cpp_type_expr)
+    direct_new_kl_type_name = new_cpp_type_name
+    direct_old_dqti = self.type_mgr.get_dqti(direct_old_cpp_type_expr)
+    direct_old_kl_type_name = direct_old_dqti.type_info.kl.name.compound
+    direct_alias = Alias(self, direct_new_kl_type_name, direct_old_dqti.type_info)
+    self.ext.decls.append(direct_alias)
+
+    const_ptr_new_cpp_type_expr = PointerTo(Const(direct_new_cpp_type_expr))
+    const_ptr_old_cpp_type_expr = PointerTo(Const(direct_old_cpp_type_expr))
+    self.type_mgr.add_alias(const_ptr_new_cpp_type_expr, const_ptr_old_cpp_type_expr)
+    const_ptr_new_kl_type_name = direct_new_kl_type_name + "_CxxConstPtr"
+    const_ptr_old_dqti = self.type_mgr.get_dqti(const_ptr_old_cpp_type_expr)
+    const_ptr_old_kl_type_name = const_ptr_old_dqti.type_info.kl.name.compound
+    const_ptr_alias = Alias(self, const_ptr_new_kl_type_name, const_ptr_old_dqti.type_info)
+    self.ext.decls.append(const_ptr_alias)
+    self.ext.add_kl_epilog("""
+%s Make_%s(%s value) {
+  return Make_%s(value);
+}
+
+%s Make_%s(io %s value) {
+  return Make_%s(value);
+}
+""" % (
+  const_ptr_new_kl_type_name,
+  const_ptr_new_kl_type_name,
+  direct_new_kl_type_name,
+  const_ptr_old_kl_type_name,
+  const_ptr_new_kl_type_name,
+  const_ptr_new_kl_type_name,
+  direct_new_kl_type_name,
+  const_ptr_old_kl_type_name,
+  ));
+
+    mutable_ptr_new_cpp_type_expr = PointerTo(direct_new_cpp_type_expr)
+    mutable_ptr_old_cpp_type_expr = PointerTo(direct_old_cpp_type_expr)
+    self.type_mgr.add_alias(mutable_ptr_new_cpp_type_expr, mutable_ptr_old_cpp_type_expr)
+    mutable_ptr_new_kl_type_name = direct_new_kl_type_name + "_CxxPtr"
+    mutable_ptr_old_dqti = self.type_mgr.get_dqti(mutable_ptr_old_cpp_type_expr)
+    mutable_ptr_old_kl_type_name = mutable_ptr_old_dqti.type_info.kl.name.compound
+    mutable_ptr_alias = Alias(self, mutable_ptr_new_kl_type_name, mutable_ptr_old_dqti.type_info)
+    self.ext.decls.append(mutable_ptr_alias)
+    self.ext.add_kl_epilog("""
+%s Make_%s(%s value) {
+  return Make_%s(value);
+}
+
+%s Make_%s(io %s value) {
+  return Make_%s(value);
+}
+""" % (
+  mutable_ptr_new_kl_type_name,
+  mutable_ptr_new_kl_type_name,
+  direct_new_kl_type_name,
+  mutable_ptr_old_kl_type_name,
+  mutable_ptr_new_kl_type_name,
+  mutable_ptr_new_kl_type_name,
+  direct_new_kl_type_name,
+  mutable_ptr_old_kl_type_name,
+  ));
+
+    const_ref_new_cpp_type_expr = ReferenceTo(Const(direct_new_cpp_type_expr))
+    const_ref_old_cpp_type_expr = ReferenceTo(Const(direct_old_cpp_type_expr))
+    self.type_mgr.add_alias(const_ref_new_cpp_type_expr, const_ref_old_cpp_type_expr)
+    const_ref_new_kl_type_name = direct_new_kl_type_name + "_CxxConstRef"
+    const_ref_old_dqti = self.type_mgr.get_dqti(const_ref_old_cpp_type_expr)
+    const_ref_old_kl_type_name = const_ref_old_dqti.type_info.kl.name.compound
+    const_ref_alias = Alias(self, const_ref_new_kl_type_name, const_ref_old_dqti.type_info)
+    self.ext.decls.append(const_ref_alias)
+    self.ext.add_kl_epilog("""
+%s Make_%s(%s value) {
+  return Make_%s(value);
+}
+
+%s Make_%s(io %s value) {
+  return Make_%s(value);
+}
+""" % (
+  const_ref_new_kl_type_name,
+  const_ref_new_kl_type_name,
+  direct_new_kl_type_name,
+  const_ref_old_kl_type_name,
+  const_ref_new_kl_type_name,
+  const_ref_new_kl_type_name,
+  direct_new_kl_type_name,
+  const_ref_old_kl_type_name,
+  ));
+
+    mutable_ref_new_cpp_type_expr = ReferenceTo(direct_new_cpp_type_expr)
+    mutable_ref_old_cpp_type_expr = ReferenceTo(direct_old_cpp_type_expr)
+    self.type_mgr.add_alias(mutable_ref_new_cpp_type_expr, mutable_ref_old_cpp_type_expr)
+    mutable_ref_new_kl_type_name = direct_new_kl_type_name + "_CxxRef"
+    mutable_ref_old_dqti = self.type_mgr.get_dqti(mutable_ref_old_cpp_type_expr)
+    mutable_ref_old_kl_type_name = mutable_ref_old_dqti.type_info.kl.name.compound
+    mutable_ref_alias = Alias(self, mutable_ref_new_kl_type_name, mutable_ref_old_dqti.type_info)
+    self.ext.decls.append(mutable_ref_alias)
+    self.ext.add_kl_epilog("""
+%s Make_%s(%s value) {
+  return Make_%s(value);
+}
+
+%s Make_%s(io %s value) {
+  return Make_%s(value);
+}
+""" % (
+  mutable_ref_new_kl_type_name,
+  mutable_ref_new_kl_type_name,
+  direct_new_kl_type_name,
+  mutable_ref_old_kl_type_name,
+  mutable_ref_new_kl_type_name,
+  mutable_ref_new_kl_type_name,
+  direct_new_kl_type_name,
+  mutable_ref_old_kl_type_name,
+  ));
+
+    return direct_alias
 
   def add_type(
     self,

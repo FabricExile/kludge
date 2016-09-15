@@ -33,7 +33,7 @@ report("<empty>");
 ext.add_func('TakeAliasTypeRef', None, ['AliasType &'])\
   .add_test("""
 AliasType alias_value = 42;
-TakeAliasTypeRef(alias_value);
+TakeAliasTypeRef(Make_AliasType_CxxRef(alias_value));
 report("<empty>");
 """, """
 <empty>
@@ -42,7 +42,7 @@ report("<empty>");
 ext.add_func('TakeAliasTypeConstRef', None, ['AliasType const &'])\
   .add_test("""
 AliasType alias_value = 42;
-TakeAliasTypeConstRef(alias_value);
+TakeAliasTypeConstRef(Make_AliasType_CxxConstRef(alias_value));
 report("<empty>");
 """, """
 <empty>

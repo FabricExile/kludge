@@ -31,6 +31,13 @@
   this.ptr = data;
 }
 
+{% if not decl.type_info.direct.is_simple %}
+{{decl.type_info.const_ptr.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
+}
+
+{% endif %}
+
 // Is valid.  Check for null pointer
 Boolean {{decl.type_info.const_ptr.kl.name}}.cxxPtrIsValid() {
   return !!this.ptr;
@@ -96,6 +103,13 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
   this.ptr = data;
 }
 
+{% if not decl.type_info.direct.is_simple %}
+{{decl.type_info.mutable_ptr.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
+  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
+}
+
+{% endif %}
+
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
 {{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
@@ -133,6 +147,13 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 {{decl.type_info.const_ref.kl.name}}(Data cpp_ptr) {
   this.ptr = cpp_ptr;
 }
+
+{% if not decl.type_info.direct.is_simple %}
+{{decl.type_info.const_ref.kl.name}}({{decl.type_info.direct.kl.name}} value) {
+  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
+}
+
+{% endif %}
 
 // Copy ctor
 {{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ref.kl.name}} that) {
@@ -187,6 +208,13 @@ Boolean({{decl.type_info.const_ref.kl.name}} ref) {
 {{decl.type_info.mutable_ref.kl.name}}(Data data) {
   this.ptr = data;
 }
+
+{% if not decl.type_info.direct.is_simple %}
+{{decl.type_info.mutable_ref.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
+  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
+}
+
+{% endif %}
 
 // Set the value
 {{decl.type_info.mutable_ref.kl.name}}.cxxRefSet({{decl.type_info.direct.kl.name}} value) {

@@ -41,7 +41,7 @@ ty.add_method(
   this_access = ThisAccess.static,
   ).add_test("""
 Class c(1.32, "hoo", 23);
-Class_PrintValues(Make_Class_CxxConstRef(c));
+Class_PrintValues(c);
 """, """
 Class::Class(1.32, hoo, 23)
 1.32 hoo 23

@@ -44,11 +44,21 @@ public:
     assert( false );
   }
 
-  static void PrintValues( Wrapper<Class> const &that )
+  Class const *unwrap() const
+  {
+    return this;
+  }
+
+  static void PrintValues( Class const *that )
   {
     printf("%.2f %s %d\n", that->floatValue, that->stringValue.c_str(),
            that->pri_intValue);
     fflush( stdout );
+  }
+
+  static void PrintValues( Wrapper<Class> const &that )
+  {
+    PrintValues( that.operator->() );
   }
 
   int operator[]( size_t index ) const

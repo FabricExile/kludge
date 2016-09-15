@@ -34,16 +34,21 @@ ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
 ty.set_default_access(MemberAccess.private)
 ty.add_member('pri_intValue', 'int')
-# ty.add_method(
-#   'PrintValues',
-#   params = ['Class const *'],
-#   this_access = ThisAccess.static,
-#   )
-ty.add_method(
-  'PrintValues',
-  params = ['Wrapper<Class> const &'],
-  this_access = ThisAccess.static,
-  ).add_test("""
+ty.add_const_method('unwrap', 'Class const *')
+ty.add_static_method('PrintValues', None, ['Class const *'])\
+  .add_test("""
+Class c(1.32, "hoo", 23);
+Class_CxxConstPtr ptr = c.unwrap();
+Class_PrintValues(ptr);
+""", """
+Class::Class(1.32, hoo, 23)
+Wrapper::Wrapper(Ty *)
+1.32 hoo 23
+Wrapper::~Wrapper()
+Class::~Class()
+""")
+ty.add_static_method('PrintValues', None, ['Wrapper<Class> const &'])\
+  .add_test("""
 Class_PrintValues(Make_Wrapped_Class_CxxConstRef(Class(1.32, "hoo", 23)));
 """, """
 Class::Class(1.32, hoo, 23)

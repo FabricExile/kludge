@@ -14,6 +14,7 @@ class WrappedTypeInfo(TypeInfo):
     self,
     jinjenv,
     kl_global_name,
+    kl_global_name_for_derivatives,
     cpp_type_expr,
     extends,
     record,
@@ -22,6 +23,7 @@ class WrappedTypeInfo(TypeInfo):
       self,
       jinjenv,
       kl_name_base=kl_global_name,
+      kl_name_base_for_derivatives=kl_global_name_for_derivatives,
       edk_name="Fabric_EDK_KL_" + kl_global_name,
       lib_expr=cpp_type_expr,
       extends=extends,
@@ -66,8 +68,9 @@ class WrappedBuiltinDecl(BuiltinDecl):
 
 class WrappedSpec(object):
 
-  def __init__(self, kl_type_name, cpp_type_expr, extends, record):
+  def __init__(self, kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record):
     self.kl_type_name = kl_type_name
+    self.kl_type_name_for_derivatives = kl_type_name_for_derivatives
     self.cpp_type_expr = cpp_type_expr
     self.extends = extends
     self.record = record
@@ -81,9 +84,9 @@ class WrappedSelector(Selector):
     self.cpp_type_expr_to_spec = {}
     self.type_info_cache = {}
 
-  def register(self, kl_type_name, cpp_type_expr, extends, record):
+  def register(self, kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record):
     self.cpp_type_expr_to_spec[cpp_type_expr] = WrappedSpec(
-      kl_type_name, cpp_type_expr, extends, record
+      kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record
       )
 
   def get_desc(self):
@@ -103,6 +106,7 @@ class WrappedSelector(Selector):
           and isinstance(undq_cpp_type_expr.components[0].params[0].components[-1], Simple)
           
         kl_type_name = spec.kl_type_name
+        kl_type_name_for_derivatives = spec.kl_type_name_for_derivatives
         undq_cpp_type_expr = spec.cpp_type_expr
         extends = spec.extends
         record = spec.record
@@ -113,6 +117,7 @@ class WrappedSelector(Selector):
           type_info = WrappedTypeInfo(
             self.jinjenv,
             kl_type_name,
+            kl_type_name_for_derivatives,
             undq_cpp_type_expr,
             extends=extends,
             record=record,

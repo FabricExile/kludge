@@ -2,6 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
+import copy
 from symbol_helpers import replace_invalid_chars
 from libkludge.generate.record import Record
 
@@ -56,6 +57,8 @@ class TypeInfo:
     lib_expr,
     kl_name_base=None,
     kl_name_suffix=None,
+    kl_name_base_for_derivatives=None,
+    kl_name_suffix_for_derivatives=None,
     edk_name=None,
     child_dqtis=[],
     extends=None,
@@ -69,6 +72,11 @@ class TypeInfo:
       if not edk_name:
         assert not kl_name_suffix
         edk_name = "_Kludge_EDK_" + kl_name_base
+      if kl_name_base_for_derivatives is None:
+        kl_name_base_for_derivatives = kl_name_base
+      if kl_name_suffix_for_derivatives is None:
+        kl_name_suffix_for_derivatives = kl_name_suffix
+      self.kl_for_derivatives = KLTypeInfo(kl_name_base_for_derivatives, kl_name_suffix_for_derivatives)
     if edk_name:
       self.edk = EDKTypeInfo(edk_name)
     self.lib = LibTypeInfo(lib_expr)
@@ -81,6 +89,11 @@ class TypeInfo:
     self.is_simple = is_simple
     self._codec_lookup_rules = None
 
+  def for_derivatives(self):
+    result = copy.copy(self)
+    result.kl = result.kl_for_derivatives
+    return result
+
   @property
   def base_type_info(self):
     if self.extends:
@@ -88,7 +101,11 @@ class TypeInfo:
     return self
 
   def get_desc(self):
-    return "KL[%s] EDK[%s] LIB[%s]" % (self.kl.name, self.edk.name, self.lib.name)
+    kl_name = self.kl.name.compound
+    kl_name_for_derivatives = self.kl_for_derivatives.name.compound
+    if kl_name_for_derivatives != kl_name:
+      kl_name = "%s|%s" % (kl_name, kl_name_for_derivatives)
+    return "KL[%s] EDK[%s] LIB[%s]" % (kl_name, self.edk.name, self.lib.name)
   
   def __str__(self):
     return self.get_desc()

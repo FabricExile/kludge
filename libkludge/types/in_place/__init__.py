@@ -35,6 +35,7 @@ class InPlaceTypeInfo(TypeInfo):
     self,
     jinjenv,
     kl_type_name,
+    kl_type_name_for_derivatives,
     cpp_type_expr,
     extends,
     record,
@@ -44,6 +45,7 @@ class InPlaceTypeInfo(TypeInfo):
       self,
       jinjenv,
       kl_name_base=kl_type_name,
+      kl_name_base_for_derivatives=kl_type_name_for_derivatives,
       edk_name=build_edk_name(kl_type_name),
       lib_expr=cpp_type_expr,
       extends=extends,
@@ -99,8 +101,19 @@ class InPlaceBuiltinDecl(BuiltinDecl):
 
 class InPlaceSpec(object):
 
-  def __init__(self, kl_type_name, cpp_type_expr, extends, record, is_simple=False):
+  def __init__(
+    self,
+    kl_type_name,
+    cpp_type_expr,
+    extends,
+    record,
+    is_simple=False,
+    kl_type_name_for_derivatives=None,
+    ):
     self.kl_type_name = kl_type_name
+    if not kl_type_name_for_derivatives:
+      kl_type_name_for_derivatives = kl_type_name
+    self.kl_type_name_for_derivatives = kl_type_name_for_derivatives
     self.cpp_type_expr = cpp_type_expr
     self.is_simple = is_simple
     self.extends = extends
@@ -161,9 +174,20 @@ class InPlaceSelector(Selector):
   def get_desc(self):
     return "InPlace"
 
-  def register(self, kl_type_name, cpp_type_expr, extends, record):
+  def register(
+    self,
+    kl_type_name,
+    kl_type_name_for_derivatives,
+    cpp_type_expr,
+    extends,
+    record,
+    ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = InPlaceSpec(
-      kl_type_name, cpp_type_expr, extends, record
+      kl_type_name,
+      cpp_type_expr,
+      extends,
+      record,
+      kl_type_name_for_derivatives=kl_type_name_for_derivatives
       )
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
@@ -172,6 +196,7 @@ class InPlaceSelector(Selector):
       spec = self.cpp_type_expr_to_spec.get(undq_cpp_type_expr)
       if spec:
         kl_type_name = spec.kl_type_name
+        kl_type_name_for_derivatives = spec.kl_type_name_for_derivatives
         undq_cpp_type_expr = spec.cpp_type_expr
         is_simple = spec.is_simple
         extends = spec.extends
@@ -183,6 +208,7 @@ class InPlaceSelector(Selector):
           type_info = InPlaceTypeInfo(
             self.jinjenv,
             kl_type_name,
+            kl_type_name_for_derivatives,
             undq_cpp_type_expr,
             extends=extends,
             record=record,

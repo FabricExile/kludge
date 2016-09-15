@@ -127,15 +127,19 @@ class Namespace:
 
   def add_type(
     self,
-    cpp_type_name,
-    kl_type_name=None,
+    cpp_local_expr,
+    kl_local_name,
+    kl_local_name_for_derivatives=None,
     extends=None,
     variant='owned',
     ):
-    selector = self.type_mgr.selectors[variant]
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name).prefix(self.components)
-    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_type_expr)
+    assert isinstance(cpp_local_expr, Named)
+    cpp_type_expr = cpp_local_expr.prefix(self.components)
+    assert isinstance(kl_local_name, basestring)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
+    if not kl_local_name_for_derivatives:
+      kl_local_name_for_derivatives = kl_local_name
+    kl_global_name_for_derivatives = '_'.join(self.nested_kl_names + [kl_local_name_for_derivatives])
     if extends:
       extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
       extends = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
@@ -145,7 +149,8 @@ class Namespace:
       child_namespace_kl_name=kl_local_name,
       extends=(extends and extends.record),
       )
-    selector.register(kl_global_name, cpp_type_expr, extends, record)
+    selector = self.type_mgr.selectors[variant]
+    selector.register(kl_global_name, kl_global_name_for_derivatives, cpp_type_expr, extends, record)
     self.namespace_mgr.add_type(
       self.components,
       cpp_type_expr.components[-1],
@@ -160,9 +165,11 @@ class Namespace:
     kl_type_name=None,
     extends=None,
     ):
+    cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
+    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
     return self.add_type(
-      cpp_type_name=cpp_type_name,
-      kl_type_name=kl_type_name,
+      cpp_local_expr=cpp_local_expr,
+      kl_local_name=kl_local_name,
       extends=extends,
       variant='owned',
       )
@@ -173,25 +180,45 @@ class Namespace:
     kl_type_name=None,
     extends=None,
     ):
+    cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
+    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
     return self.add_type(
-      cpp_type_name=cpp_type_name,
-      kl_type_name=kl_type_name,
+      cpp_local_expr=cpp_local_expr,
+      kl_local_name=kl_local_name,
       extends=extends,
       variant='in_place',
       )
 
   def add_wrapped_type(
     self,
+    cpp_wrapper_name,
     cpp_type_name,
     kl_type_name=None,
-    extends=None,
     ):
-    return self.add_type(
-      cpp_type_name=cpp_type_name,
-      kl_type_name=kl_type_name,
-      extends=extends,
+    cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
+    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
+
+    owned_cpp_local_expr = cpp_local_expr
+    owned_kl_local_name = 'Raw_' + kl_local_name
+    owned = self.add_type(
+      cpp_local_expr=owned_cpp_local_expr,
+      kl_local_name=owned_kl_local_name,
+      kl_local_name_for_derivatives=kl_local_name,
+      extends=None,
+      variant='owned',
+      )
+
+    wrapped_cpp_local_expr = Named([Template(cpp_wrapper_name, [cpp_local_expr])])
+    wrapped_kl_local_name = 'Wrapped_' + kl_local_name
+    wrapped = self.add_type(
+      cpp_local_expr=wrapped_cpp_local_expr,
+      kl_local_name=kl_local_name,
+      kl_local_name_for_derivatives=wrapped_kl_local_name,
+      extends=None,
       variant='wrapped',
       )
+
+    return wrapped
 
   def add_kl_ext_type_alias(
     self,

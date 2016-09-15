@@ -163,8 +163,9 @@ class PtrRefTypeInfoSet(object):
   
   def __init__(self, jinjenv, undq_type_info):
     self.direct = undq_type_info
+    undq_type_info_for_derivatives = undq_type_info.for_derivatives()
     for name, klass in type_info_class_map.iteritems():
-      setattr(self, name, klass(jinjenv, undq_type_info))
+      setattr(self, name, klass(jinjenv, undq_type_info_for_derivatives))
 
 class PtrRefSelector(Selector):
 

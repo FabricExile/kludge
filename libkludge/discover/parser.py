@@ -259,14 +259,14 @@ class Parser(object):
       if extends:
         decls.write(", extends='%s'" % extends)
       decls.write(")%s\n" % self.parse_comment(ast_logger, cursor))
+      for child_record_cursor in child_record_cursors:
+        child_ast_logger.log_cursor(child_record_cursor)
+        self.parse_record_decl(child_ast_logger, child_record_cursor, child_obj, decls, defns)
       for member in members:
         print >>decls, member
       for method in methods:
         print >>defns, method
       print >>defns, ""
-      for child_record_cursor in child_record_cursors:
-        child_ast_logger.log_cursor(child_record_cursor)
-        self.parse_record_decl(child_ast_logger, child_record_cursor, child_obj, decls, defns)
 
   def parse_function_decl(self, ast_logger, cursor, obj, decls, defns):
     defns.write("# %s\n%s.add_func('%s', '%s', %s)%s\n\n" % (

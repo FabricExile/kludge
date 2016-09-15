@@ -130,7 +130,7 @@ class Namespace:
     cpp_local_expr,
     kl_local_name,
     kl_local_name_for_derivatives=None,
-    extends=None,
+    extends_type_info=None,
     variant='owned',
     ):
     assert isinstance(cpp_local_expr, Named)
@@ -140,17 +140,14 @@ class Namespace:
     if not kl_local_name_for_derivatives:
       kl_local_name_for_derivatives = kl_local_name
     kl_global_name_for_derivatives = '_'.join(self.nested_kl_names + [kl_local_name_for_derivatives])
-    if extends:
-      extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-      extends = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
     record = Record(
       self,
       child_namespace_component=cpp_type_expr.components[-1],
       child_namespace_kl_name=kl_local_name,
-      extends=(extends and extends.record),
+      extends=(extends_type_info and extends_type_info.record),
       )
     selector = self.type_mgr.selectors[variant]
-    selector.register(kl_global_name, kl_global_name_for_derivatives, cpp_type_expr, extends, record)
+    selector.register(kl_global_name, kl_global_name_for_derivatives, cpp_type_expr, extends_type_info, record)
     self.namespace_mgr.add_type(
       self.components,
       cpp_type_expr.components[-1],
@@ -167,10 +164,15 @@ class Namespace:
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
+    if extends:
+      extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
+      extends_type_info = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
+    else:
+      extends_type_info = None
     return self.add_type(
       cpp_local_expr=cpp_local_expr,
       kl_local_name=kl_local_name,
-      extends=extends,
+      extends_type_info=extends_type_info,
       variant='owned',
       )
 
@@ -182,10 +184,15 @@ class Namespace:
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
+    if extends:
+      extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
+      extends_type_info = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
+    else:
+      extends_type_info = None
     return self.add_type(
       cpp_local_expr=cpp_local_expr,
       kl_local_name=kl_local_name,
-      extends=extends,
+      extends_type_info=extends_type_info,
       variant='in_place',
       )
 
@@ -194,27 +201,38 @@ class Namespace:
     cpp_wrapper_name,
     cpp_type_name,
     kl_type_name=None,
+    extends=None,
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
 
     owned_cpp_local_expr = cpp_local_expr
     owned_kl_local_name = 'Raw_' + kl_local_name
+    if extends:
+      owned_extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
+      owned_extends_type_info = self.type_mgr.get_dqti(owned_extends_cpp_type_expr).type_info
+    else:
+      owned_extends_type_info = None
     owned = self.add_type(
       cpp_local_expr=owned_cpp_local_expr,
       kl_local_name=owned_kl_local_name,
       kl_local_name_for_derivatives=kl_local_name,
-      extends=None,
+      extends_type_info=owned_extends_type_info,
       variant='owned',
       )
 
     wrapped_cpp_local_expr = Named([Template(cpp_wrapper_name, [cpp_local_expr])])
     wrapped_kl_local_name = 'Wrapped_' + kl_local_name
+    if extends:
+      wrapped_extends_cpp_type_expr = self.cpp_type_expr_parser.parse('%s< %s >' % (cpp_wrapper_name, extends))
+      wrapped_extends_type_info = self.type_mgr.get_dqti(wrapped_extends_cpp_type_expr).type_info
+    else:
+      wrapped_extends_type_info = None
     wrapped = self.add_type(
       cpp_local_expr=wrapped_cpp_local_expr,
       kl_local_name=kl_local_name,
       kl_local_name_for_derivatives=wrapped_kl_local_name,
-      extends=None,
+      extends_type_info=wrapped_extends_type_info,
       variant='wrapped',
       )
 

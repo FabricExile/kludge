@@ -3,6 +3,11 @@
 {######################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
+{% if decl.type_info.existing_kl_ext_name %}
+require {{decl.type_info.existing_kl_ext_name}};
+{% endif %}
+alias {{decl.type_info.existing_kl_global_name}} {{decl.type_info.kl.name}};
+
 UInt64 __CxxSize_{{decl.type_info.kl.name}}() {
   return {{decl.type_info.kl.name}}().dataSize();
 }

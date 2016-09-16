@@ -377,19 +377,20 @@ class Namespace:
   def add_mirror(
     self,
     cpp_local_name,
-    kl_global_name,
+    existing_kl_global_name,
     kl_ext_name=None,
     ):
     assert isinstance(cpp_local_name, basestring)
     cpp_global_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
     assert isinstance(cpp_global_expr, Named)
-    if kl_ext_name:
-      assert isinstance(kl_ext_name, basestring)
-      self.ext.add_kl_require(kl_ext_name)
-    assert isinstance(kl_global_name, basestring)
+    kl_local_name = self.maybe_generate_kl_local_name(None, cpp_global_expr)
+    kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
+    assert isinstance(existing_kl_global_name, basestring)
     self.type_mgr.selectors['mirror'].register(
       cpp_global_expr,
       kl_global_name,
+      existing_kl_global_name,
+      kl_ext_name,
       self,
       )
     self.namespace_mgr.add_type(
@@ -397,7 +398,7 @@ class Namespace:
       cpp_global_expr.components[-1],
       cpp_global_expr,
       )
-    return self.type_mgr.get_dqti(cpp_global_expr).type_info.record
+    record = self.type_mgr.get_dqti(cpp_global_expr).type_info.record
 
   def add_enum(
     self,

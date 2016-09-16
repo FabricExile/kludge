@@ -16,6 +16,8 @@ class MirrorTypeInfo(TypeInfo):
     jinjenv,
     kl_global_name,
     cpp_global_expr,
+    existing_kl_global_name,
+    existing_kl_ext_name,
     record,
     ):
     TypeInfo.__init__(
@@ -27,6 +29,8 @@ class MirrorTypeInfo(TypeInfo):
       lib_expr=cpp_global_expr,
       record=record,
       )
+    self.existing_kl_global_name = existing_kl_global_name
+    self.existing_kl_ext_name = existing_kl_ext_name
 
 class MirrorBuiltinDecl(BuiltinDecl):
 
@@ -63,10 +67,14 @@ class MirrorSpec(object):
     self,
     cpp_global_expr,
     kl_global_name,
+    existing_kl_global_name,
+    existing_kl_ext_name,
     namespace,
     ):
     self.cpp_global_expr = cpp_global_expr
     self.kl_global_name = kl_global_name
+    self.existing_kl_global_name = existing_kl_global_name
+    self.existing_kl_ext_name = existing_kl_ext_name
     self.namespace = namespace
 
 class MirrorSelector(Selector):
@@ -80,10 +88,12 @@ class MirrorSelector(Selector):
     self,
     cpp_global_expr,
     kl_global_name,
+    existing_kl_global_name,
+    existing_kl_ext_name,
     namespace,
     ):
     self.cpp_global_expr_to_spec[cpp_global_expr] = MirrorSpec(
-      cpp_global_expr, kl_global_name, namespace
+      cpp_global_expr, kl_global_name, existing_kl_global_name, existing_kl_ext_name, namespace
       )
 
   def get_desc(self):
@@ -96,6 +106,8 @@ class MirrorSelector(Selector):
       if spec:
         kl_global_name = spec.kl_global_name
         cpp_global_expr = spec.cpp_global_expr
+        existing_kl_global_name = spec.existing_kl_global_name
+        existing_kl_ext_name = spec.existing_kl_ext_name
         namespace = spec.namespace
 
         type_info_cache_key = kl_global_name
@@ -105,6 +117,8 @@ class MirrorSelector(Selector):
             self.jinjenv,
             kl_global_name,
             cpp_global_expr,
+            existing_kl_global_name,
+            existing_kl_ext_name,
             Record(
               namespace,
               include_empty_ctor=False,

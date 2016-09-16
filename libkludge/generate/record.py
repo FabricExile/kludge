@@ -512,12 +512,14 @@ class Record(Decl):
   def add_bin_op(
     self,
     op,
-    returns='bool',
-    params=None,
+    returns,
+    params,
     ):
-    if not params:
-      params = [self.this_type_info.lib.name.compound + ' const &', self.this_type_info.lib.name.compound + ' const &']
+    assert isinstance(op, basestring)
+    assert isinstance(returns, basestring)
     assert len(params) == 2
+    assert isinstance(params[0], basestring)
+    assert isinstance(params[1], basestring)
     bin_op = BinOp(
       self,
       result_type=returns,
@@ -535,7 +537,9 @@ class Record(Decl):
     op,
     params,
     ):
+    assert isinstance(op, basestring)
     assert len(params) == 1
+    assert isinstance(params[0], basestring)
     ass_op = AssOp(
       self,
       op=op,
@@ -696,3 +700,12 @@ class Record(Decl):
 
   def has_casts(self):
     return len(self.casts) > 0
+
+  def public_members(self):
+    return [member for member in self.members if member.is_public()]
+
+  def nested_public_members(self):
+    result = []
+    for record in self.get_nested_records():
+      result.extend(record.public_members())
+    return result

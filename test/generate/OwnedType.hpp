@@ -89,6 +89,15 @@ public:
   int const &operator*() const
     { return pri_intValue; }
 
+  Class operator+( Class const &that ) const
+  {
+    return Class(
+      floatValue + that.floatValue,
+      stringValue + that.stringValue,
+      pri_intValue + that.pri_intValue
+      );
+  }
+
 protected:
 
   std::string const &protectedMethod() { return stringValue; }
@@ -137,6 +146,7 @@ public:
     int _intValue
     )
     : Class( 3.14, "hello", _intValue )
+    , newPublicMember(2.81)
   {
     std::cout << "DerivedClass::DerivedClass(" << _intValue << ")\n" << std::flush;
   }
@@ -148,4 +158,6 @@ public:
 
   int newMethod() const
     { return -9; }
+
+  double newPublicMember;
 };

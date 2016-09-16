@@ -9,7 +9,7 @@ struct {{decl.type_info.kl.name}}
   {};
 {% else %}
 {
-  private Data cpp_ptr;
+  protected Data cpp_ptr;
 };
 
 Data {{decl.type_info.kl.name}}.__getUnderlyingPtr() {

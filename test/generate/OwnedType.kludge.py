@@ -87,21 +87,40 @@ Class::Class(3.14, hello, -2)
 Class::~Class()
 """)
 
+ty.add_bin_op('+', 'Class', ['Class const &', 'Class const &'])\
+  .add_test("""
+Class c1(5.4, "one", -7);
+report("c1 = " + c1);
+report("c1+c1 = " + (c1+c1));
+""", """
+Class::Class(5.4, one, -7)
+c1 = Class:{floatValue:+5.4,stringValue:one}
+Class::Class(10.8, oneone, -14)
+c1+c1 = Class:{floatValue:+10.8,stringValue:oneone}
+Class::~Class()
+Class::~Class()
+""")
+
 dty = ext.add_owned_type('DerivedClass', extends='Class')
 dty.add_ctor(['int'])
 dty.add_const_method('newMethod', 'int')
+dty.add_member('newPublicMember', 'double', access=MemberAccess.public)
 dty.add_test("""
 DerivedClass dc(56);
+report("dc = " + dc);
 report("dc.newMethod() = " + dc.newMethod());
 report("dc.publicMethod() = " + dc.publicMethod());
 Class c = dc;
+report("c = " + c);
 report("c.publicMethod() = " + c.publicMethod());
 """, """
 Class::Class(3.14, hello, 56)
 DerivedClass::DerivedClass(56)
+dc = DerivedClass:{floatValue:+3.14,stringValue:hello,newPublicMember:+2.81}
 dc.newMethod() = -9
 dc.publicMethod() = hello
 Class::Class(Class const &)
+c = Class:{floatValue:+3.14,stringValue:hello}
 c.publicMethod() = hello
 Class::~Class()
 DerivedClass::~DerivedClass()

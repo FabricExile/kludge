@@ -4,4 +4,23 @@
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 {{decl.render_method_impls('kl')}}
+{% if decl.type_info.kl.name.compound != "StdString" %}
+{{decl.type_info.kl.name}}.appendDesc(io String string) {
+  string += "{{decl.type_info.kl.name}}:";
+  if (!this.cpp_ptr)
+    string += "null";
+  else {
+    string += "{";
+{% for member in decl.type_info.record.nested_public_members() %}
+{% if not loop.first %}
+    string += ",";
+{% endif %}
+    string += "{{member.kl_name}}:";
+    string += this.GET_{{member.kl_name}}();
+{% endfor %}
+    string += "}";
+  }
+}
+
+{% endif %}
 {% endblock body %}

@@ -359,42 +359,30 @@ class Namespace:
       record=owned,
       )
 
-  def add_kl_ext_type_alias(
+  def add_mirror(
     self,
     cpp_local_name,
-    kl_ext_name,
     kl_global_name,
+    kl_ext_name=None,
     ):
     assert isinstance(cpp_local_name, basestring)
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
-    assert isinstance(cpp_type_expr, Named)
-    assert isinstance(kl_ext_name, basestring)
-    self.ext.add_kl_require(kl_ext_name)
+    cpp_global_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
+    assert isinstance(cpp_global_expr, Named)
+    if kl_ext_name:
+      assert isinstance(kl_ext_name, basestring)
+      self.ext.add_kl_require(kl_ext_name)
     assert isinstance(kl_global_name, basestring)
-    self.type_mgr.add_selector(
-      KLExtTypeAliasSelector(
-        self,
-        cpp_type_expr,
-        kl_global_name,
-        )
-      )
-    record = Record(
+    self.type_mgr.selectors['mirror'].register(
+      cpp_global_expr,
+      kl_global_name,
       self,
-      "KLExtTypeAlias[ext=%s]",
-      self.type_mgr.get_dqti(cpp_type_expr).type_info,
-      include_empty_ctor = False,
-      include_copy_ctor = False,
-      include_simple_ass_op = False,
-      include_getters_setters = False,
-      include_dtor = False,
       )
-    self.ext.decls.append(record)
     self.namespace_mgr.add_type(
       self.components,
-      cpp_type_expr.components[-1],
-      cpp_type_expr,
+      cpp_global_expr.components[-1],
+      cpp_global_expr,
       )
-    return record
+    return self.type_mgr.get_dqti(cpp_global_expr).type_info.record
 
   def add_enum(
     self,

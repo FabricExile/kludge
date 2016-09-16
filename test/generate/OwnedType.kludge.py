@@ -101,6 +101,22 @@ Class::~Class()
 Class::~Class()
 """)
 
+ty.add_ass_op('+=', ['Class const &'])\
+  .add_test("""
+Class c1(5.4, "one", -7);
+report("c1 = " + c1);
+c1 += c1;
+report("c1 = " + c1);
+""", """
+Class::Class(5.4, one, -7)
+c1 = Class:{floatValue:+5.4,stringValue:one}
+Class::Class(10.8, oneone, -14)
+Class::operator=(Class const &)
+Class::~Class()
+c1 = Class:{floatValue:+10.8,stringValue:oneone}
+Class::~Class()
+""")
+
 dty = ext.add_owned_type('DerivedClass', extends='Class')
 dty.add_ctor(['int'])
 dty.add_const_method('newMethod', 'int')

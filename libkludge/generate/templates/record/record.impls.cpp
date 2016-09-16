@@ -198,11 +198,11 @@ FABRIC_EXT_EXPORT void
 {% for ass_op in record.ass_ops %}
 FABRIC_EXT_EXPORT void
 {{ass_op.get_edk_symbol_name(type_info)}}(
-    {{macros.edk_param_list(None, ass_op.this, ass_op.params) | indent(4)}}
+    {{macros.edk_param_list(None, ass_op.get_this(type_info), ass_op.params) | indent(4)}}
     )
 {
     {{macros.cpp_call_pre(None, ass_op.params) | indent(4)}}
-    {{ass_op.this.render_ref()}} {{ass_op.op}}
+    {{ass_op.get_this(type_info).render_ref()}} {{ass_op.op}}
         {{macros.cpp_call_args(ass_op.params) | indent(8)}}
     {{macros.cpp_call_post(None, ass_op.params) | indent(4)}}
 }

@@ -149,7 +149,7 @@
 {% for comment in ass_op.comments %}
 {{comment}}
 {% endfor %}
-{{ass_op.this.type_info.kl.name}}.{{ass_op.op}}(
+{{type_info.kl.name}}.{{ass_op.op}}(
     {{ass_op.params[0].render_kl() | indent(4)}}
     ) = "{{ass_op.get_edk_symbol_name(type_info)}}";
 

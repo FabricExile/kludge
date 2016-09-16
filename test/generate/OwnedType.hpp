@@ -98,6 +98,14 @@ public:
       );
   }
 
+  Class &operator+=( Class const &that )
+  {
+    floatValue += that.floatValue;
+    stringValue += that.stringValue;
+    pri_intValue += that.pri_intValue;
+    return *this;
+  }
+
 protected:
 
   std::string const &protectedMethod() { return stringValue; }

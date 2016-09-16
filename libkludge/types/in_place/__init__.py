@@ -40,6 +40,7 @@ class InPlaceTypeInfo(TypeInfo):
     extends,
     record,
     is_simple,
+    forbid_copy,
     ):
     TypeInfo.__init__(
       self,
@@ -51,6 +52,7 @@ class InPlaceTypeInfo(TypeInfo):
       extends=extends,
       record=record,
       is_simple=is_simple,
+      forbid_copy=forbid_copy,
       )
 
   def build_codec_lookup_rules(self):
@@ -109,6 +111,7 @@ class InPlaceSpec(object):
     record,
     is_simple=False,
     kl_type_name_for_derivatives=None,
+    forbid_copy=False,
     ):
     self.kl_type_name = kl_type_name
     if not kl_type_name_for_derivatives:
@@ -118,6 +121,7 @@ class InPlaceSpec(object):
     self.is_simple = is_simple
     self.extends = extends
     self.record = record
+    self.forbid_copy = forbid_copy
 
 class InPlaceSelector(Selector):
 
@@ -179,13 +183,15 @@ class InPlaceSelector(Selector):
     cpp_type_expr,
     extends,
     record,
+    forbid_copy=False,
     ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = InPlaceSpec(
       kl_type_name,
       cpp_type_expr,
       extends,
       record,
-      kl_type_name_for_derivatives=kl_type_name_for_derivatives
+      kl_type_name_for_derivatives=kl_type_name_for_derivatives,
+      forbid_copy=forbid_copy,
       )
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
@@ -199,6 +205,7 @@ class InPlaceSelector(Selector):
         is_simple = spec.is_simple
         extends = spec.extends
         record = spec.record
+        forbid_copy = spec.forbid_copy
 
         type_info_cache_key = kl_type_name
         type_info = self.type_info_cache.get(type_info_cache_key)
@@ -211,6 +218,7 @@ class InPlaceSelector(Selector):
             extends=extends,
             record=record,
             is_simple=is_simple,
+            forbid_copy=forbid_copy,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
           self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, type_info))

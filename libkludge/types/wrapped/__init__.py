@@ -18,6 +18,7 @@ class WrappedTypeInfo(TypeInfo):
     cpp_type_expr,
     extends,
     record,
+    forbid_copy,
     ):
     TypeInfo.__init__(
       self,
@@ -28,6 +29,7 @@ class WrappedTypeInfo(TypeInfo):
       lib_expr=cpp_type_expr,
       extends=extends,
       record=record,
+      forbid_copy=forbid_copy,
       )
 
   def build_codec_lookup_rules(self):
@@ -68,12 +70,13 @@ class WrappedBuiltinDecl(BuiltinDecl):
 
 class WrappedSpec(object):
 
-  def __init__(self, kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record):
+  def __init__(self, kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record, forbid_copy):
     self.kl_type_name = kl_type_name
     self.kl_type_name_for_derivatives = kl_type_name_for_derivatives
     self.cpp_type_expr = cpp_type_expr
     self.extends = extends
     self.record = record
+    self.forbid_copy = forbid_copy
 
 class WrappedSelector(Selector):
 
@@ -82,9 +85,9 @@ class WrappedSelector(Selector):
     self.cpp_type_expr_to_spec = {}
     self.type_info_cache = {}
 
-  def register(self, kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record):
+  def register(self, kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record, forbid_copy):
     self.cpp_type_expr_to_spec[cpp_type_expr] = WrappedSpec(
-      kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record
+      kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record, forbid_copy
       )
 
   def get_desc(self):
@@ -108,6 +111,7 @@ class WrappedSelector(Selector):
         undq_cpp_type_expr = spec.cpp_type_expr
         extends = spec.extends
         record = spec.record
+        forbid_copy = spec.forbid_copy
 
         type_info_cache_key = kl_type_name
         type_info = self.type_info_cache.get(type_info_cache_key)
@@ -119,6 +123,7 @@ class WrappedSelector(Selector):
             undq_cpp_type_expr,
             extends=extends,
             record=record,
+            forbid_copy=forbid_copy,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
           self.ext.decls.append(WrappedBuiltinDecl(self.ext, type_info))

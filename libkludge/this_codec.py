@@ -40,11 +40,10 @@ class ThisCodec:
       "this": self,
       })
 
-  def render_copy_ctor(self, param, forbid_copy):
+  def render_copy_ctor(self, param):
     return self.type_info._render("repr", "copy_ctor", "cpp", {
       "this": self,
       "param": param,
-      "forbid_copy": forbid_copy,
       })
 
   def render_class_name_cpp(self):
@@ -52,11 +51,10 @@ class ThisCodec:
       "this": self,
       })
 
-  def render_simple_ass_op(self, param, forbid_copy):
+  def render_simple_ass_op(self, param):
     return self.type_info._render("repr", "simple_ass_op", "cpp", {
       "this": self,
       "param": param,
-      "forbid_copy": forbid_copy,
       })
 
   def render_wrapper_ref(self):

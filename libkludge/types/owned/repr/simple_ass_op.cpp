@@ -1,7 +1,7 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% if forbid_copy %}
+{% if this.type_info.forbid_copy %}
 {{this.value_name.edk}}.cpp_ptr = {{param.value_name.edk}}.cpp_ptr;
 const_cast< ::Fabric::EDK::KL::Traits< {{param.type_info.edk.name}} >::IOParam >( {{param.value_name.edk}} ).cpp_ptr = NULL;
 {% else %}

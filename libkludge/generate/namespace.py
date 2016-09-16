@@ -266,10 +266,16 @@ class Namespace:
         child_namespace_component=cpp_global_expr.components[-1],
         child_namespace_kl_name=kl_local_name_for_derivatives,
         extends=(extends_type_info and extends_type_info.record),
-        forbid_copy=forbid_copy,
         )
     selector = self.type_mgr.selectors[variant]
-    selector.register(kl_global_name, kl_global_name_for_derivatives, cpp_global_expr, extends_type_info, record)
+    selector.register(
+      kl_global_name,
+      kl_global_name_for_derivatives,
+      cpp_global_expr,
+      extends_type_info,
+      record,
+      forbid_copy=forbid_copy,
+      )
     self.namespace_mgr.add_type(
       self.components,
       cpp_global_expr.components[-1],
@@ -346,7 +352,7 @@ class Namespace:
       kl_local_name=owned_kl_local_name,
       kl_local_name_for_derivatives=kl_local_name,
       extends_type_info=owned_extends_type_info,
-      forbid_copy=forbid_copy,
+      forbid_copy=True,
       variant='owned',
       )
     owned_cpp_global_expr = self.type_mgr.get_dqti(owned_cpp_local_expr).type_info.lib.expr
@@ -363,6 +369,7 @@ class Namespace:
       kl_local_name=kl_local_name,
       kl_local_name_for_derivatives=wrapped_kl_local_name,
       extends_type_info=wrapped_extends_type_info,
+      forbid_copy=forbid_copy,
       variant='wrapped',
       record=owned,
       )

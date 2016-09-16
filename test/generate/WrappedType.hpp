@@ -13,12 +13,23 @@
 
 class Class : public RefCounter
 {
-public:
+private:
 
   Class()
   {
-    std::cout << "Class::Class()\n" << std::flush;
+    assert( false );
   }
+  Class( Class const &that )
+  {
+    assert( false );
+  }
+  Class &operator=(Class const &that)
+  {
+    assert( false );
+  }
+
+public:
+
   Class(
     float _floatValue,
     std::string const &_stringValue,
@@ -30,18 +41,9 @@ public:
   {
     std::cout << "Class::Class(" << _floatValue << ", " << _stringValue << ", " << _intValue << ")\n" << std::flush;
   }
-  Class( Class const &that )
-  {
-    assert( false );
-  }
   ~Class()
   {
     std::cout << "Class::~Class()\n" << std::flush;
-  }
-
-  Class &operator=(Class const &that)
-  {
-    assert( false );
   }
 
   Class const *unwrap() const

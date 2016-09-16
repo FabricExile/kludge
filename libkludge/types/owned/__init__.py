@@ -18,6 +18,7 @@ class OwnedTypeInfo(TypeInfo):
     cpp_type_expr,
     extends,
     record,
+    forbid_copy,
     ):
     TypeInfo.__init__(
       self,
@@ -28,6 +29,7 @@ class OwnedTypeInfo(TypeInfo):
       lib_expr=cpp_type_expr,
       extends=extends,
       record=record,
+      forbid_copy=forbid_copy,
       )
 
   def build_codec_lookup_rules(self):
@@ -75,12 +77,14 @@ class OwnedSpec(object):
     cpp_type_expr,
     extends,
     record,
+    forbid_copy=False,
     ):
     self.kl_type_name = kl_type_name
     self.kl_type_name_for_derivatives = kl_type_name_for_derivatives
     self.cpp_type_expr = cpp_type_expr
     self.extends = extends
     self.record = record
+    self.forbid_copy = forbid_copy
 
 class OwnedSelector(Selector):
 
@@ -96,9 +100,10 @@ class OwnedSelector(Selector):
     cpp_type_expr,
     extends,
     record,
+    forbid_copy=False,
     ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = OwnedSpec(
-      kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record
+      kl_type_name, kl_type_name_for_derivatives, cpp_type_expr, extends, record, forbid_copy
       )
 
   def get_desc(self):
@@ -114,6 +119,7 @@ class OwnedSelector(Selector):
         undq_cpp_type_expr = spec.cpp_type_expr
         extends = spec.extends
         record = spec.record
+        forbid_copy = spec.forbid_copy
 
         type_info_cache_key = kl_type_name
         type_info = self.type_info_cache.get(type_info_cache_key)
@@ -125,6 +131,7 @@ class OwnedSelector(Selector):
             undq_cpp_type_expr,
             extends=extends,
             record=record,
+            forbid_copy=forbid_copy,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
           self.ext.decls.append(OwnedBuiltinDecl(self.ext, type_info))

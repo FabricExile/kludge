@@ -121,8 +121,6 @@ class InPlaceSpec(object):
 
 class InPlaceSelector(Selector):
 
-  should_create_ptr_ref = True
-
   def __init__(self, ext):
     Selector.__init__(self, ext)
 

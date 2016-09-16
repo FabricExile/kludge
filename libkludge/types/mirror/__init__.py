@@ -71,8 +71,6 @@ class MirrorSpec(object):
 
 class MirrorSelector(Selector):
 
-  should_create_ptr_ref = True
-
   def __init__(self, ext):
     Selector.__init__(self, ext)
     self.cpp_global_expr_to_spec = {}

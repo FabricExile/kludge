@@ -72,8 +72,6 @@ class TypeMgr:
       if dqti:
         print "type_mgr: Adding conversion: %s -> %s" % (cpp_type_name, dqti)
         self._cpp_type_name_to_dqti[cpp_type_name] = dqti
-        if selector.should_create_ptr_ref:
-          self.maybe_get_dqti(PointerTo(cpp_type_expr))
         return dqti
 
   def get_dqti(self, cpp_type_expr):

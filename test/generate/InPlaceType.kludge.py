@@ -40,6 +40,7 @@ report(Class_GetStaticFloat());
 """, """
 +3.3
 """)
+ty.generate_type('Class const &')
 ty.add_get_ind_op('int').add_test("""
 Class c(-7, 3.14);
 report(c.getAt(56));
@@ -147,6 +148,7 @@ Class::~Class()
 """)
 
 dty = ext.add_in_place_type('DerivedClass', extends='Class')
+dty.generate_type('DerivedClass const &')
 dty.add_member('shortValue', 'short')
 dty.add_ctor(['int', 'float', 'short'])
 dty.add_const_method('anotherPublicMethod', 'short')\

@@ -84,8 +84,6 @@ class OwnedSpec(object):
 
 class OwnedSelector(Selector):
 
-  should_create_ptr_ref = True
-
   def __init__(self, ext):
     Selector.__init__(self, ext)
     self.cpp_type_expr_to_spec = {}

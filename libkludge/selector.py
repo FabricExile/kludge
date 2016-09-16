@@ -8,8 +8,6 @@ class Selector(object):
 
   __metaclass__ = abc.ABCMeta
 
-  should_create_ptr_ref = False
-  
   def __init__(self, ext):
     self.ext = ext
 

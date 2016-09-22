@@ -20,6 +20,7 @@ inline UInt64 __CxxSize_{{decl.type_info.mutable_ptr.kl.name}}() {
 
 struct {{decl.type_info.const_ref.kl.name}} {
   protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
+  protected {{decl.type_info.direct.kl.name}} values[];
 };
 
 inline UInt64 __CxxSize_{{decl.type_info.const_ref.kl.name}}() {

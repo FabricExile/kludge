@@ -38,16 +38,16 @@
 
 {% endfor %}
 {% endif %}
-{% if type_info.is_direct %}
+{% if type_info.is_direct or (type_info.is_const_ref and is_final_record and not type_info.direct.forbid_copy) %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Constructors and Destructor
 ////////////////////////////////////////////////////////////////////////
-{% if record.include_empty_ctor %}
+{% if type_info.is_direct and record.include_empty_ctor %}
 {{type_info.kl.name}}() = "{{record.get_empty_ctor_edk_symbol_name(type_info)}}";
 
 {% endif %}
-{% if record.include_copy_ctor %}
+{% if type_info.is_direct and record.include_copy_ctor %}
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.get_copy_ctor_edk_symbol_name(type_info)}}";
@@ -57,14 +57,31 @@
 {% for comment in ctor.comments %}
 {{comment}}
 {% endfor %}
+{% if type_info.is_direct %}
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{ctor.get_edk_symbol_name(type_info)}}";
 
+{% endif %}
+{% if type_info.is_const_ref and not ctor.is_empty() and not ctor.is_copy(type_info) %}
+{{type_info.kl.name}}(
+    {% for param in ctor.params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) {
+    this.values.push({{type_info.direct_orig.kl.name}}(
+        {% for param in ctor.params %}
+        {{param.value_name.kl | indent(8)}}{{"," if not loop.last else ""}}
+        {% endfor %}
+        ));
+    this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
+}
+
+{% endif %}
 {% endfor %}
-{% if record.include_dtor %}
+{% if type_info.is_direct and record.include_dtor %}
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
 
 {% endif %}

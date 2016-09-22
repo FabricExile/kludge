@@ -35,7 +35,7 @@ def build_edk_name(kl_type_name, suffix):
 
 class ConstRefTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, undq_type_info):
+  def __init__(self, jinjenv, undq_type_info, undq_orig_type_info):
     TypeInfo.__init__(
       self,
       jinjenv,
@@ -45,6 +45,8 @@ class ConstRefTypeInfo(TypeInfo):
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
+      direct_orig_type_info=undq_orig_type_info,
+      is_const_ref=True,
       )
 
   def build_codec_lookup_rules(self):
@@ -55,7 +57,7 @@ class ConstRefTypeInfo(TypeInfo):
 
 class MutableRefTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, undq_type_info):
+  def __init__(self, jinjenv, undq_type_info, undq_orig_type_info):
     TypeInfo.__init__(
       self,
       jinjenv,
@@ -65,6 +67,7 @@ class MutableRefTypeInfo(TypeInfo):
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
+      direct_orig_type_info=undq_orig_type_info,
       )
 
   def build_codec_lookup_rules(self):
@@ -75,7 +78,7 @@ class MutableRefTypeInfo(TypeInfo):
 
 class ConstPtrTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, undq_type_info):
+  def __init__(self, jinjenv, undq_type_info, undq_orig_type_info):
     TypeInfo.__init__(
       self,
       jinjenv,
@@ -85,6 +88,7 @@ class ConstPtrTypeInfo(TypeInfo):
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
+      direct_orig_type_info=undq_orig_type_info,
       )
 
   def build_codec_lookup_rules(self):
@@ -95,7 +99,7 @@ class ConstPtrTypeInfo(TypeInfo):
 
 class MutablePtrTypeInfo(TypeInfo):
 
-  def __init__(self, jinjenv, undq_type_info):
+  def __init__(self, jinjenv, undq_type_info, undq_orig_type_info):
     TypeInfo.__init__(
       self,
       jinjenv,
@@ -105,6 +109,7 @@ class MutablePtrTypeInfo(TypeInfo):
       record=undq_type_info.record,
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
+      direct_orig_type_info=undq_orig_type_info,
       )
 
   def build_codec_lookup_rules(self):
@@ -142,7 +147,8 @@ class PtrRefBuiltinDecl(BuiltinDecl):
         self.type_info.const_ref,
         self.type_info.mutable_ref,
         ]):
-        for record in records:
+        for ri in range(0, len(records)):
+          record = records[ri]
           is_direct = False
           is_const_ptr = index == 0
           is_mutable_ptr = index == 1
@@ -159,6 +165,7 @@ class PtrRefBuiltinDecl(BuiltinDecl):
             'allow_mutable_methods': is_direct or is_mutable_ptr or is_mutable_ref,
             'allow_const_methods': True,
             'is_ptr': is_const_ptr or is_mutable_ptr,
+            'is_final_record': ri == len(records) - 1,
             })
     return result
 
@@ -168,7 +175,7 @@ class PtrRefTypeInfoSet(object):
     self.direct = undq_type_info
     undq_type_info_for_derivatives = undq_type_info.for_derivatives()
     for name, klass in type_info_class_map.iteritems():
-      setattr(self, name, klass(jinjenv, undq_type_info_for_derivatives))
+      setattr(self, name, klass(jinjenv, undq_type_info_for_derivatives, undq_type_info))
 
   def get_indirects(self):
     return [self.const_ptr, self.mutable_ptr, self.const_ref, self.mutable_ref]

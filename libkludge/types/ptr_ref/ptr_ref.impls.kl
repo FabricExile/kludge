@@ -184,4 +184,11 @@ Boolean({{decl.type_info.const_ref.kl.name}} ref) {
   s += this.cxxRefGet();
 }
 
+{% if decl.type_info.direct.kl.name.compound == 'StdString' %}
+{{decl.type_info.const_ref.kl.name}}(String string) {
+  this.values.push({{decl.type_info.direct.kl.name}}(string));
+  this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('this.values[0]')}};
+}
+{% endif %}
+
 {% endblock body %}

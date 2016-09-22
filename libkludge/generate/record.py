@@ -57,6 +57,13 @@ class Ctor(Methodlike):
   def get_this(self, type_info):
     return self.record.get_this(type_info, True)
 
+  def is_empty(self):
+    return len(self.params) == 0
+
+  def is_copy(self, const_ref_type_info):
+    return len(self.params) == 1 \
+      and self.params[0].type_info.lib.expr == const_ref_type_info.lib.expr
+
 class Method(Methodlike):
 
   def __init__(

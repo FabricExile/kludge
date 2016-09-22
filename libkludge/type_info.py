@@ -65,7 +65,9 @@ class TypeInfo:
     record=None,
     is_simple=False,
     direct_type_info=None,
+    direct_orig_type_info=None,
     forbid_copy=False,
+    is_const_ref=False,
     ):
     if kl_name_base is not None:
       if not kl_name_suffix:
@@ -90,7 +92,9 @@ class TypeInfo:
     self.record = record
     self.is_simple = is_simple
     self.direct = direct_type_info
+    self.direct_orig = direct_orig_type_info
     self.forbid_copy = forbid_copy
+    self.is_const_ref = is_const_ref
     self._codec_lookup_rules = None
 
   @property

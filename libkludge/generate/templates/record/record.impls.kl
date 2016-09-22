@@ -79,6 +79,15 @@
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 
+{% if ctor.param_count() == 1 and ctor.params[0].type_info.kl.name.compound == 'StdString_CxxConstRef' %}
+{{type_info.kl.name}}(String string) {
+    this.values.push({{type_info.direct_orig.kl.name}}(
+        StdString(string)
+        ));
+    this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
+}
+
+{% endif %}
 {% endif %}
 {% endfor %}
 {% if type_info.is_direct and record.include_dtor %}

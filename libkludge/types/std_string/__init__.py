@@ -29,6 +29,7 @@ class StdStringSelector(Selector):
       record.add_ctor([])
       record.add_ctor(['char const *'])
       record.add_ctor(['char const *', 'size_t'])
+      record.add_ctor(['char const *', 'char const *'])
       record.add_const_method('c_str', 'char const *')
       record.add_const_method('data', 'char const *', kl_name='cxxData')
       record.add_const_method('size', 'size_t')
@@ -40,7 +41,7 @@ class StdStringSelector(Selector):
       record.add_kl("""
 inline {{type_name}}(String string) {
   CxxChar array<>(string.data(), string.length());
-  this.append(CxxCharConstPtr(array, 0), CxxCharConstPtr(array, string.length()));
+  this = {{type_name}}(CxxCharConstPtr(array, 0), CxxCharConstPtr(array, string.length()));
 }
 
 inline {{type_name}}.appendDesc(io String string) {

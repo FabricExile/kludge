@@ -64,6 +64,9 @@ class Ctor(Methodlike):
     return len(self.params) == 1 \
       and self.params[0].type_info.lib.expr == const_ref_type_info.lib.expr
 
+  def param_count(self):
+    return len(self.params)
+
 class Method(Methodlike):
 
   def __init__(

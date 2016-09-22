@@ -13,6 +13,13 @@ class Class {
 public:
 
   Class() {}
+  Class( std::string const &_stringValue )
+    : floatValue( -6.34 )
+    , stringValue( _stringValue )
+    , pri_intValue( -7 )
+  {
+    std::cout << "Class::Class(" << _stringValue << ")\n" << std::flush;
+  }
   Class(
     float _floatValue,
     std::string const &_stringValue,
@@ -123,6 +130,10 @@ private:
 
   int pri_intValue;
 };
+
+inline void GlobalFuncTakingClassConstRef( Class const &klass ) {
+  std::cout << "GlobalFuncTakingClassConstRef: klass.stringValue = " + klass.stringValue + "\n" << std::flush;
+}
 
 Class ReturnClass() {
   return Class( 5.61, "foo", -43 );

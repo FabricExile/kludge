@@ -13,6 +13,7 @@ ty.set_default_access(MemberAccess.private)
 ty.add_member('pri_intValue', 'int')
 
 ty.add_ctor()
+ty.add_ctor(['std::string const &'])
 ty.add_ctor(['float', 'char const *', 'int'])\
   .add_comment("""Another comment""")\
   .add_test("""
@@ -114,6 +115,17 @@ Class::Class(10.8, oneone, -14)
 Class::operator=(Class const &)
 Class::~Class()
 c1 = Class:{floatValue:+10.8,stringValue:oneone}
+Class::~Class()
+""")
+
+ext.add_func('GlobalFuncTakingClassConstRef', None, ['Class const &'])\
+  .add_test("""
+GlobalFuncTakingClassConstRef("hello");
+""", """
+Class::Class(hello)
+Class::Class(Class const &)
+Class::~Class()
+GlobalFuncTakingClassConstRef: klass.stringValue = hello
 Class::~Class()
 """)
 

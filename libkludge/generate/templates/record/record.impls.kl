@@ -66,15 +66,27 @@
 
 {% endif %}
 {% endfor %}
-{% if type_info.is_const_ref %}
-{% if type_info.kl.name.compound != 'StdString_CxxConstRef' %}
+{% if type_info.kl.name.compound != 'StdString' and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
 {% if record.has_char_const_ptr_ctor() %}
+{% if type_info.is_direct %}
+{{type_info.kl.name}}(String string) {
+    this = {{type_info.kl.name}}(CxxCharConstPtr(string));
+}
+
+{% elif type_info.is_const_ref %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(CxxCharConstPtr(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 
+{% endif %}
 {% elif record.has_std_string_const_ref_ctor() %}
+{% if type_info.is_direct %}
+{{type_info.kl.name}}(String string) {
+    this = {{type_info.kl.name}}(StdString_CxxConstRef(StdString(string)));
+}
+
+{% elif type_info.is_const_ref %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(StdString(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};

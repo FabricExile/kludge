@@ -25,12 +25,10 @@ public:
   MyType( std::string const &s )
     : m_s( s )
   {
-    std::cout << "MyType::MyType(" << s << ")\n" << std::flush;
   }
 
   ~MyType()
   {
-    std::cout << "MyType::~MyType()\n" << std::flush;
   }
 
   std::string const &get() const
@@ -43,3 +41,9 @@ private:
 
   std::string m_s;
 };
+
+inline MyType const &GetStaticMyType()
+{
+  static MyType my_type("staticMyType");
+  return my_type;
+}

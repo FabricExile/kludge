@@ -24,8 +24,14 @@ ty.add_const_method("get", "std::string const &")
 ty.add_test("""
 report("MyType('onetwothreefour').get() = " + MyType('onetwothreefour').get());
 """, """
-MyType::MyType(onetwothreefour)
 MyType::get()
 MyType('onetwothreefour').get() = onetwothreefour
-MyType::~MyType()
+""")
+
+ext.add_func("GetStaticMyType", "MyType const &")\
+  .add_test("""
+report("GetStaticMyType().get() = " + GetStaticMyType().get());
+""", """
+MyType::get()
+GetStaticMyType().get() = staticMyType
 """)

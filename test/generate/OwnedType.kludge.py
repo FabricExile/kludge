@@ -125,6 +125,8 @@ GlobalFuncTakingClassConstRef("hello");
 Class::Class(hello)
 Class::Class(Class const &)
 Class::~Class()
+Class::Class(Class const &)
+Class::~Class()
 GlobalFuncTakingClassConstRef: klass.stringValue = hello
 Class::~Class()
 """)

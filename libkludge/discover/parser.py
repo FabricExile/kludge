@@ -331,6 +331,8 @@ class Parser(object):
       print '  | #include "%s"' % include
     print "  +-" + ("-" * 78)
 
+    include_abspaths = [os.path.abspath(include) for include in includes]
+
     with tempfile.NamedTemporaryFile(prefix='kludge_', suffix='.h', mode='w', dir=os.getcwd()) as includer:
       for include in includes:
         print >>includer, '#include "%s"' % include
@@ -387,7 +389,8 @@ class Parser(object):
 
             for cursor in unit.cursor.get_children():
                 if hasattr(cursor.location.file, 'name') \
-                  and cursor.location.file.name not in includes:
+                  and cursor.location.file.name not in include_abspaths:
+                  self.debug("Skipping AST nodes for '%s'" % cursor.location.file.name)
                   continue
                 self.parse_cursor(ast_logger, cursor, 'ext', decls, defns)
         master_filename = os.path.join(self.opts.outdir, basename + '.kludge.py')

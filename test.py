@@ -107,7 +107,7 @@ def test_discover(basename):
       '../../../../kludge', 'generate',
       # '--debug-type-templates',
       basename,
-      basename + '.hpp.kludge.py',
+      basename + '.kludge.py',
       ],
     cwd = test_tmp_dir,
     ) == 0

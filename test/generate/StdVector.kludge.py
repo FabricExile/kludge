@@ -42,6 +42,8 @@ report(Make_SInt32_VariableArray(ReturnIntVec()));
 [-7,42]
 """)
 
+ext.add_func('GlobalTakingStdVectorConstRef', None, ['std::vector<int> const &'])\
+
 # ext.add_func('ReturnStringArrayArray', 'std::vector< std::vector<std::string> >')\
 #   .add_test("""
 # report("ReturnStringArrayArray() = " + ReturnStringArrayArray());

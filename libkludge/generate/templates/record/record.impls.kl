@@ -65,25 +65,9 @@
     ) = "{{ctor.get_edk_symbol_name(type_info)}}";
 
 {% endif %}
-{#
-{% if type_info.is_const_ref and not ctor.is_empty() and not ctor.is_copy(type_info) %}
-{{type_info.kl.name}}(
-    {% for param in ctor.params %}
-    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
-    {% endfor %}
-    ) {
-    this.values.push({{type_info.direct_orig.kl.name}}(
-        {% for param in ctor.params %}
-        {{param.value_name.kl | indent(8)}}{{"," if not loop.last else ""}}
-        {% endfor %}
-        ));
-    this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
-}
-
-{% endif %}
-#}
 {% endfor %}
-{% if type_info.is_const_ref and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
+{% if type_info.is_const_ref %}
+{% if type_info.kl.name.compound != 'StdString_CxxConstRef' %}
 {% if record.has_char_const_ptr_ctor() %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(CxxCharConstPtr(string)));
@@ -96,6 +80,7 @@
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 
+{% endif %}
 {% endif %}
 {% endif %}
 {% if type_info.is_direct and record.include_dtor %}

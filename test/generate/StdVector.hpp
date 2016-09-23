@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 inline float ReturnSecond(
   std::vector<float> const &vals
@@ -58,4 +59,9 @@ inline std::vector<int> ReturnIntVec()
   result.push_back(-7);
   result.push_back(42);
   return result;
+}
+
+inline void GlobalTakingStdVectorConstRef( std::vector<int> const &v )
+{
+  std::cout << "GlobalTakingStdVectorConstRef: v[0] = " << v[0] << "\n" << std::flush;
 }

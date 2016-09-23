@@ -97,6 +97,7 @@ def test_discover(basename):
       './kludge', 'discover',
       '-I', test_generate_dir,
       '-o', test_tmp_dir,
+      basename,
       os.path.join(test_discover_dir, basename + '.hpp'),
       ],
     ) == 0

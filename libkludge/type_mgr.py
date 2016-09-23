@@ -30,6 +30,7 @@ class TypeMgr:
     self.add_selector(VoidPtrSelector(ext))
     self.add_selector(StdStringSelector(ext))
     self.add_selector(StdVectorSelector(ext))
+    self.add_selector(StdSetSelector(ext))
     self.add_selector(self.selectors['in_place'])
     self.add_selector(self.selectors['owned'])
     self.add_selector(self.selectors['wrapped'])

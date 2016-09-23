@@ -7,6 +7,7 @@ from void_ptr import VoidPtrSelector
 from std_string import StdStringSelector
 from fixed_array import FixedArraySelector
 from std_vector import StdVectorSelector
+from std_set import StdSetSelector
 from in_place import InPlaceSelector
 from owned import OwnedSelector
 from wrapped import WrappedSelector

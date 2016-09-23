@@ -7,7 +7,7 @@ from parser import Parser
 from libkludge import util
 
 name = "discover"
-usage = "[OPTIONS] <header.h> [<header.h> ...]"
+usage = "[OPTIONS] <extension name> <directory OR header.h> [<directory OR header.h> ...]"
 description = "Generate Kludge script stubs from C++ headers"
 
 def quit_with_usage(prog):
@@ -16,7 +16,7 @@ def quit_with_usage(prog):
 
 def main(prog, args):
   opt_parser = optparse.OptionParser(
-    usage="%%prog %s %s" % (name, usage),
+    usage="%%prog %s %s" % (prog, usage),
     description=description,
     )
   opt_parser.add_option(
@@ -79,14 +79,14 @@ def main(prog, args):
     help="Pass option to Clang++",
     )
   (opts, args) = opt_parser.parse_args(args=args)
-  headers = args
-  if len(headers) == 0:
-    util.error(opts, "Missing header to process")
+  ext_name = args[0]
+  dirs_and_files = args[1:]
+  if len(dirs_and_files) == 0:
+    util.error(opts, "Missing directories and/or headers to process")
     quit_with_usage(prog)
   parser = Parser(
     name = args[0],
     opts = opts,
     )
-  for script_filename in headers:
-    parser.process(script_filename)
+  parser.process(ext_name, dirs_and_files)
   return 0

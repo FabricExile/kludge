@@ -54,11 +54,11 @@ inline {{type_name}}_CxxConstRef.appendDesc(io String string) {
   string += String(ptr);
 }
 """)
-      type_mgr.selectors['owned'].register(
+      type_mgr.named_selectors['owned'].register(
         kl_type_name=kl_type_name,
         kl_type_name_for_derivatives=kl_type_name,
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
         )
-      return None
+      return True # restart

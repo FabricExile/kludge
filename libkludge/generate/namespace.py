@@ -267,7 +267,7 @@ class Namespace:
         child_namespace_kl_name=kl_local_name_for_derivatives,
         extends=(extends_type_info and extends_type_info.record),
         )
-    selector = self.type_mgr.selectors[variant]
+    selector = self.type_mgr.named_selectors[variant]
     selector.register(
       kl_global_name,
       kl_global_name_for_derivatives,
@@ -389,7 +389,7 @@ class Namespace:
     kl_local_name = self.maybe_generate_kl_local_name(None, cpp_global_expr)
     kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
     assert isinstance(existing_kl_global_name, basestring)
-    self.type_mgr.selectors['mirror'].register(
+    self.type_mgr.named_selectors['mirror'].register(
       cpp_global_expr,
       kl_global_name,
       existing_kl_global_name,

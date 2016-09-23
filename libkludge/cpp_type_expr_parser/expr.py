@@ -55,6 +55,10 @@ class Type:
     lhs, rhs = self.build_desc()
     return lhs + rhs
 
+  @abc.abstractmethod
+  def get_kl_desc(self):
+    pass
+
   @staticmethod
   def maybe_bracket_desc(lhs, rhs):
     if rhs and not rhs.startswith(")"):
@@ -139,6 +143,9 @@ class Void(Direct):
   def build_unqualified_desc(self):
     return "void", ""
 
+  def get_kl_desc(self):
+    return "VOID"
+
   def __copy__(self):
     return Void()
 
@@ -149,6 +156,9 @@ class Bool(Direct):
 
   def build_unqualified_desc(self):
     return "bool", ""
+
+  def get_kl_desc(self):
+    return "Boolean"
 
   def __copy__(self):
     return Bool()
@@ -197,6 +207,12 @@ class Char(Integer):
   def get_signed_desc(self):
     return "char"
 
+  def get_kl_desc(self):
+    if self.is_signed:
+      return "SInt8"
+    else:
+      return "UInt8"
+
   def __copy__(self):
     return Char(self.is_signed)
 
@@ -207,6 +223,12 @@ class Short(Integer):
 
   def get_signed_desc(self):
     return "short"
+
+  def get_kl_desc(self):
+    if self.is_signed:
+      return "SInt16"
+    else:
+      return "UInt16"
 
   def __copy__(self):
     return Short(self.is_signed)
@@ -219,6 +241,12 @@ class Int(Integer):
   def get_signed_desc(self):
     return "int"
 
+  def get_kl_desc(self):
+    if self.is_signed:
+      return "SInt32"
+    else:
+      return "UInt32"
+
   def __copy__(self):
     return Int(self.is_signed)
 
@@ -230,6 +258,12 @@ class Long(Integer):
   def get_signed_desc(self):
     return "long"
 
+  def get_kl_desc(self):
+    if self.is_signed:
+      return "SInt32"
+    else:
+      return "UInt32"
+
   def __copy__(self):
     return Long(self.is_signed)
 
@@ -240,6 +274,12 @@ class LongLong(Integer):
 
   def get_signed_desc(self):
     return "long long"
+
+  def get_kl_desc(self):
+    if self.is_signed:
+      return "SInt64"
+    else:
+      return "UInt64"
 
   def __copy__(self):
     return LongLong(self.is_signed)
@@ -257,6 +297,9 @@ class Float(FloatingPoint):
   def build_unqualified_desc(self):
     return "float", ""
 
+  def get_kl_desc(self):
+    return "Float32"
+
   def __copy__(self):
     return Float()
 
@@ -267,6 +310,9 @@ class Double(FloatingPoint):
 
   def build_unqualified_desc(self):
     return "double", ""
+
+  def get_kl_desc(self):
+    return "Float64"
 
   def __copy__(self):
     return Double()
@@ -282,6 +328,9 @@ class FixedArrayOf(Direct):
     lhs, rhs = self.element.build_desc()
     rhs = "[%u]%s" % (self.size, rhs)
     return lhs, rhs
+
+  def get_kl_desc(self):
+    return "%s_FA%d" % (self.element.get_desc(), self.size)
 
   def tranform_names(self, cb):
     self.element.tranform_names(cb)
@@ -308,6 +357,10 @@ class Component(object):
 
   @abc.abstractmethod
   def get_desc(self):
+    pass
+
+  @abc.abstractmethod
+  def get_kl_desc(self):
     pass
 
   def tranform_names(self, cb):
@@ -340,6 +393,9 @@ class Simple(Component):
   def get_desc(self):
     return self.name
 
+  def get_kl_desc(self):
+    return self.name
+
   def __hash__(self):
     return Component.__hash__(self) ^ hash(self.name)
 
@@ -369,6 +425,9 @@ class Template(Component):
     return self.name + "< " + ", ".join(
       [param.get_desc() for param in self.params]
       ) + " >"
+
+  def get_kl_desc(self):
+    return '__'.join([self.name] + [param.get_kl_desc() for param in self.params])
 
   def __hash__(self):
     result = Component.__hash__(self) ^ hash(self.name)
@@ -403,6 +462,9 @@ class Named(Direct):
     return '::'.join(
       [component.get_desc() for component in self.components]
       ), ""
+
+  def get_kl_desc(self):
+    return '_'.join([component.get_kl_desc() for component in self.components])
 
   def prefix(self, components):
     assert iscomponentlist(components)
@@ -451,6 +513,9 @@ class PointerTo(Indirect):
     lhs += "*"
     return lhs, rhs
 
+  def get_kl_desc(self):
+    return "%s_PTR" % self.pointee.get_kl_desc()
+
   def __copy__(self):
     return PointerTo(self.pointee)
 
@@ -466,6 +531,9 @@ class ReferenceTo(Indirect):
       lhs += " "
     lhs += "&"
     return lhs, rhs
+
+  def get_kl_desc(self):
+    return "%s_REF" % self.pointee.get_kl_desc()
 
   def __copy__(self):
     return ReferenceTo(self.pointee)

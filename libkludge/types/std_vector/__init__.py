@@ -62,11 +62,11 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
   return result;
 }
 """, element_type_name=element_kl_type_name)
-      type_mgr.selectors['owned'].register(
+      type_mgr.named_selectors['owned'].register(
         kl_type_name=kl_type_name,
         kl_type_name_for_derivatives=kl_type_name,
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
         )
-      return None
+      return True # restart

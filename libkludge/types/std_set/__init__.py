@@ -39,11 +39,11 @@ class StdSetSelector(Selector):
       record.add_mutable_method('clear')
       record.add_mutable_method('insert', None, [element_cpp_type_name + ' const &'])
       record.add_mutable_method('erase', None, [element_cpp_type_name + ' const &'])
-      type_mgr.selectors['owned'].register(
+      type_mgr.named_selectors['owned'].register(
         kl_type_name=kl_type_name,
         kl_type_name_for_derivatives=kl_type_name,
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
         )
-      return None
+      return True # restart

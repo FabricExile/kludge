@@ -17,3 +17,15 @@ report(ReturnStdStringConstRef());
 """, """
 foo
 """)
+
+ty = ext.add_owned_type("MyType")
+ty.add_ctor(["std::string const &"])
+ty.add_const_method("get", "std::string const &")
+ty.add_test("""
+report("MyType('onetwothreefour').get() = " + MyType('onetwothreefour').get());
+""", """
+MyType::MyType(onetwothreefour)
+MyType::get()
+MyType('onetwothreefour').get() = onetwothreefour
+MyType::~MyType()
+""")

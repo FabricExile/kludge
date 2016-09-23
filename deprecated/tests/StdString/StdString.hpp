@@ -1,7 +1,7 @@
-#ifndef _StdString_hpp
-#define _StdString_hpp
+#pragma once
 
 #include <string>
+#include <iostream>
 
 inline void StdStringParams(
   std::string value,
@@ -19,5 +19,3 @@ inline void StdStringParams(
 inline std::string StdStringValueReturn() { return "value"; }
 inline std::string const &StdStringConstRefReturn() { static std::string foo = "constRef"; return foo; }
 inline std::string &StdStringMutableRefReturn() { static std::string foo = "constPtr"; return foo; }
-
-#endif

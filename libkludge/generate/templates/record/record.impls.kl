@@ -79,17 +79,23 @@
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 
-{% if ctor.param_count() == 1 and ctor.params[0].type_info.kl.name.compound == 'StdString_CxxConstRef' %}
+{% endif %}
+{% endfor %}
+{% if type_info.is_const_ref and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
+{% if record.has_char_const_ptr_ctor() %}
 {{type_info.kl.name}}(String string) {
-    this.values.push({{type_info.direct_orig.kl.name}}(
-        StdString(string)
-        ));
+    this.values.push({{type_info.direct_orig.kl.name}}(CxxCharConstPtr(string)));
+    this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
+}
+
+{% elif record.has_std_string_const_ref_ctor() %}
+{{type_info.kl.name}}(String string) {
+    this.values.push({{type_info.direct_orig.kl.name}}(StdString(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 
 {% endif %}
 {% endif %}
-{% endfor %}
 {% if type_info.is_direct and record.include_dtor %}
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
 

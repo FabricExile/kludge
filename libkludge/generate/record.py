@@ -8,7 +8,7 @@ from test import Test
 from libkludge.member_access import MemberAccess
 from this_access import ThisAccess
 from massage import *
-from libkludge.cpp_type_expr_parser import Void, DirQual, directions, qualifiers
+from libkludge.cpp_type_expr_parser import *
 from libkludge.value_name import this_cpp_value_name
 from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
@@ -62,7 +62,8 @@ class Ctor(Methodlike):
 
   def is_copy(self, const_ref_type_info):
     return len(self.params) == 1 \
-      and self.params[0].type_info.lib.expr == const_ref_type_info.lib.expr
+      and (self.params[0].type_info.lib.expr == const_ref_type_info.lib.expr \
+        or self.params[0].type_info.lib.expr == const_ref_type_info.direct.lib.expr)
 
   def param_count(self):
     return len(self.params)
@@ -719,3 +720,15 @@ class Record(Decl):
     for record in self.get_nested_records():
       result.extend(record.public_members())
     return result
+
+  def has_char_const_ptr_ctor(self):
+    for ctor in self.ctors:
+      if len(ctor.params) == 1 and ctor.params[0].type_info.lib.expr == PointerTo(Const(Char())):
+        return True
+    return False
+
+  def has_std_string_const_ref_ctor(self):
+    for ctor in self.ctors:
+      if len(ctor.params) == 1 and ctor.params[0].type_info.lib.expr == ReferenceTo(Const(Named([Simple('std'), Simple('string')]))):
+        return True
+    return False

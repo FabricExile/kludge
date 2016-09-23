@@ -29,7 +29,7 @@ Float32 a[];
 a.push(3.14);
 a.push(5.34);
 report("a = " + a);
-report("ReturnSecond(a) = " + ReturnSecond(Make_Float32_StdVector(a)));
+report("ReturnSecond(a) = " + ReturnSecond(Float32_StdVector(a)));
 """, """
 a = [+3.14,+5.34]
 ReturnSecond(a) = +5.34

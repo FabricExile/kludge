@@ -44,8 +44,8 @@ class StdVectorSelector(Selector):
       record.add_set_ind_op(element_cpp_type_name + ' const &')
       record.add_mutable_method('pop_back')
       record.add_kl("""
-inline {{type_name}} Make_{{type_name}}({{element_type_name}} array<>) {
-  return {{type_name}}(
+{{type_name}}({{element_type_name}} array<>) {
+  this = {{type_name}}(
     {{element_type_name}}_CxxConstPtr(array, 0),
     {{element_type_name}}_CxxConstPtr(array, 2)
     );

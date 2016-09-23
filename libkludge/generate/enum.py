@@ -31,6 +31,7 @@ class Enum(Decl):
       self.namespace = parent_namespace.create_child(child_namespace_component, kl_local_name)
     else:
       self.namespace = parent_namespace
+    self.comments = []
 
   def get_desc(self):
     return "Enum[%s]: %s" % (
@@ -49,3 +50,7 @@ class Enum(Decl):
 
   def get_template_aliases(self):
     return ['enum']
+
+  def add_comment(self, comment):
+    self.comments.append(clean_comment(comment))
+    return self

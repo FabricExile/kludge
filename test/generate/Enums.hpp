@@ -7,6 +7,7 @@
 #include <iostream>
 #include <assert.h>
 
+// Comments for enum
 enum GlobalEnum
 {
   ValueZero,

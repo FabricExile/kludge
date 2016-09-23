@@ -26,3 +26,9 @@ DescribeGlobalEnum: e=ValueSeventeen
 DescribeGlobalEnum: e=ValueTwo
 DescribeGlobalEnum: e=ValueTwo
 """)
+ty = ext.add_enum('', ['AnonValueOne', 'AnonValueTwo'])
+ty.add_test("""
+report(AnonValueTwo);
+""", """
+1
+""")

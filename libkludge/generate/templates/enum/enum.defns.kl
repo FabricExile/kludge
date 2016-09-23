@@ -6,13 +6,21 @@
 {% for comment in enum.comments %}
 {{comment}}
 {% endfor %}
+{% if enum.type_info %}
 alias Integer {{enum.type_info.kl.name}};
+{% endif %}
 {% for value in enum.values %}
+{% if enum.type_info %}
 const {{enum.type_info.kl.name}} {{'_'.join(enum.namespace.nested_kl_names + [value[0]])}} = {{value[1]}};
+{% else %}
+const Integer {{'_'.join(enum.namespace.nested_kl_names + [value[0]])}} = {{value[1]}};
+{% endif %}
 {% endfor %}
 
+{% if enum.type_info %}
 inline UInt64 __CxxSize_{{enum.type_info.kl.name}}() {
   return Integer().dataSize();
 }
 
+{% endif %}
 {% endblock body %}

@@ -50,3 +50,9 @@ void SetGlobalEnum( GlobalEnum &e )
 {
   e = ValueTwo;
 }
+
+enum
+{
+  AnonValueOne,
+  AnonValueTwo
+};

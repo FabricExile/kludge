@@ -420,18 +420,22 @@ class Namespace:
         clean_values.append(value)
         cur_value = value[1]
       cur_value += 1
-    cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
-    assert isinstance(cpp_type_expr, Named)
-    assert isinstance(cpp_type_expr.components[-1], Simple)
-    kl_local_name = self.maybe_generate_kl_local_name(kl_local_name, cpp_type_expr)
-    kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
-    self.type_mgr.add_selector(
-      EnumSelector(
-        self,
-        cpp_type_expr,
-        kl_global_name,
+    if cpp_local_name:
+      cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_local_name).prefix(self.components)
+      assert isinstance(cpp_type_expr, Named)
+      assert isinstance(cpp_type_expr.components[-1], Simple)
+      kl_local_name = self.maybe_generate_kl_local_name(kl_local_name, cpp_type_expr)
+      kl_global_name = '_'.join(self.nested_kl_names + [kl_local_name])
+      self.type_mgr.add_selector(
+        EnumSelector(
+          self,
+          cpp_type_expr,
+          kl_global_name,
+          )
         )
-      )
+    else:
+      cpp_type_expr = None
+      kl_local_name = None
     if are_values_namespaced:
       child_namespace_component = cpp_type_expr.components[-1]
     else:
@@ -439,14 +443,15 @@ class Namespace:
     enum = Enum(
       self,
       kl_local_name,
-      self.type_mgr.get_dqti(cpp_type_expr).type_info,
+      cpp_type_expr and self.type_mgr.get_dqti(cpp_type_expr).type_info,
       clean_values,
       child_namespace_component=child_namespace_component,
       )
     self.ext.decls.append(enum)
-    self.namespace_mgr.add_type(
-      self.components,
-      cpp_type_expr.components[-1],
-      cpp_type_expr,
-      )
+    if cpp_type_expr:
+      self.namespace_mgr.add_type(
+        self.components,
+        cpp_type_expr.components[-1],
+        cpp_type_expr,
+        )
     return enum

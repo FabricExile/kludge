@@ -436,7 +436,6 @@ class Record(Decl):
 
   def add_comment(self, comment):
     self.comments.append(clean_comment(comment))
-    print str(self.comments)
     return self
 
   def set_default_access(self, access):

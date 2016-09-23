@@ -293,11 +293,12 @@ class Namespace:
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
+    extends_type_info = None
     if extends:
       extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-      extends_type_info = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
-    else:
-      extends_type_info = None
+      extends_dqti = self.type_mgr.maybe_get_dqti(extends_cpp_type_expr)
+      if extends_dqti:
+        extends_type_info = extends_dqti.type_info
     return self.add_type(
       cpp_local_expr=cpp_local_expr,
       kl_local_name=kl_local_name,
@@ -315,11 +316,12 @@ class Namespace:
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
+    extends_type_info = None
     if extends:
       extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-      extends_type_info = self.type_mgr.get_dqti(extends_cpp_type_expr).type_info
-    else:
-      extends_type_info = None
+      extends_dqti = self.type_mgr.maybe_get_dqti(extends_cpp_type_expr)
+      if extends_dqti:
+        extends_type_info = extends_dqti.type_info
     return self.add_type(
       cpp_local_expr=cpp_local_expr,
       kl_local_name=kl_local_name,
@@ -341,12 +343,13 @@ class Namespace:
 
     owned_cpp_local_expr = cpp_local_expr
     owned_kl_local_name = 'Raw_' + kl_local_name
+    owned_extends_type_info = None
     if extends:
-      owned_extends_cpp_local_expr = self.cpp_type_expr_parser.parse(extends)
-      owned_extends_type_info = self.type_mgr.get_dqti(owned_extends_cpp_local_expr).type_info
-      owned_extends_cpp_global_expr = owned_extends_type_info.lib.expr
-    else:
-      owned_extends_type_info = None
+      owned_extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
+      owned_extends_dqti = self.type_mgr.maybe_get_dqti(owned_extends_cpp_type_expr)
+      if owned_extends_dqti:
+        owned_extends_type_info = owned_extends_dqti.type_info
+        owned_extends_cpp_global_expr = owned_extends_type_info.lib.expr
     owned = self.add_type(
       cpp_local_expr=owned_cpp_local_expr,
       kl_local_name=owned_kl_local_name,
@@ -359,11 +362,11 @@ class Namespace:
 
     wrapped_cpp_global_expr = Named([Template(cpp_wrapper_name, [owned_cpp_global_expr])])
     wrapped_kl_local_name = 'Wrapped_' + kl_local_name
-    if extends:
+    wrapped_extends_type_info = None
+    if owned_extends_type_info:
       wrapped_extends_cpp_global_expr = Named([Template(cpp_wrapper_name, [owned_extends_cpp_global_expr])])
-      wrapped_extends_type_info = self.type_mgr.get_dqti(wrapped_extends_cpp_global_expr).type_info
-    else:
-      wrapped_extends_type_info = None
+      wrapped_extends_dqti = self.type_mgr.get_dqti(wrapped_extends_cpp_global_expr)
+      wrapped_extends_type_info = wrapped_extends_dqti.type_info
     return self.add_type(
       cpp_global_expr=wrapped_cpp_global_expr,
       kl_local_name=kl_local_name,

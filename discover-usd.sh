@@ -1,0 +1,1 @@
+./kludge discover -I /opt/pixar/usd/include -I /opt/usd-deps/include -I /opt/usd-deps/include/python2.7 -I /opt/usd-deps/include/OpenEXR/ -C --std=c++11 -D BUILD_COMPONENT_SRC_PREFIX="pxr/" -DBUILD_OPTLEVEL_DEV Test /opt/usd-deps/include/GL/glew.h /opt/pixar/usd/include/pxr/

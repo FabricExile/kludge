@@ -115,7 +115,8 @@ class Parser(object):
     cursor,
     ):
     if cursor.raw_comment:
-      return '\\\n  .add_comment("""%s""")' % cursor.raw_comment
+      comment = cursor.raw_comment.replace('"', '\\"')
+      return '\\\n  .add_comment("""%s""")' % comment
     else:
       return ''
 
@@ -260,7 +261,7 @@ class Parser(object):
         child_ast_logger.log_cursor(child_record_cursor)
         self.parse_record_decl(child_ast_logger, child_record_cursor, child_obj, decls, defns)
       for member in members:
-        print >>decls, member
+        print >>defns, member
       for method in methods:
         print >>defns, method
       print >>defns, ""

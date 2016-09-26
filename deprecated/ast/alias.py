@@ -21,6 +21,11 @@ class Alias(Decl):
         )
     self.new_kl_type_name = new_kl_type_name
     self.old_type_info = old_type_info
+    self.comments = []
 
   def jinja_stream_aliases(self, jinjenv, lang):
     return jinjenv.get_template('ast/builtin/alias.template.' + lang).stream(decl = self)
+
+  def add_comment(self, comment):
+    self.comments.append(clean_comment(comment))
+    return self

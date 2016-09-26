@@ -3,6 +3,9 @@
 {######################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
+{% for comment in alias.comments %}
+{{comment}}
+{% endfor %}
 alias {{alias.old_type_info.kl.name.base}} {{alias.new_kl_global_name}}{{alias.old_type_info.kl.name.suffix}};
 
 {% endblock body %}

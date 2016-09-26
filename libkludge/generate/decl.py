@@ -36,7 +36,7 @@ class Decl(object):
     return self.parent_namespace.namespace_mgr
 
   def add_test(self, kl, out):
-    self.ext.add_test(self.get_test_name(), kl, out)
+    self.ext.add_test(kl, out, test_name=self.get_test_name())
 
   @abc.abstractmethod
   def get_desc(self):

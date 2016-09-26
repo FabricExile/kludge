@@ -5,7 +5,7 @@
 ext.add_cpp_quoted_include('StdVector.hpp')
 
 ext.generate_type("std::vector<int>")
-ext.add_test("StdVector_basics", """
+ext.add_test("""
 SInt32_StdVector vec;
 report(vec.size());
 vec.push_back(-7);

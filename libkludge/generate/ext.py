@@ -105,7 +105,9 @@ class Ext:
     glbls['include'] = include
     include(filename)
 
-  def add_test(self, test_name, kl, out):
+  def add_test(self, kl, out, test_name=None):
+    if not test_name:
+      test_name = "TEST_%d" % len(self.tests)
     self.tests.append(Test(test_name, self.jinjenv, kl, out))
 
   def write(self):

@@ -27,7 +27,7 @@ class Methodlike(object):
     return self.record.ext
 
   def add_test(self, kl, out):
-    self.ext.add_test(self.get_test_name(), kl, out)
+    self.ext.add_test(kl, out, test_name=self.get_test_name())
     return self
 
   def add_comment(self, comment):

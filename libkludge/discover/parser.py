@@ -284,6 +284,22 @@ class Parser(object):
                   self.parse_comment(child_ast_logger, child_cursor),
                   )
                 )
+          elif child_cursor.spelling in [
+            "operator+=",
+            "operator-=",
+            "operator*=",
+            "operator/=",
+            "operator%=",
+            ]:
+            methods.append(
+              "# %s\n%s.add_ass_op('%s', %s)%s" % (
+                self.location_desc(child_cursor.location),
+                child_obj,
+                child_cursor.spelling[8:],
+                self.parse_params(child_ast_logger, child_cursor),
+                self.parse_comment(child_ast_logger, child_cursor),
+                )
+              )
           else:
             methods.append(
               "# %s\n%s.add_method('%s', '%s', %s, %s)%s" % (

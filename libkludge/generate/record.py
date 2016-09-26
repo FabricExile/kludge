@@ -256,21 +256,13 @@ class AssOp(Methodlike):
     self,
     record,
     op,
-    param_type,
-    param_name,
+    params,
     ):
     Methodlike.__init__(self, record)
     self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
     self.base_edk_symbol_name = record.kl_global_name + '__ass_op_' + self.op_to_edk_op[op]
     self.op = op
-    self.params = [
-      ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(param_type)
-          ),
-        param_name
-        ),
-      ]
+    self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
 
   @property
   def ext(self):
@@ -594,19 +586,23 @@ class Record(Decl):
     returns,
     params,
     ):
-    assert isinstance(op, basestring)
-    assert isinstance(returns, basestring)
-    assert len(params) == 2
-    params = massage_params(params)
-    bin_op = BinOp(
-      self,
-      result_type=returns,
-      op=op,
-      params=params,
-      )
-    self.bin_ops.append(bin_op)
-    return bin_op
-  
+    try:
+      assert isinstance(op, basestring)
+      assert isinstance(returns, basestring)
+      assert len(params) == 2
+      params = massage_params(params)
+      bin_op = BinOp(
+        self,
+        result_type=returns,
+        op=op,
+        params=params,
+        )
+      self.bin_ops.append(bin_op)
+      return bin_op
+    except Exception as e:
+      self.warning("Ignoring bin op '%s': %s" % (op, e))
+      return EmptyCommentContainer()
+
   def add_ass_op(
     self,
     op,
@@ -614,12 +610,11 @@ class Record(Decl):
     ):
     assert isinstance(op, basestring)
     assert len(params) == 1
-    assert isinstance(params[0], basestring)
+    params = massage_params(params)
     ass_op = AssOp(
       self,
       op=op,
-      param_name='arg',
-      param_type=params[0],
+      params=params,
       )
     self.ass_ops.append(ass_op)
     return ass_op

@@ -66,6 +66,11 @@ public:
     pri_intValue = that.pri_intValue;
   }
 
+  void operator()( int foo )
+  {
+    std::cout << "Class::operator()(" << foo << ")\n" << std::flush;
+  }
+
   std::string const &publicMethod() { return stringValue; }
 
   int getIntValue() const { return pri_intValue; }

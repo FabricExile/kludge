@@ -110,6 +110,43 @@ class Method(Methodlike):
     assert self.this_access != ThisAccess.static
     return self.record.get_this(type_info, self.this_access == ThisAccess.mutable)
 
+class CallOp(Methodlike):
+
+  def __init__(
+    self,
+    record,
+    returns,
+    params,
+    this_access,
+    kl_name=None,
+    ):
+    Methodlike.__init__(self, record)
+    self.result = ResultCodec(record.resolve_dqti(returns))
+    self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
+    self.this_access = this_access
+    self.is_const = self.this_access == ThisAccess.const
+    self.is_mutable = self.this_access == ThisAccess.mutable
+    self.is_static = self.this_access == ThisAccess.static
+
+  @property
+  def this_access_suffix(self):
+    if self.this_access == ThisAccess.const:
+      return '?'
+    elif self.this_access == ThisAccess.mutable:
+      return '!'
+    else:
+      assert False
+  
+  def get_edk_symbol_name(self, type_info):
+    return self.record.gen_edk_symbol_name('call_op', type_info, self.params)
+
+  def get_test_name(self):
+    return self.record.kl_global_name + '__call_op'
+
+  def get_this(self, type_info):
+    assert self.this_access != ThisAccess.static
+    return self.record.get_this(type_info, self.this_access == ThisAccess.mutable)
+
 class UniOp(Methodlike):
 
   op_to_edk_op = {
@@ -177,10 +214,7 @@ class BinOp(Methodlike):
     record,
     result_type,
     op,
-    lhs_param_name,
-    lhs_param_type,
-    rhs_param_name,
-    rhs_param_type,
+    params,
     ):
     Methodlike.__init__(self, record)
     self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
@@ -190,20 +224,7 @@ class BinOp(Methodlike):
         )
       )
     self.op = op
-    self.params = [
-      ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(lhs_param_type)
-          ),
-        lhs_param_name
-        ),
-      ParamCodec(
-        self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr(rhs_param_type)
-          ),
-        rhs_param_name
-        ),
-      ]
+    self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
 
   @property
   def ext(self):
@@ -383,6 +404,7 @@ class Record(Decl):
     self.members = []
     self.ctors = []
     self.methods = []
+    self.call_ops = []
     self.uni_ops = []
     self.bin_ops = []
     self.ass_ops = []
@@ -514,6 +536,35 @@ class Record(Decl):
 
   def add_static_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
     return self.add_method(name, returns, params, opt_params, ThisAccess.static, kl_name=kl_name)
+
+  def add_call_op(
+    self,
+    returns=None,
+    params=[],
+    opt_params=[],
+    this_access=ThisAccess.const,
+    ):
+    try:
+      assert this_access != ThisAccess.static
+      returns = massage_returns(returns)
+      params = massage_params(params)
+      opt_params = massage_params(opt_params)
+
+      result = None
+      for i in range(0, len(opt_params)+1):
+        call_op = CallOp(
+          self,
+          returns,
+          params + opt_params[0:i],
+          this_access=this_access,
+          )
+        self.call_ops.append(call_op)
+        if not result:
+          result = call_op
+      return result
+    except Exception as e:
+      self.ext.warning("Ignoring call op: %s" % (name, e))
+      return EmptyCommentContainer()
   
   def add_uni_op(
     self,
@@ -539,16 +590,12 @@ class Record(Decl):
     assert isinstance(op, basestring)
     assert isinstance(returns, basestring)
     assert len(params) == 2
-    assert isinstance(params[0], basestring)
-    assert isinstance(params[1], basestring)
+    params = massage_params(params)
     bin_op = BinOp(
       self,
       result_type=returns,
       op=op,
-      lhs_param_name='lhs',
-      lhs_param_type=params[0],
-      rhs_param_name='rhs',
-      rhs_param_type=params[1],
+      params=params,
       )
     self.bin_ops.append(bin_op)
     return bin_op
@@ -709,6 +756,9 @@ class Record(Decl):
 
   def has_methods(self):
     return len(self.methods) > 0
+
+  def has_call_ops(self):
+    return len(self.call_ops) > 0
 
   def has_uni_ops(self):
     return len(self.uni_ops) > 0

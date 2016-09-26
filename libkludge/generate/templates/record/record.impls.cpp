@@ -135,6 +135,35 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {% endif %}
 {% endfor %}
 {% endif %}
+{% if record.has_call_ops %}
+////////////////////////////////////////////////////////////////////////
+// {{type_info}}
+// call_ops
+////////////////////////////////////////////////////////////////////////
+
+{% for call_op in record.call_ops %}
+{% if (call_op.is_mutable and allow_mutable_methods)
+    or (call_op.is_const and allow_const_methods) %}
+FABRIC_EXT_EXPORT {{call_op.result.render_direct_type_edk()}}
+{{call_op.get_edk_symbol_name(type_info)}}(
+{% if call_op.is_static %}
+    {{macros.edk_param_list(call_op.result, None, call_op.params) | indent(4)}}
+{% else %}
+    {{macros.edk_param_list(call_op.result, call_op.get_this(type_info), call_op.params) | indent(4)}}
+{% endif %}
+    )
+{
+    {{macros.cpp_call_pre(call_op.result, call_op.params) | indent(4)}}
+
+    {{call_op.get_this(type_info).render_ref()}}(
+        {{macros.cpp_call_args(call_op.params) | indent(8)}}
+        )
+    {{macros.cpp_call_post(call_op.result, call_op.params) | indent(4)}}
+}
+
+{% endif %}
+{% endfor %}
+{% endif %}
 {% if record.has_uni_ops() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}

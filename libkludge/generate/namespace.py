@@ -254,7 +254,8 @@ class Namespace:
       return direct_alias
     except Exception as e:
       self.ext.warning("Ignoring alias '%s': %s" % (new_cpp_type_name, e))
-
+      return EmptyCommentContainer()
+      
   def generate_type(self, cpp_local_name):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
     self.type_mgr.get_dqti(cpp_local_expr)

@@ -139,6 +139,40 @@
 {% endif %}
 {% endfor %}
 {% endif %}
+{% if record.has_call_ops() %}
+////////////////////////////////////////////////////////////////////////
+// {{type_info}}
+// call_ops
+////////////////////////////////////////////////////////////////////////
+{% for call_op in record.call_ops %}
+{% if (call_op.is_mutable and allow_mutable_methods)
+    or (call_op.is_const and allow_const_methods) %}
+{% for comment in call_op.comments %}
+{{comment}}
+{% endfor %}
+{{call_op.result.render_type_kl()}}
+{{type_info.kl.name}}.cxxCall{{call_op.this_access_suffix}}(
+    {% for param in call_op.params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    )
+{% if type_info.is_direct %}
+ = "{{call_op.get_edk_symbol_name(type_info)}}";
+{% else %}
+{
+    if (Fabric_Guarded && !this.ptr)
+        throw "Call of {{type_info.kl.name}}.cxxCall on null {{type_info.kl.name}}";
+    {{call_op.result.render_return_kl()}}
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxxCall(
+        {% for param in call_op.params %}
+        {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
+        {% endfor %}
+        );
+}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
 {% if type_info.is_direct and record.has_uni_ops %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}

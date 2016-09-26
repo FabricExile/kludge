@@ -131,6 +131,16 @@ GlobalFuncTakingClassConstRef: klass.stringValue = hello
 Class::~Class()
 """)
 
+ty.add_call_op(None, ['int'])\
+  .add_test("""
+Class cl(1.1, "foo", -8);
+cl.cxxCall(14);
+""", """
+Class::Class(1.1, foo, -8)
+Class::operator()(14)
+Class::~Class()
+""")
+
 dty = ext.add_owned_type('DerivedClass', extends='Class')
 dty.add_ctor(['int'])
 dty.add_const_method('newMethod', 'int')

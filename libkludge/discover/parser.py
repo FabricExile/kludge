@@ -239,8 +239,21 @@ class Parser(object):
                 self.parse_comment(child_ast_logger, child_cursor),
                 )
               )
-          elif child_cursor.spelling == "operator*":
-            if self.param_count(child_cursor) == 0:
+          elif child_cursor.spelling in [
+            "operator==",
+            "operator!=",
+            "operator<",
+            "operator<=",
+            "operator>",
+            "operator>=",
+            "operator+",
+            "operator-",
+            "operator*",
+            "operator/",
+            "operator%",
+            ]:
+            if child_cursor.spelling == 'operator*' \
+              and self.param_count(child_cursor) == 0:
               methods.append(
                 "# %s\n%s.add_deref('deref', '%s', %s)" % (
                   self.location_desc(child_cursor.location),
@@ -250,7 +263,17 @@ class Parser(object):
                   )
                 )
             else:
-              methods.append("# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
+              methods.append(
+                "# %s\n%s.add_bin_op('%s', '%s', ['%s const &'] + %s)%s" % (
+                  self.location_desc(child_cursor.location),
+                  child_obj,
+                  child_cursor.spelling[8:],
+                  child_cursor.result_type.spelling,
+                  name,
+                  self.parse_params(child_ast_logger, child_cursor),
+                  self.parse_comment(child_ast_logger, child_cursor),
+                  )
+                )
           else:
             methods.append(
               "# %s\n%s.add_method('%s', '%s', %s, %s)%s" % (

@@ -29,6 +29,8 @@ public:
       {}
 
     int x;
+
+    typedef std::string Typedefed;
   };
 
   Class( int x )
@@ -50,10 +52,14 @@ public:
     }
   }
 
+  typedef Enum Typedefed;
+
 private:
 
   SubClass _subClass;
 };
+
+typedef int Typedefed;
 
 inline char const *GlobalFunc() {
   return "From NameSpace";

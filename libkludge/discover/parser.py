@@ -269,7 +269,8 @@ class Parser(object):
         pass
       elif child_cursor.kind == CursorKind.CLASS_DECL \
         or child_cursor.kind == CursorKind.STRUCT_DECL \
-        or child_cursor.kind == CursorKind.ENUM_DECL:
+        or child_cursor.kind == CursorKind.ENUM_DECL \
+        or child_cursor.kind == CursorKind.TYPEDEF_DECL:
         child_record_cursors.append(child_cursor)
       else:
         methods.append("# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))

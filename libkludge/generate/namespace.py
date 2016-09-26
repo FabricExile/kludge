@@ -121,17 +121,18 @@ class Namespace:
       return EmptyCommentContainer()
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
-    direct_new_cpp_type_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
-    direct_old_cpp_type_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
-    self.type_mgr.add_alias(direct_new_cpp_type_expr, direct_old_cpp_type_expr)
+    direct_new_cpp_local_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
+    direct_new_cpp_global_expr = direct_new_cpp_local_expr.prefix(self.components)
+    direct_old_cpp_global_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
+    self.type_mgr.add_alias(direct_new_cpp_global_expr, direct_old_cpp_global_expr)
     direct_new_kl_type_name = new_cpp_type_name
-    direct_old_dqti = self.type_mgr.get_dqti(direct_old_cpp_type_expr)
+    direct_old_dqti = self.type_mgr.get_dqti(direct_old_cpp_global_expr)
     direct_old_kl_type_name = direct_old_dqti.type_info.kl.name.compound
     direct_alias = Alias(self, direct_new_kl_type_name, direct_old_dqti.type_info)
     self.ext.decls.append(direct_alias)
 
-    const_ptr_new_cpp_type_expr = PointerTo(Const(direct_new_cpp_type_expr))
-    const_ptr_old_cpp_type_expr = PointerTo(Const(direct_old_cpp_type_expr))
+    const_ptr_new_cpp_type_expr = PointerTo(Const(direct_new_cpp_global_expr))
+    const_ptr_old_cpp_type_expr = PointerTo(Const(direct_old_cpp_global_expr))
     self.type_mgr.add_alias(const_ptr_new_cpp_type_expr, const_ptr_old_cpp_type_expr)
     const_ptr_new_kl_type_name = direct_new_kl_type_name + "_CxxConstPtr"
     const_ptr_old_dqti = self.type_mgr.get_dqti(const_ptr_old_cpp_type_expr)
@@ -157,8 +158,8 @@ class Namespace:
   const_ptr_old_kl_type_name,
   ));
 
-    mutable_ptr_new_cpp_type_expr = PointerTo(direct_new_cpp_type_expr)
-    mutable_ptr_old_cpp_type_expr = PointerTo(direct_old_cpp_type_expr)
+    mutable_ptr_new_cpp_type_expr = PointerTo(direct_new_cpp_global_expr)
+    mutable_ptr_old_cpp_type_expr = PointerTo(direct_old_cpp_global_expr)
     self.type_mgr.add_alias(mutable_ptr_new_cpp_type_expr, mutable_ptr_old_cpp_type_expr)
     mutable_ptr_new_kl_type_name = direct_new_kl_type_name + "_CxxPtr"
     mutable_ptr_old_dqti = self.type_mgr.get_dqti(mutable_ptr_old_cpp_type_expr)
@@ -184,8 +185,8 @@ class Namespace:
   mutable_ptr_old_kl_type_name,
   ));
 
-    const_ref_new_cpp_type_expr = ReferenceTo(Const(direct_new_cpp_type_expr))
-    const_ref_old_cpp_type_expr = ReferenceTo(Const(direct_old_cpp_type_expr))
+    const_ref_new_cpp_type_expr = ReferenceTo(Const(direct_new_cpp_global_expr))
+    const_ref_old_cpp_type_expr = ReferenceTo(Const(direct_old_cpp_global_expr))
     self.type_mgr.add_alias(const_ref_new_cpp_type_expr, const_ref_old_cpp_type_expr)
     const_ref_new_kl_type_name = direct_new_kl_type_name + "_CxxConstRef"
     const_ref_old_dqti = self.type_mgr.get_dqti(const_ref_old_cpp_type_expr)
@@ -211,8 +212,8 @@ class Namespace:
   const_ref_old_kl_type_name,
   ));
 
-    mutable_ref_new_cpp_type_expr = ReferenceTo(direct_new_cpp_type_expr)
-    mutable_ref_old_cpp_type_expr = ReferenceTo(direct_old_cpp_type_expr)
+    mutable_ref_new_cpp_type_expr = ReferenceTo(direct_new_cpp_global_expr)
+    mutable_ref_old_cpp_type_expr = ReferenceTo(direct_old_cpp_global_expr)
     self.type_mgr.add_alias(mutable_ref_new_cpp_type_expr, mutable_ref_old_cpp_type_expr)
     mutable_ref_new_kl_type_name = direct_new_kl_type_name + "_CxxRef"
     mutable_ref_old_dqti = self.type_mgr.get_dqti(mutable_ref_old_cpp_type_expr)

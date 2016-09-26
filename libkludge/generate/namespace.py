@@ -54,7 +54,13 @@ class Namespace:
     return Namespace(self.ext, self, nested_namespace.components, kl_name)
 
   def resolve_dqti(self, cpp_type_name):
-    return self.namespace_mgr.resolve_dqti(self.components, cpp_type_name)
+    result = self.namespace_mgr.resolve_dqti(self.components, cpp_type_name)
+    if not result:
+      raise Exception("unable to resolve type '%s' in namespace '%s'" % (
+        cpp_type_name,
+        '::'.join([component.get_desc() for component in self.components]),
+        ))
+    return result
   
   def resolve_cpp_type_expr(self, cpp_type_name):
     dqti = self.resolve_dqti(cpp_type_name)
@@ -123,28 +129,29 @@ class Namespace:
       return EmptyCommentContainer()
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
-    direct_new_cpp_global_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
-    direct_old_cpp_global_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
-    self.type_mgr.add_alias(direct_new_cpp_global_expr, direct_old_cpp_global_expr)
-    direct_new_kl_local_name = new_cpp_type_name
-    direct_new_kl_global_name = '_'.join(self.nested_kl_names + [direct_new_kl_local_name])
-    direct_old_dqti = self.type_mgr.get_dqti(direct_old_cpp_global_expr)
-    print "direct_old_dqti.type_info.kl.name = " + str(direct_old_dqti.type_info.kl.name)
-    print "direct_old_dqti.type_info.edk.name = " + str(direct_old_dqti.type_info.edk.name)
-    print "direct_old_dqti.type_info.lib.name = " + str(direct_old_dqti.type_info.lib.name)
-    print "direct_old_dqti.type_info.lib.expr = " + str(direct_old_dqti.type_info.lib.expr)
-    direct_alias = Alias(self, direct_new_kl_global_name, direct_old_dqti.type_info)
-    self.ext.decls.append(direct_alias)
+    try:
+      direct_new_cpp_global_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
+      direct_old_cpp_global_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
+      self.type_mgr.add_alias(direct_new_cpp_global_expr, direct_old_cpp_global_expr)
+      direct_new_kl_local_name = new_cpp_type_name
+      direct_new_kl_global_name = '_'.join(self.nested_kl_names + [direct_new_kl_local_name])
+      direct_old_dqti = self.type_mgr.get_dqti(direct_old_cpp_global_expr)
+      print "direct_old_dqti.type_info.kl.name = " + str(direct_old_dqti.type_info.kl.name)
+      print "direct_old_dqti.type_info.edk.name = " + str(direct_old_dqti.type_info.edk.name)
+      print "direct_old_dqti.type_info.lib.name = " + str(direct_old_dqti.type_info.lib.name)
+      print "direct_old_dqti.type_info.lib.expr = " + str(direct_old_dqti.type_info.lib.expr)
+      direct_alias = Alias(self, direct_new_kl_global_name, direct_old_dqti.type_info)
+      self.ext.decls.append(direct_alias)
 
-    const_ptr_new_cpp_type_expr = PointerTo(Const(direct_new_cpp_global_expr))
-    const_ptr_old_cpp_type_expr = PointerTo(Const(direct_old_cpp_global_expr))
-    self.type_mgr.add_alias(const_ptr_new_cpp_type_expr, const_ptr_old_cpp_type_expr)
-    const_ptr_new_kl_type_name = direct_new_kl_global_name + "_CxxConstPtr"
-    const_ptr_old_dqti = self.type_mgr.get_dqti(const_ptr_old_cpp_type_expr)
-    const_ptr_old_kl_type_name = const_ptr_old_dqti.type_info.kl.name.compound
-    const_ptr_alias = Alias(self, const_ptr_new_kl_type_name, const_ptr_old_dqti.type_info)
-    self.ext.decls.append(const_ptr_alias)
-    self.ext.add_kl_epilog("""
+      const_ptr_new_cpp_type_expr = PointerTo(Const(direct_new_cpp_global_expr))
+      const_ptr_old_cpp_type_expr = PointerTo(Const(direct_old_cpp_global_expr))
+      self.type_mgr.add_alias(const_ptr_new_cpp_type_expr, const_ptr_old_cpp_type_expr)
+      const_ptr_new_kl_type_name = direct_new_kl_global_name + "_CxxConstPtr"
+      const_ptr_old_dqti = self.type_mgr.get_dqti(const_ptr_old_cpp_type_expr)
+      const_ptr_old_kl_type_name = const_ptr_old_dqti.type_info.kl.name.compound
+      const_ptr_alias = Alias(self, const_ptr_new_kl_type_name, const_ptr_old_dqti.type_info)
+      self.ext.decls.append(const_ptr_alias)
+      self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
@@ -153,25 +160,25 @@ class Namespace:
   return Make_%s(value);
 }
 """ % (
-  const_ptr_new_kl_type_name,
-  const_ptr_new_kl_type_name,
-  direct_new_kl_global_name,
-  const_ptr_old_kl_type_name,
-  const_ptr_new_kl_type_name,
-  const_ptr_new_kl_type_name,
-  direct_new_kl_global_name,
-  const_ptr_old_kl_type_name,
-  ));
+        const_ptr_new_kl_type_name,
+        const_ptr_new_kl_type_name,
+        direct_new_kl_global_name,
+        const_ptr_old_kl_type_name,
+        const_ptr_new_kl_type_name,
+        const_ptr_new_kl_type_name,
+        direct_new_kl_global_name,
+        const_ptr_old_kl_type_name,
+        ));
 
-    mutable_ptr_new_cpp_type_expr = PointerTo(direct_new_cpp_global_expr)
-    mutable_ptr_old_cpp_type_expr = PointerTo(direct_old_cpp_global_expr)
-    self.type_mgr.add_alias(mutable_ptr_new_cpp_type_expr, mutable_ptr_old_cpp_type_expr)
-    mutable_ptr_new_kl_type_name = direct_new_kl_global_name + "_CxxPtr"
-    mutable_ptr_old_dqti = self.type_mgr.get_dqti(mutable_ptr_old_cpp_type_expr)
-    mutable_ptr_old_kl_type_name = mutable_ptr_old_dqti.type_info.kl.name.compound
-    mutable_ptr_alias = Alias(self, mutable_ptr_new_kl_type_name, mutable_ptr_old_dqti.type_info)
-    self.ext.decls.append(mutable_ptr_alias)
-    self.ext.add_kl_epilog("""
+      mutable_ptr_new_cpp_type_expr = PointerTo(direct_new_cpp_global_expr)
+      mutable_ptr_old_cpp_type_expr = PointerTo(direct_old_cpp_global_expr)
+      self.type_mgr.add_alias(mutable_ptr_new_cpp_type_expr, mutable_ptr_old_cpp_type_expr)
+      mutable_ptr_new_kl_type_name = direct_new_kl_global_name + "_CxxPtr"
+      mutable_ptr_old_dqti = self.type_mgr.get_dqti(mutable_ptr_old_cpp_type_expr)
+      mutable_ptr_old_kl_type_name = mutable_ptr_old_dqti.type_info.kl.name.compound
+      mutable_ptr_alias = Alias(self, mutable_ptr_new_kl_type_name, mutable_ptr_old_dqti.type_info)
+      self.ext.decls.append(mutable_ptr_alias)
+      self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
@@ -180,25 +187,25 @@ class Namespace:
   return Make_%s(value);
 }
 """ % (
-  mutable_ptr_new_kl_type_name,
-  mutable_ptr_new_kl_type_name,
-  direct_new_kl_global_name,
-  mutable_ptr_old_kl_type_name,
-  mutable_ptr_new_kl_type_name,
-  mutable_ptr_new_kl_type_name,
-  direct_new_kl_global_name,
-  mutable_ptr_old_kl_type_name,
-  ));
+        mutable_ptr_new_kl_type_name,
+        mutable_ptr_new_kl_type_name,
+        direct_new_kl_global_name,
+        mutable_ptr_old_kl_type_name,
+        mutable_ptr_new_kl_type_name,
+        mutable_ptr_new_kl_type_name,
+        direct_new_kl_global_name,
+        mutable_ptr_old_kl_type_name,
+        ));
 
-    const_ref_new_cpp_type_expr = ReferenceTo(Const(direct_new_cpp_global_expr))
-    const_ref_old_cpp_type_expr = ReferenceTo(Const(direct_old_cpp_global_expr))
-    self.type_mgr.add_alias(const_ref_new_cpp_type_expr, const_ref_old_cpp_type_expr)
-    const_ref_new_kl_type_name = direct_new_kl_global_name + "_CxxConstRef"
-    const_ref_old_dqti = self.type_mgr.get_dqti(const_ref_old_cpp_type_expr)
-    const_ref_old_kl_type_name = const_ref_old_dqti.type_info.kl.name.compound
-    const_ref_alias = Alias(self, const_ref_new_kl_type_name, const_ref_old_dqti.type_info)
-    self.ext.decls.append(const_ref_alias)
-    self.ext.add_kl_epilog("""
+      const_ref_new_cpp_type_expr = ReferenceTo(Const(direct_new_cpp_global_expr))
+      const_ref_old_cpp_type_expr = ReferenceTo(Const(direct_old_cpp_global_expr))
+      self.type_mgr.add_alias(const_ref_new_cpp_type_expr, const_ref_old_cpp_type_expr)
+      const_ref_new_kl_type_name = direct_new_kl_global_name + "_CxxConstRef"
+      const_ref_old_dqti = self.type_mgr.get_dqti(const_ref_old_cpp_type_expr)
+      const_ref_old_kl_type_name = const_ref_old_dqti.type_info.kl.name.compound
+      const_ref_alias = Alias(self, const_ref_new_kl_type_name, const_ref_old_dqti.type_info)
+      self.ext.decls.append(const_ref_alias)
+      self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
@@ -207,25 +214,25 @@ class Namespace:
   return Make_%s(value);
 }
 """ % (
-  const_ref_new_kl_type_name,
-  const_ref_new_kl_type_name,
-  direct_new_kl_global_name,
-  const_ref_old_kl_type_name,
-  const_ref_new_kl_type_name,
-  const_ref_new_kl_type_name,
-  direct_new_kl_global_name,
-  const_ref_old_kl_type_name,
-  ));
+        const_ref_new_kl_type_name,
+        const_ref_new_kl_type_name,
+        direct_new_kl_global_name,
+        const_ref_old_kl_type_name,
+        const_ref_new_kl_type_name,
+        const_ref_new_kl_type_name,
+        direct_new_kl_global_name,
+        const_ref_old_kl_type_name,
+        ));
 
-    mutable_ref_new_cpp_type_expr = ReferenceTo(direct_new_cpp_global_expr)
-    mutable_ref_old_cpp_type_expr = ReferenceTo(direct_old_cpp_global_expr)
-    self.type_mgr.add_alias(mutable_ref_new_cpp_type_expr, mutable_ref_old_cpp_type_expr)
-    mutable_ref_new_kl_type_name = direct_new_kl_global_name + "_CxxRef"
-    mutable_ref_old_dqti = self.type_mgr.get_dqti(mutable_ref_old_cpp_type_expr)
-    mutable_ref_old_kl_type_name = mutable_ref_old_dqti.type_info.kl.name.compound
-    mutable_ref_alias = Alias(self, mutable_ref_new_kl_type_name, mutable_ref_old_dqti.type_info)
-    self.ext.decls.append(mutable_ref_alias)
-    self.ext.add_kl_epilog("""
+      mutable_ref_new_cpp_type_expr = ReferenceTo(direct_new_cpp_global_expr)
+      mutable_ref_old_cpp_type_expr = ReferenceTo(direct_old_cpp_global_expr)
+      self.type_mgr.add_alias(mutable_ref_new_cpp_type_expr, mutable_ref_old_cpp_type_expr)
+      mutable_ref_new_kl_type_name = direct_new_kl_global_name + "_CxxRef"
+      mutable_ref_old_dqti = self.type_mgr.get_dqti(mutable_ref_old_cpp_type_expr)
+      mutable_ref_old_kl_type_name = mutable_ref_old_dqti.type_info.kl.name.compound
+      mutable_ref_alias = Alias(self, mutable_ref_new_kl_type_name, mutable_ref_old_dqti.type_info)
+      self.ext.decls.append(mutable_ref_alias)
+      self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
@@ -234,17 +241,19 @@ class Namespace:
   return Make_%s(value);
 }
 """ % (
-  mutable_ref_new_kl_type_name,
-  mutable_ref_new_kl_type_name,
-  direct_new_kl_global_name,
-  mutable_ref_old_kl_type_name,
-  mutable_ref_new_kl_type_name,
-  mutable_ref_new_kl_type_name,
-  direct_new_kl_global_name,
-  mutable_ref_old_kl_type_name,
-  ));
+        mutable_ref_new_kl_type_name,
+        mutable_ref_new_kl_type_name,
+        direct_new_kl_global_name,
+        mutable_ref_old_kl_type_name,
+        mutable_ref_new_kl_type_name,
+        mutable_ref_new_kl_type_name,
+        direct_new_kl_global_name,
+        mutable_ref_old_kl_type_name,
+        ));
 
-    return direct_alias
+      return direct_alias
+    except Exception as e:
+      self.ext.warning("Ignoring alias '%s': %s" % (new_cpp_type_name, e))
 
   def generate_type(self, cpp_local_name):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_local_name)

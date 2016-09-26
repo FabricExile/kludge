@@ -111,18 +111,16 @@ class Parser(object):
         grandchild_ast_logger = child_ast_logger.indent()
         for grandchild_cursor in child_cursor.get_children():
           grandchild_ast_logger.log_cursor(grandchild_cursor)
-          if grandchild_cursor.kind == CursorKind.DECL_REF_EXPR:
+          if grandchild_cursor.kind in [CursorKind.TYPE_REF, CursorKind.NAMESPACE_REF, CursorKind.TEMPLATE_REF]:
+            continue
+          else:
             has_grandchild = True
             break
         if has_grandchild:
           opt_params.append((child_cursor.spelling, child_cursor.type.spelling))
         else:
           params.append((child_cursor.spelling, child_cursor.type.spelling))          
-      elif child_cursor.kind == CursorKind.TYPE_REF:
-        pass
-      elif child_cursor.kind == CursorKind.NAMESPACE_REF:
-        pass
-      elif child_cursor.kind == CursorKind.TEMPLATE_REF:
+      elif child_cursor.kind in [CursorKind.TYPE_REF, CursorKind.NAMESPACE_REF, CursorKind.TEMPLATE_REF]:
         pass
       else:
         self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))

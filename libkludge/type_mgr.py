@@ -40,7 +40,7 @@ class TypeMgr:
     self.add_tail_selector(StdStringSelector(ext))
     self.add_tail_selector(StdVectorSelector(ext))
     self.add_tail_selector(StdSetSelector(ext))
-    self.add_tail_selector(OtherSelector(ext))
+    # self.add_tail_selector(OtherSelector(ext))
 
   def add_selector(self, codec):
     print "Registered conversion selector: %s" % codec.get_desc()
@@ -54,21 +54,21 @@ class TypeMgr:
     return self._alias_new_cpp_type_name_to_old_cpp_type_expr.has_key(str(new_cpp_type_expr))
 
   def add_alias(self, new_cpp_type_expr, old_cpp_type_expr):
+    print "type_mgr: Adding alias: %s -> %s" % (str(new_cpp_type_expr), str(old_cpp_type_expr))
     self._alias_new_cpp_type_name_to_old_cpp_type_expr[str(new_cpp_type_expr)] = old_cpp_type_expr
 
   def maybe_get_dqti(self, cpp_type_expr):
-    undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
+    cpp_type_name = str(cpp_type_expr)
+    print "type_mgr: maybe_get_dqti(%s)" % cpp_type_name
 
     while True:
-      undq_cpp_type_name = str(undq_cpp_type_expr)
-      alias_cpp_type_expr = self._alias_new_cpp_type_name_to_old_cpp_type_expr.get(undq_cpp_type_name)
+      alias_cpp_type_expr = self._alias_new_cpp_type_name_to_old_cpp_type_expr.get(cpp_type_name)
       if not alias_cpp_type_expr:
         break
-      undq_cpp_type_expr = alias_cpp_type_expr
-
-    cpp_type_expr = undq_cpp_type_expr.get_redq(dq)
-
-    cpp_type_name = str(cpp_type_expr)
+      alias_cpp_type_name = str(alias_cpp_type_expr)
+      print "type_mgr: Redirected %s -> %s" % (cpp_type_name, alias_cpp_type_name)
+      cpp_type_expr = alias_cpp_type_expr
+      cpp_type_name = alias_cpp_type_name
 
     # print "type_mgr: Checking cache for %s" % cpp_type_name
     dqti = self._cpp_type_name_to_dqti.get(cpp_type_name)

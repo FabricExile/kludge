@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-# import clang
+import copy
 from cpp_type_expr_parser import *
 
 class Namespace:
@@ -72,10 +72,11 @@ class Namespace:
 
 class NamespaceMgr:
 
-  def __init__(self):
+  def __init__(self, type_mgr):
     # [pzion 20160311] Each member in the namespace is either a Clang cursor that is the
     # definition of the type (or typedef/using; if there is no definition, it's the declaration),
     # or a dict in the case that it's a nested namespace
+    self.type_mgr = type_mgr
     self.root_namespace = Namespace()
     self.cpp_type_expr_parser = Parser()
 
@@ -124,8 +125,17 @@ class NamespaceMgr:
       return self.globalize_components(path_components, nested_name)
     cpp_type_expr.tranform_names(globalize_nested_name)
 
-  def resolve_cpp_type_expr(self, path_components, cpp_type_name):
+  def resolve_dqti(self, path_components, cpp_type_name):
     assert isinstance(cpp_type_name, basestring)
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
-    self.globalize_cpp_type_expr(path_components, cpp_type_expr)
-    return cpp_type_expr
+    undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
+    if not isinstance(undq_cpp_type_expr, Named):
+      return self.type_mgr.maybe_get_dqti(cpp_type_expr)
+    self.globalize_cpp_type_expr(path_components, undq_cpp_type_expr)
+    for i in range(0, len(path_components)+1):
+      components = path_components[0:len(path_components)-i]
+      nested_undq_cpp_type_expr = copy.copy(undq_cpp_type_expr).prefix(components)
+      nested_cpp_type_expr = nested_undq_cpp_type_expr.get_redq(dq)
+      nested_dqti = self.type_mgr.maybe_get_dqti(nested_cpp_type_expr)
+      if nested_dqti:
+        return nested_dqti

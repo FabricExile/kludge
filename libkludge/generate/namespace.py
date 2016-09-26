@@ -52,12 +52,14 @@ class Namespace:
     assert isinstance(kl_name, basestring)
     nested_namespace = self.namespace_mgr.add_nested_namespace(self.components, component)
     return Namespace(self.ext, self, nested_namespace.components, kl_name)
-  
-  def resolve_cpp_type_expr(self, cpp_type_name):
-    return self.namespace_mgr.resolve_cpp_type_expr(self.components, cpp_type_name)
 
   def resolve_dqti(self, cpp_type_name):
-    return self.type_mgr.get_dqti(self.resolve_cpp_type_expr(cpp_type_name))
+    return self.namespace_mgr.resolve_dqti(self.components, cpp_type_name)
+  
+  def resolve_cpp_type_expr(self, cpp_type_name):
+    dqti = self.resolve_dqti(cpp_type_name)
+    if dqti:
+      return dqti.type_info.lib.expr
 
   @property
   def cpp_type_expr_parser(self):
@@ -121,13 +123,16 @@ class Namespace:
       return EmptyCommentContainer()
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
-    direct_new_cpp_local_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
-    direct_new_cpp_global_expr = direct_new_cpp_local_expr.prefix(self.components)
+    direct_new_cpp_global_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)
     direct_old_cpp_global_expr = self.resolve_cpp_type_expr(old_cpp_type_name)
     self.type_mgr.add_alias(direct_new_cpp_global_expr, direct_old_cpp_global_expr)
     direct_new_kl_local_name = new_cpp_type_name
     direct_new_kl_global_name = '_'.join(self.nested_kl_names + [direct_new_kl_local_name])
     direct_old_dqti = self.type_mgr.get_dqti(direct_old_cpp_global_expr)
+    print "direct_old_dqti.type_info.kl.name = " + str(direct_old_dqti.type_info.kl.name)
+    print "direct_old_dqti.type_info.edk.name = " + str(direct_old_dqti.type_info.edk.name)
+    print "direct_old_dqti.type_info.lib.name = " + str(direct_old_dqti.type_info.lib.name)
+    print "direct_old_dqti.type_info.lib.expr = " + str(direct_old_dqti.type_info.lib.expr)
     direct_alias = Alias(self, direct_new_kl_global_name, direct_old_dqti.type_info)
     self.ext.decls.append(direct_alias)
 

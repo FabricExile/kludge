@@ -31,6 +31,8 @@ public:
     int x;
 
     typedef std::string Typedefed;
+
+    void typedefedMethod(Typedefed const &) const {}
   };
 
   Class( int x )
@@ -54,12 +56,16 @@ public:
 
   typedef SubClass Typedefed;
 
+  void typedefedMethod(Typedefed const &) const {}
+
 private:
 
   SubClass _subClass;
 };
 
 typedef Class Typedefed;
+
+inline void TypedefedFunc(Typedefed const &) {}
 
 inline char const *GlobalFunc() {
   return "From NameSpace";

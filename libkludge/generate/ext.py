@@ -46,8 +46,8 @@ class Ext:
           }),
       )
     setattr(self.jinjenv, 'opts', opts)
-    self.namespace_mgr = NamespaceMgr()
     self.type_mgr = TypeMgr(self)
+    self.namespace_mgr = NamespaceMgr(self.type_mgr)
 
     self.cpp_flags = []
     self.cpp_defines = []

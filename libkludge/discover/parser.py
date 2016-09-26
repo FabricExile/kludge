@@ -265,7 +265,7 @@ class Parser(object):
             if child_cursor.spelling == 'operator*' \
               and self.param_count(child_cursor) == 0:
               methods.append(
-                "# %s\n%s.add_deref('deref', '%s', %s)" % (
+                "# %s\n%s.add_deref('%s', %s)" % (
                   self.location_desc(child_cursor.location),
                   child_obj,
                   child_cursor.result_type.spelling,

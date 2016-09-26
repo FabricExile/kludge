@@ -687,9 +687,9 @@ class Record(Decl):
 
   def add_deref(
     self,
-    kl_method_name,
     returns,
-    this_access = ThisAccess.const
+    this_access = ThisAccess.const,
+    kl_method_name = 'cxxDeref',
     ):
     assert not self.deref_kl_method_name
     assert isinstance(kl_method_name, basestring)

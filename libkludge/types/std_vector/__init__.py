@@ -57,7 +57,7 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
   result.reserve(size);
   for (Index i = 0; i < size; ++i)  {
     {{element_type_name}}_CxxConstRef ptr = vec.getAt(i);
-    result.push(ptr.cxxRefGet());
+    result.push(ptr.cxxGet());
   }
   return result;
 }

@@ -65,24 +65,24 @@ Make_{{type_info.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
 ////////////////////////////////////////////////////////////////////////
 
 // Is valid.  Check for null pointer
-Boolean {{decl.type_info.const_ptr.kl.name}}.cxxPtrIsValid() {
+Boolean {{decl.type_info.const_ptr.kl.name}}.cxxIsValid() {
   return !!this.ptr;
 }
 
 Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
-  this = ptr.cxxPtrIsValid();
+  this = ptr.cxxIsValid();
 }
 
 // Indexing operation
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt(Index index) {
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxGetAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxxPtrGetAt on null {{decl.type_info.const_ptr.kl.name}}";
+    throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxxGetAt on null {{decl.type_info.const_ptr.kl.name}}";
   return {{decl.type_info.const_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
 }
 
 // Deref the pointer
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxPtrDeref() {
-  return this.cxxPtrGetAt(0);
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxDeref() {
+  return this.cxxGetAt(0);
 }
 
 {% if decl.type_info.direct.kl.name.base == 'CxxChar' %}
@@ -96,7 +96,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 // a String is not always safe, just as it is not always safe in C++
 {{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   Count size = 0;
-  while (this.cxxPtrGetAt(size))
+  while (this.cxxGetAt(size))
     ++size;
   UInt8 bytes<>(this.ptr, size);
   String ss;
@@ -111,21 +111,21 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 {% endif %}
 
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt(Index index) {
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxGetAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrGetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxGetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
   return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
 }
 
 // Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrDeref() {
-  return this.cxxPtrGetAt(0);
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxDeref() {
+  return this.cxxGetAt(0);
 }
 
 // Set the value at an offset into the array
-{{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
+{{decl.type_info.mutable_ptr.kl.name}}.cxxSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxPtrSetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxSetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
   this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
 }
 
@@ -140,22 +140,22 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 }
 
 // Get the {{decl.type_info.direct.kl.name}} value
-{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxRefGet() {
+{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxGet() {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.const_ref.kl.name}}.cxxRefGet on null {{decl.type_info.const_ref.kl.name}}";
+    throw "Call of {{decl.type_info.const_ref.kl.name}}.cxxGet on null {{decl.type_info.const_ref.kl.name}}";
   return {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} };
 }
 
 // Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
 {{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
-  this = ref.cxxRefGet();
+  this = ref.cxxGet();
 }
 
 {# Horrible Hack #}
 {% if decl.type_info.const_ref.kl.name.compound != 'StdString_CxxConstRef' %}
 // Convert to String
 {{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
-  s += this.cxxRefGet();
+  s += this.cxxGet();
 }
 
 {% endif %}
@@ -163,25 +163,25 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 // Convert to Boolean
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
-  this = Boolean(ref.cxxRefGet());
+  this = Boolean(ref.cxxGet());
 }
 {% endif %}
 
 // Set the value
-{{decl.type_info.mutable_ref.kl.name}}.cxxRefSet({{decl.type_info.direct.kl.name}} value) {
+{{decl.type_info.mutable_ref.kl.name}}.cxxSet({{decl.type_info.direct.kl.name}} value) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxxRefSet on null {{decl.type_info.mutable_ref.kl.name}}";
+    throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxxSet on null {{decl.type_info.mutable_ref.kl.name}}";
   {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 
 // Assignment of {{decl.type_info.direct.kl.name}}
 {{decl.type_info.mutable_ref.kl.name}}.=({{decl.type_info.direct.kl.name}} value) {
-  this.cxxRefSet(value);
+  this.cxxSet(value);
 }
 
 // Convert to String
 {{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
-  s += this.cxxRefGet();
+  s += this.cxxGet();
 }
 
 {% if decl.type_info.direct.kl.name.compound == 'StdString' %}

@@ -59,7 +59,6 @@ class TypeMgr:
 
   def maybe_get_dqti(self, cpp_type_expr):
     cpp_type_name = str(cpp_type_expr)
-    print "type_mgr: maybe_get_dqti(%s)" % cpp_type_name
 
     while True:
       alias_cpp_type_expr = self._alias_new_cpp_type_name_to_old_cpp_type_expr.get(cpp_type_name)

@@ -26,11 +26,14 @@ class Parser:
     self.key_unsigned = Keyword("unsigned")
     self.key_const = Keyword("const")
     self.key_volatile = Keyword("volatile")
-    self.key_struct = Keyword("struct")
+    self.key_struct = Keyword("struct").suppress()
+    self.key_class = Keyword("class").suppress()
 
     self.ident = And([
       NotAny(self.key_const),
       NotAny(self.key_volatile),
+      NotAny(self.key_struct),
+      NotAny(self.key_class),
       Word(alphas+"_", alphanums+"_"),
       ])
     self.number = Word(nums).setParseAction(lambda s,l,t: int(t[0]))
@@ -61,7 +64,9 @@ class Parser:
       # print "make_simple t=%s" % t
       return Simple(t[0])
     self.ty_simple = MatchFirst([
-      self.ident
+      self.ident,
+      self.key_struct + self.ident,
+      self.key_class + self.ident,
       ]).setParseAction(make_simple)
 
     self.ty_template_params = Forward()
@@ -99,7 +104,8 @@ class Parser:
       # print "make_named t=%s" % t
       return Named(t[:])
     self.ty_named = MatchFirst([
-      self.ty_components
+      self.ty_components,
+      self.tok_colon_colon + self.ty_components,
       ]).setParseAction(make_named)
 
     self.ty_unqualified = MatchFirst([

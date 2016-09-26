@@ -35,9 +35,10 @@ class Func(Decl):
     self.params = []
     for param_index in range(0, len(params)):
       param = params[param_index]
-      self.params.append(
-        param.gen_codec(param_index, parent_namespace.resolve_dqti)
-        )
+      param_codec = param.gen_codec(param_index, parent_namespace.resolve_dqti)
+      if not param_codec:
+        raise Exception("cannot parse type for parameter %d" % (param_index + 1))
+      self.params.append(param_codec)
     self.comments = []
   
   def get_edk_symbol_name(self):

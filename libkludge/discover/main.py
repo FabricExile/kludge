@@ -44,6 +44,13 @@ def main(prog, args):
     help="Skip generation of master .kludge.py script",
     )
   opt_parser.add_option(
+    '', '--ignore-dir',
+    action='append',
+    dest='dirs_to_ignore',
+    metavar='DIR',
+    help="Ignore DIR when finding header files to parse",
+    )
+  opt_parser.add_option(
     '-I', None,
     action='append',
     dest='cpppath',
@@ -81,6 +88,8 @@ def main(prog, args):
   (opts, args) = opt_parser.parse_args(args=args)
   ext_name = args[0]
   dirs_and_files = args[1:]
+  if not opts.dirs_to_ignore:
+    opts.dirs_to_ignore = []
   if len(dirs_and_files) == 0:
     util.error(opts, "Missing directories and/or headers to process")
     quit_with_usage(prog)

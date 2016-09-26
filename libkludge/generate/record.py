@@ -14,7 +14,7 @@ from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
 from libkludge.dir_qual_type_info import DirQualTypeInfo
-from libkludge.util import clean_comment
+from libkludge.util import clean_comment, EmptyCommentContainer
 
 class Methodlike(object):
 
@@ -442,28 +442,35 @@ class Record(Decl):
     self.default_access = access
 
   def add_member(self, cpp_name, cpp_type_name, getter='', setter='', access=None):
-    if access is None:
-      access = self.default_access
-    cpp_type_expr = self.resolve_cpp_type_expr(cpp_type_name)
-    dqti = self.ext.type_mgr.get_dqti(cpp_type_expr)
-    member = Member(self, cpp_name, dqti, getter, setter, access=access)
-    self.members.append(member)
-    return self
+    try:
+      if access is None:
+        access = self.default_access
+      cpp_type_expr = self.resolve_cpp_type_expr(cpp_type_name)
+      dqti = self.ext.type_mgr.get_dqti(cpp_type_expr)
+      member = Member(self, cpp_name, dqti, getter, setter, access=access)
+      self.members.append(member)
+      return self
+    except Exception as e:
+      self.ext.warning("Ignoring member '%s': %s" % (cpp_name, e))
   
   def add_ctor(self, params=[], opt_params=[]):
-    params = massage_params(params)
-    opt_params = massage_params(opt_params)
+    try:
+      params = massage_params(params)
+      opt_params = massage_params(opt_params)
 
-    if len(params) == 0:
-      self.include_empty_ctor = False
+      if len(params) == 0:
+        self.include_empty_ctor = False
 
-    result = None
-    for i in range(0, len(opt_params)+1):
-      ctor = Ctor(self, params + opt_params[0:i])
-      self.ctors.append(ctor)
-      if not result:
-        result = ctor
-    return result
+      result = None
+      for i in range(0, len(opt_params)+1):
+        ctor = Ctor(self, params + opt_params[0:i])
+        self.ctors.append(ctor)
+        if not result:
+          result = ctor
+      return result
+    except Exception as e:
+      self.ext.warning("Ignoring ctor: %s" % (e))
+      return EmptyCommentContainer()
 
   def add_method(
     self,
@@ -474,26 +481,30 @@ class Record(Decl):
     this_access=ThisAccess.const,
     kl_name=None,
     ):
-    assert isinstance(name, basestring)
+    try:
+      assert isinstance(name, basestring)
 
-    returns = massage_returns(returns)
-    params = massage_params(params)
-    opt_params = massage_params(opt_params)
+      returns = massage_returns(returns)
+      params = massage_params(params)
+      opt_params = massage_params(opt_params)
 
-    result = None
-    for i in range(0, len(opt_params)+1):
-      method = Method(
-        self,
-        name,
-        returns,
-        params + opt_params[0:i],
-        this_access=this_access,
-        kl_name=kl_name,
-        )
-      self.methods.append(method)
-      if not result:
-        result = method
-    return result
+      result = None
+      for i in range(0, len(opt_params)+1):
+        method = Method(
+          self,
+          name,
+          returns,
+          params + opt_params[0:i],
+          this_access=this_access,
+          kl_name=kl_name,
+          )
+        self.methods.append(method)
+        if not result:
+          result = method
+      return result
+    except Exception as e:
+      self.ext.warning("Ignoring method '%s': %s" % (name, e))
+      return EmptyCommentContainer()
 
   def add_const_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
     return self.add_method(name, returns, params, opt_params, ThisAccess.const, kl_name=kl_name)

@@ -20,6 +20,10 @@ def info(opts, string):
 def debug(opts, string):
   log(opts, 3, "Debug: %s" % string)
 
+class EmptyCommentContainer(object):
+  def add_comment(self, comment):
+    pass
+
 def is_kl_keyword(name):
   return name in [
     "alias",

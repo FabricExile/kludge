@@ -13,6 +13,7 @@ class Parser(object):
   def __init__(self, name, opts):
     self.name = name
     self.opts = opts
+    self.opts.dirs_to_ignore = [self.expand_envvars(dir) for dir in self.opts.dirs_to_ignore]
     self.clang_opts = ['-x', 'c++']
     if self.opts.clang_opts:
       self.clang_opts.extend(self.opts.clang_opts)
@@ -87,6 +88,13 @@ class Parser(object):
       CursorKind.MACRO_DEFINITION,
       CursorKind.INCLUSION_DIRECTIVE,
       ]
+
+  def param_count(self, cursor):
+    result = 0
+    for child_cursor in cursor.get_children():
+      if child_cursor.kind == CursorKind.PARM_DECL:
+        result += 1
+    return result
 
   def parse_params(
     self,
@@ -218,14 +226,17 @@ class Parser(object):
                 )
               )
           elif child_cursor.spelling == "operator*":
-            methods.append(
-              "# %s\n%s.add_deref('deref', '%s', %s)" % (
-                self.location_desc(child_cursor.location),
-                child_obj,
-                child_cursor.result_type.spelling,
-                self.parse_method_access(child_ast_logger, child_cursor),
+            if self.param_count(child_cursor) == 0:
+              methods.append(
+                "# %s\n%s.add_deref('deref', '%s', %s)" % (
+                  self.location_desc(child_cursor.location),
+                  child_obj,
+                  child_cursor.result_type.spelling,
+                  self.parse_method_access(child_ast_logger, child_cursor),
+                  )
                 )
-              )
+            else:
+              methods.append("# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
           else:
             methods.append(
               "# %s\n%s.add_method('%s', '%s', %s, %s)%s" % (
@@ -331,6 +342,12 @@ class Parser(object):
     clang.cindex.Diagnostic.Note: "note",
     }
 
+  def should_ignore_dir(self, dirpath):
+    for dir in self.opts.dirs_to_ignore:
+      if dirpath.startswith(dir):
+        return True
+    return False
+
   def process(self, ext_name, dirs_and_files):
     ast_logger = self.ASTLogger(self)
 
@@ -340,6 +357,9 @@ class Parser(object):
         includes.append(self.expand_envvars(dir_or_file))
       elif os.path.isdir(dir_or_file):
         for dirpath, dirnames, filenames in os.walk(self.expand_envvars(dir_or_file)):
+          if self.should_ignore_dir(dirpath):
+            self.info("Ignoring directory '%s'" % dirpath)
+            continue
           for filename in filenames:
             if filename.endswith('.h') or filename.endswith('.hpp') or filename.endswith('.hxx'):
               includes.append(os.path.join(dirpath, filename))
@@ -442,5 +462,9 @@ class Parser(object):
               for lib in self.opts.libs:
                 print >>master, "ext.add_lib('%s')" % lib
             print >>master
+            if len(includes) > 0:
+              for include in includes:
+                print >>master, "ext.add_cpp_angled_include('%s')" % include
+              print >>master
             print >>master, "include('%s')" % decls_basename
             print >>master, "include('%s')" % defns_basename

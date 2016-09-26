@@ -129,4 +129,3 @@ class NamespaceMgr:
     cpp_type_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     self.globalize_cpp_type_expr(path_components, cpp_type_expr)
     return cpp_type_expr
-

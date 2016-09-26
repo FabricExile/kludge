@@ -16,8 +16,8 @@ class ConstVoidPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      nested_name = ["Data"],
-      lib_expr = const_cpp_type_expr,
+      kl_name_base='Data',
+      lib_expr=const_cpp_type_expr,
       )
 
   def build_codec_lookup_rules(self):
@@ -32,8 +32,8 @@ class MutableVoidPtrTypeInfo(TypeInfo):
     TypeInfo.__init__(
       self,
       jinjenv,
-      nested_name = ["Data"],
-      lib_expr = mutable_cpp_type_expr,
+      kl_name_base='Data',
+      lib_expr=mutable_cpp_type_expr,
       )
 
   def build_codec_lookup_rules(self):

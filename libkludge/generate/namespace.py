@@ -13,6 +13,7 @@ from massage import *
 from libkludge.types import KLExtTypeAliasSelector
 from libkludge.types import WrappedSelector
 from libkludge.types import EnumSelector
+from libkludge.util import EmptyCommentContainer
 
 class Namespace:
 
@@ -98,22 +99,26 @@ class Namespace:
 
   def add_func(self, cpp_name, returns=None, params=[], kl_name=None):
     cpp_local_name = cpp_name
-    cpp_global_name = "::".join(self.nested_cpp_names + [cpp_local_name])
+    try:
+      cpp_global_name = "::".join(self.nested_cpp_names + [cpp_local_name])
 
-    kl_local_name = kl_name
-    if not kl_local_name:
-      kl_local_name = cpp_local_name
-    kl_global_name = "_".join(self.nested_kl_names + [kl_local_name])
+      kl_local_name = kl_name
+      if not kl_local_name:
+        kl_local_name = cpp_local_name
+      kl_global_name = "_".join(self.nested_kl_names + [kl_local_name])
 
-    func = Func(
-      self,
-      cpp_global_name,
-      kl_global_name,
-      massage_returns(returns),
-      massage_params(params),
-      )
-    self.ext.decls.append(func)
-    return func
+      func = Func(
+        self,
+        cpp_global_name,
+        kl_global_name,
+        massage_returns(returns),
+        massage_params(params),
+        )
+      self.ext.decls.append(func)
+      return func
+    except Exception as e:
+      self.warning("Ignoring function %s: %s" % (cpp_local_name, e))
+      return EmptyCommentContainer()
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):
     direct_new_cpp_type_expr = self.cpp_type_expr_parser.parse(new_cpp_type_name).prefix(self.components)

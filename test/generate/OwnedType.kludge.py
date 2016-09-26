@@ -76,7 +76,7 @@ Class::~Class()
 Class::~Class()
 """)
 
-ty.add_uni_op('++', 'next', 'bool')
+ty.add_uni_op('++', 'bool', kl_method_name='next')
 ty.add_deref('int const &')
 ty.add_test("""
 for ( Class c1(3.14, "hello", -2); c1; c1.next() )

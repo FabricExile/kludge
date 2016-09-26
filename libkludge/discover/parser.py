@@ -223,7 +223,7 @@ class Parser(object):
             pass
           elif child_cursor.spelling == "operator++":
             methods.append(
-              "# %s\n%s.add_uni_op('++', 'inc', '%s')%s" % (
+              "# %s\n%s.add_uni_op('++', '%s')%s" % (
                 self.location_desc(child_cursor.location),
                 child_obj,
                 child_cursor.result_type.spelling,
@@ -232,7 +232,7 @@ class Parser(object):
               )
           elif child_cursor.spelling == "operator--":
             methods.append(
-              "# %s\n%s.add_uni_op('--', 'dec', '%s')%s" % (
+              "# %s\n%s.add_uni_op('--', '%s')%s" % (
                 self.location_desc(child_cursor.location),
                 child_obj,
                 child_cursor.result_type.spelling,

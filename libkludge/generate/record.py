@@ -566,12 +566,19 @@ class Record(Decl):
       self.ext.warning("Ignoring call op: %s" % (name, e))
       return EmptyCommentContainer()
   
+  kl_method_name = {
+    '++': 'cxxInc',
+    '--': 'cxxDec',
+    }
+
   def add_uni_op(
     self,
     op,
-    kl_method_name,
     returns,
+    kl_method_name=None,
     ):
+    if not kl_method_name:
+      kl_method_name = self.kl_method_name[op]
     uni_op = UniOp(
       self,
       op,

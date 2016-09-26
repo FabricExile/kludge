@@ -52,14 +52,14 @@ public:
     }
   }
 
-  typedef Enum Typedefed;
+  typedef SubClass Typedefed;
 
 private:
 
   SubClass _subClass;
 };
 
-typedef int Typedefed;
+typedef Class Typedefed;
 
 inline char const *GlobalFunc() {
   return "From NameSpace";

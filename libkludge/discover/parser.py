@@ -123,7 +123,9 @@ class Parser(object):
     cursor,
     ):
     if cursor.raw_comment:
-      comment = cursor.raw_comment.replace('"', '\\"')
+      comment = cursor.raw_comment
+      comment = comment.replace('\\', '\\\\')
+      comment = comment.replace('"', '\\"')
       return '\\\n  .add_comment("""%s""")' % comment
     else:
       return ''
@@ -307,6 +309,15 @@ class Parser(object):
       self.parse_comment(ast_logger, cursor),
       ))
 
+  def parse_typedef_decl(self, ast_logger, cursor, obj, decls, defns):
+    decls.write("# %s\n%s.add_alias('%s', '%s')%s\n" % (
+      self.location_desc(cursor.location),
+      obj,
+      cursor.spelling,
+      cursor.underlying_typedef_type.spelling,
+      self.parse_comment(ast_logger, cursor),
+      ))
+
   def parse_namespace(self, ast_logger, cursor, obj, decls, defns):
     name = cursor.spelling
     child_obj = "%s_%s" % (obj, name)
@@ -328,6 +339,8 @@ class Parser(object):
       self.parse_record_decl(ast_logger, cursor, obj, decls, defns)
     elif cursor.kind == CursorKind.ENUM_DECL:
       self.parse_enum_decl(ast_logger, cursor, obj, decls, defns)
+    elif cursor.kind == CursorKind.TYPEDEF_DECL:
+      self.parse_typedef_decl(ast_logger, cursor, obj, decls, defns)
     elif cursor.kind == CursorKind.FUNCTION_DECL:
       self.parse_function_decl(ast_logger, cursor, obj, decls, defns)
     elif cursor.kind == CursorKind.NAMESPACE:

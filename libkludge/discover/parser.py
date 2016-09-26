@@ -102,11 +102,22 @@ class Parser(object):
     cursor,
     ):
     params = []
+    opt_params = []
     child_ast_logger = ast_logger.indent()
     for child_cursor in cursor.get_children():
       child_ast_logger.log_cursor(child_cursor)
       if child_cursor.kind == CursorKind.PARM_DECL:
-        params.append((child_cursor.spelling, child_cursor.type.spelling))
+        has_grandchild = False
+        grandchild_ast_logger = child_ast_logger.indent()
+        for grandchild_cursor in child_cursor.get_children():
+          grandchild_ast_logger.log_cursor(grandchild_cursor)
+          if grandchild_cursor.kind == CursorKind.DECL_REF_EXPR:
+            has_grandchild = True
+            break
+        if has_grandchild:
+          opt_params.append((child_cursor.spelling, child_cursor.type.spelling))
+        else:
+          params.append((child_cursor.spelling, child_cursor.type.spelling))          
       elif child_cursor.kind == CursorKind.TYPE_REF:
         pass
       elif child_cursor.kind == CursorKind.NAMESPACE_REF:
@@ -115,7 +126,10 @@ class Parser(object):
         pass
       else:
         self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
-    return "[%s]" % (', '.join(["Param('%s', '%s')" % param for param in params]))
+    result = "[%s]" % (', '.join(["Param('%s', '%s')" % param for param in params]))
+    if len(opt_params) > 0:
+      result = "%s, [%s]" % (result, ', '.join(["Param('%s', '%s')" % opt_param for opt_param in opt_params]))
+    return result
 
   def parse_comment(
     self,

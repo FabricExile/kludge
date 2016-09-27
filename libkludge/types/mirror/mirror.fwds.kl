@@ -6,6 +6,9 @@
 {% if decl.type_info.existing_kl_ext_name %}
 require {{decl.type_info.existing_kl_ext_name}};
 {% endif %}
+{% for comment in decl.type_info.record.comments %}
+{{comment}}
+{% endfor %}
 alias {{decl.type_info.existing_kl_global_name}} {{decl.type_info.kl.name}};
 
 UInt64 __CxxSize_{{decl.type_info.kl.name}}() {

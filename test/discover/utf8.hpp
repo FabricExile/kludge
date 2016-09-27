@@ -6,4 +6,5 @@
 
 /// Utf8 comment: ∑ f(i) = ∏ g(i),
 class Utf8 {
+  int foo;
 };

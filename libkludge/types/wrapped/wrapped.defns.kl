@@ -3,6 +3,9 @@
 {######################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
+{% for comment in decl.type_info.record.comments %}
+{{comment}}
+{% endfor %}
 struct {{decl.type_info.kl.name}}
 {% if decl.type_info.extends %}
   : {{decl.type_info.extends.kl.name}}

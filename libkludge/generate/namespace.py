@@ -423,6 +423,7 @@ class Namespace:
       cpp_global_expr,
       )
     record = self.type_mgr.get_dqti(cpp_global_expr).type_info.record
+    return record
 
   def add_enum(
     self,

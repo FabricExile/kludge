@@ -362,6 +362,8 @@ class Parser(object):
         ))
       if extends:
         decls.write(", extends='%s'" % extends)
+      if cursor.is_abstract_type():
+        decls.write(", is_abstract=True")
       decls.write(")%s\n" % self.parse_comment(ast_logger, cursor))
       for child_record_cursor in child_record_cursors:
         child_ast_logger.log_cursor(child_record_cursor)

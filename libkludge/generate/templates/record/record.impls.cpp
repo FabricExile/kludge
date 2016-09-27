@@ -52,6 +52,7 @@ FABRIC_EXT_EXPORT void
 {% endif %}
 {% endfor %}
 {% endif %}
+{% if not is_direct or not record.is_abstract %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Constructors and Destructor
@@ -100,6 +101,7 @@ FABRIC_EXT_EXPORT void
     {{record.get_mutable_this(type_info).render_delete()}}
 }
 
+{% endif %}
 {% endif %}
 {% if record.has_methods %}
 ////////////////////////////////////////////////////////////////////////
@@ -203,7 +205,7 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 
 {% endfor %}
 {% endif %}
-{% if record.include_simple_ass_op %}
+{% if not record.is_abstract and record.include_simple_ass_op %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Simple Assignment Operator
@@ -218,7 +220,7 @@ FABRIC_EXT_EXPORT void
 }
 
 {% endif %}
-{% if record.has_ass_ops() %}
+{% if not record.is_abstract and record.has_ass_ops() %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Other Assignment Operators

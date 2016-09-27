@@ -383,6 +383,7 @@ class Record(Decl):
     forbid_copy=False,
     child_namespace_component=None,
     child_namespace_kl_name=None,
+    is_abstract=False,
     ):
     Decl.__init__(self, parent_namespace)
 
@@ -423,6 +424,7 @@ class Record(Decl):
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
     self.forbid_copy = forbid_copy
+    self.is_abstract = is_abstract
     self.get_ind_op_result = None
     self.get_ind_op_params = None
     self.set_ind_op_params = None

@@ -44,15 +44,30 @@
 // Constructors and Destructor
 ////////////////////////////////////////////////////////////////////////
 {% if type_info.is_direct and record.include_empty_ctor %}
+{% if record.is_abstract %}
+{{type_info.kl.name}}() {
+    throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
+}
+{% else %}
 {{type_info.kl.name}}() = "{{record.get_empty_ctor_edk_symbol_name(type_info)}}";
+{% endif %}
 
 {% endif %}
 {% if type_info.is_direct and record.include_copy_ctor %}
+{% if record.is_abstract %}
+{{type_info.kl.name}}(
+    {{record.get_copy_param(type_info).render_kl() | indent(4)}}
+    ) {
+    throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
+}
+{% else %}
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.get_copy_ctor_edk_symbol_name(type_info)}}";
+{% endif %}
 
 {% endif %}
+{% if not record.is_abstract %}
 {% for ctor in record.ctors %}
 {% for comment in ctor.comments %}
 {{comment}}
@@ -66,7 +81,8 @@
 
 {% endif %}
 {% endfor %}
-{% if type_info.kl.name.compound != 'StdString' and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
+{% endif %}
+{% if not record.is_abstract and type_info.kl.name.compound != 'StdString' and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
 {% if record.has_char_const_ptr_ctor() %}
 {% if type_info.is_direct %}
 {{type_info.kl.name}}(String string) {
@@ -95,7 +111,7 @@
 {% endif %}
 {% endif %}
 {% endif %}
-{% if type_info.is_direct and record.include_dtor %}
+{% if not record.is_abstract and type_info.is_direct and record.include_dtor %}
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
 
 {% endif %}
@@ -210,6 +226,7 @@
 // {{type_info}}
 // Assignment Operators
 ////////////////////////////////////////////////////////////////////////
+{% if not record.is_abstract %}
 {% for ass_op in record.ass_ops %}
 {% for comment in ass_op.comments %}
 {{comment}}
@@ -219,10 +236,19 @@
     ) = "{{ass_op.get_edk_symbol_name(type_info)}}";
 
 {% endfor %}
+{% endif %}
 {% if record.include_simple_ass_op %}
+{% if record.is_abstract %}
+{{type_info.kl.name}}.=(
+    {{record.get_copy_param(type_info).render_kl() | indent(4)}}
+    ) {
+    throw "Cannot assign to instance of abstract type {{type_info.kl.name}}()";
+}
+{% else %}
 {{type_info.kl.name}}.=(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.get_simple_ass_op_edk_symbol_name(type_info)}}";
+{% endif %}
 
 {% endif %}
 {% endif %}

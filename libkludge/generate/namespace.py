@@ -270,6 +270,7 @@ class Namespace:
     variant='owned',
     record=None,
     forbid_copy=False,
+    is_abstract=False,
     ):
     if not cpp_global_expr:
       assert isinstance(cpp_local_expr, Named)
@@ -287,6 +288,7 @@ class Namespace:
         child_namespace_component=cpp_global_expr.components[-1],
         child_namespace_kl_name=kl_local_name_for_derivatives,
         extends=(extends_type_info and extends_type_info.record),
+        is_abstract=is_abstract,
         )
     selector = self.type_mgr.named_selectors[variant]
     selector.register(
@@ -311,6 +313,7 @@ class Namespace:
     kl_type_name=None,
     extends=None,
     forbid_copy=False,
+    is_abstract=False,
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
@@ -325,6 +328,7 @@ class Namespace:
       kl_local_name=kl_local_name,
       extends_type_info=extends_type_info,
       forbid_copy=forbid_copy,
+      is_abstract=is_abstract,
       variant='owned',
       )
 
@@ -334,6 +338,7 @@ class Namespace:
     kl_type_name=None,
     extends=None,
     forbid_copy=False,
+    is_abstract=False,
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
@@ -348,6 +353,7 @@ class Namespace:
       kl_local_name=kl_local_name,
       extends_type_info=extends_type_info,
       forbid_copy=forbid_copy,
+      is_abstract=is_abstract,
       variant='in_place',
       )
 
@@ -358,6 +364,7 @@ class Namespace:
     kl_type_name=None,
     extends=None,
     forbid_copy=False,
+    is_abstract=False,
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
@@ -377,6 +384,7 @@ class Namespace:
       kl_local_name_for_derivatives=kl_local_name,
       extends_type_info=owned_extends_type_info,
       forbid_copy=True,
+      is_abstract=is_abstract,
       variant='owned',
       )
     owned_cpp_global_expr = self.type_mgr.get_dqti(owned_cpp_local_expr).type_info.lib.expr

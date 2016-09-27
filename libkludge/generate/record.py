@@ -555,7 +555,7 @@ class Record(Decl):
           result = call_op
       return result
     except Exception as e:
-      self.ext.warning("Ignoring call op: %s" % (name, e))
+      self.ext.warning("Ignoring call operator: %s" % (e))
       return EmptyCommentContainer()
   
   kl_method_name = {
@@ -569,16 +569,20 @@ class Record(Decl):
     returns,
     kl_method_name=None,
     ):
-    if not kl_method_name:
-      kl_method_name = self.kl_method_name[op]
-    uni_op = UniOp(
-      self,
-      op,
-      kl_method_name,
-      returns,
-      )
-    self.uni_ops.append(uni_op)
-    return uni_op
+    try:
+      if not kl_method_name:
+        kl_method_name = self.kl_method_name[op]
+      uni_op = UniOp(
+        self,
+        op,
+        kl_method_name,
+        returns,
+        )
+      self.uni_ops.append(uni_op)
+      return uni_op
+    except Exception as e:
+      self.warning("Ignoring unary operator %s: %s" % (op, e))
+      return EmptyCommentContainer()
   
   def add_bin_op(
     self,
@@ -600,7 +604,7 @@ class Record(Decl):
       self.bin_ops.append(bin_op)
       return bin_op
     except Exception as e:
-      self.warning("Ignoring bin op '%s': %s" % (op, e))
+      self.warning("Ignoring binary operator %s: %s" % (op, e))
       return EmptyCommentContainer()
 
   def add_ass_op(
@@ -608,24 +612,32 @@ class Record(Decl):
     op,
     params,
     ):
-    assert isinstance(op, basestring)
-    assert len(params) == 1
-    params = massage_params(params)
-    ass_op = AssOp(
-      self,
-      op=op,
-      params=params,
-      )
-    self.ass_ops.append(ass_op)
-    return ass_op
+    try:
+      assert isinstance(op, basestring)
+      assert len(params) == 1
+      params = massage_params(params)
+      ass_op = AssOp(
+        self,
+        op=op,
+        params=params,
+        )
+      self.ass_ops.append(ass_op)
+      return ass_op
+    except Exception as e:
+      self.warning("Ignoring assignment operator %s: %s" % (op, e))
+      return EmptyCommentContainer()
       
   def add_cast(
     self,
     dst,
     ):
-    cast = Cast(self, dst)
-    self.casts.append(cast)
-    return cast
+    try:
+      cast = Cast(self, dst)
+      self.casts.append(cast)
+      return cast
+    except Exception as e:
+      self.warning("Ignoring cast to %s: %s" % (dst, e))
+      return EmptyCommentContainer()
 
   def add_kl(
     self,

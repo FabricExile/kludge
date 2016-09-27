@@ -7,6 +7,7 @@ import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 from libkludge import util
 from libkludge.visibility import Visibility
+from libkludge import cpp_type_expr_parser
 
 class Parser(object):
 
@@ -29,6 +30,8 @@ class Parser(object):
       for cppdefine in self.opts.cppdefines:
           self.clang_opts.extend(["-D", self.expand_envvars(cppdefine)])
     self.info("Using Clang options: %s" % " ".join(self.clang_opts))
+
+    self.cpp_type_expr_parser = cpp_type_expr_parser.Parser()
 
   def error(self, string):
     util.error(self.opts, string)
@@ -191,15 +194,32 @@ class Parser(object):
       elif child_cursor.kind == CursorKind.CXX_ACCESS_SPEC_DECL:
         pass
       elif child_cursor.kind == CursorKind.FIELD_DECL:
-        members.append(
-          "# %s\n%s.add_member('%s', '%s', visibility=%s)" % (
+        try:
+          cpp_type_expr = self.cpp_type_expr_parser.parse(child_cursor.type.spelling)
+          is_const = cpp_type_expr.is_const \
+            or ( isinstance(cpp_type_expr, cpp_type_expr_parser.ReferenceTo) \
+              and cpp_type_expr.pointee.is_const )
+          if is_const:
+            setter_clause = ", setter=None"
+          else:
+            setter_clause = ""
+          members.append(
+            "# %s\n%s.add_member('%s', '%s', visibility=%s%s)" % (
+              self.location_desc(child_cursor.location),
+              child_obj,
+              child_cursor.spelling,
+              child_cursor.type.spelling,
+              self.access_specifier_descs[child_cursor.access_specifier],
+              setter_clause,
+              )
+            )
+        except Exception as e:
+          members.append("# Kludge WARNING: %s: ignoring member '%s' of type '%s': %s" % (
             self.location_desc(child_cursor.location),
-            child_obj,
             child_cursor.spelling,
             child_cursor.type.spelling,
-            self.access_specifier_descs[child_cursor.access_specifier],
-            )
-          )
+            e,
+            ))
       elif child_cursor.kind == CursorKind.CONSTRUCTOR:
         if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
           methods.append(

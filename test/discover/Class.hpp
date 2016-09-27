@@ -125,6 +125,8 @@ std::vector<Class> ReturnClassVec() {
 struct StructWithIndirectTypeThatCanInPlace {
   StructWithIndirectTypeThatCanInPlace( float const &x )
     : floatValue( x ) {}
+  StructWithIndirectTypeThatCanInPlace operator=(StructWithIndirectTypeThatCanInPlace const &that)
+    { return *this; }
   float const &floatValue;
 };
 

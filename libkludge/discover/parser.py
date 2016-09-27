@@ -138,7 +138,6 @@ class Parser(object):
       comment = cursor.raw_comment
       comment = comment.replace('\\', '\\\\')
       comment = comment.replace('"', '\\"')
-      comment = comment.decode('unicode_escape').encode('ascii', 'ignore')
       return '\\\n  .add_comment("""%s""")' % comment
     else:
       return ''

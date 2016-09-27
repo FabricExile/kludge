@@ -92,22 +92,38 @@ def test_discover(basename):
   if not os.path.isdir(test_tmp_dir):
     os.makedirs(test_tmp_dir)
 
+  discover_args = [
+    './kludge', 'discover',
+    '-I', test_generate_dir,
+    '-o', test_tmp_dir,
+    basename,
+    os.path.join(test_discover_dir, basename + '.hpp'),
+    ]
+  print 'RUN: ' + ' '.join(discover_args)
+  assert subprocess.call(discover_args) == 0
+
+  generate_args = [
+    '../../../../kludge', 'generate',
+    # '--debug-type-templates',
+    basename,
+    basename + '.kludge.py',
+    ]
+  print 'RUN: ' + ' '.join(generate_args)
   assert subprocess.call(
-    [
-      './kludge', 'discover',
-      '-I', test_generate_dir,
-      '-o', test_tmp_dir,
-      basename,
-      os.path.join(test_discover_dir, basename + '.hpp'),
-      ],
+    generate_args,
+    cwd = test_tmp_dir,
     ) == 0
 
+  scons_env = os.environ.copy()
+  scons_env['CPPPATH'] = os.path.abspath('.')
+  scons_args = [
+    'scons',
+    '-f', basename + '.SConstruct',
+    'VERBOSE=1',
+    ]
+  print 'RUN: ' + ' '.join(scons_args)
   assert subprocess.call(
-    [
-      '../../../../kludge', 'generate',
-      # '--debug-type-templates',
-      basename,
-      basename + '.kludge.py',
-      ],
+    scons_args,
     cwd = test_tmp_dir,
+    env = scons_env,
     ) == 0

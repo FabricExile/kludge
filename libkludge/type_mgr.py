@@ -43,18 +43,18 @@ class TypeMgr:
     # self.add_tail_selector(OtherSelector(ext))
 
   def add_selector(self, codec):
-    print "Registered conversion selector: %s" % codec.get_desc()
+    # print "Registered conversion selector: %s" % codec.get_desc()
     self._selectors.append(codec)
 
   def add_tail_selector(self, codec):
-    print "Registered tail selector: %s" % codec.get_desc()
+    # print "Registered tail selector: %s" % codec.get_desc()
     self._tail_selectors.append(codec)
 
   def has_alias(self, new_cpp_type_expr):
     return self._alias_new_cpp_type_name_to_old_cpp_type_expr.has_key(str(new_cpp_type_expr))
 
   def add_alias(self, new_cpp_type_expr, old_cpp_type_expr):
-    print "type_mgr: Adding alias: %s -> %s" % (str(new_cpp_type_expr), str(old_cpp_type_expr))
+    # print "type_mgr: Adding alias: %s -> %s" % (str(new_cpp_type_expr), str(old_cpp_type_expr))
     self._alias_new_cpp_type_name_to_old_cpp_type_expr[str(new_cpp_type_expr)] = old_cpp_type_expr
 
   def maybe_get_dqti(self, cpp_type_expr):
@@ -65,7 +65,7 @@ class TypeMgr:
       if not alias_cpp_type_expr:
         break
       alias_cpp_type_name = str(alias_cpp_type_expr)
-      print "type_mgr: Redirected %s -> %s" % (cpp_type_name, alias_cpp_type_name)
+      # print "type_mgr: Redirected %s -> %s" % (cpp_type_name, alias_cpp_type_name)
       cpp_type_expr = alias_cpp_type_expr
       cpp_type_name = alias_cpp_type_name
 
@@ -82,13 +82,13 @@ class TypeMgr:
         dqti = selector.maybe_create_dqti(self, cpp_type_expr)
         if dqti:
           assert isinstance(dqti, DirQualTypeInfo)
-          print "type_mgr: Adding conversion: %s -> %s" % (cpp_type_name, dqti)
+          # print "type_mgr: Adding conversion: %s -> %s" % (cpp_type_name, dqti)
           self._cpp_type_name_to_dqti[cpp_type_name] = dqti
           return dqti
       for tail_selector in self._tail_selectors:
         dqti = tail_selector.maybe_create_dqti(self, cpp_type_expr)
         if dqti:
-          print "type_mgr: Defining %s" % cpp_type_name
+          # print "type_mgr: Defining %s" % cpp_type_name
           assert not isinstance(dqti, DirQualTypeInfo)
           keep_looking = True
           break

@@ -7,6 +7,7 @@
 class MyAbstractClass
 {
 public:
+  MyAbstractClass() {}
   virtual const char *GetData(int index) const = 0;
   virtual const char *GetData() const
   {

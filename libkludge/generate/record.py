@@ -319,7 +319,15 @@ class Cast(Methodlike):
 
 class Member(object):
 
-  def __init__(self, record, cpp_name, dqti, getter_kl_name, setter_kl_name, visibility):
+  def __init__(
+    self,
+    record,
+    cpp_name,
+    dqti,
+    getter_kl_name,
+    setter_kl_name,
+    visibility,
+    ):
     self.record = record
     self.cpp_name = cpp_name
     self.kl_name = cpp_name
@@ -455,13 +463,28 @@ class Record(Decl):
   def set_default_visibility(self, visibility):
     self.default_visibility = visibility
 
-  def add_member(self, cpp_name, cpp_type_name, getter='', setter='', visibility=None):
+  def add_member(
+    self,
+    cpp_name,
+    cpp_type_name,
+    getter='',
+    setter='',
+    visibility=None,
+    this_access=ThisAccess.mutable,
+    ):
     try:
       if visibility is None:
         visibility = self.default_visibility
       cpp_type_expr = self.resolve_cpp_type_expr(cpp_type_name)
       dqti = self.ext.type_mgr.get_dqti(cpp_type_expr)
-      member = Member(self, cpp_name, dqti, getter, setter, visibility=visibility)
+      member = Member(
+        self,
+        cpp_name,
+        dqti,
+        getter,
+        setter,
+        visibility=visibility,
+        )
       self.members.append(member)
       return self
     except Exception as e:

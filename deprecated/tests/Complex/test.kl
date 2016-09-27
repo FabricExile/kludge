@@ -1,8 +1,0 @@
-require Complex;
-
-operator entry()
-{
-  Complex32 c;
-  report(c);
-}
-

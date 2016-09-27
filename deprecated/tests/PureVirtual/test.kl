@@ -1,6 +1,0 @@
-require PureVirtual;
-
-operator entry() {
-  Normal n;
-  PureVirt v;
-}

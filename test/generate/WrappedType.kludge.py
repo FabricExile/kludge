@@ -29,10 +29,10 @@ c.publicMethod() = hello
 Wrapper::~Wrapper()
 Class::~Class()
 """)
-ty.set_default_access(MemberAccess.public)
+ty.set_default_visibility(Visibility.public)
 ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
-ty.set_default_access(MemberAccess.private)
+ty.set_default_visibility(Visibility.private)
 ty.add_member('pri_intValue', 'int')
 ty.add_const_method('unwrap', 'Class const *')
 ty.add_static_method('PrintValues', None, ['Class const *'])\

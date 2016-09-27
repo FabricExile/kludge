@@ -6,10 +6,10 @@ ext.add_cpp_quoted_include('OwnedType.hpp')
 
 ty = ext.add_owned_type('Class')
 ty.add_comment("""/// Test comment""")
-ty.set_default_access(MemberAccess.public)
+ty.set_default_visibility(Visibility.public)
 ty.add_member('floatValue', 'float')
 ty.add_member('stringValue', 'std::string')
-ty.set_default_access(MemberAccess.private)
+ty.set_default_visibility(Visibility.private)
 ty.add_member('pri_intValue', 'int')
 
 ty.add_ctor()
@@ -144,7 +144,7 @@ Class::~Class()
 dty = ext.add_owned_type('DerivedClass', extends='Class')
 dty.add_ctor(['int'])
 dty.add_const_method('newMethod', 'int')
-dty.add_member('newPublicMember', 'double', access=MemberAccess.public)
+dty.add_member('newPublicMember', 'double', visibility=Visibility.public)
 dty.add_test("""
 DerivedClass dc(56);
 report("dc = " + dc);

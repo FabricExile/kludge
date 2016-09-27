@@ -1,6 +1,0 @@
-actual.*
-*.fpm.json
-*.dylib
-*.so
-*.dll
-SConstruct

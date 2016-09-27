@@ -6,7 +6,7 @@ import os, sys, optparse, re, traceback, StringIO, tempfile, subprocess
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 from libkludge import util
-from libkludge.member_access import MemberAccess
+from libkludge.visibility import Visibility
 
 class Parser(object):
 
@@ -146,9 +146,9 @@ class Parser(object):
       return ''
 
   access_specifier_descs = {
-    AccessSpecifier.PRIVATE: 'MemberAccess.private',
-    AccessSpecifier.PROTECTED: 'MemberAccess.protected',
-    AccessSpecifier.PUBLIC: 'MemberAccess.public',
+    AccessSpecifier.PRIVATE: 'Visibility.private',
+    AccessSpecifier.PROTECTED: 'Visibility.protected',
+    AccessSpecifier.PUBLIC: 'Visibility.public',
     }
 
   def parse_method_access(
@@ -192,7 +192,7 @@ class Parser(object):
         pass
       elif child_cursor.kind == CursorKind.FIELD_DECL:
         members.append(
-          "# %s\n%s.add_member('%s', '%s', access=%s)" % (
+          "# %s\n%s.add_member('%s', '%s', visibility=%s)" % (
             self.location_desc(child_cursor.location),
             child_obj,
             child_cursor.spelling,

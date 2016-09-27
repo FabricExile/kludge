@@ -1,5 +1,0 @@
-require VoidPtr;
-
-operator entry() {
-  report("ConstVoidPtrResult() = " + ConstVoidPtrResult());
-}

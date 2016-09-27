@@ -1,8 +1,0 @@
-{######################################################################}
-{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
-{######################################################################}
-
-{% extends "ast/builtin/decl.template.kl" %}
-{% block body %}
-alias {{decl.old_type_info.kl.name.base}} {{decl.new_kl_type_name}}{{decl.old_type_info.kl.name.suffix}};
-{% endblock body %}

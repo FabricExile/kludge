@@ -6,7 +6,7 @@ import os, jinja2, inspect
 from libkludge.namespace_mgr import NamespaceMgr
 from libkludge.type_mgr import TypeMgr
 from namespace import Namespace
-from libkludge.member_access import MemberAccess
+from libkludge.visibility import Visibility
 from this_access import ThisAccess
 from param import Param
 from test import Test
@@ -92,7 +92,7 @@ class Ext:
       'ext': self,
       'Param': Param,
       'ThisAccess': ThisAccess,
-      'MemberAccess': MemberAccess,
+      'Visibility': Visibility,
       }
     def include(filename):
       with open(filename, "r") as file:

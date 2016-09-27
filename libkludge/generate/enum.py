@@ -4,7 +4,6 @@
 
 from decl import Decl
 from test import Test
-from libkludge.member_access import MemberAccess
 from this_access import ThisAccess
 from libkludge.cpp_type_expr_parser import Void, Named, DirQual, directions, qualifiers
 from libkludge.value_name import this_cpp_value_name

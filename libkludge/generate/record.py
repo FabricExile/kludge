@@ -5,7 +5,7 @@
 import inspect, hashlib, abc
 from decl import Decl
 from test import Test
-from libkludge.member_access import MemberAccess
+from libkludge.visibility import Visibility
 from this_access import ThisAccess
 from massage import *
 from libkludge.cpp_type_expr_parser import *
@@ -319,7 +319,7 @@ class Cast(Methodlike):
 
 class Member(object):
 
-  def __init__(self, record, cpp_name, dqti, getter_kl_name, setter_kl_name, access):
+  def __init__(self, record, cpp_name, dqti, getter_kl_name, setter_kl_name, visibility):
     self.record = record
     self.cpp_name = cpp_name
     self.kl_name = cpp_name
@@ -332,7 +332,7 @@ class Member(object):
     self.setter_kl_name = setter_kl_name
     if not self.setter_kl_name is None and self.setter_kl_name == '':
       self.setter_kl_name = 'SET_' + cpp_name
-    self.access = access
+    self.visibility = visibility
 
   def has_getter(self):
     return self.getter_kl_name is not None
@@ -341,7 +341,7 @@ class Member(object):
     return self.setter_kl_name is not None
 
   def is_public(self):
-    return self.access == MemberAccess.public
+    return self.visibility == Visibility.public
 
   def get_getter_edk_symbol_name(self, ti):
     return self.record.gen_edk_symbol_name('getter_' + self.cpp_name, ti)
@@ -408,7 +408,7 @@ class Record(Decl):
     self.this_value_name = this_cpp_value_name
     assert extends is None or isinstance(extends, Record)
     self.extends = extends
-    self.default_access = MemberAccess.public
+    self.default_visibility = Visibility.public
     self.include_empty_ctor = include_empty_ctor
     self.include_copy_ctor = include_copy_ctor
     self.include_simple_ass_op = include_simple_ass_op
@@ -452,16 +452,16 @@ class Record(Decl):
     self.comments.append(clean_comment(comment))
     return self
 
-  def set_default_access(self, access):
-    self.default_access = access
+  def set_default_visibility(self, visibility):
+    self.default_visibility = visibility
 
-  def add_member(self, cpp_name, cpp_type_name, getter='', setter='', access=None):
+  def add_member(self, cpp_name, cpp_type_name, getter='', setter='', visibility=None):
     try:
-      if access is None:
-        access = self.default_access
+      if visibility is None:
+        visibility = self.default_visibility
       cpp_type_expr = self.resolve_cpp_type_expr(cpp_type_name)
       dqti = self.ext.type_mgr.get_dqti(cpp_type_expr)
-      member = Member(self, cpp_name, dqti, getter, setter, access=access)
+      member = Member(self, cpp_name, dqti, getter, setter, visibility=visibility)
       self.members.append(member)
       return self
     except Exception as e:

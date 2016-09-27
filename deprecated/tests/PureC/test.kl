@@ -1,5 +1,0 @@
-require PureC;
-
-operator entry() {
-  report("pure_c_func() = " + pure_c_func());
-}

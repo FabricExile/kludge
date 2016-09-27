@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import os, sys, optparse, re, traceback, StringIO, tempfile
+import os, sys, optparse, re, traceback, StringIO, tempfile, subprocess
 import clang
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 from libkludge import util
@@ -11,6 +11,9 @@ from libkludge.member_access import MemberAccess
 class Parser(object):
 
   def __init__(self, name, opts):
+    clang_output = subprocess.check_output([self.expand_envvars('${KLUDGE_LLVM_ROOT}/bin/clang'), '--version'])
+    clang_version = re.search('version ([0-9]+\.[0-9]+\.[0-9]) ', clang_output).group(1)
+    
     self.name = name
     self.opts = opts
     self.opts.dirs_to_ignore = [self.expand_envvars(dir) for dir in self.opts.dirs_to_ignore]
@@ -21,7 +24,7 @@ class Parser(object):
       for cppdir in self.opts.cpppath:
           self.clang_opts.extend(["-I", self.expand_envvars(cppdir)])
     self.clang_opts.extend(["-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/include/c++/v1')])
-    self.clang_opts.extend(["-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/lib/clang/3.9.0/include')])
+    self.clang_opts.extend(["-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/lib/clang/%s/include' % clang_version)])
     if self.opts.cppdefines:
       for cppdefine in self.opts.cppdefines:
           self.clang_opts.extend(["-D", self.expand_envvars(cppdefine)])

@@ -2,6 +2,9 @@
 
 import os, sys, libkludge
 
+reload(sys)  # Reload does the trick!
+sys.setdefaultencoding('UTF8')
+
 # if not os.environ.get('KLUDGE_LLVM_ROOT'):
 #   print "Missing KLUDGE_LLVM_ROOT environment variabling; exiting."
 #   sys.exit(1)

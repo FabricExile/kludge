@@ -312,13 +312,19 @@ class Parser(object):
                 self.parse_comment(child_ast_logger, child_cursor),
                 )
               )
+      elif child_cursor.kind == CursorKind.UNEXPOSED_DECL:
+        grandchild_ast_logger = child_ast_logger.indent()
+        for grandchild_cursor in child_cursor.get_children():
+          grandchild_ast_logger.log_cursor(grandchild_cursor)
+        methods.append("# Kludge WARNING: %s: CursorKind.UNEXPOSED_DECL may mean a lost method or operator" % (self.location_desc(child_cursor.location)))
       elif child_cursor.kind == CursorKind.DESTRUCTOR:
         pass
       elif child_cursor.kind == CursorKind.CLASS_DECL \
         or child_cursor.kind == CursorKind.STRUCT_DECL \
         or child_cursor.kind == CursorKind.ENUM_DECL \
         or child_cursor.kind == CursorKind.TYPEDEF_DECL:
-        child_record_cursors.append(child_cursor)
+        if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
+          child_record_cursors.append(child_cursor)
       else:
         methods.append("# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
 

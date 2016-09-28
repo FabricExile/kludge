@@ -188,6 +188,7 @@ class Parser(object):
     obj,
     decls,
     defns,
+    should_include_cursor,
     ):
     name = cursor.spelling
     child_obj = '%s_%s' % (obj, name)
@@ -381,14 +382,14 @@ class Parser(object):
         decls.write(", is_abstract=True")
       decls.write(")%s\n" % self.parse_comment(ast_logger, cursor))
       for child_record_cursor in child_record_cursors:
-        self.parse_cursor(child_ast_logger, child_record_cursor, child_obj, decls, defns)
+        self.parse_cursor(child_ast_logger, child_record_cursor, child_obj, decls, defns, should_include_cursor)
       for member in members:
         print >>defns, member
       for method in methods:
         print >>defns, method
       print >>defns, ""
 
-  def parse_function_decl(self, ast_logger, cursor, obj, decls, defns):
+  def parse_function_decl(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
     defns.write("# %s\n%s.add_func('%s', '%s', %s)%s\n\n" % (
       self.location_desc(cursor.location),
       obj,
@@ -398,7 +399,7 @@ class Parser(object):
       self.parse_comment(ast_logger, cursor),
       ))
 
-  def parse_enum_decl(self, ast_logger, cursor, obj, decls, defns):
+  def parse_enum_decl(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
     values = []
     child_ast_logger = ast_logger.indent()
     for child_cursor in cursor.get_children():
@@ -416,7 +417,7 @@ class Parser(object):
       self.parse_comment(ast_logger, cursor),
       ))
 
-  def parse_typedef_decl(self, ast_logger, cursor, obj, decls, defns):
+  def parse_typedef_decl(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
     decls.write("# %s\n%s.add_alias('%s', '%s')%s\n" % (
       self.location_desc(cursor.location),
       obj,
@@ -425,7 +426,7 @@ class Parser(object):
       self.parse_comment(ast_logger, cursor),
       ))
 
-  def parse_namespace(self, ast_logger, cursor, obj, decls, defns):
+  def parse_namespace(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
     name = cursor.spelling
     child_obj = "%s_%s" % (obj, name)
     print >>decls, "# %s\n%s = %s.add_namespace('%s')" % (
@@ -436,29 +437,30 @@ class Parser(object):
       )
     child_ast_logger = ast_logger.indent()
     for child_cursor in cursor.get_children():
-      self.parse_cursor(child_ast_logger, child_cursor, child_obj, decls, defns)
+      self.parse_cursor(child_ast_logger, child_cursor, child_obj, decls, defns, should_include_cursor)
 
-  def parse_unexposed_decl(self, ast_logger, cursor, obj, decls, defns):
+  def parse_unexposed_decl(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
     child_ast_logger = ast_logger.indent()
     for child_cursor in cursor.get_children():
-      self.parse_cursor(child_ast_logger, child_cursor, obj, decls, defns)
+      self.parse_cursor(child_ast_logger, child_cursor, obj, decls, defns, should_include_cursor)
 
-  def parse_cursor(self, ast_logger, cursor, obj, decls, defns):
-    if cursor.kind in Parser.ignored_cursor_kinds:
+  def parse_cursor(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
+    if cursor.kind in Parser.ignored_cursor_kinds \
+      or not should_include_cursor(cursor):
       return
     ast_logger.log_cursor(cursor)
     if cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
-      self.parse_record_decl(ast_logger, cursor, obj, decls, defns)
+      self.parse_record_decl(ast_logger, cursor, obj, decls, defns, should_include_cursor)
     elif cursor.kind == CursorKind.ENUM_DECL:
-      self.parse_enum_decl(ast_logger, cursor, obj, decls, defns)
+      self.parse_enum_decl(ast_logger, cursor, obj, decls, defns, should_include_cursor)
     elif cursor.kind == CursorKind.TYPEDEF_DECL:
-      self.parse_typedef_decl(ast_logger, cursor, obj, decls, defns)
+      self.parse_typedef_decl(ast_logger, cursor, obj, decls, defns, should_include_cursor)
     elif cursor.kind == CursorKind.FUNCTION_DECL:
-      self.parse_function_decl(ast_logger, cursor, obj, decls, defns)
+      self.parse_function_decl(ast_logger, cursor, obj, decls, defns, should_include_cursor)
     elif cursor.kind == CursorKind.NAMESPACE:
-      self.parse_namespace(ast_logger, cursor, obj, decls, defns)
+      self.parse_namespace(ast_logger, cursor, obj, decls, defns, should_include_cursor)
     elif cursor.kind == CursorKind.UNEXPOSED_DECL:
-      self.parse_unexposed_decl(ast_logger, cursor, obj, decls, defns)
+      self.parse_unexposed_decl(ast_logger, cursor, obj, decls, defns, should_include_cursor)
     else:
       print >>defns, "# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind)
 
@@ -560,12 +562,14 @@ class Parser(object):
             print >>defns, "#" * 78
             print >>defns
 
+            def should_include_cursor(cursor):
+              if hasattr(cursor.location.file, 'name') \
+                and cursor.location.file.name not in include_abspaths:
+                self.debug("Skipping AST nodes for '%s'" % cursor.location.file.name)
+                return False
+              return True
             for cursor in unit.cursor.get_children():
-                if hasattr(cursor.location.file, 'name') \
-                  and cursor.location.file.name not in include_abspaths:
-                  self.debug("Skipping AST nodes for '%s'" % cursor.location.file.name)
-                  continue
-                self.parse_cursor(ast_logger, cursor, 'ext', decls, defns)
+              self.parse_cursor(ast_logger, cursor, 'ext', decls, defns, should_include_cursor)
         master_filename = os.path.join(self.opts.outdir, basename + '.kludge.py')
         if self.opts.skip_master:
           self.info("Skipping generation of master")

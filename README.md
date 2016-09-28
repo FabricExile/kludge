@@ -8,7 +8,7 @@ Kludge is licensed under a 3-clause BSD license.  See LICENSE.txt for details.
 
 ## Quickstart
 
-1. Download and unpack custom Clang build
+Download and unpack custom Clang build
 
 ```
 cd ~
@@ -16,26 +16,26 @@ wget http://dist.fabric-engine.com/llvm/fabric-llvm-3.9-linux-x86_64-gcc_48.tar.
 tar jxf fabric-llvm-3.9-linux-x86_64-gcc_48.tar.bz2
 ```
 
-1. Install pre-requisite Python modules:
+Install pre-requisite Python modules:
 
 ```
 pip install jinja2 pyparsing pytest pytest-xdist
 ```
 
-1. Set up environment:
+Set up environment:
 
 ```
 export KLUDGE_LLVM_ROOT="~/fabric-llvm-3.9-linux-x86_64-gcc_48"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$KLUDGE_LLVM_ROOT/lib" # if Clang is installed elsewhere
 ```
 
-1. Validate that unit tests are passing:
+Validate that unit tests are passing:
 
 ```
 py.test -n8
 ```
 
-1. View command-line help:
+View command-line help:
 
 ```
 ./kludge --help

@@ -126,7 +126,13 @@ class Parser(object):
           opt_params.append((child_cursor.spelling, child_cursor.type.spelling))
         else:
           params.append((child_cursor.spelling, child_cursor.type.spelling))          
-      elif child_cursor.kind in [CursorKind.TYPE_REF, CursorKind.NAMESPACE_REF, CursorKind.TEMPLATE_REF]:
+      elif child_cursor.kind in [
+        CursorKind.TYPE_REF,
+        CursorKind.NAMESPACE_REF,
+        CursorKind.TEMPLATE_REF,
+        CursorKind.CONST_ATTR,
+        CursorKind.VISIBILITY_ATTR,
+        ]:
         pass
       else:
         self.warning("%s: Unhandled %s" % (self.location_desc(child_cursor.location), child_cursor.kind))
@@ -366,7 +372,6 @@ class Parser(object):
         decls.write(", is_abstract=True")
       decls.write(")%s\n" % self.parse_comment(ast_logger, cursor))
       for child_record_cursor in child_record_cursors:
-        child_ast_logger.log_cursor(child_record_cursor)
         self.parse_cursor(child_ast_logger, child_record_cursor, child_obj, decls, defns)
       for member in members:
         print >>defns, member
@@ -422,13 +427,18 @@ class Parser(object):
       )
     child_ast_logger = ast_logger.indent()
     for child_cursor in cursor.get_children():
-      child_ast_logger.log_cursor(cursor)
       self.parse_cursor(child_ast_logger, child_cursor, child_obj, decls, defns)
+
+  def parse_unexposed_decl(self, ast_logger, cursor, obj, decls, defns):
+    child_ast_logger = ast_logger.indent()
+    for child_cursor in cursor.get_children():
+      self.parse_cursor(child_ast_logger, child_cursor, obj, decls, defns)
 
   def parse_cursor(self, ast_logger, cursor, obj, decls, defns):
     if cursor.kind in Parser.ignored_cursor_kinds:
-      pass
-    elif cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
+      return
+    ast_logger.log_cursor(cursor)
+    if cursor.kind == CursorKind.CLASS_DECL or cursor.kind == CursorKind.STRUCT_DECL:
       self.parse_record_decl(ast_logger, cursor, obj, decls, defns)
     elif cursor.kind == CursorKind.ENUM_DECL:
       self.parse_enum_decl(ast_logger, cursor, obj, decls, defns)
@@ -438,6 +448,8 @@ class Parser(object):
       self.parse_function_decl(ast_logger, cursor, obj, decls, defns)
     elif cursor.kind == CursorKind.NAMESPACE:
       self.parse_namespace(ast_logger, cursor, obj, decls, defns)
+    elif cursor.kind == CursorKind.UNEXPOSED_DECL:
+      self.parse_unexposed_decl(ast_logger, cursor, obj, decls, defns)
     else:
       print >>defns, "# Kludge WARNING: %s: Unhandled %s" % (self.location_desc(cursor.location), cursor.kind)
 
@@ -544,7 +556,6 @@ class Parser(object):
                   and cursor.location.file.name not in include_abspaths:
                   self.debug("Skipping AST nodes for '%s'" % cursor.location.file.name)
                   continue
-                ast_logger.log_cursor(cursor)
                 self.parse_cursor(ast_logger, cursor, 'ext', decls, defns)
         master_filename = os.path.join(self.opts.outdir, basename + '.kludge.py')
         if self.opts.skip_master:

@@ -95,6 +95,7 @@ class ConstPtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/ptr_ref/ptr/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["new_begin"] = "types/builtin/ptr_ref/ptr/repr"
     return tds
 
 class MutablePtrTypeInfo(TypeInfo):
@@ -116,6 +117,7 @@ class MutablePtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/ptr_ref/ptr/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["new_begin"] = "types/builtin/ptr_ref/ptr/repr"
     return tds
 
 type_info_class_map = {

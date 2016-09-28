@@ -11,3 +11,13 @@ inline int const * const * const *GetIntCPtrCPtrCPtr()
   static int const * const *fooCPtrCPtr = &fooCPtr;
   return &fooCPtrCPtr;
 }
+
+
+class Class
+{
+  public:
+
+    Class() {}
+
+    operator char const *() const { return "hello"; }
+};

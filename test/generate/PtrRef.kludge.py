@@ -11,3 +11,12 @@ report(result.cxxDeref().cxxGet().cxxDeref().cxxGet().cxxDeref());
 """, """
 42
 """)
+
+ty = ext.add_owned_type('Class')
+ty.add_cast('char const *', ThisAccess.const)
+ty.add_test("""
+Class class;
+report(CxxCharConstPtr(class));
+""", """
+hello
+""")

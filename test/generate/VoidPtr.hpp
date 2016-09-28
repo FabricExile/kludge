@@ -5,3 +5,13 @@
 #pragma once
 
 inline void *FunctionTakingVoidPtr( void *ptr ) { return ptr; }
+
+class Class
+{
+  public:
+
+    Class() {}
+
+    operator void const *() const { return this; }
+    operator void *() { return this; }
+};

@@ -25,6 +25,8 @@ class ConstVoidPtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none_cast_away_const"
     tds["result"]["*"] = "protocols/result/builtin/direct"
+    tds["repr"]["new_begin"] = "types/builtin/void_ptr/repr"
+    tds["repr"]["new_end"] = "types/builtin/void_ptr/repr"
     return tds
 
 class MutableVoidPtrTypeInfo(TypeInfo):
@@ -42,6 +44,8 @@ class MutableVoidPtrTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["result"]["*"] = "protocols/result/builtin/direct"
+    tds["repr"]["new_begin"] = "types/builtin/void_ptr/repr"
+    tds["repr"]["new_end"] = "types/builtin/void_ptr/repr"
     return tds
 
 class VoidPtrSelector(Selector):

@@ -68,6 +68,9 @@ public:
     return "stringValue: " + stringValue;
   }
 
+  operator int() const { return getIntValue(); }
+  operator int() { return getIntValue(); }
+
   float getMulFloatValue( float x ) const { return x * floatValue; }
 
   /// Method comment

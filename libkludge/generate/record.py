@@ -283,6 +283,7 @@ class Cast(Methodlike):
     self,
     record,
     dst_cpp_type_name,
+    this_access=ThisAccess.const
     ):
     Methodlike.__init__(self, record)
     self.resolve_cpp_type_expr = record.resolve_cpp_type_expr
@@ -294,13 +295,14 @@ class Cast(Methodlike):
       this_dqti.type_info,
       is_mutable=True,
       )
+    self.this_access = this_access
 
   @property
   def ext(self):
     return self.record.ext
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('cast', type_info, ThisAccess.mutable, self.get_params(type_info))
+    return self.record.gen_edk_symbol_name('cast', self.this.type_info, self.this_access, self.get_params(type_info))
 
   def get_test_name(self):
     return self.record.kl_global_name + '__cast'
@@ -655,9 +657,10 @@ class Record(Decl):
   def add_cast(
     self,
     dst,
+    this_access=ThisAccess.const,
     ):
     try:
-      cast = Cast(self, dst)
+      cast = Cast(self, dst, this_access)
       self.casts.append(cast)
       return cast
     except Exception as e:

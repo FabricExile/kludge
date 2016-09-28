@@ -249,10 +249,11 @@ class Parser(object):
       elif child_cursor.kind == CursorKind.CONVERSION_FUNCTION:
         if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
           methods.append(
-            "# %s\n%s.add_cast('%s')%s" % (
+            "# %s\n%s.add_cast('%s', %s)%s" % (
               self.location_desc(child_cursor.location),
               child_obj,
               child_cursor.result_type.spelling,
+              self.parse_method_access(child_ast_logger, child_cursor),
               self.parse_comment(child_ast_logger, child_cursor),
               )
             )

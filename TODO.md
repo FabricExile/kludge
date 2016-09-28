@@ -1,0 +1,1 @@
+- Allow discover of headers in the current directory

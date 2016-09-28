@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(kludge_llvm_root, 'lib', 'python'))
 
 import optparse, re, traceback, StringIO, tempfile, subprocess
 import clang
-from clang.cindex import AccessSpecifier, CursorKind, TypeKind
+from clang.cindex import AccessSpecifier, CursorKind, TypeKind, TokenKind
 from libkludge import util
 from libkludge.visibility import Visibility
 from libkludge import cpp_type_expr_parser
@@ -122,16 +122,12 @@ class Parser(object):
     for child_cursor in cursor.get_children():
       child_ast_logger.log_cursor(child_cursor)
       if child_cursor.kind == CursorKind.PARM_DECL:
-        has_grandchild = False
-        grandchild_ast_logger = child_ast_logger.indent()
-        for grandchild_cursor in child_cursor.get_children():
-          grandchild_ast_logger.log_cursor(grandchild_cursor)
-          if grandchild_cursor.kind in [CursorKind.TYPE_REF, CursorKind.NAMESPACE_REF, CursorKind.TEMPLATE_REF]:
-            continue
-          else:
-            has_grandchild = True
+        is_optional = False
+        for token in child_cursor.get_tokens():
+          if token.kind == TokenKind.PUNCTUATION and token.spelling == '=':
+            is_optional = True
             break
-        if has_grandchild:
+        if is_optional:
           opt_params.append((child_cursor.spelling, child_cursor.type.spelling))
         else:
           params.append((child_cursor.spelling, child_cursor.type.spelling))          

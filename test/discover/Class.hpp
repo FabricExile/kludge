@@ -94,6 +94,9 @@ public:
   int const &operator*() const
     { return pri_intValue; }
   
+  void methodTakingFixedArray( int foo[3] ) {}
+  void methodTakingOptionalInt( int foo = 3 ) {}
+
 protected:
 
   std::string const &protectedMethod() { return stringValue; }

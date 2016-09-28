@@ -16,7 +16,7 @@ class TypeMgr:
     self._selectors = []
     self._tail_selectors = []
 
-    self._alias_new_cpp_type_name_to_old_cpp_type_expr = {}
+    self._alias_new_cpp_type_expr_to_old_cpp_type_expr = {}
     self._cpp_type_name_to_dqti = {}
 
     self.named_selectors = {
@@ -51,23 +51,20 @@ class TypeMgr:
     self._tail_selectors.append(codec)
 
   def has_alias(self, new_cpp_type_expr):
-    return self._alias_new_cpp_type_name_to_old_cpp_type_expr.has_key(str(new_cpp_type_expr))
+    return self._alias_new_cpp_type_expr_to_old_cpp_type_expr.has_key(new_cpp_type_expr)
 
   def add_alias(self, new_cpp_type_expr, old_cpp_type_expr):
     # print "type_mgr: Adding alias: %s -> %s" % (str(new_cpp_type_expr), str(old_cpp_type_expr))
-    self._alias_new_cpp_type_name_to_old_cpp_type_expr[str(new_cpp_type_expr)] = old_cpp_type_expr
+    self._alias_new_cpp_type_expr_to_old_cpp_type_expr[new_cpp_type_expr] = old_cpp_type_expr
 
   def maybe_get_dqti(self, cpp_type_expr):
-    cpp_type_name = str(cpp_type_expr)
-
     while True:
-      alias_cpp_type_expr = self._alias_new_cpp_type_name_to_old_cpp_type_expr.get(cpp_type_name)
-      if not alias_cpp_type_expr:
+      alias_cpp_type_expr = self._alias_new_cpp_type_expr_to_old_cpp_type_expr.get(cpp_type_expr)
+      if not alias_cpp_type_expr or alias_cpp_type_expr == cpp_type_expr:
         break
-      alias_cpp_type_name = str(alias_cpp_type_expr)
-      # print "type_mgr: Redirected %s -> %s" % (cpp_type_name, alias_cpp_type_name)
       cpp_type_expr = alias_cpp_type_expr
-      cpp_type_name = alias_cpp_type_name
+
+    cpp_type_name = str(cpp_type_expr)
 
     # print "type_mgr: Checking cache for %s" % cpp_type_name
     dqti = self._cpp_type_name_to_dqti.get(cpp_type_name)

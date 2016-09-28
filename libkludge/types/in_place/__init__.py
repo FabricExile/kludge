@@ -140,6 +140,8 @@ class InPlaceSelector(Selector):
     uint64_spec = InPlaceSpec("UInt64", SimpleNamed("uint64_t"), None, None, True)
     float32_spec = InPlaceSpec("Float32", Float(), None, None, True)
     float64_spec = InPlaceSpec("Float64", Double(), None, None, True)
+    long_spec = InPlaceSpec("SInt64", Long(), None, None, True)
+    ulong_spec = InPlaceSpec("UInt64", Unsigned(Long()), None, None, True)
 
     self.cpp_type_expr_to_spec = {
       Bool(): boolean_spec,
@@ -166,8 +168,8 @@ class InPlaceSelector(Selector):
       #######################################################################
       # Warning: Linux + OS X ONLY
       # On Windows, these are 64-bit.  Not sure what to do about this.
-      Long(): sint32_spec,           
-      Unsigned(Long()): uint32_spec,
+      Long(): long_spec,           
+      Unsigned(Long()): ulong_spec,
       #######################################################################
       }
 

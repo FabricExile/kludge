@@ -163,6 +163,7 @@ class InPlaceSelector(Selector):
       SimpleNamed("uint64_t"): uint64_spec,
       SimpleNamed("size_t"): uint64_spec,
       SimpleNamed("ptrdiff_t"): uint64_spec,
+      SimpleNamed("intptr_t"): uint64_spec,
       Float(): float32_spec,
       Double(): float64_spec,
       #######################################################################

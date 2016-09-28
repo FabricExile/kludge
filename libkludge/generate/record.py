@@ -14,7 +14,7 @@ from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
 from libkludge.dir_qual_type_info import DirQualTypeInfo
-from libkludge.util import clean_comment, EmptyCommentContainer
+from libkludge.util import clean_comment, EmptyCommentContainer, clean_method_name
 
 class Methodlike(object):
 
@@ -83,7 +83,7 @@ class Method(Methodlike):
     self.cpp_name = cpp_name
     if not kl_name:
       kl_name = cpp_name
-    self.kl_name = kl_name
+    self.kl_name = clean_method_name(kl_name)
     self.result = ResultCodec(record.resolve_dqti(returns))
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
     self.this_access = this_access

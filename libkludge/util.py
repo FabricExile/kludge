@@ -85,6 +85,20 @@ def is_kl_keyword(name):
     "while",
     ]
 
+def is_builtin_method_name(method_name):
+    return method_name in [
+        'data',
+        'dataSize',
+        'clone',
+        'cloneMembersTo',
+        ]
+
+def clean_method_name(method_name):
+    if is_kl_keyword(method_name) \
+        or is_builtin_method_name(method_name):
+            return 'cxxCall_' + method_name
+    return method_name
+
 def clean_comment(comment):
     comment = comment.strip()
     if comment.startswith('/*'):

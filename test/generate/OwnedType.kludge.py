@@ -36,11 +36,18 @@ c.publicMethod() = hello
 Class::~Class()
 """)
 
-ty.add_method(
-  'PrintValues',
-  params = ['Class const &'],
-  this_access = ThisAccess.static,
-  ).add_test("""
+ty.add_const_method('data', 'int')\
+  .add_test("""
+Class c(5.1, 'baz', 3);
+report(c.cxxCall_data());
+""", """
+Class::Class(5.1, baz, 3)
+432
+Class::~Class()
+""")
+
+ty.add_static_method('PrintValues', None, ['Class const &'])\
+  .add_test("""
 Class c(1.32, "hoo", 23);
 Class_PrintValues(c);
 """, """

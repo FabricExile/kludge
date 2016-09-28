@@ -118,6 +118,8 @@ public:
     return *this;
   }
 
+  int data() const { return 432; }
+
 protected:
 
   std::string const &protectedMethod() { return stringValue; }

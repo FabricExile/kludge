@@ -20,3 +20,4 @@ report(CxxCharConstPtr(class));
 """, """
 hello
 """)
+ty.add_method('func', None, ['void **'])

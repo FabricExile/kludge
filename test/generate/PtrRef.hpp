@@ -20,4 +20,6 @@ class Class
     Class() {}
 
     operator char const *() const { return "hello"; }
+
+    void func( void ** ) const {}
 };

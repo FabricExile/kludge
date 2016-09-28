@@ -29,7 +29,7 @@
   this.ptr = array.data().offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}());
 }
 
-{% if decl.type_info.direct.is_simple %}
+{% if decl.type_info.direct.is_simple or decl.type_info.direct.kl.name.compound == 'Data' %}
 struct Make_{{type_info.kl.name}} permits {{type_info.kl.name}} {
   private Data ptr;
   private {{decl.type_info.direct.kl.name}} value;

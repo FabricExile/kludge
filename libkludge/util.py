@@ -23,6 +23,8 @@ def debug(opts, string):
 class EmptyCommentContainer(object):
   def add_comment(self, comment):
     pass
+  def add_test(kl, out, test_name=''):
+    pass
 
 def is_kl_keyword(name):
   return name in [
@@ -98,6 +100,11 @@ def clean_method_name(method_name):
         or is_builtin_method_name(method_name):
             return 'cxxCall_' + method_name
     return method_name
+
+def clean_param_name(param_name):
+    if is_kl_keyword(param_name):
+        return param_name + '_'
+    return param_name
 
 def clean_comment(comment):
     comment = comment.strip()

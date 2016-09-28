@@ -24,6 +24,10 @@ class ConvCodec:
         )
   
   @property
+  def base_type_info(self):
+    return self.type_info.base_type_info
+  
+  @property
   def reference_prefix(self):
     if self.is_mutable_indirect:
       return "&"

@@ -20,6 +20,10 @@ class ResultCodec:
     return self.conv.type_info
   
   @property
+  def base_type_info(self):
+    return self.conv.base_type_info
+  
+  @property
   def reference_prefix(self):
     return self.conv.reference_prefix
   

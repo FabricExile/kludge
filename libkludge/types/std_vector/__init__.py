@@ -28,6 +28,9 @@ class StdVectorSelector(Selector):
       element_type_info = type_mgr.get_dqti(undq_cpp_type_expr.components[1].params[0]).type_info
       element_cpp_type_name = element_type_info.lib.name.compound
       element_kl_type_name = element_type_info.kl.name.compound
+      element_type_info_for_derivatives = element_type_info.for_derivatives()
+      element_cpp_type_name_for_derivatives = element_type_info_for_derivatives.lib.name.compound
+      element_kl_type_name_for_derivatives = element_type_info_for_derivatives.kl.name.compound
       kl_type_name = element_kl_type_name + '_StdVector'
       record = Record(
         self.ext.root_namespace,
@@ -46,8 +49,8 @@ class StdVectorSelector(Selector):
       record.add_kl("""
 {{type_name}}({{element_type_name}} array<>) {
   this = {{type_name}}(
-    {{element_type_name}}_CxxConstPtr(array, 0),
-    {{element_type_name}}_CxxConstPtr(array, 2)
+    {{element_type_name_for_derivatives}}_CxxConstPtr(array, 0),
+    {{element_type_name_for_derivatives}}_CxxConstPtr(array, 2)
     );
 }
 
@@ -56,12 +59,15 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
   {{element_type_name}} result[];
   result.reserve(size);
   for (Index i = 0; i < size; ++i)  {
-    {{element_type_name}}_CxxConstRef ptr = vec.getAt(i);
+    {{element_type_name_for_derivatives}}_CxxConstRef ptr = vec.getAt(i);
     result.push(ptr.cxxGet());
   }
   return result;
 }
-""", element_type_name=element_kl_type_name)
+""",
+  element_type_name=element_kl_type_name,
+  element_type_name_for_derivatives=element_kl_type_name_for_derivatives,
+  )
       type_mgr.named_selectors['owned'].register(
         kl_type_name=kl_type_name,
         kl_type_name_for_derivatives=kl_type_name,

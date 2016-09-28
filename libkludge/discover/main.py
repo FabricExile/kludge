@@ -3,12 +3,8 @@
 #
 
 import sys, optparse
-from parser import Parser
 from libkludge import util
-
-name = "discover"
-usage = "[OPTIONS] <extension name> <directory OR header.h> [<directory OR header.h> ...]"
-description = "Generate Kludge script stubs from C++ headers"
+from libkludge.discover import name, usage, description
 
 def quit_with_usage(prog):
   print "Run '%s %s --help' for usage" % (prog, name)
@@ -93,6 +89,7 @@ def main(prog, args):
   if len(dirs_and_files) == 0:
     util.error(opts, "Missing directories and/or headers to process")
     quit_with_usage(prog)
+  from libkludge.discover.parser import Parser
   parser = Parser(
     name = args[0],
     opts = opts,

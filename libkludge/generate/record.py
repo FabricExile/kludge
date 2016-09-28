@@ -49,7 +49,7 @@ class Ctor(Methodlike):
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('ctor', type_info, self.params)
+    return self.record.gen_edk_symbol_name('ctor', type_info, ThisAccess.mutable, self.params)
 
   def get_test_name(self):
     return self.record.kl_global_name + '__ctor'
@@ -101,7 +101,7 @@ class Method(Methodlike):
       assert False
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('meth_' + self.cpp_name, type_info, self.params)
+    return self.record.gen_edk_symbol_name('meth_' + self.cpp_name, type_info, self.this_access, self.params)
 
   def get_test_name(self):
     return self.record.kl_global_name + '__meth_' + self.cpp_name
@@ -138,7 +138,7 @@ class CallOp(Methodlike):
       assert False
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('call_op', type_info, self.params)
+    return self.record.gen_edk_symbol_name('call_op', type_info, self.this_access, self.params)
 
   def get_test_name(self):
     return self.record.kl_global_name + '__call_op'
@@ -178,7 +178,7 @@ class UniOp(Methodlike):
     return self.record.ext
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('uni_op_' + self.op_to_edk_op[self.op], type_info)
+    return self.record.gen_edk_symbol_name('uni_op_' + self.op_to_edk_op[self.op], type_info, ThisAccess.mutable)
 
   def get_test_name(self):
     return self.record.kl_global_name + '__uni_op_' + self.op_to_edk_op[self.op]
@@ -231,7 +231,7 @@ class BinOp(Methodlike):
     return self.record.ext
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('bin_op_' + self.op_to_edk_op[self.op], type_info, self.params)
+    return self.record.gen_edk_symbol_name('bin_op_' + self.op_to_edk_op[self.op], type_info, ThisAccess.const, self.params)
 
   def get_test_name(self):
     return self.record.kl_global_name + '__bin_op_' + self.op_to_edk_op[self.op]
@@ -269,7 +269,7 @@ class AssOp(Methodlike):
     return self.record.ext
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('ass_op_' + self.op_to_edk_op[self.op], type_info, self.params)
+    return self.record.gen_edk_symbol_name('ass_op_' + self.op_to_edk_op[self.op], type_info, ThisAccess.mutable, self.params)
 
   def get_test_name(self):
     return self.record.kl_global_name + '__ass_op_' + self.op_to_edk_op[self.op]
@@ -300,7 +300,7 @@ class Cast(Methodlike):
     return self.record.ext
   
   def get_edk_symbol_name(self, type_info):
-    return self.record.gen_edk_symbol_name('cast', type_info, self.get_params(type_info))
+    return self.record.gen_edk_symbol_name('cast', type_info, ThisAccess.mutable, self.get_params(type_info))
 
   def get_test_name(self):
     return self.record.kl_global_name + '__cast'
@@ -352,10 +352,10 @@ class Member(object):
     return self.visibility == Visibility.public
 
   def get_getter_edk_symbol_name(self, ti):
-    return self.record.gen_edk_symbol_name('getter_' + self.cpp_name, ti)
+    return self.record.gen_edk_symbol_name('getter_' + self.cpp_name, ti, ThisAccess.const)
 
   def get_setter_edk_symbol_name(self, ti):
-    return self.record.gen_edk_symbol_name('setter_' + self.cpp_name, ti)
+    return self.record.gen_edk_symbol_name('setter_' + self.cpp_name, ti, ThisAccess.mutable)
 
 class KL(object):
 
@@ -746,9 +746,15 @@ class Record(Decl):
     assert self.deref_this_access != ThisAccess.static
     return self.get_this(type_info, self.deref_this_access == ThisAccess.mutable)
 
-  def gen_edk_symbol_name(self, name, type_info, params=[]):
+  this_access_short_desc = {
+    ThisAccess.const: 'CO',
+    ThisAccess.mutable: 'MU',
+    ThisAccess.static: 'ST',
+    }
+
+  def gen_edk_symbol_name(self, name, type_info, this_access, params=[]):
     h = hashlib.md5()
-    prefixes = [self.ext.name, str(type_info.kl.name), name]
+    prefixes = [self.ext.name, str(type_info.kl.name), self.this_access_short_desc[this_access], name]
     for prefix in prefixes:
       h.update(prefix)
     for param in params:
@@ -757,25 +763,25 @@ class Record(Decl):
     return '__'.join(prefixes)
     
   def get_empty_ctor_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('empty_ctor', type_info)
+    return self.gen_edk_symbol_name('empty_ctor', type_info, ThisAccess.mutable)
     
   def get_copy_ctor_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('copy_ctor', type_info)
+    return self.gen_edk_symbol_name('copy_ctor', type_info, ThisAccess.mutable)
     
   def get_simple_ass_op_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('simple_ass_op', type_info)
+    return self.gen_edk_symbol_name('simple_ass_op', type_info, ThisAccess.mutable)
     
   def get_deref_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('deref', type_info)
+    return self.gen_edk_symbol_name('deref', type_info, self.deref_this_access)
 
   def get_get_ind_op_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('get_ind_op', type_info)
+    return self.gen_edk_symbol_name('get_ind_op', type_info, self.get_ind_op_this_access)
 
   def get_set_ind_op_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('set_ind_op', type_info)
+    return self.gen_edk_symbol_name('set_ind_op', type_info, self.set_ind_op_this_access)
   
   def get_dtor_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('dtor', type_info)
+    return self.gen_edk_symbol_name('dtor', type_info, ThisAccess.mutable)
 
   def get_test_name(self):
     return self.kl_global_name

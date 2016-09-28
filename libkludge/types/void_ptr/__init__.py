@@ -17,6 +17,7 @@ class ConstVoidPtrTypeInfo(TypeInfo):
       self,
       jinjenv,
       kl_name_base='Data',
+      edk_name='Fabric::EDK::KL::Data',
       lib_expr=const_cpp_type_expr,
       )
 
@@ -33,6 +34,7 @@ class MutableVoidPtrTypeInfo(TypeInfo):
       self,
       jinjenv,
       kl_name_base='Data',
+      edk_name='Fabric::EDK::KL::Data',
       lib_expr=mutable_cpp_type_expr,
       )
 

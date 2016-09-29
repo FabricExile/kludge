@@ -6,9 +6,9 @@ Kludge roughly consists of three parts:
 
 - An *API description language* that decribes a C++ API in a way that Kludge can use to generate an extension that wraps the API.  This description language is a set of objets and methods in Python; files written in this language are Python scripts, and by convention have the suffix `.kludge.py`.  This decription language is similar in concept to the DSL used by [boost.python](http://www.boost.org/doc/libs/1_62_0/libs/python/doc/html/index.html).  A simple example in this language could be:
 
-```
-ext.add_func('AddTwoInts', 'int', ['int', 'int'])
-```
+  ```
+  ext.add_func('AddTwoInts', 'int', ['int', 'int'])
+  ```
 
 - A *generate* tool that takes an API description written in this language and generates a KL extension, written in both C++ and KL, that wraps the API.
 

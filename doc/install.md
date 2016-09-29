@@ -65,4 +65,4 @@ Currently, Kludge only runs on 64-bit Linux but there are plans to support 64-bi
 
   You should see no test failures.
 
-[Next: Tutorial: Hello World](tutorial-hello-world.md)
+Next: [Tutorial: Hello World](tutorial-hello-world.md)

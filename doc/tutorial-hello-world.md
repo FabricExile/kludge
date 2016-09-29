@@ -114,4 +114,4 @@ FABRIC_EXTS_PATH=. kl test.kl
 
 The extension should now successfully load and you will see the correct result `4` as the last line.
 
-[Next: Wrapping a Type](tutorial-wrapping-a-type.md)
+Next: [Wrapping a Type](tutorial-wrapping-a-type.md)

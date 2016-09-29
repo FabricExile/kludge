@@ -345,4 +345,4 @@ The `add_comment()` method adds a comment that will appear, verbatim, above the 
 
 Set the default visibility to one of `Visibility.public`, `Visibility.protected` or `Visibility.private` for when it is omitted for member declarations.
 
-[Next: Pointers and References](ptrs_refs.md)
+Next: [Pointers and References](ptrs_refs.md)

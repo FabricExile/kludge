@@ -16,4 +16,4 @@ Kludge roughly consists of three parts:
 
 It is because it is impossible to automatically map every possible C++ API to KL automatically that the description language exists.  There are many different ways that the API can be too complex to automatically map into KL; for instance, KL does not support templates, and therefore if we wish to use templated C++ codes within KL we must instantiate the templates using the types we wish to use it with.
 
-[Next: Installation](install.md)
+Next: [Installation](install.md)

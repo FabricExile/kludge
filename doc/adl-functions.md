@@ -28,4 +28,4 @@ The result of `add_method()` supports `add_comment(comment)` and `add_test(kl, o
 
 - `add_test(kl, out)` adds a unit test; it takes the `kl` parameter which is KL code for the test, and the `out` parmeter which is the expected output for the test.  See [Adding Unit Tests](unit-tests.md) for more details.
 
-[Next: Wrapping Types](adl-types.md)
+Next: [Wrapping Types](adl-types.md)

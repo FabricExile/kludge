@@ -18,4 +18,4 @@ Rather than simply fail in these cases, it is expected that the user will someti
 
 To understand how Kludge works, one must step back and understand that Kludge doesn't actually do anything except generate KL and C++ code to wrap a C++ API.  As such, you don't always have to be exactly right when specifying the types of parameters and return values in Kludge; in many cases you can rely on C++'s automatic casting features to happen in the generated wrapping.
 
-[Next: Wrapping Functions](adl-functions.md)
+Next: [Wrapping Functions](adl-functions.md)

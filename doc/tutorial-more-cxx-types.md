@@ -105,4 +105,4 @@ operator entry() {
 
 Pointers and references will be covered in more detail later in the documentation.
 
-[Next: How Types are Wrapped](wrapped-types.md)
+Next: [How Types are Wrapped](adl-types.md)

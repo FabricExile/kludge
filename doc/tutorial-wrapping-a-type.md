@@ -103,4 +103,4 @@ after reset: 0
 after add(42): 42
 ```
 
-[Next: Tutorial: C++ Operators](tutorial-cxx-operators.md)
+Next: [Tutorial: C++ Operators](tutorial-cxx-operators.md)

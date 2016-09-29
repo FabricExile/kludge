@@ -50,4 +50,4 @@ const SomeType_ValueTwo = 1;
 
 It is important to note that C++ types are looked up in the namespace where they are referenced.  This works exactly as you would expect in C++.
 
-[Next: Wrapping Methods and Method-Like Type Additions](adl-methods.md)
+Next: [Wrapping Methods and Method-Like Type Additions](adl-methods.md)

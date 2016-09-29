@@ -143,6 +143,7 @@ class PtrRefBuiltinDecl(BuiltinDecl):
     result = ''
     if self.type_info.direct.record:
       records = self.type_info.direct.record.get_nested_records()
+      print 'AAAA %s %d' % (self.type_info.direct.kl.name, len(records))
       for index, type_info in enumerate([
         self.type_info.const_ptr,
         self.type_info.mutable_ptr,
@@ -207,7 +208,7 @@ class PtrRefSelector(Selector):
             undq_type_info,
             )
           self.ti_set_cache.setdefault(ti_set_cache_key, ti_set)
-          self.ext.decls.append(PtrRefBuiltinDecl(self.ext, ti_set))
+          self.ext.add_decl(PtrRefBuiltinDecl(self.ext, ti_set))
 
         ti = getattr(ti_set, dq.get_desc())
         return DirQualTypeInfo(DirQual(directions.Direct, qualifiers.Unqualified), ti)

@@ -122,7 +122,7 @@ class Namespace:
         massage_returns(returns),
         massage_params(params),
         )
-      self.ext.decls.append(func)
+      self.ext.add_decl(func)
       return func
     except Exception as e:
       self.warning("Ignoring function %s: %s" % (cpp_local_name, e))
@@ -141,7 +141,7 @@ class Namespace:
       print "direct_old_dqti.type_info.lib.name = " + str(direct_old_dqti.type_info.lib.name)
       print "direct_old_dqti.type_info.lib.expr = " + str(direct_old_dqti.type_info.lib.expr)
       direct_alias = Alias(self, direct_new_kl_global_name, direct_old_dqti.type_info)
-      self.ext.decls.append(direct_alias)
+      self.ext.add_decl(direct_alias)
 
       const_ptr_new_cpp_type_expr = PointerTo(Const(direct_new_cpp_global_expr))
       const_ptr_old_cpp_type_expr = PointerTo(Const(direct_old_cpp_global_expr))
@@ -150,7 +150,7 @@ class Namespace:
       const_ptr_old_dqti = self.type_mgr.get_dqti(const_ptr_old_cpp_type_expr)
       const_ptr_old_kl_type_name = const_ptr_old_dqti.type_info.kl.name.compound
       const_ptr_alias = Alias(self, const_ptr_new_kl_type_name, const_ptr_old_dqti.type_info)
-      self.ext.decls.append(const_ptr_alias)
+      self.ext.add_decl(const_ptr_alias)
       self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
@@ -177,7 +177,7 @@ class Namespace:
       mutable_ptr_old_dqti = self.type_mgr.get_dqti(mutable_ptr_old_cpp_type_expr)
       mutable_ptr_old_kl_type_name = mutable_ptr_old_dqti.type_info.kl.name.compound
       mutable_ptr_alias = Alias(self, mutable_ptr_new_kl_type_name, mutable_ptr_old_dqti.type_info)
-      self.ext.decls.append(mutable_ptr_alias)
+      self.ext.add_decl(mutable_ptr_alias)
       self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
@@ -204,7 +204,7 @@ class Namespace:
       const_ref_old_dqti = self.type_mgr.get_dqti(const_ref_old_cpp_type_expr)
       const_ref_old_kl_type_name = const_ref_old_dqti.type_info.kl.name.compound
       const_ref_alias = Alias(self, const_ref_new_kl_type_name, const_ref_old_dqti.type_info)
-      self.ext.decls.append(const_ref_alias)
+      self.ext.add_decl(const_ref_alias)
       self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
@@ -231,7 +231,7 @@ class Namespace:
       mutable_ref_old_dqti = self.type_mgr.get_dqti(mutable_ref_old_cpp_type_expr)
       mutable_ref_old_kl_type_name = mutable_ref_old_dqti.type_info.kl.name.compound
       mutable_ref_alias = Alias(self, mutable_ref_new_kl_type_name, mutable_ref_old_dqti.type_info)
-      self.ext.decls.append(mutable_ref_alias)
+      self.ext.add_decl(mutable_ref_alias)
       self.ext.add_kl_epilog("""
 %s Make_%s(%s value) {
   return Make_%s(value);
@@ -477,7 +477,7 @@ class Namespace:
       clean_values,
       child_namespace_component=child_namespace_component,
       )
-    self.ext.decls.append(enum)
+    self.ext.add_decl(enum)
     if cpp_type_expr:
       self.namespace_mgr.add_type(
         self.components,

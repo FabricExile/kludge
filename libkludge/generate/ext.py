@@ -106,6 +106,9 @@ class Ext:
     glbls['include'] = include
     include(filename)
 
+  def add_decl(self, decl):
+    self.decls.append(decl)
+
   def add_test(self, kl, out, test_name=None):
     if not test_name:
       test_name = "TEST_%d" % len(self.tests)

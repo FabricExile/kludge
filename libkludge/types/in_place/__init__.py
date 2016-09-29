@@ -224,6 +224,6 @@ class InPlaceSelector(Selector):
             forbid_copy=forbid_copy,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
-          self.ext.decls.append(InPlaceBuiltinDecl(self.ext, is_simple, type_info))
+          self.ext.add_decl(InPlaceBuiltinDecl(self.ext, is_simple, type_info))
 
         return DirQualTypeInfo(dq, type_info)

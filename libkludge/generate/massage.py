@@ -3,7 +3,6 @@
 #
 
 from param import Param
-from libkludge.util import clean_param_name
 
 def massage_returns(returns):
   if not returns:

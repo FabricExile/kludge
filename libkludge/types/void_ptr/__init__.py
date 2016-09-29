@@ -80,7 +80,7 @@ class VoidPtrSelector(Selector):
         ConstVoidPtrTypeInfo(self.jinjenv)
         )
       if not self.have_decl:
-        self.ext.decls.append(VoidPtrDecl(self.ext))
+        self.ext.add_decl(VoidPtrDecl(self.ext))
         self.have_decl = True
       return dqti
     if cpp_type_expr == mutable_cpp_type_expr:
@@ -89,6 +89,6 @@ class VoidPtrSelector(Selector):
         MutableVoidPtrTypeInfo(self.jinjenv)
         )
       if not self.have_decl:
-        self.ext.decls.append(VoidPtrDecl(self.ext))
+        self.ext.add_decl(VoidPtrDecl(self.ext))
         self.have_decl = True
       return dqti

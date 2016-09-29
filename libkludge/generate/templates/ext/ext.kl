@@ -49,6 +49,7 @@ require {{ kl_require }};
 //////////////////////////////////////////////////////////////////////////////
 
 {% for decl in ext.decls %}
+/* FWDS FOR {{decl.get_desc()}} */
 {{ decl.render('fwds', 'kl') }}
 {% endfor %}
 
@@ -59,6 +60,7 @@ require {{ kl_require }};
 //////////////////////////////////////////////////////////////////////////////
 
 {% for decl in ext.decls %}
+/* DEFNS FOR {{decl.get_desc()}} */
 {{ decl.render('defns', 'kl') }}
 {% endfor %}
 
@@ -69,6 +71,7 @@ require {{ kl_require }};
 //////////////////////////////////////////////////////////////////////////////
 
 {% for decl in ext.decls %}
+/* IMPLS FOR {{decl.get_desc()}} */
 {{ decl.render('impls', 'kl') }}
 {% endfor %}
 

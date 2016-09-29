@@ -139,6 +139,6 @@ class OwnedSelector(Selector):
             forbid_copy=forbid_copy,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
-          self.ext.decls.append(OwnedBuiltinDecl(self.ext, type_info))
+          self.ext.add_decl(OwnedBuiltinDecl(self.ext, type_info))
 
         return DirQualTypeInfo(dq, type_info)

@@ -129,6 +129,6 @@ class MirrorSelector(Selector):
               )
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
-          self.ext.decls.append(MirrorBuiltinDecl(self.ext, type_info))
+          self.ext.add_decl(MirrorBuiltinDecl(self.ext, type_info))
 
         return DirQualTypeInfo(dq, type_info)

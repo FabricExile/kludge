@@ -43,7 +43,7 @@ Currently, Kludge only runs on 64-bit Linux but there are plans to support 64-bi
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$KLUDGE_LLVM_ROOT/lib" # if Clang is installed elsewhere on the system
   ```
 
-If GCC 4.8 is not your default compiler then you will also need to add it to `LD_LIBRARY_PATH`:
+  If GCC 4.8 is not your default compiler then you will also need to add it to `LD_LIBRARY_PATH`:
 
   ```
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/gcc-4.8/lib64"
@@ -55,7 +55,7 @@ If GCC 4.8 is not your default compiler then you will also need to add it to `LD
   ./kludge
   ```
 
-You should see some help text.
+  You should see some help text.
 
 4. Validate that unit tests are passing:
 
@@ -63,6 +63,6 @@ You should see some help text.
   py.test -n8
   ```
 
-You should see no test failures.
+  You should see no test failures.
 
 [Next: Tutorial: Hello World](tutorial-hello-world.md)

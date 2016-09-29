@@ -62,7 +62,7 @@ This command will process the input files and produce several output files. They
   The `scons` build script for the extension.
 
 `Tutorial.test.{kl,out,py}`:
-  Unit tests for the extension.  Ignore for now.
+  Unit tests for the extension.  You can safely ignore these for now, but see [Unit Tests](unit-tests.md) for more details.
 
 You should example `Tutorial.kl`.  There are a bunch of comments and some additional definitions, but the "meat" of the file is the code:
 

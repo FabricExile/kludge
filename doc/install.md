@@ -6,7 +6,7 @@ The major ingredients to use Kludge are:
 - A build of LLVM/Clang that contains a custom version of the libclang Python module.
 - Several additional (stock) Python modules that are used by Kludge
 
-# System Requirements
+## System Requirements
 
 Currently, Kludge only runs on 64-bit Linux but there are plans to support 64-bit Windows and OS X in the future.  Furthermore, you must have a GCC 4.8.x toolchain installed on the machine (usually in `/opt/gcc-4.8` if it is not already the system compiler).
 

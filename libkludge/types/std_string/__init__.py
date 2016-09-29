@@ -44,6 +44,10 @@ inline {{type_name}}(String string) {
   this = {{type_name}}(CxxCharConstPtr(array, 0), CxxCharConstPtr(array, string.length()));
 }
 
+inline {{type_name}} Make_{{type_name}}(String string) {
+  return {{type_name}}(string);
+}
+
 inline {{type_name}}.appendDesc(io String string) {
   CxxCharConstPtr ptr = this.c_str();
   string += String(ptr);

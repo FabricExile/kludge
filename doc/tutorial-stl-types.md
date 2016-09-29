@@ -1,4 +1,4 @@
-# Tutorial: STL Types, Templates, and References
+# Tutorial: STL Types and Instantiating Templates
 
 Kludge provides some basic mechanisms for automatic wrapping of STL types including `std::string` and `std::vector`.  This is illustrated in the example below.
 
@@ -88,6 +88,8 @@ operator entry() {
   report("ReverseVector(a) = " + ra);
 }
 ```
+
+This patten of using a `Make_...` function to explicitly convert types in Kludge extensions is one that you will frequently see.  The reasons this is necessary in certain cases are a combination of limitations in KL as well as the undesirability of automatic conversions in many cases, where the conversion can be slow or have side effects; we will talk a bit more about this in the next section.
 
 When run you should see the output:
 

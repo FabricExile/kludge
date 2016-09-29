@@ -39,7 +39,7 @@ Take a look at the resulting `Counter.decls.kludge.py`.  The line
 ext_Counter = ext.add_owned_type('Counter')
 ```
 
-This line tells Kludge that there is a type named `Counter` in C++ that should be available in KL (with the same name).  The term `owned` refers to the way in which the type is mapped into KL; there are different ways of doing this and they are covered later in [Type Wrapping Semantics](types.md).
+This line tells Kludge that there is a type named `Counter` in C++ that should be available in KL (with the same name).  The term `owned` refers to the way in which the type is mapped into KL; there are different ways of doing this and they are covered later in [Wrapping Types](adl-types.md).
 
 Now examine `Counter.defns.kludge.py`.  The non-comment lines are:
 
@@ -54,11 +54,13 @@ ext_Counter.add_method('reset', 'void', [], this_access=ThisAccess.mutable)
 
 These lines are fairly self explanitory, but the details are:
 
-- The `add_member` line adds a member to the type.  Since the member is private it is not strictly necessary to provide this line, but Kludge discover does anyway for completeness.  (Note that if the type is declared using `add_in_place_type` as covered in [Type Wrapping Semantics](types.md) then the members must be provided even if they aren't public) 
+- The `add_member` line adds a member to the type.  Since the member is private it is not strictly necessary to provide this line, but Kludge discover does anyway for completeness.  (Note that if the type is declared using `add_in_place_type` as covered in [Wrapping Types](adl-types.md) then the members must be provided even if they aren't public) 
 
 - The `add_ctor` line adds a constructor for the type.  The constructor takes no parameters, as indiciated by the empty array.
 
 - The `add_method` lines add methods to the type.  In each case the parameters are the name of the method, the return type, and the list of parameters, and finally the `ThisAccess` which specifies if the function is `const`, `static` or "mutable" (neither `static` nor `const`).
+
+More information on these description language methods can be found in [Wrapping Methods and Method-Like Type Additions](adl-methods.md).
 
 Now, use `kludge generate` to generate the extension:
 

@@ -2,3 +2,4 @@
 .sconsign.dblite
 .cache/
 *env.sh
+tmp/

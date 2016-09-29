@@ -104,6 +104,8 @@ ext.add_lib_dir('.')
 ext.add_lib('Tutorial')
 ```
 
+This is one of the reasons that `kludge discover` and `kludge generate` are separate steps: it's not possible to know from the C++ header files what libraries are needed to compile and link the extension.  For more information on methods that affect compilation, see [Methods that Affect Compilation](adl-comp-methods.md).
+
 Regenerate and rebuild the extension, and then run KL again:
 
 ```

@@ -158,4 +158,4 @@ The `ext.add_alias()` method creates a simple KL type alias.  It takes the param
 
 It can general be used to represent C++ `typedef` and `using <type name> =` declarations.
 
-Next: [Wrapping Namespaces](adl-namespaces.md)
+Next: [Methods Affecting Compilation](adl-comp-methods.md)

@@ -69,7 +69,7 @@ operator entry() {
   vs.push_back(Make_StdString("three"));
   vs.push_back(Make_StdString("four"));
   vs.push_back(Make_StdString("five"));
-  String longest = LongestString(vs);
+  StdString_CxxConstRef longest = LongestString(vs);
   report("longest = " + longest);
   report("longest.size() = " + longest.size());
 }

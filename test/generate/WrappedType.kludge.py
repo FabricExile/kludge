@@ -59,7 +59,7 @@ Class::~Class()
 """)
 ty.add_get_ind_op('int').add_test("""
 Class c(3.14, "foo", -7);
-report(c.getAt(56));
+report(c.cxxGetAtIndex(56));
 """, """
 Class::Class(3.14, foo, -7)
 Wrapper::Wrapper(Ty *)
@@ -70,7 +70,7 @@ Class::~Class()
 """)
 ty.add_set_ind_op('int').add_test("""
 Class c(3.14, "foo", -7);
-c.setAt(56, 4);
+c.cxxSetAtIndex(56, 4);
 report(c);
 """, """
 Class::Class(3.14, foo, -7)

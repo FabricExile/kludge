@@ -1,4 +1,4 @@
-# An Example with Types
+# Tutorial: Wrapping a Type
 
 The next tutorial example wraps an API that has C++ types.  Begin by creating the files `Counter.hpp`:
 
@@ -103,4 +103,4 @@ after reset: 0
 after add(42): 42
 ```
 
-[Next: An Extension with Types](tutorial-types.md)
+[Next: Tutorial: C++ Operators](tutorial-cxx-operators.md)

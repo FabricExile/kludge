@@ -50,8 +50,12 @@ class StdVectorSelector(Selector):
 {{type_name}}({{element_type_name}} array<>) {
   this = {{type_name}}(
     {{element_type_name_for_derivatives}}_CxxConstPtr(array, 0),
-    {{element_type_name_for_derivatives}}_CxxConstPtr(array, 2)
+    {{element_type_name_for_derivatives}}_CxxConstPtr(array, array.size())
     );
+}
+
+{{type_name}} Make_{{type_name}}({{element_type_name}} array<>) {
+  return {{type_name}}(array);
 }
 
 inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_name}} vec) {
@@ -59,10 +63,25 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
   {{element_type_name}} result[];
   result.reserve(size);
   for (Index i = 0; i < size; ++i)  {
-    {{element_type_name_for_derivatives}}_CxxConstRef ptr = vec.getAt(i);
+    {{element_type_name_for_derivatives}}_CxxConstRef ptr = vec.cxxGetAtIndex(i);
     result.push(ptr.cxxGet());
   }
   return result;
+}
+
+{{type_name}}.appendDesc(io String string) {
+  string += "{{type_name}}:[";
+  UInt64 count = this.size();
+  for (UInt64 index = 0; index < count; ++index) {
+    if (index > 0 )
+      string += ",";
+    if (index == 32) {
+      string += "...";
+      break;
+    }
+    string += this.cxxGetAtIndex(index);
+  }
+  string += "]";
 }
 """,
   element_type_name=element_kl_type_name,

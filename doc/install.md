@@ -65,4 +65,4 @@ py.test -n8
 
 You should see no test failures.
 
-[Next: Tutorial](tutorial.md)
+[Next: Tutorial: Hello World](tutorial-hello-world.md)

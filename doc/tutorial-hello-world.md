@@ -1,6 +1,6 @@
-# Tutorial
+# Tutorial: Hello, World!
 
-This section walks you through some basic use cases of Kludge.
+This section walks you through a first use case for Kludge.  We call this the "Hello World!" example because that's what the first example is always called, but we are actually doing something more interesting than simply saying "Hello, World!": we will wrap a simple C++ function in KL that actually rakes and returns values.
 
 Begin by creating a very simple C++ header file `Tutorial.hpp`:
 
@@ -114,4 +114,4 @@ FABRIC_EXTS_PATH=. kl test.kl
 
 The extension should now successfully load and you will see the correct result `4` as the last line.
 
-[Next: An Extension with Types](tutorial-types.md)
+[Next: An Extension with Types](tutorial-wrapping-a-type.md)

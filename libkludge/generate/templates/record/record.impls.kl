@@ -280,10 +280,10 @@
 {% if record.get_ind_op_result %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// getAt(Index) Operator
+// cxxGetAtIndex(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 {{record.get_ind_op_result.type_info.kl.name}}
-{{type_info.kl.name}}.getAt(
+{{type_info.kl.name}}.cxxGetAtIndex(
     {% for param in record.get_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -293,8 +293,8 @@
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.getAt on null {{type_info.kl.name}}";
-    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.getAt(
+        throw "Call of {{type_info.kl.name}}.cxxGetAtIndex on null {{type_info.kl.name}}";
+    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxxGetAtIndex(
         {% for param in record.get_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}
@@ -306,9 +306,9 @@
 {% if record.set_ind_op_params and allow_mutable_methods %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// setAt(Index) Operator
+// cxxSetAtIndex(Index) Operator
 ////////////////////////////////////////////////////////////////////////
-{{type_info.kl.name}}.setAt!(
+{{type_info.kl.name}}.cxxSetAtIndex!(
     {% for param in record.set_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -318,8 +318,8 @@
 {% else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.setAt on null {{type_info.kl.name}}";
-    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.setAt(
+        throw "Call of {{type_info.kl.name}}.cxxSetAtIndex on null {{type_info.kl.name}}";
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxxSetAtIndex(
         {% for param in record.set_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}

@@ -281,7 +281,7 @@ FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
 {% if record.get_ind_op_result %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// getAt(Index) Operator
+// cxxGetAtIndex(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
@@ -300,7 +300,7 @@ FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
 {% if record.set_ind_op_params and allow_mutable_methods %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// setAt(Index) Operator
+// cxxSetAtIndex(Index) Operator
 ////////////////////////////////////////////////////////////////////////
 
 FABRIC_EXT_EXPORT void

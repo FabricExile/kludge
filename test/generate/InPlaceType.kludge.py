@@ -43,9 +43,9 @@ report(Class_GetStaticFloat());
 ty.generate_type('Class const &')
 ty.add_get_ind_op('int').add_test("""
 Class c(-7, 3.14);
-report(c.getAt(56));
+report(c.cxxGetAtIndex(56));
 Class_CxxConstRef cr = c;
-report(cr.getAt(56));
+report(cr.cxxGetAtIndex(56));
 """, """
 Class::Class(-7, 3.14)
 Class::operator[] const(56)
@@ -56,7 +56,7 @@ Class::~Class()
 """)
 ty.add_set_ind_op('int').add_test("""
 Class c(-7, 3.14);
-c.setAt(56, 4);
+c.cxxSetAtIndex(56, 4);
 report(c);
 """, """
 Class::Class(-7, 3.14)

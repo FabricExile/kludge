@@ -4,7 +4,8 @@
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 {{decl.render_method_impls('kl')}}
-{% if decl.type_info.kl.name.compound != "StdString" %}
+{% if decl.type_info.kl.name.compound != "StdString"
+  and not decl.type_info.kl.name.compound.endswith("StdVector") %}
 {{decl.type_info.kl.name}}.appendDesc(io String string) {
   string += "{{decl.type_info.kl.name}}:";
   if (!this.cpp_ptr)

@@ -1,4 +1,4 @@
-# Namespaces in Kludge
+# Wrapping Namespaces
 
 C++ has support for nested namespaces; however, KL does not (yet) support namespaces.  As such, Kludge maps C++ namespaces to KL nested names using a `Prefixed_With_Underscores_` syntax.
 
@@ -50,4 +50,4 @@ const SomeType_ValueTwo = 1;
 
 It is important to note that C++ types are looked up in the namespace where they are referenced.  This works exactly as you would expect in C++.
 
-[Next: Add Methods and the Like to Types](methods.md)
+[Next: Wrapping Methods and Method-Like Type Additions](adl-methods.md)

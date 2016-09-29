@@ -1,4 +1,4 @@
-# Adding Methods and the Like to Types
+# Wrapping Methods and Method-Like Type Additions
 
 When a type is wrapped using `ns.add_owned_type()`, `ns.add_in_place_type()` or `ns.add_wrapped_type()`, the result is a record object that can be used to add methods and the like to the type.  In addition to nested types, enums, and aliases, as described in the section on [namespaces](namespace.md), the following methods can be called to fill out the type:
 

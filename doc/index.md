@@ -10,8 +10,10 @@
  - [More About Using C++ Types](tutorial-more-cxx-types.md)
 - [The Kludge Wrapping Philosophy](philosophy.md)
 - The API Description Language
- - [How Types are Wrapped](wrapped-types.md)
- - [Namespaces](namespaces.md)
- - [Add Methods and the Like to Types](methods.md)
+ - [Wrapping Functions](adl-functions.md)
+ - [Wrapping Types](adl-types.md)
+ - [Wrapping Namespaces](adl-namespaces.md)
+ - [Wrapping Methods and Method-Like Type Additions](adl-methods.md)
 - Advanced Kludge
  - [Pointers and References](ptrs_refs.md)
+ - [Unit Tests](unit-tests.md)

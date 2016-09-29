@@ -1,4 +1,4 @@
-# How Kludge Wraps Types
+# Wrapping Types
 
 There are multiple ways of wrapping types in Kludge; which way should be used depends on the semantics of the C++ API that is being wrapped.  Unfortunately, it is difficult-to-impossible for Kludge to make an intelligent guess as to which way should be used, and as such it is left up to the user to edit the output of the `kludge discover` command to make changes to way that types are wrapped.
 
@@ -27,7 +27,7 @@ The `extends` parameter indicates C++ inheritance; in practice, it means that th
 
 The `forbid_copy` parameter prevents users from copying values of this type; this is mostly meant to be used when copying has been forbidden in C++.  The `is_abstract` parameter indicates that the type is abstract and can't be instantiated at all; however, it can be used in the `extends` clause of another type.  A value of this type can also be used through a pointer or reference to it.
 
-The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](methods.md)).
+The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](adl-methods.md)).
 
 ## `ext.add_in_place_type()`
 
@@ -37,7 +37,7 @@ All of the simple nummeric types in C++ such as `int` and `float` are wrapped in
 
 The parameters of the `ext.add_in_place_type()` method are identical in name and function to those of `ext.add_owned_type()`.
 
-The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](methods.md)).
+The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](adl-methods.md)).
 
 ## `ext.add_wrapped_type()`
 
@@ -65,7 +65,7 @@ Additional notes about types wrapped with `ext.add_wrapped_type()`:
 
 - Kludge does track the underlying type that is wrapped via the template, but it will not generally be needed; it is prefixed with `Raw_`; for example, `Raw_DataBlob`.
 
-The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](methods.md)).
+The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](adl-methods.md)).
 
 ## `ext.add_mirror()`
 
@@ -118,7 +118,7 @@ The `ext.add_enum()` method maps a C++ enum to a KL type alias and a set of cons
 
 `cpp_local_name` is the name of the enum in C++, and values is the array of values of the enum.  The values can either a (string, integer) tuple, which gives the integer value to the named enum value, or simply a string, in which case the next integer value is used (following the same rules as C++; by default, the first value is 0).  `kl_local_name` is the (optional) name of the enum in KL; if omitted it will be the C++ name.
 
-The `are_values_namespaced` flag indicates whether the values of the enum are in a nested namespace or not (see [the namespaces section of the documentation](namespaces.md) for more information on namespace handling in Kludge).  For example, the enum:
+The `are_values_namespaced` flag indicates whether the values of the enum are in a nested namespace or not (see [the namespaces section of the documentation](adl-namespaces.md) for more information on namespace handling in Kludge).  For example, the enum:
 
 ```
 ext.add_enum('Fruit', ['Apple', 'Orange'])
@@ -158,4 +158,4 @@ The `ext.add_alias()` method creates a simple KL type alias.  It takes the param
 
 It can general be used to represent C++ `typedef` and `using <type name> =` declarations.
 
-[Next: Namespaces](namespaces.md)
+[Next: Wrapping Namespaces](adl-namespaces.md)

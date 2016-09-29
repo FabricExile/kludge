@@ -25,7 +25,7 @@ Currently, Kludge only runs on 64-bit Linux but there are plans to support 64-bi
 3. Install pre-requisite Python modules:
 
   ```
-  pip install jinja2 pyparsing scons pytest pytest-xdist
+  pip install jinja2 pyparsing scons pytest pytest-xdist subprocess difflib
   ```
 
 ## Running Kludge

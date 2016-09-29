@@ -1,6 +1,6 @@
 # Tutorial: Hello, World!
 
-This section walks you through a first use case for Kludge.  We call this the "Hello World!" example because that's what the first example is always called, but we are actually doing something more interesting than simply saying "Hello, World!": we will wrap a simple C++ function in KL that actually makes and returns values.
+This section walks you through a first use case for Kludge.  We call this the "Hello World!" example because that's what the first example is always called, but we are actually doing something more interesting than simply saying "Hello, World!": we will wrap a simple C++ function in KL that actually takes and returns values.
 
 Begin by creating a very simple C++ header file `Tutorial.hpp`:
 

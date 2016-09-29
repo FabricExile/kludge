@@ -25,7 +25,7 @@ tar jxf fabric-llvm-3.9-linux-x86_64-gcc_48.tar.bz2
 3. Install pre-requisite Python modules:
 
 ```
-pip install jinja2 pyparsing pytest pytest-xdist
+pip install jinja2 pyparsing scons pytest pytest-xdist
 ```
 
 ## Running Kludge
@@ -64,3 +64,5 @@ py.test -n8
 ```
 
 You should see no test failures.
+
+[Next: Tutorial](tutorial.md)

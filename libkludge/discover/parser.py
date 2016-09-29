@@ -597,7 +597,7 @@ class Parser(object):
             print >>master
             if len(includes) > 0:
               for include in includes:
-                print >>master, "ext.add_cpp_angled_include('%s')" % include
+                print >>master, "ext.add_cpp_quoted_include('%s')" % include
               print >>master
             print >>master, "include('%s')" % decls_basename
             print >>master, "include('%s')" % defns_basename

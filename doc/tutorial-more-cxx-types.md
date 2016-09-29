@@ -77,7 +77,7 @@ operator entry() {
 
 You should see the output
 
-``
+```
 three
 5
 ```

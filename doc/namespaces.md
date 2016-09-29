@@ -30,7 +30,7 @@ SInt32 MyLib_SomeType.Foo?();
 alias SInt32 MyLib_ChildNS_IntType;
 ```
 
-Note that wrapping a type (for example, using `.add_owned_type()`) also creates a child namespace.  This is important functionality that allows, for instance, enums and type aliases to be scoped under classes or structs:
+Note that wrapping a type (for example, using `.add_owned_type()`) also creates a child namespace.  This is important functionality that allows, for instance, nested types, enums and type aliases to be scoped under classes or structs:
 
 ```
 ty = ext.add_type("SomeType")
@@ -50,3 +50,4 @@ const SomeType_ValueTwo = 1;
 
 It is important to note that C++ types are looked up in the namespace where they are referenced.  This works exactly as you would expect in C++.
 
+[Next: Add Methods and the Like to Types](methods.md)

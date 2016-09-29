@@ -17,7 +17,7 @@
     string += ",";
 {% endif %}
     string += "{{member.kl_name}}:";
-    string += this.GET_{{member.kl_name}}();
+    string += this.cxxGet_{{member.kl_name}}();
 {% endfor %}
     string += "}";
   }

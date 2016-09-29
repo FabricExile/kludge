@@ -8,13 +8,13 @@ ty = ext.add_wrapped_type('Wrapper', 'Class')
 ty.add_ctor(['float', 'char const *', 'int'])\
   .add_test("""
 Class c(3.14, "hello", 42);
-report("c.GET_floatValue() = " + c.GET_floatValue());
-report("c.GET_stringValue() = " + c.GET_stringValue());
+report("c.cxxGet_floatValue() = " + c.cxxGet_floatValue());
+report("c.cxxGet_stringValue() = " + c.cxxGet_stringValue());
 """, """
 Class::Class(3.14, hello, 42)
 Wrapper::Wrapper(Ty *)
-c.GET_floatValue() = +3.14
-c.GET_stringValue() = hello
+c.cxxGet_floatValue() = +3.14
+c.cxxGet_stringValue() = hello
 Wrapper::~Wrapper()
 Class::~Class()
 """)
@@ -210,12 +210,12 @@ Class::~Class()
 #   report("ReturnClassVec() = " + ReturnClassVec());
 
 #   value = ReturnClass();
-#   report("Before value.SET_floatValue(-12.34): value.GET_floatValue() = " + value.GET_floatValue());
-#   value.SET_floatValue(-12.34);
-#   report("After value.SET_floatValue(-12.34): value.GET_floatValue() = " + value.GET_floatValue());
-#   report("Before value.SET_stringValue('hello'): value.GET_stringValue() = " + value.GET_stringValue());
-#   value.SET_stringValue('hello');
-#   report("After value.SET_stringValue('hello'): value.GET_stringValue() = " + value.GET_stringValue());
+#   report("Before value.cxxSet__floatValue(-12.34): value.cxxGet_floatValue() = " + value.cxxGet_floatValue());
+#   value.cxxSet__floatValue(-12.34);
+#   report("After value.cxxSet__floatValue(-12.34): value.cxxGet_floatValue() = " + value.cxxGet_floatValue());
+#   report("Before value.cxxSet__stringValue('hello'): value.cxxGet_stringValue() = " + value.cxxGet_stringValue());
+#   value.cxxSet__stringValue('hello');
+#   report("After value.cxxSet__stringValue('hello'): value.cxxGet_stringValue() = " + value.cxxGet_stringValue());
 
 #   report("value.publicMethod() = " + value.publicMethod());
 #   report("value.getDesc() = " + value.getDesc());
@@ -231,7 +231,7 @@ Class::~Class()
 
 #   StructWithIndirectTypeThatCanInPlace st =
 #     ReturnStructWithIndirectTypeThatCanInPlace();
-#   report("st.GET_floatValue() = " + st.GET_floatValue());
+#   report("st.cxxGet_floatValue() = " + st.cxxGet_floatValue());
 
 #   Class constructor1(1.1, 'myString', 123);
 #   constructor1.exportValues(floatValue, stringValue, intValue);

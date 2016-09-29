@@ -17,3 +17,13 @@ operator entry() {
   report("a = " + a);
   report("ReverseVector(a) = " + ReverseVector(a));
 }
+```
+
+Running this gives the output:
+
+```
+a = SInt32_StdVector:[0,1,2,3,4,5,6,7,8,9]
+ReverseVector(a) = SInt32_StdVector:[9,8,7,6,5,4,3,2,1,0]
+```
+
+The result is the same, but we just created the STL vector directly rather than converting one from KL.  Notice that the STL vector was created using the `push_back` method rather than the KL equivalent `push` method; this is because this is how the method is named in C++.

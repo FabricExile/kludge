@@ -35,7 +35,6 @@ path/to/kludge discover STLUser STLUser.hpp
 path/to/kludge generate STLUser STLUser.kludge.py
 scons -f STLUser.SConstruct
 ```
-```
 
 Test this example with the file `test.kl`:
 

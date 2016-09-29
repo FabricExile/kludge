@@ -9,3 +9,4 @@
  - [STL Types](tutorial-stl-types.md)
  - [More About Using C++ Types](tutorial-more-cxx-types.md)
 - [How Types are Wrapped](wrapped-types.md)
+- [Namespaces](namespaces.md)

@@ -114,3 +114,4 @@ FABRIC_EXTS_PATH=. kl test.kl
 
 The extension should now successfully load and you will see the correct result `4` as the last line.
 
+[Next: An Extension with Types](tutorial-types.md)

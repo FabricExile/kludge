@@ -103,6 +103,6 @@ So how exactly are the operators mapped to KL?
 
 - The line `a += b;` calls the `operator +=` of `MyInt`.
 
-As you can see, in all cases but the increment operator the mapping from C++ to KL is direct: we use exactly the same syntax in KL as we do in C++.  In the case of increment, we use the special `cxxInc` method to perform the increment.  This is a pattern you will see often in Kludge: when there is no direct KL analog for something in C++ it will be available through a method or type that includes `cxx` or `Cxx` in the name.
+As you can see, in all cases but the increment operator the mapping from C++ to KL is direct: we use exactly the same syntax in KL as we do in C++.  In the case of increment, we use the special `cxxInc` method to perform the increment.  This is a pattern you will see often in Kludge: when there is no direct KL analog for something in C++ it will be available through a method or type that includes `cxx` or `Cxx` in the name.  More information on how operators are wrapped can be found in [Wrapping Methods and Method-Like Type Additions](adl-methods.md).
 
 Next: [Tutorial: STL Types and Instantiating Templates](tutorial-stl-types.md)

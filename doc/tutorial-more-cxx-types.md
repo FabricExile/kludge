@@ -32,7 +32,7 @@ The result is the same, but we just created the STL vector directly rather than 
 
 Since Kludge prioritizes performance over ease of use, Kludge needs to provide a way to cooperate with C++'s heavy use of pointers and references.  In C++, pointers and references are often used as a mechanism to avoid making copies of data, and Kludge provides a reflection mechanism of C++ pointers and references into KL.  We will now see this in action.
 
-Let's begin with an example header file, 'RefEx.hpp':
+Let's begin with an example header file, `RefEx.hpp`:
 
 ```
 #pragma once
@@ -103,6 +103,6 @@ operator entry() {
 }
 ```
 
-Pointers and references will be covered in more detail later in the documentation.
+More about C++ pointers and references can be found in the section [Pointers and References](ptrs_refs.md).
 
-Next: [How Types are Wrapped](adl-types.md)
+Next: [The Kludge Wrapping Philosophy](philosophy.md)

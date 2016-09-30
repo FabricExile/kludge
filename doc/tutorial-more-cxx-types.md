@@ -1,6 +1,6 @@
 # Tutorial: More About Using C++ Types
 
-In the last tutorial we had to explicitly convery a KL array of integers into an STL vector in order to call a C++ function to reverse the elements of the vector.
+In the last tutorial we had to explicitly convert a KL array of integers into an STL vector in order to call a C++ function to reverse the elements of the vector.
 
 An obvious question is, why doesn't Kludge just automatically convert the vector?  The answer lies in a key design aspect of Kludge: **Kludge will try to make the extension as easy to use as possible, but not at the cost of significant performance loss**.
 
@@ -84,7 +84,7 @@ three
 
 as expected.  The key thing to notice here, however, is that we didn't construct a new KL string with the result; instead, we have a value of type `StdString_CxxConstRef`.  This KL type corresponds to the C++ type `std::string const &` and it allows us to avoid copying an actual string.  In this case it wouldn't matter much, but in the case where the string had millions of characters -- or it was a different heavyweight type -- it can make a big difference.
 
-Similar to `_CxxConstRef`, Kludge also supports `_CxxRef`, `_CxxConstPtr` and `_CxxPtr`.  One of the properties that these types have are that they automatically can use the methods of the type they refer or point to (as seen above), which allows you to avoid converting it to an actual instance of the type.  And, just like C++ pointers and references, you must be very careful when using them: it's easy to create code where the pointer or reference is to a value that has been destroyed.
+Similar to `_CxxConstRef`, Kludge also supports `_CxxRef`, `_CxxConstPtr` and `_CxxPtr`.  One of the properties that these types have are that they automatically can use the methods of the type they refer or point to (as seen above), which allows you to avoid converting it to an actual instance of the type.  And, just like C++ pointers and references, you must be very careful when using them: it's easy to create code where the pointer or reference points to a value that has been destroyed.
 
 Fortunately, for many use cases you don't have to worry about them if it's not important.  This is because there is (usually) an automatic conversion between pointers and references and the underlying type.  So, for example, this code would work as well:
 

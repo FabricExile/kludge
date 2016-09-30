@@ -95,7 +95,7 @@ So how exactly are the operators mapped to KL?
 
 - The line `MyInt a(7), b(5);` uses the C++ constructor that takes an `int` to create instances of the C++ type in KL
 
-- The line `report("a = " + SInt32(a));` uses the `operator int` of `MyInt` to allow coversion of `MyInt` to a KL SInt32 (which is equivalent to a C++ int)
+- The line `report("a = " + SInt32(a));` uses the `operator int` of `MyInt` to allow conversion of `MyInt` to a KL SInt32 (which is equivalent to a C++ int)
 
 - The line `report("a + b = " + SInt32(a+b));` uses the `operator +` of `MyInt` to add two values of the type
 

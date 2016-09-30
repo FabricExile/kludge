@@ -27,17 +27,17 @@ The `extends` parameter indicates C++ inheritance; in practice, it means that th
 
 The `forbid_copy` parameter prevents users from copying values of this type; this is mostly meant to be used when copying has been forbidden in C++.  The `is_abstract` parameter indicates that the type is abstract and can't be instantiated at all; however, it can be used in the `extends` clause of another type.  A value of this type can also be used through a pointer or reference to it.
 
-The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](adl-methods.md)).
+The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Wrapping Methods and Method-Like Type Additions](adl-methods.md)).
 
 ## `ext.add_in_place_type()`
 
 The *in-place* mechanism for wrapping types makes the KL memory layout of the type exactly match that in C++.  This means that the type is stored directly, which can make a positive difference for performance under certain circumstances.  However, it must be the case that all of the members of type are correctly specified in Kludge, in the right order, and they must all, too, be wrapped in-place.  **Note that Kludge currently does not do anything to ensure that these conditions are met; failing to meet them will cause unpredicatable results with your extension, usually crashes.**
 
-All of the simple nummeric types in C++ such as `int` and `float` are wrapped in-place.  Compound types can also be wrapped in-place; good examples of types that can be wrapped in place are fixed-size vectors, quaternions, fixed-size matrices, and any other class or struct whose members are (recursively) composed of simple C++ types.  Note however that for certain cases it makes sense to the `.add_mirror()` (see below).
+All of the simple nummeric types in C++ such as `int` and `float` are automatically wrapped in-place.  Compound types can also be wrapped in-place; good examples of types that can be wrapped in place are fixed-size vectors, quaternions, fixed-size matrices, and any other class or struct whose members are (recursively) composed of simple C++ types.  Note however that for certain cases it makes sense to use the `.add_mirror()` method instead (see below).
 
 The parameters of the `ext.add_in_place_type()` method are identical in name and function to those of `ext.add_owned_type()`.
 
-The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](adl-methods.md)).
+The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Wrapping Methods and Method-Like Type Additions](adl-methods.md)).
 
 ## `ext.add_wrapped_type()`
 
@@ -65,7 +65,7 @@ Additional notes about types wrapped with `ext.add_wrapped_type()`:
 
 - Kludge does track the underlying type that is wrapped via the template, but it will not generally be needed; it is prefixed with `Raw_`; for example, `Raw_DataBlob`.
 
-The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Adding Methods and the Like to Types](adl-methods.md)).
+The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Wrapping Methods and Method-Like Type Additions](adl-methods.md)).
 
 ## `ext.add_mirror()`
 
@@ -118,7 +118,7 @@ The `ext.add_enum()` method maps a C++ enum to a KL type alias and a set of cons
 
 `cpp_local_name` is the name of the enum in C++, and values is the array of values of the enum.  The values can either a (string, integer) tuple, which gives the integer value to the named enum value, or simply a string, in which case the next integer value is used (following the same rules as C++; by default, the first value is 0).  `kl_local_name` is the (optional) name of the enum in KL; if omitted it will be the C++ name.
 
-The `are_values_namespaced` flag indicates whether the values of the enum are in a nested namespace or not (see [the namespaces section of the documentation](adl-namespaces.md) for more information on namespace handling in Kludge).  For example, the enum:
+The `are_values_namespaced` flag indicates whether the values of the enum are in a nested namespace or not (see [Wrapping Namespaces](adl-namespaces.md) for more information on namespace handling in Kludge).  For example, the enum:
 
 ```
 ext.add_enum('Fruit', ['Apple', 'Orange'])
@@ -158,4 +158,4 @@ The `ext.add_alias()` method creates a simple KL type alias.  It takes the param
 
 It can general be used to represent C++ `typedef` and `using <type name> =` declarations.
 
-Next: [Methods Affecting Compilation](adl-comp-methods.md)
+Next: [Wrapping Namespaces](adl-namespaces.md)

@@ -6,7 +6,7 @@ It has already been shown in the tutorial how to wrap functions.  The specific m
   def add_func(self, cpp_name, returns=None, params=[], kl_name=None):
 ```
 
-`cpp_name` is the name of the C++ function.  `returns` is the C++ type that the function returns.  `params` is the list of parameters that the function takes; each element is either `Param(name, cpp_type_name)` or just a string, in which case it is just the C++ type name.  If provided, `kl_name` is the name for the function in KL, which is otherwish the same as `cpp_name`.
+`cpp_name` is the name of the C++ function.  `returns` is the C++ type that the function returns.  `params` is the list of parameters that the function takes; each element is either `Param(name, cpp_type_name)` or just a string, in which case it is just the C++ type name.  If provided, `kl_name` is the name for the function in KL, which is otherwise the same as `cpp_name`.
 
 For example, the description language code:
 
@@ -26,6 +26,6 @@ The result of `add_method()` supports `add_comment(comment)` and `add_test(kl, o
 
 - `add_comment(comment)` adds a comment that will appear, verbatim, above the KL wrapping for the function.  The comment must include KL commenting delimiters.  This is used by `kludge discover` to bring C++ function comments into KL.
 
-- `add_test(kl, out)` adds a unit test; it takes the `kl` parameter which is KL code for the test, and the `out` parmeter which is the expected output for the test.  See [Adding Unit Tests](unit-tests.md) for more details.
+- `add_test(kl, out)` adds a unit test; it takes the `kl` parameter which is KL code for the test, and the `out` parameter which is the expected output for the test.  See [Adding Unit Tests](unit-tests.md) for more details.
 
 Next: [Wrapping Types](adl-types.md)

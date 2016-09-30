@@ -1,6 +1,6 @@
 # Pointers and References
 
-As discussed previously, Kludge will automatically wrap pointer and reference types that are used by C++ for parameter and return values.  For a give type `MyType` these take the form `MyType_CxxConstPtr`, `MyType_CxxConstRef`, `MyType_CxxPtr` and `MyType_CxxRef`.
+As discussed previously, Kludge will automatically wrap pointer and reference types that are used by C++ for parameter and return values.  For a given type `MyType` these take the form `MyType_CxxConstPtr`, `MyType_CxxConstRef`, `MyType_CxxPtr` and `MyType_CxxRef`.
 
 The basic features that all of these types have are:
 
@@ -10,7 +10,7 @@ The basic features that all of these types have are:
 
 - Casting from `MyType` to each pointer and reference type is *usually* implicit, but sometimes requires an explicit call to eg. `Make_MyType_CxxConstPtr()`.  This is particularly required for casts from simple, built-in types like `SInt32` and `Float32` and is due to the implicit casting rules in KL.
 
-- Creating a value of a pointer or reference type will initially point to nothing, ie. will be null.  Trying to use this value (eg. by calling a method on it) will throw an exception in KL.  Use `MyType_CxxConstPtr.cxxIsValid()`, or just the cast
+- Creating a value of a pointer or reference type will initially point to nothing, i.e. will be null.  Trying to use this value (eg. by calling a method on it) will throw an exception in KL.  Use `MyType_CxxConstPtr.cxxIsValid()`, or just the cast
 
 Furthermore, each of these types expose a few extra methods to let you work with them, as described below.
 
@@ -36,7 +36,7 @@ Furthermore, each of these types expose a few extra methods to let you work with
 
 `_CxxRef` supports all the methods of `_CxxConstRef`, and additionally supports the methods:
 
-- `MyType_CxxRef.cxxSet(MyType)` sets the value of the reference value, ie. peforms a C++ assign of the value.
+- `MyType_CxxRef.cxxSet(MyType)` sets the value of the reference value, i.e. performs a C++ assign of the value.
 
 ## The `CxxCharConstPtr` Type
 

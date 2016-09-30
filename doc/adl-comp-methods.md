@@ -12,15 +12,15 @@ Adds a C++ preprocessor definition that is passed to the C++ compile (the `-D` p
 
 ## `ext.add_cpp_include_dir(directory)`
 
-Adds an include directory to to the C++ include directory path (the `-I` parameter in GCC and Clang).
+Adds an include directory to the C++ include directory path (the `-I` parameter in GCC and Clang).
 
 ## `add_cpp_quoted_include(filepath)`
 
-Adds a C++ inclusion directive to the top of the generated C++ extension.  The inclusion uses double quotes, ie. `#include "filepath"`
+Adds a C++ inclusion directive to the top of the generated C++ extension.  The inclusion uses double quotes, i.e. `#include "filepath"`
 
 ## `add_cpp_angled_include(filepath)`
 
-Adds a C++ inclusion directive to the top of the generated C++ extension.  The inclusion uses angle brackets, ie. `#include <filepath>`
+Adds a C++ inclusion directive to the top of the generated C++ extension.  The inclusion uses angle brackets, i.e. `#include <filepath>`
 
 ## `add_lib_dir(dirpath)`
 
@@ -36,7 +36,7 @@ Adds verbatim C++ code above everything (except comments) at the top of the gene
 
 ## `add_cpp_prolog(cpp_code)`
 
-Adds verbatim C++ code near the top of the generated extension C++ file, right after the include statments from `add_cpp_quoted_include` and `add_cpp_angled_include`.
+Adds verbatim C++ code near the top of the generated extension C++ file, right after the include statements from `add_cpp_quoted_include` and `add_cpp_angled_include`.
 
 ## `add_cpp_epilog(cpp_code)`
 

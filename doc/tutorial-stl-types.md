@@ -73,7 +73,7 @@ for ty in ['int']:
   ext.add_func('ReverseVector', 'std::vector<%s>'%ty, ['std::vector<%s> const &'%ty])
 ```
 
-Now try to run `test.kl`.  You will a different error this type, that there is no function `ReverseVector(SInt32[])`.  This is because, unlike for strings, there is no automatic conversion of KL vectors to STL vectors.  Instead, you must do this explcitly.  Change `test.kl` to:
+Now try to run `test.kl`.  You will get a different error this time, that there is no function `ReverseVector(SInt32[])`.  This is because, unlike for strings, there is no automatic conversion of KL vectors to STL vectors.  Instead, you must do this explicitly.  Change `test.kl` to:
 
 ```
 require STLUser;

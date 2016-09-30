@@ -25,7 +25,7 @@ private:
 };
 ```
 
-Since the class is entirely self-container, we do not need a corresponding `Counter.cpp` and do not need to compile a shared library for the class.
+Since the class is entirely self-contained, we do not need a corresponding `Counter.cpp` and do not need to compile a shared library for the class.
 
 Use Kludge's discover tool to build an API description of the header:
 
@@ -52,11 +52,11 @@ ext_Counter.add_method('add', 'void', [Param('amount', 'int')], this_access=This
 ext_Counter.add_method('reset', 'void', [], this_access=ThisAccess.mutable)
 ```
 
-These lines are fairly self explanitory, but the details are:
+These lines are fairly self explanatory, but the details are:
 
 - The `add_member` line adds a member to the type.  Since the member is private it is not strictly necessary to provide this line, but Kludge discover does anyway for completeness.  (Note that if the type is declared using `add_in_place_type` as covered in [Wrapping Types](adl-types.md) then the members must be provided even if they aren't public) 
 
-- The `add_ctor` line adds a constructor for the type.  The constructor takes no parameters, as indiciated by the empty array.
+- The `add_ctor` line adds a constructor for the type.  The constructor takes no parameters, as indicated by the empty array.
 
 - The `add_method` lines add methods to the type.  In each case the parameters are the name of the method, the return type, and the list of parameters, and finally the `ThisAccess` which specifies if the function is `const`, `static` or "mutable" (neither `static` nor `const`).
 

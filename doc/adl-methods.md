@@ -63,7 +63,7 @@ Float32 MyType.foo!(SInt32, Float32);
 Float32 MyType.foo!(SInt32, Float32, Boolean);
 ```
 
-Note that it is entirely possible to call `add_method` multiple times with the same name; the ffect is C++ and KL method overloading (which work the same way).  However, if there is an exact match on parameter types then there will be a C++ compile error for the extension itself.
+Note that it is entirely possible to call `add_method` multiple times with the same name; the effect is C++ and KL method overloading (which work the same way).  However, if there is an exact match on parameter types then there will be a C++ compile error for the extension itself.
 
 Static methods are wrapped as a global function with the method name prefixed by the type name.  So, for example,
 
@@ -83,7 +83,7 @@ The result of `add_method()` supports `add_comment(comment)` and `add_test(kl, o
 
 - `add_comment(comment)` adds a comment that will appear, verbatim, above the KL wrapping for the method.  The comment must include KL commenting delimiters.  This is used by `kludge discover` to bring C++ method comments into KL.
 
-- `add_test(kl, out)` adds a unit test; it takes the `kl` parameter which is KL code for the test, and the `out` parmeter which is the expected output for the test.
+- `add_test(kl, out)` adds a unit test; it takes the `kl` parameter which is KL code for the test, and the `out` parameter which is the expected output for the test.
 
 # `add_const_method()`, `add_mutable_method()` and `add_static_method()`
 

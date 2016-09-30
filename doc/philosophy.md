@@ -1,6 +1,6 @@
 # The Kludge Wrapping Philosophy
 
-The approach that Kludge takes when wrapping C++ code is allow you to incrementally build up the wrapping of a C++ library.  Except in the particular case of members of in-place wrapped types (see [Wrapping Types](wrapping-types.md)), Kludge doesn't require you to wrap all of anything; you can only wrap as little or as much as you need.
+The approach that Kludge takes when wrapping C++ code is allow you to incrementally build up the wrapping of a C++ library.  Except in the particular case of members of in-place wrapped types (see [Wrapping Types](adl-types.md)), Kludge doesn't require you to wrap all of anything; you can only wrap as little or as much as you need.
 
 There are several reasons for this approach:
 

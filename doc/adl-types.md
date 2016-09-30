@@ -19,7 +19,7 @@ The actual parameters of `.add_owned_type()` are
     forbid_copy=False,
     is_abstract=False,
     ):
-``
+```
 
 The only required parameter is `cpp_type_name`, which is the C++ type that is being wrapped.  By default the type will have the same name in KL, but this can be overridden with the `kl_type_name` parameter.
 

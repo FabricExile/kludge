@@ -12,6 +12,8 @@ sys.path.insert(0, os.path.join(kludge_llvm_root, 'lib', 'python'))
 
 import optparse, re, traceback, StringIO, tempfile, subprocess
 import clang
+from clang.cindex import Config
+Config.set_library_path(os.path.join(kludge_llvm_root, 'lib'))
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind, TokenKind
 from libkludge import util
 from libkludge.visibility import Visibility

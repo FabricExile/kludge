@@ -7,7 +7,7 @@
 class AbstractClass
 {
 public:
-  virtual const char * GetName() = NULL;
+  virtual const char * GetName() = 0;
 };
 
 class ParentClass : public AbstractClass

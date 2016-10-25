@@ -3,3 +3,4 @@
 .cache/
 *env.sh
 tmp/
+kludge.sublime-project

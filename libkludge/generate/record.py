@@ -412,8 +412,10 @@ class Record(Decl):
     self.bin_ops = []
     self.ass_ops = []
     self.casts = []
-    self.deref_kl_method_name = None
-    self.deref_result = None
+    self.const_deref_kl_method_name = None
+    self.const_deref_result = None
+    self.mutable_deref_kl_method_name = None
+    self.mutable_deref_result = None
     self.kls = []
 
     self.this_value_name = this_cpp_value_name
@@ -732,21 +734,31 @@ class Record(Decl):
     this_access = ThisAccess.const,
     kl_method_name = 'cxxDeref',
     ):
-    assert not self.deref_kl_method_name
     assert isinstance(kl_method_name, basestring)
-    self.deref_kl_method_name = kl_method_name
     assert isinstance(returns, basestring)
-    self.deref_result = ResultCodec(
-      self.ext.type_mgr.get_dqti(
-        self.resolve_cpp_type_expr(returns)
+    if this_access == ThisAccess.const:
+      assert not self.const_deref_kl_method_name
+      self.const_deref_kl_method_name = kl_method_name
+      self.const_deref_result = ResultCodec(
+        self.ext.type_mgr.get_dqti(
+          self.resolve_cpp_type_expr(returns)
+          )
         )
-      )
-    self.deref_this_access = this_access
+    else:
+      assert not self.mutable_deref_kl_method_name
+      self.mutable_deref_kl_method_name = kl_method_name
+      self.mutable_deref_result = ResultCodec(
+        self.ext.type_mgr.get_dqti(
+          self.resolve_cpp_type_expr(returns)
+          )
+        )
     return self
 
-  def get_deref_this(self, type_info):
-    assert self.deref_this_access != ThisAccess.static
-    return self.get_this(type_info, self.deref_this_access == ThisAccess.mutable)
+  def get_const_deref_this(self, type_info):
+    return self.get_const_this(type_info)
+
+  def get_mutable_deref_this(self, type_info):
+    return self.get_mutable_this(type_info)
 
   this_access_short_desc = {
     ThisAccess.const: 'CO',
@@ -773,8 +785,11 @@ class Record(Decl):
   def get_simple_ass_op_edk_symbol_name(self, type_info):
     return self.gen_edk_symbol_name('simple_ass_op', type_info, ThisAccess.mutable)
     
-  def get_deref_edk_symbol_name(self, type_info):
-    return self.gen_edk_symbol_name('deref', type_info, self.deref_this_access)
+  def get_const_deref_edk_symbol_name(self, type_info):
+    return self.gen_edk_symbol_name('deref', type_info, ThisAccess.const)
+
+  def get_mutable_deref_edk_symbol_name(self, type_info):
+    return self.gen_edk_symbol_name('deref', type_info, ThisAccess.mutable)
 
   def get_get_ind_op_edk_symbol_name(self, type_info):
     return self.gen_edk_symbol_name('get_ind_op', type_info, self.get_ind_op_this_access)

@@ -267,14 +267,24 @@
 
 {% endfor %}
 {% endif %}
-{% if type_info.is_direct and record.deref_kl_method_name %}
+{% if type_info.is_direct and record.const_deref_kl_method_name %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// Deref
+// Const Deref
 ////////////////////////////////////////////////////////////////////////
-{{record.deref_result.type_info.kl.name}}
-{{type_info.kl.name}}.{{record.deref_kl_method_name}}(
-    ) = "{{record.get_deref_edk_symbol_name(type_info)}}";
+{{record.const_deref_result.type_info.kl.name}}
+{{type_info.kl.name}}.{{record.const_deref_kl_method_name}}(
+    ) = "{{record.get_const_deref_edk_symbol_name(type_info)}}";
+
+{% endif %}
+{% if type_info.is_direct and record.mutable_deref_kl_method_name %}
+////////////////////////////////////////////////////////////////////////
+// {{type_info}}
+// Mutable mutable_Deref
+////////////////////////////////////////////////////////////////////////
+{{record.mutable_deref_result.type_info.kl.name}}
+{{type_info.kl.name}}.{{record.mutable_deref_kl_method_name}}(
+    ) = "{{record.get_mutable_deref_edk_symbol_name(type_info)}}";
 
 {% endif %}
 {% if record.get_ind_op_result %}

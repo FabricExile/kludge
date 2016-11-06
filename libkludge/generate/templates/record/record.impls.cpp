@@ -261,20 +261,37 @@ FABRIC_EXT_EXPORT void
 
 {% endfor %}
 {% endif %}
-{% if record.deref_kl_method_name %}
+{% if record.const_deref_kl_method_name %}
 ////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// Deref
+// Const const_Deref
 ////////////////////////////////////////////////////////////////////////
 
-FABRIC_EXT_EXPORT {{record.deref_result.render_direct_type_edk()}}
-{{record.get_deref_edk_symbol_name(type_info)}}(
-    {{macros.edk_param_list(record.deref_result, record.get_deref_this(type_info), None) | indent(4)}}
+FABRIC_EXT_EXPORT {{record.const_deref_result.render_direct_type_edk()}}
+{{record.get_const_deref_edk_symbol_name(type_info)}}(
+    {{macros.edk_param_list(record.const_deref_result, record.get_const_deref_this(type_info), None) | indent(4)}}
     )
 {
-    {{macros.cpp_call_pre(record.deref_result, None) | indent(4)}}
-        *{{record.get_deref_this(type_info).render_ref() | indent(8)}}
-    {{macros.cpp_call_post(record.deref_result, None) | indent(4)}}
+    {{macros.cpp_call_pre(record.const_deref_result, None) | indent(4)}}
+        *{{record.get_const_deref_this(type_info).render_ref() | indent(8)}}
+    {{macros.cpp_call_post(record.const_deref_result, None) | indent(4)}}
+}
+
+{% endif %}
+{% if record.mutable_deref_kl_method_name %}
+////////////////////////////////////////////////////////////////////////
+// {{type_info}}
+// mutable mutable_Deref
+////////////////////////////////////////////////////////////////////////
+
+FABRIC_EXT_EXPORT {{record.mutable_deref_result.render_direct_type_edk()}}
+{{record.get_mutable_deref_edk_symbol_name(type_info)}}(
+    {{macros.edk_param_list(record.mutable_deref_result, record.get_mutable_deref_this(type_info), None) | indent(4)}}
+    )
+{
+    {{macros.cpp_call_pre(record.mutable_deref_result, None) | indent(4)}}
+        *{{record.get_mutable_deref_this(type_info).render_ref() | indent(8)}}
+    {{macros.cpp_call_post(record.mutable_deref_result, None) | indent(4)}}
 }
 
 {% endif %}

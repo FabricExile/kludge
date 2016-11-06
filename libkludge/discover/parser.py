@@ -259,6 +259,25 @@ class Parser(object):
         if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
           if child_cursor.spelling == "operator=":
             pass
+          elif child_cursor.spelling == "operator[]":
+            if child_cursor.is_const_method():
+              methods.append(
+                "# %s\n%s.add_get_ind_op('%s')%s" % (
+                  self.location_desc(child_cursor.location),
+                  child_obj,
+                  child_cursor.result_type.spelling,
+                  self.parse_comment(child_ast_logger, child_cursor),
+                  )
+                )
+            else:
+              methods.append(
+                "# %s\n%s.add_set_ind_op('%s')%s" % (
+                  self.location_desc(child_cursor.location),
+                  child_obj,
+                  child_cursor.result_type.spelling,
+                  self.parse_comment(child_ast_logger, child_cursor),
+                  )
+                )
           elif child_cursor.spelling == "operator++":
             methods.append(
               "# %s\n%s.add_uni_op('++', '%s')%s" % (

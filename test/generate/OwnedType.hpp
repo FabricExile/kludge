@@ -142,7 +142,15 @@ inline void GlobalFuncTakingClassConstRef( Class const &klass ) {
   std::cout << "GlobalFuncTakingClassConstRef: klass.stringValue = " + klass.stringValue + "\n" << std::flush;
 }
 
-Class ReturnClass() {
+inline Class operator*( Class const &lhs, Class const &rhs ) {
+  return Class(
+    lhs.floatValue * rhs.floatValue,
+    lhs.stringValue + rhs.stringValue,
+    lhs.getIntValue() * rhs.getIntValue()
+    );
+}
+
+inline Class ReturnClass() {
   return Class( 5.61, "foo", -43 );
 }
 

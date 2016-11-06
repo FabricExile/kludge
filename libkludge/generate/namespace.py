@@ -8,6 +8,7 @@ from record import Record
 from alias import Alias
 from enum import Enum
 from func import Func
+from bin_op import BinOp
 from param import Param
 from massage import *
 from libkludge.types import KLExtTypeAliasSelector
@@ -125,7 +126,21 @@ class Namespace:
       self.ext.add_decl(func)
       return func
     except Exception as e:
-      self.warning("Ignoring function %s: %s" % (cpp_local_name, e))
+      self.warning("Ignoring func %s: %s" % (cpp_local_name, e))
+      return EmptyCommentContainer()
+
+  def add_bin_op(self, op, returns, params):
+    try:
+      bin_op = BinOp(
+        self,
+        op,
+        massage_returns(returns),
+        massage_params(params),
+        )
+      self.ext.add_decl(bin_op)
+      return bin_op
+    except Exception as e:
+      self.warning("Ignoring bin_op %s: %s" % (op, e))
       return EmptyCommentContainer()
 
   def add_alias(self, new_cpp_type_name, old_cpp_type_name):

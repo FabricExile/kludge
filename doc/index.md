@@ -10,7 +10,7 @@
  - [More About Using C++ Types](tutorial-more-cxx-types.md)
 - [The Kludge Wrapping Philosophy](philosophy.md)
 - The API Description Language
- - [Wrapping Functions](adl-functions.md)
+ - [Wrapping Functions and Function-Like Globals](adl-functions.md)
  - [Wrapping Types](adl-types.md)
  - [Wrapping Namespaces](adl-namespaces.md)
  - [Wrapping Methods and Method-Like Type Additions](adl-methods.md)

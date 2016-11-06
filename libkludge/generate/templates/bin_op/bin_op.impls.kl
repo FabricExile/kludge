@@ -1,0 +1,12 @@
+{######################################################################}
+{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
+{######################################################################}
+{% import "generate/macros.kl" as macros %}
+{% extends "generate/decl/decl.impls.kl" %}
+{% block body %}
+{{ bin_op.result.render_type_kl() }}
+{{ bin_op.op }}(
+    {{ macros.kl_param_list(bin_op.params) | indent(4) }}
+    ) = "{{bin_op.get_edk_symbol_name()}}";
+
+{% endblock body %}

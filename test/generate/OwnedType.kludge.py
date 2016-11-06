@@ -125,6 +125,20 @@ c1 = Class:{floatValue:+10.8,stringValue:oneone}
 Class::~Class()
 """)
 
+ext.add_bin_op('*', 'Class', ['Class const &', 'Class const &'])\
+  .add_test("""
+Class c1(5.4, "one", -7);
+report("c1 = " + c1);
+report("c1 * c1 = " + (c1 * c1));
+""", """
+Class::Class(5.4, one, -7)
+c1 = Class:{floatValue:+5.4,stringValue:one}
+Class::Class(29.16, oneone, 49)
+c1 * c1 = Class:{floatValue:+29.16,stringValue:oneone}
+Class::~Class()
+Class::~Class()
+""")
+
 ext.add_func('GlobalFuncTakingClassConstRef', None, ['Class const &'])\
   .add_test("""
 GlobalFuncTakingClassConstRef("hello");

@@ -15,3 +15,7 @@ public:
 private:
   int m_a;
 };
+
+inline Issue2 operator*( Issue2 const &lhs, Issue2 const &rhs ) {
+  return Issue2( *lhs * *rhs );
+}

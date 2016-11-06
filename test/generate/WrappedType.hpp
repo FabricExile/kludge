@@ -77,6 +77,9 @@ public:
 
   std::string const &publicMethod() { return stringValue; }
 
+  int getIntValue() const
+    { return pri_intValue; }
+
 public:
 
   float floatValue;
@@ -86,7 +89,6 @@ private:
 
   int pri_intValue;
 };
-
 
 class DerivedClass : public Class
 {

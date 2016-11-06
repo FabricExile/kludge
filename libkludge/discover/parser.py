@@ -408,14 +408,30 @@ class Parser(object):
       print >>defns, ""
 
   def parse_function_decl(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
-    defns.write("# %s\n%s.add_func('%s', '%s', %s)%s\n\n" % (
-      self.location_desc(cursor.location),
-      obj,
-      cursor.spelling,
-      cursor.result_type.spelling,
-      self.parse_params(ast_logger, cursor),
-      self.parse_comment(ast_logger, cursor),
-      ))
+    if cursor.spelling in [
+      'operator+',
+      'operator-',
+      'operator*',
+      'operator/',
+      'operator%',
+      ]:
+      defns.write("# %s\n%s.add_bin_op('%s', '%s', %s)%s\n\n" % (
+        self.location_desc(cursor.location),
+        obj,
+        cursor.spelling[-1],
+        cursor.result_type.spelling,
+        self.parse_params(ast_logger, cursor),
+        self.parse_comment(ast_logger, cursor),
+        ))
+    else:
+      defns.write("# %s\n%s.add_func('%s', '%s', %s)%s\n\n" % (
+        self.location_desc(cursor.location),
+        obj,
+        cursor.spelling,
+        cursor.result_type.spelling,
+        self.parse_params(ast_logger, cursor),
+        self.parse_comment(ast_logger, cursor),
+        ))
 
   def parse_enum_decl(self, ast_logger, cursor, obj, decls, defns, should_include_cursor):
     values = []

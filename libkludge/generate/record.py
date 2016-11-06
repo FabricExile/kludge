@@ -396,7 +396,10 @@ class Record(Decl):
         self.namespace,
         predicate = inspect.ismethod,
         ):
-        if namespace_method[0] not in ['add_func']:
+        if namespace_method[0] not in [
+          'add_func',
+          'add_bin_op',
+          ]:
           setattr(self, namespace_method[0], namespace_method[1])
     else:
       self.namespace = parent_namespace

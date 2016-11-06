@@ -106,7 +106,14 @@ class Namespace:
       and isinstance(cpp_type_expr.components[0], Simple)
     return self.create_child(cpp_type_expr.components[0], kl_name)
 
-  def add_func(self, cpp_name, returns=None, params=[], kl_name=None):
+  def add_func(
+    self,
+    cpp_name,
+    returns=None,
+    params=[],
+    opt_params=[],
+    kl_name=None,
+    ):
     cpp_local_name = cpp_name
     try:
       cpp_global_name = "::".join(self.nested_cpp_names + [cpp_local_name])
@@ -116,15 +123,23 @@ class Namespace:
         kl_local_name = cpp_local_name
       kl_global_name = "_".join(self.nested_kl_names + [kl_local_name])
 
-      func = Func(
-        self,
-        cpp_global_name,
-        kl_global_name,
-        massage_returns(returns),
-        massage_params(params),
-        )
-      self.ext.add_decl(func)
-      return func
+      returns = massage_returns(returns)
+      params = massage_params(params)
+      opt_params = massage_params(opt_params)
+
+      result = None
+      for i in range(0, len(opt_params)+1):
+        func = Func(
+          self,
+          cpp_global_name,
+          kl_global_name,
+          returns,
+          params + opt_params[0:i],
+          )
+        self.ext.add_decl(func)
+        if not result:
+          result = func
+      return result
     except Exception as e:
       self.warning("Ignoring func %s: %s" % (cpp_local_name, e))
       return EmptyCommentContainer()

@@ -23,3 +23,7 @@ inline CxxVec2 const &ReturnCxxVec2ConstRef()
   static CxxVec2 vec2(1.2, -6);
   return vec2;
 }
+
+inline CxxVec2 DoubleCxxVec2( CxxVec2 const &vec2 ) {
+  return CxxVec2( vec2.x + vec2.x, vec2.y + vec2.y );
+}

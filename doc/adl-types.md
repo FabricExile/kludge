@@ -52,11 +52,7 @@ void MyOpaque_SetX( MyOpaque *_r, int x );
 void MyOpaque_Delete( MyOpaque *_r );
 ```
 
-## `ext.add_wrapped_type()`
-
-The *wrapped* mechanism for wrapping types is used to hold a value that is contained by a C++ template; the most common use case of this is when the value is owned by some sort of shared pointer template, but it is not limited to only this case; it will generally work with any template which exposes the C++ `operator->()` to access the value the template owns.
-
-The parameters for `.add_wrapped_type()` are:
+The parameters for `.add_opaque_type()` are:
 
 ```
   def add_opaque_type(
@@ -70,6 +66,34 @@ The parameters for `.add_wrapped_type()` are:
 The `extends` parameter acts a little bit differently than for other types.  It is not required that the C++ type actually inherits from the type given by `extends`; instead, Kludge assumes that it is safe to `reinterpret_cast` to the derived type.  This is because many C APIs use opaque pointers exactly in this manner.
 
 The result of the `ext.add_opaque_type()` call is a record object that can be used to add tests to the type.  Note, however, that it is not currently possible to add methods or members to opaque types through the Kludge specification language; currently, the only way to use opaque types is through functions.  However, you can provide boilerplate code that wraps these functions as methods.
+
+## `ext.add_wrapped_type()`
+
+The *wrapped* mechanism for wrapping types is used to hold a value that is contained by a C++ template; the most common use case of this is when the value is owned by some sort of shared pointer template, but it is not limited to only this case; it will generally work with any template which exposes the C++ `operator->()` to access the value the template owns.
+
+The parameters for `.add_wrapped_type()` are:
+
+```
+  def add_wrapped_type(
+    self,
+    cpp_wrapper_name,
+    cpp_type_name,
+    kl_type_name=None,
+    extends=None,
+    forbid_copy=False,
+    is_abstract=False,
+    ):
+```
+
+The only additional parameters is `cpp_wrapped_name`, which is the name of the C++ template that wraps the owned value.  For example, if the type that is being wrapped is called `DataBlob` and it is owned through the `SharedPtr` template, then the type would be wrapped with `ext.add_wrapped_type('SharedPtr', 'DataBlob')`.  Internally, Kludge will own a copy of a value of type `SharedPtr<DataBlob>`, thus respecting the shared pointer semantics.
+
+Additional notes about types wrapped with `ext.add_wrapped_type()`:
+
+- References and pointers for the type, for example `DataBlock_CxxConstPtr` using the above syntax, does not point to the wrapped value but rather the unwrapped value (i.e. the result of `operator->()`).  It is still possible to get pointers and references to wrapped values; their type is prefixed with `Wrapped_`; for example, `Wrapped_DataBlock_CxxConstPtr`.
+
+- Kludge does track the underlying type that is wrapped via the template, but it will not generally be needed; it is prefixed with `Raw_`; for example, `Raw_DataBlob`.
+
+The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Wrapping Methods and Method-Like Type Additions](adl-methods.md)).
 
 ## `ext.add_mirror()`
 

@@ -301,6 +301,11 @@ class Namespace:
     record=None,
     forbid_copy=False,
     is_abstract=False,
+    lookup_wrapper=None,
+    include_empty_ctor=True,
+    include_copy_ctor=True,
+    include_simple_ass_op=True,
+    include_dtor=True,
     ):
     if not cpp_global_expr:
       assert isinstance(cpp_local_expr, Named)
@@ -319,6 +324,10 @@ class Namespace:
         child_namespace_kl_name=kl_local_name_for_derivatives,
         extends=(extends_type_info and extends_type_info.record),
         is_abstract=is_abstract,
+        include_empty_ctor=include_empty_ctor,
+        include_copy_ctor=include_copy_ctor,
+        include_simple_ass_op=include_simple_ass_op,
+        include_dtor=include_dtor,
         )
     selector = self.type_mgr.named_selectors[variant]
     selector.register(
@@ -334,7 +343,10 @@ class Namespace:
       cpp_global_expr.components[-1],
       cpp_global_expr,
       )
-    self.type_mgr.get_dqti(cpp_global_expr)
+    if lookup_wrapper:
+      self.type_mgr.get_dqti(lookup_wrapper(cpp_global_expr))
+    else:
+      self.type_mgr.get_dqti(cpp_global_expr)
     return record
 
   def add_owned_type(
@@ -360,6 +372,34 @@ class Namespace:
       forbid_copy=forbid_copy,
       is_abstract=is_abstract,
       variant='owned',
+      )
+
+  def add_opaque_type(
+    self,
+    cpp_type_name,
+    kl_type_name=None,
+    extends=None,
+    ):
+    cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
+    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
+    extends_type_info = None
+    if extends:
+      extends_cpp_type_expr = PointerTo(self.cpp_type_expr_parser.parse(extends))
+      extends_dqti = self.type_mgr.maybe_get_dqti(extends_cpp_type_expr)
+      if extends_dqti:
+        extends_type_info = extends_dqti.type_info
+    return self.add_type(
+      cpp_local_expr=cpp_local_expr,
+      kl_local_name=kl_local_name,
+      extends_type_info=extends_type_info,
+      forbid_copy=False,
+      is_abstract=False,
+      variant='opaque',
+      lookup_wrapper=PointerTo,
+      include_empty_ctor=False,
+      include_copy_ctor=False,
+      include_simple_ass_op=False,
+      include_dtor=False,
       )
 
   def add_in_place_type(

@@ -1,0 +1,19 @@
+{######################################################################}
+{# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
+{######################################################################}
+{% extends "generate/decl/decl.defns.kl" %}
+{% block body %}
+{% for comment in decl.type_info.record.comments %}
+{{comment}}
+{% endfor %}
+struct {{decl.type_info.kl.name}}
+{% if decl.type_info.extends %}
+  : {{decl.type_info.extends.kl.name}}
+  {};
+{% else %}
+{
+  protected Data cpp_ptr;
+};
+{% endif %}
+
+{% endblock body %}

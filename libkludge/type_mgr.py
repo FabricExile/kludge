@@ -21,6 +21,7 @@ class TypeMgr:
 
     self.named_selectors = {
       'owned': OwnedSelector(ext),
+      'opaque': OpaqueSelector(ext),
       'wrapped': WrappedSelector(ext),
       'in_place': InPlaceSelector(ext),
       'mirror': MirrorSelector(ext),
@@ -31,6 +32,7 @@ class TypeMgr:
     self.add_selector(VoidPtrSelector(ext))
     self.add_selector(self.named_selectors['in_place'])
     self.add_selector(self.named_selectors['owned'])
+    self.add_selector(self.named_selectors['opaque'])
     self.add_selector(self.named_selectors['wrapped'])
     self.add_selector(self.named_selectors['mirror'])
     self.add_selector(FixedArraySelector(ext))

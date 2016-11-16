@@ -1,6 +1,4 @@
 {######################################################################}
 {# Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved. #}
 {######################################################################}
-{% if param.is_mutable_indirect %}
-{{param.conv.render_lib_to_edk()}}
-{% endif %}
+{{conv.value_name.lib}} = reinterpret_cast< ::{{conv.type_info.lib.name.base}} >( {{conv.value_name.edk}}.cpp_ptr );

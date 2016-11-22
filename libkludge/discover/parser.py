@@ -598,7 +598,7 @@ class Parser(object):
 
             def should_include_cursor(cursor):
               if hasattr(cursor.location.file, 'name') \
-                and cursor.location.file.name not in include_abspaths:
+                and os.path.abspath(cursor.location.file.name) not in include_abspaths:
                 self.debug("Skipping AST nodes for '%s'" % cursor.location.file.name)
                 return False
               return True

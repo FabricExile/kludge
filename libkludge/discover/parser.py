@@ -2,19 +2,24 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import os, sys
-
-kludge_llvm_root = os.environ.get('KLUDGE_LLVM_ROOT')
-if not kludge_llvm_root:
-  print "Missing KLUDGE_LLVM_ROOT environment variabling; exiting."
-  sys.exit(1)
-sys.path.insert(0, os.path.join(kludge_llvm_root, 'lib', 'python'))
-
+import os, sys, platform
 import optparse, re, traceback, StringIO, tempfile, subprocess
-import clang
-from clang.cindex import Config
-Config.set_library_path(os.path.join(kludge_llvm_root, 'lib'))
-from clang.cindex import AccessSpecifier, CursorKind, TypeKind, TokenKind
+
+try:
+  import clang
+except:
+  kludge_llvm_root = os.environ.get('KLUDGE_LLVM_ROOT')
+  if not kludge_llvm_root:
+    print "Cannot find libclang Python module; exiting."
+    sys.exit(1)
+  sys.path.insert(0, os.path.join(kludge_llvm_root, 'lib', 'python'))
+  import clang
+  if platform.system() == 'Windows':
+    Config.set_library_path(os.path.join(kludge_llvm_root, 'bin'))
+  else:
+    Config.set_library_path(os.path.join(kludge_llvm_root, 'lib'))
+from clang.cindex import Config, AccessSpecifier, CursorKind, TypeKind, TokenKind
+
 from libkludge import util
 from libkludge.visibility import Visibility
 from libkludge import cpp_type_expr_parser
@@ -25,9 +30,17 @@ class Parser(object):
     self.name = name
     self.opts = opts
 
-    clang_output = subprocess.check_output([self.expand_envvars('${KLUDGE_LLVM_ROOT}/bin/clang'), '--version'])
-    clang_version = re.search('version ([0-9]+\.[0-9]+\.[0-9]) ', clang_output).group(1)
-    
+    fabric_dir = os.environ.get('FABRIC_DIR')
+    if fabric_dir:
+      clang_root = os.path.join(fabric_dir, 'Tools', 'Kludge', 'clang')
+    else:
+      kludge_llvm_root = os.environ.get('KLUDGE_LLVM_ROOT')
+      if kludge_llvm_root:
+        clang_root = kludge_llvm_root
+      else:
+        print "Cannot find libclang headers; exiting."
+        sys.exit(1)
+
     self.opts.dirs_to_ignore = [self.expand_envvars(dir) for dir in self.opts.dirs_to_ignore]
     self.clang_opts = ['-x', 'c++']
     if self.opts.clang_opts:
@@ -35,8 +48,8 @@ class Parser(object):
     if self.opts.cpppath:
       for cppdir in self.opts.cpppath:
           self.clang_opts.extend(["-I", self.expand_envvars(cppdir)])
-    self.clang_opts.extend(["-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/include/c++/v1')])
-    self.clang_opts.extend(["-isystem", self.expand_envvars('${KLUDGE_LLVM_ROOT}/lib/clang/%s/include' % clang_version)])
+    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(fabric_dir, 'include', 'c++', 'v1'))])
+    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(fabric_dir, 'lib', 'clang', '3.9.0', 'include'))])
     if self.opts.cppdefines:
       for cppdefine in self.opts.cppdefines:
           self.clang_opts.extend(["-D", self.expand_envvars(cppdefine)])

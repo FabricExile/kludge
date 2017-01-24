@@ -12,6 +12,13 @@ if platform.system() == 'Windows':
 
 try:
   import clang
+  from clang.cindex import Config
+  fabric_dir = os.environ.get('FABRIC_DIR')
+  if fabric_dir:
+    if platform.system() == 'Windows':
+      Config.set_library_path(os.path.join(fabric_dir, 'bin'))
+    else:
+      Config.set_library_path(os.path.join(fabric_dir, 'lib'))
 except:
   kludge_llvm_root = os.environ.get('KLUDGE_LLVM_ROOT')
   if not kludge_llvm_root:
@@ -19,11 +26,12 @@ except:
     sys.exit(1)
   sys.path.insert(0, os.path.join(kludge_llvm_root, 'lib', 'python'))
   import clang
+  from clang.cindex import Config
   if platform.system() == 'Windows':
     Config.set_library_path(os.path.join(kludge_llvm_root, 'bin'))
   else:
     Config.set_library_path(os.path.join(kludge_llvm_root, 'lib'))
-from clang.cindex import Config, AccessSpecifier, CursorKind, TypeKind, TokenKind
+from clang.cindex import AccessSpecifier, CursorKind, TypeKind, TokenKind
 
 from libkludge import util
 from libkludge.visibility import Visibility

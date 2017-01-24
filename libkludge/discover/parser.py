@@ -5,6 +5,12 @@
 import os, sys, platform
 import optparse, re, traceback, StringIO, tempfile, subprocess
 
+if platform.system() == 'Windows':
+  print sys.version_info
+  if sys.version_info < (2, 7, 13) or sys.version_info >= (3, 0, 0):
+    print "Python 2.7.13+ is required on Windows; exiting."
+    sys.exit(1)
+
 try:
   import clang
 except:

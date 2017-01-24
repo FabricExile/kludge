@@ -13,7 +13,7 @@ Global usage:
   for command in libkludge.commands:
     print """%s %s %s
   %s""" % (
-      sys.argv[0],
+      'kludge',
       command.name,
       command.usage,
       command.description,

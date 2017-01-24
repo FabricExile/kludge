@@ -32,7 +32,7 @@ def test_generate(basename):
 
   assert subprocess.call(
     [
-      './kludge', 'generate',
+      'kludge', 'generate',
       '-o', test_tmp_dir,
       # '--debug-type-templates',
       basename,
@@ -93,7 +93,7 @@ def test_discover(basename):
     os.makedirs(test_tmp_dir)
 
   discover_args = [
-    './kludge', 'discover',
+    'kludge', 'discover',
     '-I', test_generate_dir,
     '-o', test_tmp_dir,
     basename,
@@ -103,7 +103,7 @@ def test_discover(basename):
   assert subprocess.call(discover_args) == 0
 
   generate_args = [
-    '../../../../kludge', 'generate',
+    'kludge', 'generate',
     # '--debug-type-templates',
     basename,
     basename + '.kludge.py',

@@ -24,25 +24,25 @@ class Ext:
       loader = jinja2.PrefixLoader({
           "protocols": jinja2.PrefixLoader({
               "conv": jinja2.PrefixLoader({
-                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/conv'),
+                  "builtin": jinja2.PackageLoader('libkludge', 'protocols/conv'),
                   }),
               "result": jinja2.PrefixLoader({
-                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/result'),
+                  "builtin": jinja2.PackageLoader('libkludge', 'protocols/result'),
                   }),
               "param": jinja2.PrefixLoader({
-                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/param'),
+                  "builtin": jinja2.PackageLoader('libkludge', 'protocols/param'),
                   }),
               "self": jinja2.PrefixLoader({
-                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/self'),
+                  "builtin": jinja2.PackageLoader('libkludge', 'protocols/self'),
                   }),
               "repr": jinja2.PrefixLoader({
-                  "builtin": jinja2.PackageLoader('__main__', 'libkludge/protocols/repr'),
+                  "builtin": jinja2.PackageLoader('libkludge', 'protocols/repr'),
                   }),
               }),
           "types": jinja2.PrefixLoader({
-              "builtin": jinja2.PackageLoader('__main__', 'libkludge/types'),
+              "builtin": jinja2.PackageLoader('libkludge', 'types'),
               }),
-          "generate": jinja2.PackageLoader('__main__', 'libkludge/generate/templates'),
+          "generate": jinja2.PackageLoader('libkludge', 'generate/templates'),
           }),
       )
     setattr(self.jinjenv, 'opts', opts)

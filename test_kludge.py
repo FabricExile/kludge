@@ -54,11 +54,15 @@ def test_generate(basename):
 
   scons_env = os.environ.copy()
   scons_env['CPPPATH'] = os.path.abspath(test_generate_dir)
+  if platform.system() == 'Windows':
+    scons_args = ['scons.bat']
+  else:
+    scons_args = ['scons']
+  scons_args.extend([
+    '-f', basename + '.SConstruct',
+    ])
   assert subprocess.call(
-    [
-      'python', os.path.join(sys.exec_prefix, 'Scripts', 'scons.py'),
-      '-f', basename + '.SConstruct',
-      ],
+    scons_args,
     cwd = test_tmp_dir,
     env = scons_env,
     ) == 0
@@ -128,11 +132,14 @@ def test_discover(basename):
 
   scons_env = os.environ.copy()
   scons_env['CPPPATH'] = root_dir
-  scons_args = [
-    'python', os.path.join(sys.exec_prefix, 'Scripts', 'scons.py'),
+  if platform.system() == 'Windows':
+    scons_args = ['scons.bat']
+  else:
+    scons_args = ['scons']
+  scons_args.extend([
     '-f', basename + '.SConstruct',
     'VERBOSE=1',
-    ]
+    ])
   print 'RUN: ' + ' '.join(scons_args)
   assert subprocess.call(
     scons_args,

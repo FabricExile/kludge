@@ -61,8 +61,8 @@ class Parser(object):
     if self.opts.cpppath:
       for cppdir in self.opts.cpppath:
           self.clang_opts.extend(["-I", self.expand_envvars(cppdir)])
-    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(fabric_dir, 'include', 'c++', 'v1'))])
-    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(fabric_dir, 'lib', 'clang', '3.9.0', 'include'))])
+    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'include', 'c++', 'v1'))])
+    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'lib', 'clang', '3.9.0', 'include'))])
     if self.opts.cppdefines:
       for cppdefine in self.opts.cppdefines:
           self.clang_opts.extend(["-D", self.expand_envvars(cppdefine)])

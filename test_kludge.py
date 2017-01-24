@@ -3,10 +3,22 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-import os, pytest, subprocess, difflib
+import os, sys, pytest, subprocess, difflib, platform
 
-test_generate_dir = os.path.join('test', 'generate')
-test_generate_tmp_dir_base = os.path.join('test', 'tmp', 'generate')
+fabric_scene_graph_dir = os.environ['FABRIC_SCENE_GRAPH_DIR']
+if fabric_scene_graph_dir:
+  root_dir = os.path.join(fabric_scene_graph_dir, 'Native', 'Tools', 'Kludge')
+else:
+  root_dir = '.'
+
+fabric_dir = os.environ['FABRIC_DIR']
+if fabric_dir:
+  kludge = os.path.join(fabric_dir, 'Tools', 'Kludge', 'kludge.py')
+else:
+  kludge = 'kludge'
+
+test_generate_dir = os.path.join(root_dir, 'test', 'generate')
+test_generate_tmp_dir_base = os.path.join(root_dir, 'test', 'tmp', 'generate')
 
 def collect_test_generate_basenames():
   result = []
@@ -32,7 +44,7 @@ def test_generate(basename):
 
   assert subprocess.call(
     [
-      'kludge', 'generate',
+      'python', kludge, 'generate',
       '-o', test_tmp_dir,
       # '--debug-type-templates',
       basename,
@@ -44,7 +56,7 @@ def test_generate(basename):
   scons_env['CPPPATH'] = os.path.abspath(test_generate_dir)
   assert subprocess.call(
     [
-      'scons',
+      'python', os.path.join(sys.exec_prefix, 'Scripts', 'scons.py'),
       '-f', basename + '.SConstruct',
       ],
     cwd = test_tmp_dir,
@@ -93,7 +105,7 @@ def test_discover(basename):
     os.makedirs(test_tmp_dir)
 
   discover_args = [
-    'kludge', 'discover',
+    'python', kludge, 'discover',
     '-I', test_generate_dir,
     '-o', test_tmp_dir,
     basename,
@@ -103,7 +115,7 @@ def test_discover(basename):
   assert subprocess.call(discover_args) == 0
 
   generate_args = [
-    'kludge', 'generate',
+    'python', kludge, 'generate',
     # '--debug-type-templates',
     basename,
     basename + '.kludge.py',
@@ -115,9 +127,9 @@ def test_discover(basename):
     ) == 0
 
   scons_env = os.environ.copy()
-  scons_env['CPPPATH'] = os.path.abspath('.')
+  scons_env['CPPPATH'] = root_dir
   scons_args = [
-    'scons',
+    'python', os.path.join(sys.exec_prefix, 'Scripts', 'scons.py'),
     '-f', basename + '.SConstruct',
     'VERBOSE=1',
     ]

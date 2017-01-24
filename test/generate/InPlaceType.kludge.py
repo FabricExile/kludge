@@ -153,7 +153,7 @@ dty.add_member('shortValue', 'short')
 dty.add_ctor(['int', 'float', 'short'])
 dty.add_const_method('anotherPublicMethod', 'short')\
   .add_test("""
-DerivedClass dc(5, -1e9, 56);
+DerivedClass dc(5, -3.14, 56);
 report("dc.shortValue = " + dc.shortValue);
 report("dc.publicConstMethod() = " + dc.publicConstMethod());
 report("dc.anotherPublicMethod() = " + dc.anotherPublicMethod());
@@ -162,13 +162,13 @@ report("dc_cr.cxxGet_shortValue() = " + dc_cr.cxxGet_shortValue());
 report("dc_cr.publicConstMethod() = " + dc_cr.publicConstMethod());
 report("dc_cr.anotherPublicMethod() = " + dc_cr.anotherPublicMethod());
 """, """
-Class::Class(5, -1e+09)
-DerivedClass::DerivedClass(5, -1e+09, 56)
+Class::Class(5, -3.14)
+DerivedClass::DerivedClass(5, -3.14, 56)
 dc.shortValue = 56
-dc.publicConstMethod() = -10.0e8
+dc.publicConstMethod() = -3.14
 dc.anotherPublicMethod() = -168
 dc_cr.cxxGet_shortValue() = 56
-dc_cr.publicConstMethod() = -10.0e8
+dc_cr.publicConstMethod() = -3.14
 dc_cr.anotherPublicMethod() = -168
 DerivedClass::~DerivedClass()
 Class::~Class()

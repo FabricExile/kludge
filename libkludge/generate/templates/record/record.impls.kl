@@ -1,146 +1,157 @@
-{######################################################################}
-{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved. #}
-{######################################################################}
+{############################################################################}
+{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
+{############################################################################}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
+{############################################################################}
 {% if record.include_getters_setters or not type_info.is_direct %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Getters and Setters
-////////////////////////////////////////////////////////////////////////
-{% for member in record.members %}
-{% if member.is_public() %}
-{% if member.has_getter() %}
+//////////////////////////////////////////////////////////////////////////////
+{%  for member in record.members %}
+{%   if member.is_public() %}
+{%    if member.has_getter() %}
+
+/// \dfgPresetOmit
 {{member.type_info.kl.name}} {{type_info.kl.name}}.{{member.getter_kl_name}}()
-{% if type_info.is_direct %}
+{%     if type_info.is_direct %}
   = "{{member.get_getter_edk_symbol_name(type_info)}}";
-{% else %}
+{%     else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.{{member.getter_kl_name}} on null {{type_info.kl.name}}";
     return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{member.getter_kl_name}}();
 }
-{% endif %}
-{% endif %}
-{% if member.has_setter() and allow_mutable_methods %}
+{%     endif %}
+{%    endif %}
+{%    if member.has_setter() and allow_mutable_methods %}
+
+/// \dfgPresetOmit
 {{type_info.kl.name}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}})
-{% if type_info.is_direct %}
+{%     if type_info.is_direct %}
   = "{{member.get_setter_edk_symbol_name(type_info)}}";
-{% else %}
+{%     else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.{{member.setter_kl_name}} on null {{type_info.kl.name}}";
     {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{member.setter_kl_name}}(value);
 }
-{% endif %}
-{% endif %}
-{% endif %}
+{%     endif %}
+{%    endif %}
+{%   endif %}
 
-{% endfor %}
+{%  endfor %}
 {% endif %}
+{############################################################################}
 {% if type_info.is_direct or (type_info.is_const_ref and is_final_record and not type_info.direct.forbid_copy) %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Constructors and Destructor
-////////////////////////////////////////////////////////////////////////
-{% if type_info.is_direct and record.include_empty_ctor %}
-{% if record.is_abstract %}
+//////////////////////////////////////////////////////////////////////////////
+{%  if type_info.is_direct and record.include_empty_ctor %}
+
+{%   if record.is_abstract %}
 {{type_info.kl.name}}() {
     throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
 }
-{% else %}
+{%   else %}
 {{type_info.kl.name}}() = "{{record.get_empty_ctor_edk_symbol_name(type_info)}}";
-{% endif %}
+{%   endif %}
+{%  endif %}
+{%  if type_info.is_direct and record.include_copy_ctor %}
 
-{% endif %}
-{% if type_info.is_direct and record.include_copy_ctor %}
-{% if record.is_abstract %}
+{%   if record.is_abstract %}
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) {
     throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
 }
-{% else %}
+{%   else %}
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.get_copy_ctor_edk_symbol_name(type_info)}}";
-{% endif %}
+{%   endif %}
+{%  endif %}
+{%  if not record.is_abstract %}
+{%   for ctor in record.ctors %}
 
-{% endif %}
-{% if not record.is_abstract %}
-{% for ctor in record.ctors %}
-{% for comment in ctor.comments %}
+{%    for comment in ctor.comments %}
 {{comment}}
-{% endfor %}
-{% if type_info.is_direct %}
+{%    endfor %}
+{%    if type_info.is_direct %}
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{ctor.get_edk_symbol_name(type_info)}}";
+{%    endif %}
+{%   endfor %}
+{%  endif %}
+{%  if not record.is_abstract and type_info.kl.name.compound != 'StdString' and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
+{%   if record.has_char_const_ptr_ctor() %}
+{%    if type_info.is_direct %}
 
-{% endif %}
-{% endfor %}
-{% endif %}
-{% if not record.is_abstract and type_info.kl.name.compound != 'StdString' and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
-{% if record.has_char_const_ptr_ctor() %}
-{% if type_info.is_direct %}
 {{type_info.kl.name}}(String string) {
     this = {{type_info.kl.name}}(CxxCharConstPtr(string));
 }
+{%    elif type_info.is_const_ref %}
 
-{% elif type_info.is_const_ref %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(CxxCharConstPtr(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
+{%    endif %}
+{%   elif record.has_std_string_const_ref_ctor() %}
+{%    if type_info.is_direct %}
 
-{% endif %}
-{% elif record.has_std_string_const_ref_ctor() %}
-{% if type_info.is_direct %}
 {{type_info.kl.name}}(String string) {
     this = {{type_info.kl.name}}(StdString_CxxConstRef(StdString(string)));
 }
+{%    elif type_info.is_const_ref %}
 
-{% elif type_info.is_const_ref %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(StdString(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
+{%    endif %}
+{%   endif %}
+{%  endif %}
+{%  if not record.is_abstract and type_info.is_direct and record.include_dtor %}
 
-{% endif %}
-{% endif %}
-{% endif %}
-{% if not record.is_abstract and type_info.is_direct and record.include_dtor %}
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
-
+{%  endif %}
 {% endif %}
-{% endif %}
+{############################################################################}
 {% if record.has_methods() %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Methods
-////////////////////////////////////////////////////////////////////////
-{% for method in record.methods %}
-{% if (method.is_static and allow_static_methods)
+//////////////////////////////////////////////////////////////////////////////
+{%  for method in record.methods %}
+{%   if (method.is_static and allow_static_methods)
     or (method.is_mutable and allow_mutable_methods)
     or (method.is_const and allow_const_methods) %}
-{% for comment in method.comments %}
+
+{%    for comment in method.comments %}
 {{comment}}
-{% endfor %}
+{%    endfor %}
 {{method.result.render_type_kl()}}
-{% if method.is_static %}
+{%    if method.is_static %}
 {{type_info.kl.name}}_{{method.kl_name}}(
-{% else %}
+{%    else %}
 {{type_info.kl.name}}.{{method.kl_name}}{{method.this_access_suffix}}(
-{% endif %}
+{%    endif %}
     {% for param in method.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     )
-{% if type_info.is_direct %}
+{%    if type_info.is_direct %}
  = "{{method.get_edk_symbol_name(type_info)}}";
-{% else %}
+{%    else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.{{method.kl_name}} on null {{type_info.kl.name}}";
@@ -151,30 +162,33 @@
         {% endfor %}
         );
 }
+{%    endif %}
+{%   endif %}
+{%  endfor %}
 {% endif %}
-{% endif %}
-{% endfor %}
-{% endif %}
+{############################################################################}
 {% if record.has_call_ops() %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// call_ops
-////////////////////////////////////////////////////////////////////////
-{% for call_op in record.call_ops %}
-{% if (call_op.is_mutable and allow_mutable_methods)
+// Call Operators
+//////////////////////////////////////////////////////////////////////////////
+{%  for call_op in record.call_ops %}
+{%   if (call_op.is_mutable and allow_mutable_methods)
     or (call_op.is_const and allow_const_methods) %}
-{% for comment in call_op.comments %}
+
+{%    for comment in call_op.comments %}
 {{comment}}
-{% endfor %}
+{%    endfor %}
 {{call_op.result.render_type_kl()}}
 {{type_info.kl.name}}.cxxCall{{call_op.this_access_suffix}}(
     {% for param in call_op.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     )
-{% if type_info.is_direct %}
+{%    if type_info.is_direct %}
  = "{{call_op.get_edk_symbol_name(type_info)}}";
-{% else %}
+{%    else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.cxxCall on null {{type_info.kl.name}}";
@@ -185,122 +199,138 @@
         {% endfor %}
         );
 }
+{%    endif %}
+{%   endif %}
+{%  endfor %}
 {% endif %}
-{% endif %}
-{% endfor %}
-{% endif %}
+{############################################################################}
 {% if type_info.is_direct and record.has_uni_ops %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Unary Operators
-////////////////////////////////////////////////////////////////////////
-{% for uni_op in record.uni_ops %}
-{% for comment in uni_op.comments %}
+//////////////////////////////////////////////////////////////////////////////
+{%  for uni_op in record.uni_ops %}
+
+{%   for comment in uni_op.comments %}
 {{comment}}
-{% endfor %}
+{%   endfor %}
 {{uni_op.result.type_info.kl.name}}
 {{type_info.kl.name}}.{{uni_op.kl_method_name}}!(
     ) = "{{uni_op.get_edk_symbol_name(type_info)}}";
-
-{% endfor %}
+{%  endfor %}
 {% endif %}
+{############################################################################}
 {% if type_info.is_direct and record.has_bin_ops %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Binary Operators
-////////////////////////////////////////////////////////////////////////
-{% for bin_op in record.bin_ops %}
-{% for comment in bin_op.comments %}
+//////////////////////////////////////////////////////////////////////////////
+{%  for bin_op in record.bin_ops %}
+
+{%   for comment in bin_op.comments %}
 {{comment}}
-{% endfor %}
+{%   endfor %}
 {{bin_op.result.type_info.kl.name}}
 {{bin_op.op}}(
     {{bin_op.params[0].render_kl() | indent(4)}},
     {{bin_op.params[1].render_kl() | indent(4)}}
     ) = "{{bin_op.get_edk_symbol_name(type_info)}}";
-
-{% endfor %}
+{%  endfor %}
 {% endif %}
+{############################################################################}
 {% if type_info.is_direct and record.has_ass_ops %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Assignment Operators
-////////////////////////////////////////////////////////////////////////
-{% if not record.is_abstract %}
-{% for ass_op in record.ass_ops %}
-{% for comment in ass_op.comments %}
+//////////////////////////////////////////////////////////////////////////////
+{%  if not record.is_abstract %}
+{%   for ass_op in record.ass_ops %}
+
+{%    for comment in ass_op.comments %}
 {{comment}}
-{% endfor %}
+{%    endfor %}
 {{type_info.kl.name}}.{{ass_op.op}}(
     {{ass_op.params[0].render_kl() | indent(4)}}
     ) = "{{ass_op.get_edk_symbol_name(type_info)}}";
+{%   endfor %}
+{%  endif %}
+{%  if record.include_simple_ass_op %}
+{%   if record.is_abstract %}
 
-{% endfor %}
-{% endif %}
-{% if record.include_simple_ass_op %}
-{% if record.is_abstract %}
 {{type_info.kl.name}}.=(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) {
     throw "Cannot assign to instance of abstract type {{type_info.kl.name}}()";
 }
-{% else %}
+{%   else %}
+
 {{type_info.kl.name}}.=(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) = "{{record.get_simple_ass_op_edk_symbol_name(type_info)}}";
+{%   endif %}
+{%  endif %}
 {% endif %}
-
-{% endif %}
-{% endif %}
+{############################################################################}
 {% if type_info.is_direct and record.has_casts() %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Casts
-////////////////////////////////////////////////////////////////////////
-{% for cast in record.casts %}
-{% for comment in cast.comments %}
+//////////////////////////////////////////////////////////////////////////////
+{%  for cast in record.casts %}
+
+{%   for comment in cast.comments %}
 {{comment}}
-{% endfor %}
+{%   endfor %}
 {{cast.this.type_info.kl.name}}(
     {{cast.get_param(type_info).render_kl() | indent(4)}}
     ) = "{{cast.get_edk_symbol_name(type_info)}}";
-
-{% endfor %}
+{%  endfor %}
 {% endif %}
+{############################################################################}
 {% if type_info.is_direct and record.const_deref_kl_method_name %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// Const Deref
-////////////////////////////////////////////////////////////////////////
+// Const Dereference
+//////////////////////////////////////////////////////////////////////////////
+
 {{record.const_deref_result.type_info.kl.name}}
 {{type_info.kl.name}}.{{record.const_deref_kl_method_name}}(
     ) = "{{record.get_const_deref_edk_symbol_name(type_info)}}";
-
 {% endif %}
+{############################################################################}
 {% if type_info.is_direct and record.mutable_deref_kl_method_name %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// Mutable mutable_Deref
-////////////////////////////////////////////////////////////////////////
+// Mutable Dereference
+//////////////////////////////////////////////////////////////////////////////
+
 {{record.mutable_deref_result.type_info.kl.name}}
 {{type_info.kl.name}}.{{record.mutable_deref_kl_method_name}}(
     ) = "{{record.get_mutable_deref_edk_symbol_name(type_info)}}";
-
 {% endif %}
+{############################################################################}
 {% if record.get_ind_op_result %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // cxxGetAtIndex(Index) Operator
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
 {{record.get_ind_op_result.type_info.kl.name}}
 {{type_info.kl.name}}.cxxGetAtIndex(
     {% for param in record.get_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     )
-{% if type_info.is_direct %}
+{%  if type_info.is_direct %}
   = "{{record.get_get_ind_op_edk_symbol_name(type_info)}}";
-{% else %}
+{%  else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.cxxGetAtIndex on null {{type_info.kl.name}}";
@@ -310,22 +340,24 @@
         {% endfor %}
         );
 }
+{%  endif %}
 {% endif %}
-
-{% endif %}
+{############################################################################}
 {% if record.set_ind_op_params and allow_mutable_methods %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // cxxSetAtIndex(Index) Operator
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
 {{type_info.kl.name}}.cxxSetAtIndex!(
     {% for param in record.set_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     )
-{% if type_info.is_direct %}
+{%  if type_info.is_direct %}
   = "{{record.get_set_ind_op_edk_symbol_name(type_info)}}";
-{% else %}
+{%  else %}
 {
     if (Fabric_Guarded && !this.ptr)
         throw "Call of {{type_info.kl.name}}.cxxSetAtIndex on null {{type_info.kl.name}}";
@@ -335,18 +367,19 @@
         {% endfor %}
         );
 }
+{%  endif %}
 {% endif %}
-
-{% endif %}
+{############################################################################}
 {% if type_info.is_direct and record.has_kls() %}
-////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
 // Additional KL code
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+{%  for kl in record.kls %}
 
-{% for kl in record.kls %}
 {{kl.render(type_info)}}
-
-{% endfor %}
+{%  endfor %}
 {% endif %}
+{############################################################################}
 {% endblock body %}

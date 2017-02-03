@@ -1,9 +1,10 @@
-{######################################################################}
-{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved. #}
-{######################################################################}
+{############################################################################}
+{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
+{############################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
 {% if not decl.is_simple %}
+
 {% for comment in decl.type_info.record.comments %}
 {{comment}}
 {% endfor %}
@@ -16,10 +17,10 @@ struct {{decl.type_info.kl.name}}
   {{"public" if member.is_public() else "private"}} {{member.type_info.kl.name.base}} {{member.kl_name}}{{member.type_info.kl.name.suffix}};
 {% endfor %}
 };
-
 {% endif %}
+
+/// \dfgPresetOmit
 inline UInt64 __CxxSize_{{decl.type_info.kl.name}}() {
   return {{decl.type_info.kl.name}}().dataSize();
 }
-
 {% endblock body %}

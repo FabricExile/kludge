@@ -1,6 +1,6 @@
-{######################################################################}
-{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved. #}
-{######################################################################}
+{############################################################################}
+{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
+{############################################################################}
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -21,9 +21,13 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-{% for kl_require in ext.kl_requires %}
+{% if ext.kl_requires %}
+{%  for kl_require in ext.kl_requires %}
 require {{ kl_require }};
-{% endfor %}
+{%  endfor %}
+{% else %}
+// No requires specified
+{% endif %}
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -38,16 +42,19 @@ require {{ kl_require }};
 //
 //////////////////////////////////////////////////////////////////////////////
 
-{% for kl_prolog in ext.kl_prologs %}
+{% if ext.kl_prologs %}
+{%  for kl_prolog in ext.kl_prologs %}
 {{ kl_prolog }}
-{% endfor %}
+{%  endfor %}
+{% else %}
+// No prologs specified
+{% endif %}
 
 //////////////////////////////////////////////////////////////////////////////
 //
 // Forwards
 //
 //////////////////////////////////////////////////////////////////////////////
-
 {% for decl in ext.decls %}
 {{ decl.render('fwds', 'kl') }}
 {% endfor %}
@@ -57,7 +64,6 @@ require {{ kl_require }};
 // Declarations
 //
 //////////////////////////////////////////////////////////////////////////////
-
 {% for decl in ext.decls %}
 {{ decl.render('defns', 'kl') }}
 {% endfor %}
@@ -67,7 +73,6 @@ require {{ kl_require }};
 // Implementations
 //
 //////////////////////////////////////////////////////////////////////////////
-
 {% for decl in ext.decls %}
 {{ decl.render('impls', 'kl') }}
 {% endfor %}
@@ -85,6 +90,10 @@ require {{ kl_require }};
 //
 //////////////////////////////////////////////////////////////////////////////
 
-{% for kl_epilog in ext.kl_epilogs %}
+{% if ext.kl_epilogs %}
+{%  for kl_epilog in ext.kl_epilogs %}
 {{ kl_epilog }}
-{% endfor %}
+{%  endfor %}
+{% else %}
+// No epilogs specified
+{% endif %}

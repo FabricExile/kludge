@@ -1,8 +1,9 @@
-{######################################################################}
-{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved. #}
-{######################################################################}
+{############################################################################}
+{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
+{############################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
+
 {% for comment in decl.type_info.record.comments %}
 {{comment}}
 {% endfor %}
@@ -20,7 +21,7 @@ Data {{decl.type_info.kl.name}}.__getUnderlyingPtr() {
 }
 {% endif %}
 
+/// \dfgPresetOmit
 UInt64 __CxxSize_{{decl.type_info.kl.name}}()
   = "__CxxSize_{{decl.type_info.edk.name}}";
-
 {% endblock body %}

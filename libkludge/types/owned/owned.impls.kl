@@ -1,27 +1,28 @@
-{######################################################################}
-{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved. #}
-{######################################################################}
+{############################################################################}
+{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
+{############################################################################}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 {{decl.render_method_impls('kl')}}
 {% if decl.type_info.kl.name.compound != "StdString"
   and not decl.type_info.kl.name.compound.endswith("StdVector") %}
+
+/// \dfgPresetOmit
 {{decl.type_info.kl.name}}.appendDesc(io String string) {
   string += "{{decl.type_info.kl.name}}:";
   if (!this.cpp_ptr)
     string += "null";
   else {
     string += "{";
-{% for member in decl.type_info.record.nested_public_members() %}
-{% if not loop.first %}
+{%  for member in decl.type_info.record.nested_public_members() %}
+{%   if not loop.first %}
     string += ",";
-{% endif %}
+{%   endif %}
     string += "{{member.kl_name}}:";
     string += this.cxxGet_{{member.kl_name}}();
-{% endfor %}
+{%  endfor %}
     string += "}";
   }
 }
-
 {% endif %}
 {% endblock body %}

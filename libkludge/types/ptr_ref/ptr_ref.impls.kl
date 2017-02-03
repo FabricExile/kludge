@@ -1,9 +1,10 @@
-{######################################################################}
-{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved. #}
-{######################################################################}
+{############################################################################}
+{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
+{############################################################################}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 {{decl.render_method_impls('kl')}}
+
 ////////////////////////////////////////////////////////////////////////
 // {{decl.type_info.const_ptr.kl.name}}
 // {{decl.type_info.mutable_ptr.kl.name}}
@@ -15,85 +16,101 @@
 ////////////////////////////////////////////////////////////////////////
 // Construction
 ////////////////////////////////////////////////////////////////////////
-
 {% for type_info in decl.type_info.get_indirects() %}
+
+/// \dfgPresetOmit
 {{type_info.kl.name}}(Data data) {
   this.ptr = data;
 }
 
+/// \dfgPresetOmit
 {{type_info.kl.name}}({{decl.type_info.direct.kl.name}} array<>) {
   this.ptr = array.data();
 }
 
+/// \dfgPresetOmit
 {{type_info.kl.name}}({{decl.type_info.direct.kl.name}} array<>, Index index) {
   this.ptr = array.data().offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}());
 }
+{%  if decl.type_info.direct.is_simple or decl.type_info.direct.kl.name.compound == 'Data' %}
 
-{% if decl.type_info.direct.is_simple or decl.type_info.direct.kl.name.compound == 'Data' %}
+/// \dfgPresetOmit
 struct Make_{{type_info.kl.name}} permits {{type_info.kl.name}} {
   private Data ptr;
   private {{decl.type_info.direct.kl.name}} value;
 };
 
+/// \dfgPresetOmit
 Make_{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} value) {
   this.ptr = this.value.data();
   this.value = value;
 }
 
+/// \dfgPresetOmit
 Make_{{type_info.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
   this.ptr = value.data();
 }
 
+/// \dfgPresetOmit
 {{type_info.kl.name}}(Make_{{type_info.kl.name}} maker) {
   this.ptr = maker.ptr;
 }
-{% else %}
+{%  else %}
+
+/// \dfgPresetOmit
 {{type_info.kl.name}}({{decl.type_info.direct.kl.name}} value) {
   this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('value')}};
 }
 
+/// \dfgPresetOmit
 {{type_info.kl.name}} Make_{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} value) {
   return {{type_info.kl.name}}(
     {{decl.type_info.direct.render_get_underlying_ptr('value')}}
     );
 }
-{% endif %}
+{%  endif %}
 {% endfor %}
 
 ////////////////////////////////////////////////////////////////////////
 // Others
 ////////////////////////////////////////////////////////////////////////
 
-// Is valid.  Check for null pointer
+/// Is valid.  Check for null pointer
+/// \dfgPresetOmit
 Boolean {{decl.type_info.const_ptr.kl.name}}.cxxIsValid() {
   return !!this.ptr;
 }
 
+/// \dfgPresetOmit
 Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
   this = ptr.cxxIsValid();
 }
 
-// Indexing operation
+/// Indexing operation
+/// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxGetAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxxGetAt on null {{decl.type_info.const_ptr.kl.name}}";
   return {{decl.type_info.const_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
 }
 
-// Deref the pointer
+/// Deref the pointer
+/// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxDeref() {
   return this.cxxGetAt(0);
 }
-
 {% if decl.type_info.direct.kl.name.base == 'CxxChar' %}
-// Given a String, take a pointer to the bytes of the string
+
+/// Given a String, take a pointer to the bytes of the string
+/// \dfgPresetOmit
 {{decl.type_info.const_ptr.kl.name}}(String s) {
   this.ptr = s.data();
 }
 
-// Convert to a string
-// Note that this can potentially crash.  Converting a {{decl.type_info.const_ptr.kl.name}} to
-// a String is not always safe, just as it is not always safe in C++
+/// Convert to a string
+/// Note that this can potentially crash.  Converting a {{decl.type_info.const_ptr.kl.name}} to
+/// a String is not always safe, just as it is not always safe in C++
+/// \dfgPresetOmit
 {{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   Count size = 0;
   while (this.cxxGetAt(size))
@@ -104,91 +121,104 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
   s += ss;
 }
 {% else %}
-// Convert to a string
+
+/// Convert to a string
+/// \dfgPresetOmit
 {{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   s += this.ptr;
 }
 {% endif %}
 
-// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+/// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+/// \dfgPresetOmit
 {{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxGetAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxGetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
   return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
 }
 
-// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+/// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
+/// \dfgPresetOmit
 {{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxDeref() {
   return this.cxxGetAt(0);
 }
 
-// Set the value at an offset into the array
+/// Set the value at an offset into the array
+/// \dfgPresetOmit
 {{decl.type_info.mutable_ptr.kl.name}}.cxxSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxSetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
   this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
 }
 
-// Copy ctor
+/// Copy ctor
+/// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}}({{decl.type_info.const_ref.kl.name}} that) {
   this.ptr = that.ptr;
 }
 
-// Assigment
+/// Assigment
+/// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}}.=({{decl.type_info.const_ref.kl.name}} that) {
   this.ptr = that.ptr;
 }
 
-// Get the {{decl.type_info.direct.kl.name}} value
+/// Get the {{decl.type_info.direct.kl.name}} value
+/// \dfgPresetOmit
 {{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxGet() {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.const_ref.kl.name}}.cxxGet on null {{decl.type_info.const_ref.kl.name}}";
   return {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} };
 }
 
-// Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
+/// Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
+/// \dfgPresetOmit
 {{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
   this = ref.cxxGet();
 }
-
 {# Horrible Hack #}
 {% if decl.type_info.const_ref.kl.name.compound != 'StdString_CxxConstRef' %}
-// Convert to String
+
+/// Convert to String
+/// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
   s += this.cxxGet();
 }
-
 {% endif %}
 {% if decl.type_info.direct.is_simple and decl.type_info.direct.kl.name.base != 'Boolean' %}
 
-// Convert to Boolean
+/// Convert to Boolean
+/// \dfgPresetOmit
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
   this = Boolean(ref.cxxGet());
 }
 {% endif %}
 
-// Set the value
+/// Set the value
+/// \dfgPresetOmit
 {{decl.type_info.mutable_ref.kl.name}}.cxxSet({{decl.type_info.direct.kl.name}} value) {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxxSet on null {{decl.type_info.mutable_ref.kl.name}}";
   {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 
-// Assignment of {{decl.type_info.direct.kl.name}}
+/// Assignment of {{decl.type_info.direct.kl.name}}
+/// \dfgPresetOmit
 {{decl.type_info.mutable_ref.kl.name}}.=({{decl.type_info.direct.kl.name}} value) {
   this.cxxSet(value);
 }
 
-// Convert to String
+/// Convert to String
+/// \dfgPresetOmit
 {{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
   s += this.cxxGet();
 }
-
 {% if decl.type_info.direct.kl.name.compound == 'StdString' %}
+
+/// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}}(String string) {
   this.values.push({{decl.type_info.direct.kl.name}}(string));
   this.ptr = {{decl.type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 {% endif %}
-
 {% endblock body %}

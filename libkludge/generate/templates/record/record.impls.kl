@@ -53,6 +53,9 @@
 //////////////////////////////////////////////////////////////////////////////
 {%  if type_info.is_direct and record.include_empty_ctor %}
 
+{%   if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%   endif %}
 {%   if record.is_abstract %}
 {{type_info.kl.name}}() {
     throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
@@ -63,6 +66,9 @@
 {%  endif %}
 {%  if type_info.is_direct and record.include_copy_ctor %}
 
+{%   if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%   endif %}
 {%   if record.is_abstract %}
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
@@ -77,11 +83,14 @@
 {%  endif %}
 {%  if not record.is_abstract %}
 {%   for ctor in record.ctors %}
-
-{%    for comment in ctor.comments %}
-{{comment}}
-{%    endfor %}
 {%    if type_info.is_direct %}
+
+{%     for comment in ctor.comments %}
+{{comment}}
+{%     endfor %}
+{%     if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%     endif %}
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
@@ -94,11 +103,17 @@
 {%   if record.has_char_const_ptr_ctor() %}
 {%    if type_info.is_direct %}
 
+{%     if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%     endif %}
 {{type_info.kl.name}}(String string) {
     this = {{type_info.kl.name}}(CxxCharConstPtr(string));
 }
 {%    elif type_info.is_const_ref %}
 
+{%     if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%     endif %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(CxxCharConstPtr(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
@@ -107,11 +122,17 @@
 {%   elif record.has_std_string_const_ref_ctor() %}
 {%    if type_info.is_direct %}
 
+{%     if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%     endif %}
 {{type_info.kl.name}}(String string) {
     this = {{type_info.kl.name}}(StdString_CxxConstRef(StdString(string)));
 }
 {%    elif type_info.is_const_ref %}
 
+{%     if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%     endif %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(StdString(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
@@ -121,6 +142,9 @@
 {%  endif %}
 {%  if not record.is_abstract and type_info.is_direct and record.include_dtor %}
 
+{%   if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%   endif %}
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
 {%  endif %}
 {% endif %}
@@ -139,6 +163,9 @@
 {%    for comment in method.comments %}
 {{comment}}
 {%    endfor %}
+{%    if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%    endif %}
 {{method.result.render_type_kl()}}
 {%    if method.is_static %}
 {{type_info.kl.name}}_{{method.kl_name}}(
@@ -180,6 +207,7 @@
 {%    for comment in call_op.comments %}
 {{comment}}
 {%    endfor %}
+/// \dfgPresetOmit
 {{call_op.result.render_type_kl()}}
 {{type_info.kl.name}}.cxxCall{{call_op.this_access_suffix}}(
     {% for param in call_op.params %}
@@ -285,6 +313,9 @@
 {%   for comment in cast.comments %}
 {{comment}}
 {%   endfor %}
+{%   if type_info.is_cxx %}
+/// \dfgPresetOmit
+{%   endif %}
 {{cast.this.type_info.kl.name}}(
     {{cast.get_param(type_info).render_kl() | indent(4)}}
     ) = "{{cast.get_edk_symbol_name(type_info)}}";
@@ -298,6 +329,7 @@
 // Const Dereference
 //////////////////////////////////////////////////////////////////////////////
 
+/// \dfgPresetOmit
 {{record.const_deref_result.type_info.kl.name}}
 {{type_info.kl.name}}.{{record.const_deref_kl_method_name}}(
     ) = "{{record.get_const_deref_edk_symbol_name(type_info)}}";
@@ -310,6 +342,7 @@
 // Mutable Dereference
 //////////////////////////////////////////////////////////////////////////////
 
+/// \dfgPresetOmit
 {{record.mutable_deref_result.type_info.kl.name}}
 {{type_info.kl.name}}.{{record.mutable_deref_kl_method_name}}(
     ) = "{{record.get_mutable_deref_edk_symbol_name(type_info)}}";
@@ -322,6 +355,7 @@
 // cxxGetAtIndex(Index) Operator
 //////////////////////////////////////////////////////////////////////////////
 
+/// \dfgPresetOmit
 {{record.get_ind_op_result.type_info.kl.name}}
 {{type_info.kl.name}}.cxxGetAtIndex(
     {% for param in record.get_ind_op_params %}
@@ -350,6 +384,7 @@
 // cxxSetAtIndex(Index) Operator
 //////////////////////////////////////////////////////////////////////////////
 
+/// \dfgPresetOmit
 {{type_info.kl.name}}.cxxSetAtIndex!(
     {% for param in record.set_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}

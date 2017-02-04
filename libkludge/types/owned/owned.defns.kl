@@ -7,6 +7,9 @@
 {% for comment in decl.type_info.record.comments %}
 {{comment}}
 {% endfor %}
+{% if decl.type_info.is_cxx %}
+/// \dfgPresetOmit
+{% endif %}
 struct {{decl.type_info.kl.name}}
 {% if decl.type_info.extends %}
   : {{decl.type_info.extends.kl.name}}
@@ -16,6 +19,7 @@ struct {{decl.type_info.kl.name}}
   protected Data cpp_ptr;
 };
 
+/// \dfgPresetOmit
 Data {{decl.type_info.kl.name}}.__getUnderlyingPtr() {
   return this.cpp_ptr;
 }

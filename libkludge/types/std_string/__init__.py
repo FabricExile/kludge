@@ -3,6 +3,7 @@
 #
 
 from libkludge.type_info import TypeInfo
+from libkludge.type_simplifier import TypeSimplifier
 from libkludge.selector import Selector
 from libkludge.generate.record import Record
 from libkludge.dir_qual_type_info import DirQualTypeInfo
@@ -64,5 +65,6 @@ inline {{type_name}}_CxxConstRef.appendDesc(io String string) {
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
+        simplifier=TypeSimplifier(),
         )
       return True # restart

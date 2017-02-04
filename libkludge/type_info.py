@@ -68,6 +68,7 @@ class TypeInfo:
     direct_orig_type_info=None,
     forbid_copy=False,
     is_const_ref=False,
+    simplifier=None,
     ):
     if kl_name_base is not None:
       if not kl_name_suffix:
@@ -95,7 +96,12 @@ class TypeInfo:
     self.direct_orig = direct_orig_type_info
     self.forbid_copy = forbid_copy
     self.is_const_ref = is_const_ref
+    self.simplifier = simplifier
     self._codec_lookup_rules = None
+
+  @property
+  def is_cxx(self):
+    return self.simplifier is not None
 
   @property
   def is_direct(self):

@@ -3,6 +3,7 @@
 #
 
 from libkludge.type_info import TypeInfo
+from libkludge.type_simplifier import TypeSimplifier
 from libkludge.selector import Selector
 from libkludge.cpp_type_expr_parser import dir_qual
 from libkludge.dir_qual_type_info import DirQualTypeInfo
@@ -47,6 +48,7 @@ class ConstRefTypeInfo(TypeInfo):
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
       is_const_ref=True,
+      simplifier=TypeSimplifier(),
       )
 
   def build_codec_lookup_rules(self):
@@ -68,6 +70,7 @@ class MutableRefTypeInfo(TypeInfo):
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
+      simplifier=TypeSimplifier(),
       )
 
   def build_codec_lookup_rules(self):
@@ -89,6 +92,7 @@ class ConstPtrTypeInfo(TypeInfo):
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
+      simplifier=TypeSimplifier(),
       )
 
   def build_codec_lookup_rules(self):
@@ -111,6 +115,7 @@ class MutablePtrTypeInfo(TypeInfo):
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
+      simplifier=TypeSimplifier(),
       )
 
   def build_codec_lookup_rules(self):

@@ -127,7 +127,7 @@ V3f_CxxConstPtr GetV3fPtr();
 The result will need to be dereferenced for any of its methods to be used, for example:
 
 ```
-Vec3 vec3 = GetV3fPtr().cxxDeref();
+Vec3 vec3 = GetV3fPtr().cxx_deref();
 ```
 
 ## `ext.add_enum()`

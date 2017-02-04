@@ -209,7 +209,7 @@
 {%    endfor %}
 /// \dfgPresetOmit
 {{call_op.result.render_type_kl()}}
-{{type_info.kl.name}}.cxxCall{{call_op.this_access_suffix}}(
+{{type_info.kl.name}}.cxx_call{{call_op.this_access_suffix}}(
     {% for param in call_op.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -219,9 +219,9 @@
 {%    else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.cxxCall on null {{type_info.kl.name}}";
+        throw "Call of {{type_info.kl.name}}.cxx_call on null {{type_info.kl.name}}";
     {{call_op.result.render_return_kl()}}
-    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxxCall(
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxx_call(
         {% for param in call_op.params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}
@@ -352,12 +352,12 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// cxxGetAtIndex(Index) Operator
+// GetAtIndex Operator
 //////////////////////////////////////////////////////////////////////////////
 
 /// \dfgPresetOmit
 {{record.get_ind_op_result.type_info.kl.name}}
-{{type_info.kl.name}}.cxxGetAtIndex(
+{{type_info.kl.name}}.cxx_getAtIndex(
     {% for param in record.get_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -367,8 +367,8 @@
 {%  else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.cxxGetAtIndex on null {{type_info.kl.name}}";
-    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxxGetAtIndex(
+        throw "Call of {{type_info.kl.name}}.cxx_getAtIndex on null {{type_info.kl.name}}";
+    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxx_getAtIndex(
         {% for param in record.get_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}
@@ -381,11 +381,11 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // {{type_info}}
-// cxxSetAtIndex(Index) Operator
+// SetAtIndex Operator
 //////////////////////////////////////////////////////////////////////////////
 
 /// \dfgPresetOmit
-{{type_info.kl.name}}.cxxSetAtIndex!(
+{{type_info.kl.name}}.cxx_setAtIndex!(
     {% for param in record.set_ind_op_params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
@@ -395,8 +395,8 @@
 {%  else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.cxxSetAtIndex on null {{type_info.kl.name}}";
-    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxxSetAtIndex(
+        throw "Call of {{type_info.kl.name}}.cxx_setAtIndex on null {{type_info.kl.name}}";
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxx_setAtIndex(
         {% for param in record.set_ind_op_params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}

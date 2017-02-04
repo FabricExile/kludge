@@ -18,25 +18,25 @@ Furthermore, each of these types expose a few extra methods to let you work with
 
 - `Boolean MyType_CxxConstPtr.cxxIsValid()` checks that it is not null.  We also provide the cast to `Boolean` that achieves the same thing.
 
-- `MyType_CxxConstRef MyType_CxxConstPtr.cxxGetAt(Index)` returns a `MyType_CxxConstRef` to the element at a given index in the same way as the C++ indexing operator.  No bounds checking is performed (nor could be performed since C++ does not bounds check on raw pointers).
+- `MyType_CxxConstRef MyType_CxxConstPtr.cxx_getAt(Index)` returns a `MyType_CxxConstRef` to the element at a given index in the same way as the C++ indexing operator.  No bounds checking is performed (nor could be performed since C++ does not bounds check on raw pointers).
 
-- `MyType_CxxConstRef MyType_CxxConstPtr.cxxDeref()` dereferences the pointer; equivalent to `MyType_CxxConstPtr.cxxGetAt(0)`
+- `MyType_CxxConstRef MyType_CxxConstPtr.cxx_deref()` dereferences the pointer; equivalent to `MyType_CxxConstPtr.cxx_getAt(0)`
 
 ## `_CxxPtr` Methods
 
 `_CxxPtr` supports all the methods of `_CxxConstPtr` except that they return a `_CxxRef` rather than a `_CxxConstRef` where appropriate.  They additional support the methods:
 
-- `MyType_CxxPtr.cxxSetAt(Index, MyType)` sets the value at the given index.  Equivalent to `MyType_Cxxptr.cxxGetAt(Index).cxxSet(MyType)`.
+- `MyType_CxxPtr.cxx_setAt(Index, MyType)` sets the value at the given index.  Equivalent to `MyType_Cxxptr.cxx_getAt(Index).cxx_set(MyType)`.
 
 ## `_CxxConstRef` Methods
 
-- `MyType MyType_CxxConstRef.cxxGet()` returns a copy of the value that's referenced.  We also provide `MyType(MyType_CxxConstRef)` as an implicit call to `MyType MyType_CxxConstRef.cxxGet()`.
+- `MyType MyType_CxxConstRef.cxx_get()` returns a copy of the value that's referenced.  We also provide `MyType(MyType_CxxConstRef)` as an implicit call to `MyType MyType_CxxConstRef.cxx_get()`.
 
 ## `_CxxRef` Methods
 
 `_CxxRef` supports all the methods of `_CxxConstRef`, and additionally supports the methods:
 
-- `MyType_CxxRef.cxxSet(MyType)` sets the value of the reference value, i.e. performs a C++ assign of the value.
+- `MyType_CxxRef.cxx_set(MyType)` sets the value of the reference value, i.e. performs a C++ assign of the value.
 
 ## The `CxxCharConstPtr` Type
 

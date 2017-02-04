@@ -191,14 +191,14 @@ SInt32_CxxConstPtr ptr = SimpleConstPtrResult();
 report("SimpleConstPtrResult(): ptr = " + ptr);
 report("SimpleConstPtrResult(): ptr.cxxIsValid() = " + ptr.cxxIsValid());
 report("SimpleConstPtrResult(): Boolean(ptr) = " + Boolean(ptr));
-report("SimpleConstPtrResult(): ptr.cxxDeref() = " + ptr.cxxDeref());
-report("SimpleConstPtrResult(): ptr.cxxGetAt(0) = " + ptr.cxxGetAt(0));
+report("SimpleConstPtrResult(): ptr.cxx_deref() = " + ptr.cxx_deref());
+report("SimpleConstPtrResult(): ptr.cxx_getAt(0) = " + ptr.cxx_getAt(0));
 """, """
 SimpleConstPtrResult(): ptr = <Opaque>
 SimpleConstPtrResult(): ptr.cxxIsValid() = true
 SimpleConstPtrResult(): Boolean(ptr) = true
-SimpleConstPtrResult(): ptr.cxxDeref() = 42
-SimpleConstPtrResult(): ptr.cxxGetAt(0) = 42
+SimpleConstPtrResult(): ptr.cxx_deref() = 42
+SimpleConstPtrResult(): ptr.cxx_getAt(0) = 42
 """)
 
 ext.add_func('SimpleMutablePtrResult', 'int *')\
@@ -207,21 +207,21 @@ SInt32_CxxPtr ptr = SimpleMutablePtrResult();
 report("SimplePtrResult(): before: ptr = " + ptr);
 report("SimplePtrResult(): before: ptr.cxxIsValid() = " + ptr.cxxIsValid());
 report("SimplePtrResult(): before: Boolean(ptr) = " + Boolean(ptr));
-report("SimplePtrResult(): before: ptr.cxxDeref() = " + ptr.cxxDeref());
-report("SimplePtrResult(): before: ptr.cxxGetAt(0) = " + ptr.cxxGetAt(0));
-report("SimplePtrResult(): ptr.cxxDeref().cxxSet(-7)");
-ptr.cxxDeref().cxxSet(-7);
-report("SimplePtrResult(): before: ptr.cxxDeref() = " + ptr.cxxDeref());
-report("SimplePtrResult(): before: ptr.cxxGetAt(0) = " + ptr.cxxGetAt(0));
+report("SimplePtrResult(): before: ptr.cxx_deref() = " + ptr.cxx_deref());
+report("SimplePtrResult(): before: ptr.cxx_getAt(0) = " + ptr.cxx_getAt(0));
+report("SimplePtrResult(): ptr.cxx_deref().cxx_set(-7)");
+ptr.cxx_deref().cxx_set(-7);
+report("SimplePtrResult(): before: ptr.cxx_deref() = " + ptr.cxx_deref());
+report("SimplePtrResult(): before: ptr.cxx_getAt(0) = " + ptr.cxx_getAt(0));
 """, """
 SimplePtrResult(): before: ptr = {ptr:<Opaque>}
 SimplePtrResult(): before: ptr.cxxIsValid() = true
 SimplePtrResult(): before: Boolean(ptr) = true
-SimplePtrResult(): before: ptr.cxxDeref() = 42
-SimplePtrResult(): before: ptr.cxxGetAt(0) = 42
-SimplePtrResult(): ptr.cxxDeref().cxxSet(-7)
-SimplePtrResult(): before: ptr.cxxDeref() = -7
-SimplePtrResult(): before: ptr.cxxGetAt(0) = -7
+SimplePtrResult(): before: ptr.cxx_deref() = 42
+SimplePtrResult(): before: ptr.cxx_getAt(0) = 42
+SimplePtrResult(): ptr.cxx_deref().cxx_set(-7)
+SimplePtrResult(): before: ptr.cxx_deref() = -7
+SimplePtrResult(): before: ptr.cxx_getAt(0) = -7
 """)
 
 ext.add_func('SimpleConstRefResult', 'int const &')\
@@ -235,7 +235,7 @@ ext.add_func('SimpleMutableRefResult', 'int &')\
   .add_test("""
 SInt32_CxxRef result = SimpleMutableRefResult();
 report("SimpleMutableRefResult(): before: result = " + result);
-result.cxxSet(-7);
+result.cxx_set(-7);
 result = SimpleMutableRefResult();
 report("SimpleMutableRefResult(): after: result = " + result);
 """, """

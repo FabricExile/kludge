@@ -88,16 +88,16 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 /// Indexing operation
 /// \dfgPresetOmit
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxGetAt(Index index) {
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxx_getAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxxGetAt on null {{decl.type_info.const_ptr.kl.name}}";
+    throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxx_getAt on null {{decl.type_info.const_ptr.kl.name}}";
   return {{decl.type_info.const_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
 }
 
 /// Deref the pointer
 /// \dfgPresetOmit
-{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxxDeref() {
-  return this.cxxGetAt(0);
+{{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxx_deref() {
+  return this.cxx_getAt(0);
 }
 {% if decl.type_info.direct.kl.name.base == 'CxxChar' %}
 
@@ -113,7 +113,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 /// \dfgPresetOmit
 {{decl.type_info.const_ptr.kl.name}}.appendDesc(io String s) {
   Count size = 0;
-  while (this.cxxGetAt(size))
+  while (this.cxx_getAt(size))
     ++size;
   UInt8 bytes<>(this.ptr, size);
   String ss;
@@ -131,23 +131,23 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 /// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
 /// \dfgPresetOmit
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxGetAt(Index index) {
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxx_getAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxGetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxx_getAt on null {{decl.type_info.mutable_ptr.kl.name}}";
   return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
 }
 
 /// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref
 /// \dfgPresetOmit
-{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxxDeref() {
-  return this.cxxGetAt(0);
+{{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxx_deref() {
+  return this.cxx_getAt(0);
 }
 
 /// Set the value at an offset into the array
 /// \dfgPresetOmit
-{{decl.type_info.mutable_ptr.kl.name}}.cxxSetAt(Index i, {{decl.type_info.direct.kl.name}} v) {
+{{decl.type_info.mutable_ptr.kl.name}}.cxx_setAt(Index i, {{decl.type_info.direct.kl.name}} v) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxxSetAt on null {{decl.type_info.mutable_ptr.kl.name}}";
+    throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxx_setAt on null {{decl.type_info.mutable_ptr.kl.name}}";
   this.ptr.offset(i)->{ {{decl.type_info.direct.kl.name}} } = v;
 }
 
@@ -165,16 +165,16 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 
 /// Get the {{decl.type_info.direct.kl.name}} value
 /// \dfgPresetOmit
-{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxxGet() {
+{{decl.type_info.direct.kl.name}} {{decl.type_info.const_ref.kl.name}}.cxx_get() {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.const_ref.kl.name}}.cxxGet on null {{decl.type_info.const_ref.kl.name}}";
+    throw "Call of {{decl.type_info.const_ref.kl.name}}.cxx_get on null {{decl.type_info.const_ref.kl.name}}";
   return {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} };
 }
 
 /// Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
 /// \dfgPresetOmit
 {{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
-  this = ref.cxxGet();
+  this = ref.cxx_get();
 }
 {# Horrible Hack #}
 {% if decl.type_info.const_ref.kl.name.compound != 'StdString_CxxConstRef' %}
@@ -182,7 +182,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 /// Convert to String
 /// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}}.appendDesc(io String s) {
-  s += this.cxxGet();
+  s += this.cxx_get();
 }
 {% endif %}
 {% if decl.type_info.direct.is_simple and decl.type_info.direct.kl.name.base != 'Boolean' %}
@@ -190,28 +190,28 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 /// Convert to Boolean
 /// \dfgPresetOmit
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
-  this = Boolean(ref.cxxGet());
+  this = Boolean(ref.cxx_get());
 }
 {% endif %}
 
 /// Set the value
 /// \dfgPresetOmit
-{{decl.type_info.mutable_ref.kl.name}}.cxxSet({{decl.type_info.direct.kl.name}} value) {
+{{decl.type_info.mutable_ref.kl.name}}.cxx_set({{decl.type_info.direct.kl.name}} value) {
   if (Fabric_Guarded && !this.ptr)
-    throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxxSet on null {{decl.type_info.mutable_ref.kl.name}}";
+    throw "Call of {{decl.type_info.mutable_ref.kl.name}}.cxx_set on null {{decl.type_info.mutable_ref.kl.name}}";
   {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} } = value;
 }
 
 /// Assignment of {{decl.type_info.direct.kl.name}}
 /// \dfgPresetOmit
 {{decl.type_info.mutable_ref.kl.name}}.=({{decl.type_info.direct.kl.name}} value) {
-  this.cxxSet(value);
+  this.cxx_set(value);
 }
 
 /// Convert to String
 /// \dfgPresetOmit
 {{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
-  s += this.cxxGet();
+  s += this.cxx_get();
 }
 {% if decl.type_info.direct.kl.name.compound == 'StdString' %}
 

@@ -9,11 +9,11 @@ ty.add_ctor()
 ty.add_ctor(['int', 'float']).add_test("""
 Class c(-7, 1.52);
 report("c.intValue = " + c.intValue);
-report("c.cxxGet_intValue() = " + c.cxxGet_intValue());
+report("c.cxx_get_intValue() = " + c.cxx_get_intValue());
 """, """
 Class::Class(-7, 1.52)
 c.intValue = -7
-c.cxxGet_intValue() = -7
+c.cxx_get_intValue() = -7
 Class::~Class()
 """)
 ty.add_test("""
@@ -43,9 +43,9 @@ report(Class_GetStaticFloat());
 ty.generate_type('Class const &')
 ty.add_get_ind_op('int').add_test("""
 Class c(-7, 3.14);
-report(c.cxxGetAtIndex(56));
+report(c.cxx_getAtIndex(56));
 Class_CxxConstRef cr = c;
-report(cr.cxxGetAtIndex(56));
+report(cr.cxx_getAtIndex(56));
 """, """
 Class::Class(-7, 3.14)
 Class::operator[] const(56)
@@ -56,7 +56,7 @@ Class::~Class()
 """)
 ty.add_set_ind_op('int').add_test("""
 Class c(-7, 3.14);
-c.cxxSetAtIndex(56, 4);
+c.cxx_setAtIndex(56, 4);
 report(c);
 """, """
 Class::Class(-7, 3.14)
@@ -66,36 +66,36 @@ Class::~Class()
 """)
 ty.add_test("""
 Class c(14, -8.9);
-report("c.cxxGet_intValue() = " + c.cxxGet_intValue());
+report("c.cxx_get_intValue() = " + c.cxx_get_intValue());
 report("c.publicConstMethod() = " + c.publicConstMethod());
 report("c.publicMutableMethod() = " + c.publicMutableMethod());
 Class_CxxConstRef cr = c;
-report("cr.cxxGet_intValue() = " + cr.cxxGet_intValue());
+report("cr.cxx_get_intValue() = " + cr.cxx_get_intValue());
 report("cr.publicConstMethod() = " + cr.publicConstMethod());
 Class_CxxRef mr = Make_Class_CxxRef(c);
-report("mr.cxxGet_intValue() = " + mr.cxxGet_intValue());
+report("mr.cxx_get_intValue() = " + mr.cxx_get_intValue());
 report("mr.publicConstMethod() = " + mr.publicConstMethod());
 report("mr.publicMutableMethod() = " + mr.publicMutableMethod());
 Class_CxxConstPtr cp = c;
-report("cp.cxxGet_intValue() = " + cp.cxxGet_intValue());
+report("cp.cxx_get_intValue() = " + cp.cxx_get_intValue());
 report("cp.publicConstMethod() = " + cp.publicConstMethod());
 Class_CxxPtr mp = Make_Class_CxxPtr(c);
-report("mp.cxxGet_intValue() = " + mp.cxxGet_intValue());
+report("mp.cxx_get_intValue() = " + mp.cxx_get_intValue());
 report("mp.publicConstMethod() = " + mp.publicConstMethod());
 report("mp.publicMutableMethod() = " + mp.publicMutableMethod());
 """, """
 Class::Class(14, -8.9)
-c.cxxGet_intValue() = 14
+c.cxx_get_intValue() = 14
 c.publicConstMethod() = -8.9
 c.publicMutableMethod() = -8.9
-cr.cxxGet_intValue() = 14
+cr.cxx_get_intValue() = 14
 cr.publicConstMethod() = -8.9
-mr.cxxGet_intValue() = 14
+mr.cxx_get_intValue() = 14
 mr.publicConstMethod() = -8.9
 mr.publicMutableMethod() = -8.9
-cp.cxxGet_intValue() = 14
+cp.cxx_get_intValue() = 14
 cp.publicConstMethod() = -8.9
-mp.cxxGet_intValue() = 14
+mp.cxx_get_intValue() = 14
 mp.publicConstMethod() = -8.9
 mp.publicMutableMethod() = -8.9
 Class::~Class()
@@ -158,7 +158,7 @@ report("dc.shortValue = " + dc.shortValue);
 report("dc.publicConstMethod() = " + dc.publicConstMethod());
 report("dc.anotherPublicMethod() = " + dc.anotherPublicMethod());
 DerivedClass_CxxConstRef dc_cr = dc;
-report("dc_cr.cxxGet_shortValue() = " + dc_cr.cxxGet_shortValue());
+report("dc_cr.cxx_get_shortValue() = " + dc_cr.cxx_get_shortValue());
 report("dc_cr.publicConstMethod() = " + dc_cr.publicConstMethod());
 report("dc_cr.anotherPublicMethod() = " + dc_cr.anotherPublicMethod());
 """, """
@@ -167,7 +167,7 @@ DerivedClass::DerivedClass(5, -3.14, 56)
 dc.shortValue = 56
 dc.publicConstMethod() = -3.14
 dc.anotherPublicMethod() = -168
-dc_cr.cxxGet_shortValue() = 56
+dc_cr.cxx_get_shortValue() = 56
 dc_cr.publicConstMethod() = -3.14
 dc_cr.anotherPublicMethod() = -168
 DerivedClass::~DerivedClass()

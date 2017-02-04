@@ -18,12 +18,12 @@ ty.add_ctor(['float', 'char const *', 'int'])\
   .add_comment("""Another comment""")\
   .add_test("""
 Class c(3.14, "hello", 42);
-report("c.cxxGet_floatValue() = " + c.cxxGet_floatValue());
-report("c.cxxGet_stringValue() = " + c.cxxGet_stringValue());
+report("c.cxx_get_floatValue() = " + c.cxx_get_floatValue());
+report("c.cxx_get_stringValue() = " + c.cxx_get_stringValue());
 """, """
 Class::Class(3.14, hello, 42)
-c.cxxGet_floatValue() = +3.14
-c.cxxGet_stringValue() = hello
+c.cxx_get_floatValue() = +3.14
+c.cxx_get_stringValue() = hello
 Class::~Class()
 """)
 ty.add_mutable_method('publicMethod', 'std::string const &')\
@@ -39,7 +39,7 @@ Class::~Class()
 ty.add_const_method('data', 'int')\
   .add_test("""
 Class c(5.1, 'baz', 3);
-report(c.cxxCall_data());
+report(c.cxx_call_data());
 """, """
 Class::Class(5.1, baz, 3)
 432
@@ -87,7 +87,7 @@ ty.add_uni_op('++', 'bool', kl_method_name='next')
 ty.add_deref('int const &')
 ty.add_test("""
 for ( Class c1(3.14, "hello", -2); c1; c1.next() )
-  report(c1.cxxDeref());
+  report(c1.cxx_deref());
 """, """
 Class::Class(3.14, hello, -2)
 -2
@@ -155,7 +155,7 @@ Class::~Class()
 ty.add_call_op(None, ['int'])\
   .add_test("""
 Class cl(1.1, "foo", -8);
-cl.cxxCall(14);
+cl.cxx_call(14);
 """, """
 Class::Class(1.1, foo, -8)
 Class::operator()(14)
@@ -263,12 +263,12 @@ Class::~Class()
 #   report("ReturnClassVec() = " + ReturnClassVec());
 
 #   value = ReturnClass();
-#   report("Before value.cxxSet__floatValue(-12.34): value.cxxGet_floatValue() = " + value.cxxGet_floatValue());
-#   value.cxxSet__floatValue(-12.34);
-#   report("After value.cxxSet__floatValue(-12.34): value.cxxGet_floatValue() = " + value.cxxGet_floatValue());
-#   report("Before value.cxxSet__stringValue('hello'): value.cxxGet_stringValue() = " + value.cxxGet_stringValue());
-#   value.cxxSet__stringValue('hello');
-#   report("After value.cxxSet__stringValue('hello'): value.cxxGet_stringValue() = " + value.cxxGet_stringValue());
+#   report("Before value.cxx_set_floatValue(-12.34): value.cxx_get_floatValue() = " + value.cxx_get_floatValue());
+#   value.cxx_set_floatValue(-12.34);
+#   report("After value.cxx_set_floatValue(-12.34): value.cxx_get_floatValue() = " + value.cxx_get_floatValue());
+#   report("Before value.cxx_set_stringValue('hello'): value.cxx_get_stringValue() = " + value.cxx_get_stringValue());
+#   value.cxx_set_stringValue('hello');
+#   report("After value.cxx_set_stringValue('hello'): value.cxx_get_stringValue() = " + value.cxx_get_stringValue());
 
 #   report("value.publicMethod() = " + value.publicMethod());
 #   report("value.getDesc() = " + value.getDesc());
@@ -284,7 +284,7 @@ Class::~Class()
 
 #   StructWithIndirectTypeThatCanInPlace st =
 #     ReturnStructWithIndirectTypeThatCanInPlace();
-#   report("st.cxxGet_floatValue() = " + st.cxxGet_floatValue());
+#   report("st.cxx_get_floatValue() = " + st.cxx_get_floatValue());
 
 #   Class constructor1(1.1, 'myString', 123);
 #   constructor1.exportValues(floatValue, stringValue, intValue);

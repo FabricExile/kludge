@@ -8,13 +8,13 @@ ty = ext.add_wrapped_type('Wrapper', 'Class')
 ty.add_ctor(['float', 'char const *', 'int'])\
   .add_test("""
 Class c(3.14, "hello", 42);
-report("c.cxxGet_floatValue() = " + c.cxxGet_floatValue());
-report("c.cxxGet_stringValue() = " + c.cxxGet_stringValue());
+report("c.cxx_get_floatValue() = " + c.cxx_get_floatValue());
+report("c.cxx_get_stringValue() = " + c.cxx_get_stringValue());
 """, """
 Class::Class(3.14, hello, 42)
 Wrapper::Wrapper(Ty *)
-c.cxxGet_floatValue() = +3.14
-c.cxxGet_stringValue() = hello
+c.cxx_get_floatValue() = +3.14
+c.cxx_get_stringValue() = hello
 Wrapper::~Wrapper()
 Class::~Class()
 """)
@@ -59,7 +59,7 @@ Class::~Class()
 """)
 ty.add_get_ind_op('int').add_test("""
 Class c(3.14, "foo", -7);
-report(c.cxxGetAtIndex(56));
+report(c.cxx_getAtIndex(56));
 """, """
 Class::Class(3.14, foo, -7)
 Wrapper::Wrapper(Ty *)
@@ -70,7 +70,7 @@ Class::~Class()
 """)
 ty.add_set_ind_op('int').add_test("""
 Class c(3.14, "foo", -7);
-c.cxxSetAtIndex(56, 4);
+c.cxx_setAtIndex(56, 4);
 report(c);
 """, """
 Class::Class(3.14, foo, -7)
@@ -210,12 +210,12 @@ Class::~Class()
 #   report("ReturnClassVec() = " + ReturnClassVec());
 
 #   value = ReturnClass();
-#   report("Before value.cxxSet__floatValue(-12.34): value.cxxGet_floatValue() = " + value.cxxGet_floatValue());
-#   value.cxxSet__floatValue(-12.34);
-#   report("After value.cxxSet__floatValue(-12.34): value.cxxGet_floatValue() = " + value.cxxGet_floatValue());
-#   report("Before value.cxxSet__stringValue('hello'): value.cxxGet_stringValue() = " + value.cxxGet_stringValue());
-#   value.cxxSet__stringValue('hello');
-#   report("After value.cxxSet__stringValue('hello'): value.cxxGet_stringValue() = " + value.cxxGet_stringValue());
+#   report("Before value.cxx_set_floatValue(-12.34): value.cxx_get_floatValue() = " + value.cxx_get_floatValue());
+#   value.cxx_set_floatValue(-12.34);
+#   report("After value.cxx_set_floatValue(-12.34): value.cxx_get_floatValue() = " + value.cxx_get_floatValue());
+#   report("Before value.cxx_set_stringValue('hello'): value.cxx_get_stringValue() = " + value.cxx_get_stringValue());
+#   value.cxx_set_stringValue('hello');
+#   report("After value.cxx_set_stringValue('hello'): value.cxx_get_stringValue() = " + value.cxx_get_stringValue());
 
 #   report("value.publicMethod() = " + value.publicMethod());
 #   report("value.getDesc() = " + value.getDesc());
@@ -231,7 +231,7 @@ Class::~Class()
 
 #   StructWithIndirectTypeThatCanInPlace st =
 #     ReturnStructWithIndirectTypeThatCanInPlace();
-#   report("st.cxxGet_floatValue() = " + st.cxxGet_floatValue());
+#   report("st.cxx_get_floatValue() = " + st.cxx_get_floatValue());
 
 #   Class constructor1(1.1, 'myString', 123);
 #   constructor1.exportValues(floatValue, stringValue, intValue);

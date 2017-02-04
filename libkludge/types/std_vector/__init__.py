@@ -63,8 +63,8 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
   {{element_type_name}} result[];
   result.reserve(size);
   for (Index i = 0; i < size; ++i)  {
-    {{element_type_name_for_derivatives}}_CxxConstRef ptr = vec.cxxGetAtIndex(i);
-    result.push(ptr.cxxGet());
+    {{element_type_name_for_derivatives}}_CxxConstRef ptr = vec.cxx_getAtIndex(i);
+    result.push(ptr.cxx_get());
   }
   return result;
 }
@@ -79,7 +79,7 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
       string += "...";
       break;
     }
-    string += this.cxxGetAtIndex(index);
+    string += this.cxx_getAtIndex(index);
   }
   string += "]";
 }

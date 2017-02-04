@@ -10,9 +10,9 @@ SInt32_StdVector vec;
 report(vec.size());
 vec.push_back(-7);
 report(vec.size());
-report(vec.cxxGetAtIndex(0));
-vec.cxxSetAtIndex(0, Make_SInt32_CxxConstRef(42));
-report(vec.cxxGetAtIndex(0));
+report(vec.cxx_getAtIndex(0));
+vec.cxx_setAtIndex(0, Make_SInt32_CxxConstRef(42));
+report(vec.cxx_getAtIndex(0));
 vec.pop_back();
 report(vec.size());
 """, """

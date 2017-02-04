@@ -98,7 +98,7 @@ def is_builtin_method_name(method_name):
 def clean_method_name(method_name):
     if is_kl_keyword(method_name) \
         or is_builtin_method_name(method_name):
-            return 'cxxCall_' + method_name
+            return 'cxx_call_' + method_name
     return method_name
 
 def clean_param_name(param_name):

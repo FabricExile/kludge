@@ -19,7 +19,7 @@ The `add_member()` method adds a member to the type.  Its parameters are:
 
 `cpp_name` is the name of the member in C++; it will have the same name in KL.  `cpp_type_name` is the C++ type name of the member.  The `visibility`, if provided, is one of `Visibility.public`, `Visibility.protected` and `Visibility.private`; if not provided, it defaults to the current default visibility, which starts at `Visibility.public` but can be changed with `set_default_visibility()`.
 
-Public members are accessed via getters and setters that are automatically built for the type. The name of the getter defaults to `cxxGet_<memberName>` and the setter to `cxxSet_<memberName>` but can be controlled with the corresponding parameter.  If either `getter` or `setter` is set to `None`, the getter or setter will be completely omitted.
+Public members are accessed via getters and setters that are automatically built for the type. The name of the getter defaults to `cxx_get_<memberName>` and the setter to `cxx_set_<memberName>` but can be controlled with the corresponding parameter.  If either `getter` or `setter` is set to `None`, the getter or setter will be completely omitted.
 
 It is not required to specify the members for a type, except when using in-place type wrapping; if not specified, the members will simply not be accessible from KL.
 
@@ -131,7 +131,7 @@ The `add_call_op()` method provides a wrapping for C++ `operator()`.  It takes t
 All of the parameters work as for methods.  The result of `add_call()` supports `add_comment(comment)` and `add_test(kl, out)`.
 
 
-The call operator is mapped into KL as a method `cxxCall`.  For instance, the wrapping:
+The call operator is mapped into KL as a method `cxx_call`.  For instance, the wrapping:
 
 ```
 ty.add_call_op('int', ['float'])
@@ -140,7 +140,7 @@ ty.add_call_op('int', ['float'])
 results in KL:
 
 ```
-SInt32 MyType.cxxCall(Float32);
+SInt32 MyType.cxx_call(Float32);
 ```
 
 ## `add_uni_op()`
@@ -280,7 +280,7 @@ The parameters are:
 
 The `value_cpp_type_name` is the type name of the value that is get or set; for `add_get_ind_op()` it is the return value, and for `add_set_ind_op()` it is the second parameter value.  The first parameter value in each case is of type `Index` in KL and `size_t` in C++ (at some point we will allow this to be overridden).  `this_access` controls the mutability of the type for each case.
 
-The index operations are mapped to the methods `cxxGetAtIndex` and `cxxSetAtIndex`, respectively. The result of `add_get_ind_op()` or `add_set_ind_op()` supports `add_comment(comment)` and `add_test(kl, out)`.
+The index operations are mapped to the methods `cxx_getAtIndex` and `cxx_setAtIndex`, respectively. The result of `add_get_ind_op()` or `add_set_ind_op()` supports `add_comment(comment)` and `add_test(kl, out)`.
 
 For example:
 
@@ -292,8 +292,8 @@ ty.add_set_ind_op('float')
 produces:
 
 ```
-Float32 MyType.cxxGetAtIndex?(Index index);
-MyType.cxxSetAtIndex!(Index index, Float32 value);
+Float32 MyType.cxx_getAtIndex?(Index index);
+MyType.cxx_setAtIndex!(Index index, Float32 value);
 ```
 
 ## `add_deref()`
@@ -305,7 +305,7 @@ The `add_deref()` method maps the C++ `operator *()` that acts as a deference op
     self,
     returns,
     this_access = ThisAccess.const,
-    kl_method_name = 'cxxDeref',
+    kl_method_name = 'cxx_deref',
     ):
 ```
 
@@ -320,7 +320,7 @@ ty.add_deref('int');
 Produces:
 
 ```
-SInt32 MyType.cxxDeref?();
+SInt32 MyType.cxx_deref?();
 ```
 
 ## `add_kl()`

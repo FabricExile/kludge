@@ -19,19 +19,39 @@ ty.add_ctor(['float', 'char const *', 'int'])\
   .add_test("""
 Class c(3.14, "hello", 42);
 report("c.cxx_get_floatValue() = " + c.cxx_get_floatValue());
+report("c.get_floatValue() = " + c.get_floatValue());
 report("c.cxx_get_stringValue() = " + c.cxx_get_stringValue());
+report("c.get_stringValue() = " + c.get_stringValue());
+c.cxx_set_floatValue(1.23);
+report("after c.cxx_set_floatValue(1.23):");
+report("c.cxx_get_floatValue() = " + c.cxx_get_floatValue());
+report("c.get_floatValue() = " + c.get_floatValue());
+c.set_floatValue(-9.67);
+report("after c.set_floatValue(-9.67):");
+report("c.cxx_get_floatValue() = " + c.cxx_get_floatValue());
+report("c.get_floatValue() = " + c.get_floatValue());
 """, """
 Class::Class(3.14, hello, 42)
 c.cxx_get_floatValue() = +3.14
+c.get_floatValue() = +3.14
 c.cxx_get_stringValue() = hello
+c.get_stringValue() = hello
+after c.cxx_set_floatValue(1.23):
+c.cxx_get_floatValue() = +1.23
+c.get_floatValue() = +1.23
+after c.set_floatValue(-9.67):
+c.cxx_get_floatValue() = -9.67
+c.get_floatValue() = -9.67
 Class::~Class()
 """)
 ty.add_mutable_method('publicMethod', 'std::string const &')\
   .add_test("""
 Class c(3.14, "hello", 42);
+report("c.cxx_publicMethod() = " + c.cxx_publicMethod());
 report("c.publicMethod() = " + c.publicMethod());
 """, """
 Class::Class(3.14, hello, 42)
+c.cxx_publicMethod() = hello
 c.publicMethod() = hello
 Class::~Class()
 """)
@@ -39,19 +59,23 @@ Class::~Class()
 ty.add_const_method('data', 'int')\
   .add_test("""
 Class c(5.1, 'baz', 3);
-report(c.cxx_call_data());
+report("c.cxx_data() = " + c.cxx_data());
+report("c.data_() = " + c.data_());
 """, """
 Class::Class(5.1, baz, 3)
-432
+c.cxx_data() = 432
+c.data_() = 432
 Class::~Class()
 """)
 
 ty.add_static_method('PrintValues', None, ['Class const &'])\
   .add_test("""
 Class c(1.32, "hoo", 23);
+Class_CxxPrintValues(c);
 Class_PrintValues(c);
 """, """
 Class::Class(1.32, hoo, 23)
+1.32 hoo 23
 1.32 hoo 23
 Class::~Class()
 """)
@@ -141,13 +165,15 @@ Class::~Class()
 
 ext.add_func('GlobalFuncTakingClassConstRef', None, ['Class const &'])\
   .add_test("""
+CxxGlobalFuncTakingClassConstRef("hello");
 GlobalFuncTakingClassConstRef("hello");
 """, """
 Class::Class(hello)
 Class::Class(Class const &)
 Class::~Class()
-Class::Class(Class const &)
+GlobalFuncTakingClassConstRef: klass.stringValue = hello
 Class::~Class()
+Class::Class(hello)
 GlobalFuncTakingClassConstRef: klass.stringValue = hello
 Class::~Class()
 """)
@@ -169,20 +195,20 @@ dty.add_member('newPublicMember', 'double', visibility=Visibility.public)
 dty.add_test("""
 DerivedClass dc(56);
 report("dc = " + dc);
-report("dc.newMethod() = " + dc.newMethod());
-report("dc.publicMethod() = " + dc.publicMethod());
+report("dc.cxx_newMethod() = " + dc.cxx_newMethod());
+report("dc.cxx_publicMethod() = " + dc.cxx_publicMethod());
 Class c = dc;
 report("c = " + c);
-report("c.publicMethod() = " + c.publicMethod());
+report("c.cxx_publicMethod() = " + c.cxx_publicMethod());
 """, """
 Class::Class(3.14, hello, 56)
 DerivedClass::DerivedClass(56)
 dc = DerivedClass:{floatValue:+3.14,stringValue:hello,newPublicMember:+2.81}
-dc.newMethod() = -9
-dc.publicMethod() = hello
+dc.cxx_newMethod() = -9
+dc.cxx_publicMethod() = hello
 Class::Class(Class const &)
 c = Class:{floatValue:+3.14,stringValue:hello}
-c.publicMethod() = hello
+c.cxx_publicMethod() = hello
 Class::~Class()
 DerivedClass::~DerivedClass()
 Class::~Class()

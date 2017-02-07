@@ -3,6 +3,7 @@
 #
 
 from libkludge.type_info import TypeInfo
+from libkludge.type_simplifier import NullTypeSimplifier
 from libkludge.selector import Selector
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
@@ -19,6 +20,7 @@ class OwnedTypeInfo(TypeInfo):
     extends,
     record,
     forbid_copy,
+    dont_delete,
     simplifier,
     ):
     TypeInfo.__init__(
@@ -33,6 +35,7 @@ class OwnedTypeInfo(TypeInfo):
       forbid_copy=forbid_copy,
       simplifier=simplifier,
       )
+    self.dont_delete = dont_delete
 
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)
@@ -80,6 +83,7 @@ class OwnedSpec(object):
     extends,
     record,
     forbid_copy=False,
+    dont_delete=False,
     simplifier=None,
     ):
     self.kl_type_name = kl_type_name
@@ -88,6 +92,7 @@ class OwnedSpec(object):
     self.extends = extends
     self.record = record
     self.forbid_copy = forbid_copy
+    self.dont_delete = dont_delete
     self.simplifier = simplifier
 
 class OwnedSelector(Selector):
@@ -105,7 +110,8 @@ class OwnedSelector(Selector):
     extends,
     record,
     forbid_copy=False,
-    simplifier=None,
+    dont_delete=False,
+    simplifier=NullTypeSimplifier(),
     ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = OwnedSpec(
       kl_type_name,
@@ -114,6 +120,7 @@ class OwnedSelector(Selector):
       extends,
       record,
       forbid_copy=forbid_copy,
+      dont_delete=dont_delete,
       simplifier=simplifier,
       )
 
@@ -131,6 +138,7 @@ class OwnedSelector(Selector):
         extends = spec.extends
         record = spec.record
         forbid_copy = spec.forbid_copy
+        dont_delete = spec.dont_delete
 
         type_info_cache_key = kl_type_name
         type_info = self.type_info_cache.get(type_info_cache_key)
@@ -143,6 +151,7 @@ class OwnedSelector(Selector):
             extends=extends,
             record=record,
             forbid_copy=forbid_copy,
+            dont_delete=dont_delete,
             simplifier=spec.simplifier,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)

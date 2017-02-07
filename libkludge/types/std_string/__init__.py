@@ -9,6 +9,35 @@ from libkludge.generate.record import Record
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
 
+class StdStringTypeSimplifier(TypeSimplifier):
+
+  def __init__(self):
+    TypeSimplifier.__init__(self)
+
+  def param_cost(self, type_info):
+    return 100
+
+  def param_type_name_base(self, type_info):
+    return "String"
+
+  def param_type_name_suffix(self, type_info):
+    return ""
+
+  def result_type_name(self, type_info):
+    return "String"
+
+  def render_param_pre(self, type_info):
+    return "CxxStdString("
+
+  def render_param_post(self, type_info):
+    return ")"
+
+  def render_result_pre(self, type_info):
+    return "String("
+
+  def render_result_post(self, type_info):
+    return ")"
+
 class StdStringSelector(Selector):
 
   def __init__(self, ext):
@@ -16,19 +45,19 @@ class StdStringSelector(Selector):
     self.cpp_type_expr = Named([Simple('std'), Simple('string')])
 
   def get_desc(self):
-    return "StdString"
+    return 'CxxStdString'
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
     if dq.is_direct and undq_cpp_type_expr == self.cpp_type_expr:
-      kl_type_name = 'StdString'
+      kl_type_name = 'CxxStdString'
       record = Record(
         self.ext.root_namespace,
         child_namespace_component=undq_cpp_type_expr.components[0],
         child_namespace_kl_name=kl_type_name,
         )
       record.add_ctor([])
-      record.add_ctor(['char const *'])
+      record.add_ctor(['char const *'], dont_promote=True)
       record.add_ctor(['char const *', 'size_t'])
       record.add_ctor(['char const *', 'char const *'])
       record.add_const_method('c_str', 'char const *')
@@ -40,22 +69,21 @@ class StdStringSelector(Selector):
       record.add_set_ind_op('char')
       record.add_mutable_method('push_back', None, ['char'])
       record.add_kl("""
+/// \dfgPresetOmit
 inline {{type_name}}(String string) {
   CxxChar array<>(string.data(), string.length());
   this = {{type_name}}(CxxCharConstPtr(array, 0), CxxCharConstPtr(array, string.length()));
 }
 
+/// \dfgPresetOmit
 inline {{type_name}} Make_{{type_name}}(String string) {
   return {{type_name}}(string);
 }
 
-inline {{type_name}}.appendDesc(io String string) {
-  CxxCharConstPtr ptr = this.c_str();
-  string += String(ptr);
-}
-
-inline {{type_name}}_CxxConstRef.appendDesc(io String string) {
-  CxxCharConstPtr ptr = this.c_str();
+/// Convert to a string
+/// \dfgPresetOmit
+{{type_name}}.appendDesc(io String string) {
+  CxxCharConstPtr ptr = this.cxx_c_str();
   string += String(ptr);
 }
 """)
@@ -65,6 +93,6 @@ inline {{type_name}}_CxxConstRef.appendDesc(io String string) {
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
-        simplifier=TypeSimplifier(),
+        simplifier=StdStringTypeSimplifier(),
         )
       return True # restart

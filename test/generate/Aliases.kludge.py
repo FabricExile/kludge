@@ -16,13 +16,17 @@ UInt32
 
 ext.add_func('ReturnAliasValue', 'AliasType')\
   .add_test("""
+report("CxxReturnAliasValue() = " + CxxReturnAliasValue());
 report("ReturnAliasValue() = " + ReturnAliasValue());
 """, """
+CxxReturnAliasValue() = 63
 ReturnAliasValue() = 63
 """)
 
 ext.add_func('TakeAliasType', None, ['AliasType'])\
   .add_test("""
+AliasType cxx_alias_value = 42;
+CxxTakeAliasType(cxx_alias_value);
 AliasType alias_value = 42;
 TakeAliasType(alias_value);
 report("<empty>");
@@ -32,8 +36,10 @@ report("<empty>");
 
 ext.add_func('TakeAliasTypeRef', None, ['AliasType &'])\
   .add_test("""
+AliasType cxx_alias_value = 42;
+CxxTakeAliasTypeRef(Make_CxxAliasTypeRef(cxx_alias_value));
 AliasType alias_value = 42;
-TakeAliasTypeRef(Make_AliasType_CxxRef(alias_value));
+TakeAliasTypeRef(alias_value);
 report("<empty>");
 """, """
 <empty>
@@ -41,8 +47,10 @@ report("<empty>");
 
 ext.add_func('TakeAliasTypeConstRef', None, ['AliasType const &'])\
   .add_test("""
+AliasType cxx_alias_value = 42;
+CxxTakeAliasTypeConstRef(Make_CxxAliasTypeConstRef(cxx_alias_value));
 AliasType alias_value = 42;
-TakeAliasTypeConstRef(Make_AliasType_CxxConstRef(alias_value));
+TakeAliasTypeConstRef(alias_value);
 report("<empty>");
 """, """
 <empty>

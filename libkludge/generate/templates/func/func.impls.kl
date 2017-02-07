@@ -4,9 +4,42 @@
 {% import "generate/macros.kl" as macros %}
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
-{{ func.result.render_type_kl() }}
-{{ func.kl_global_name }}(
-    {{ macros.kl_param_list(func.params) | indent(4) }}
-    ) = "{{func.get_edk_symbol_name()}}";
 
+{% for comment in func.comments %}
+{{comment}}
+{% endfor %}
+/// \dfgPresetOmit
+{{func.result.render_type_kl()}}
+Cxx{{func.kl_global_name}}(
+    {{macros.kl_param_list(func.params) | indent(4)}}
+    ) = "{{func.get_edk_symbol_name()}}";
+{% if func.should_promote %}
+
+{%  for comment in func.comments %}
+{{comment}}
+{%  endfor %}
+{{func.result.type_info.simplifier.result_type_name(func.result.type_info)}}
+{{func.kl_global_name}}(
+    {% for param in func.params %}
+    {{param.type_info.simplifier.render_param_pass_type(param.type_info)}}
+    {{param.type_info.simplifier.param_type_name_base(param.type_info)}}
+    {{param.value_name.kl}}
+    {{param.type_info.simplifier.param_type_name_suffix(param.type_info)}}
+    {{"," if not loop.last else ""}}
+    {% endfor %}
+    )
+{
+    {{func.result.render_return_kl()}}
+    {{func.result.type_info.simplifier.render_result_pre(func.result.type_info)}}
+    Cxx{{func.kl_global_name}}(
+        {% for param in func.params %}
+        {{param.type_info.simplifier.render_param_pre(param.type_info)}}
+        {{param.value_name.kl}}
+        {{param.type_info.simplifier.render_param_post(param.type_info)}}
+        {{"," if not loop.last else ""}}
+        {% endfor %}
+        )
+    {{func.result.type_info.simplifier.render_result_post(func.result.type_info)}};
+}
+{% endif %}
 {% endblock body %}

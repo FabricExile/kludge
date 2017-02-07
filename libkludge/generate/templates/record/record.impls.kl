@@ -12,33 +12,64 @@
 //////////////////////////////////////////////////////////////////////////////
 {%  for member in record.members %}
 {%   if member.is_public() %}
+{## Getter ##################################################################}
 {%    if member.has_getter() %}
 
 /// \dfgPresetOmit
-{{member.type_info.kl.name}} {{type_info.kl.name}}.{{member.getter_kl_name}}()
+{{member.type_info.kl.name}} {{type_info.kl.name}}.cxx_{{member.getter_kl_name}}()
 {%     if type_info.is_direct %}
   = "{{member.get_getter_edk_symbol_name(type_info)}}";
 {%     else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.{{member.getter_kl_name}} on null {{type_info.kl.name}}";
-    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{member.getter_kl_name}}();
+        throw "Call of {{type_info.kl.name}}.cxx_{{member.getter_kl_name}} on null {{type_info.kl.name}}";
+    return {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxx_{{member.getter_kl_name}}();
 }
 {%     endif %}
+
+{% if type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
+{% endif %}
+{{member.type_info.simplifier.result_type_name(member.type_info)}}
+{{type_info.kl.name}}.{{member.getter_kl_name}}()
+{
+    return
+    {{member.type_info.simplifier.render_result_pre(member.type_info)}}
+    this.cxx_{{member.getter_kl_name}}()
+    {{member.type_info.simplifier.render_result_post(member.type_info)}}
+    ;
+}
 {%    endif %}
+{## Setter ##################################################################}
 {%    if member.has_setter() and allow_mutable_methods %}
 
 /// \dfgPresetOmit
-{{type_info.kl.name}}.{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}})
+{{type_info.kl.name}}.cxx_{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}})
 {%     if type_info.is_direct %}
   = "{{member.get_setter_edk_symbol_name(type_info)}}";
 {%     else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.{{member.setter_kl_name}} on null {{type_info.kl.name}}";
-    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{member.setter_kl_name}}(value);
+        throw "Call of {{type_info.kl.name}}.cxx_{{member.setter_kl_name}} on null {{type_info.kl.name}}";
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxx_{{member.setter_kl_name}}(value);
 }
 {%     endif %}
+
+{% if type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
+{% endif %}
+{{type_info.kl.name}}.{{member.setter_kl_name}}!(
+    {{member.type_info.simplifier.param_type_name_base(member.type_info)}}
+    value
+    {{member.type_info.simplifier.param_type_name_suffix(member.type_info)}}
+   )
+{
+    this.cxx_{{member.setter_kl_name}}(
+        {{member.type_info.simplifier.render_param_pre(member.type_info)}}
+        value
+        {{member.type_info.simplifier.render_param_post(member.type_info)}}
+        );
+}
 {%    endif %}
 {%   endif %}
 
@@ -51,9 +82,10 @@
 // {{type_info}}
 // Constructors and Destructor
 //////////////////////////////////////////////////////////////////////////////
+{## Empty Constructor #######################################################}
 {%  if type_info.is_direct and record.include_empty_ctor %}
 
-{%   if type_info.is_cxx %}
+{%   if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {%   endif %}
 {%   if record.is_abstract %}
@@ -64,9 +96,10 @@
 {{type_info.kl.name}}() = "{{record.get_empty_ctor_edk_symbol_name(type_info)}}";
 {%   endif %}
 {%  endif %}
+{## Copy Constructor ########################################################}
 {%  if type_info.is_direct and record.include_copy_ctor %}
 
-{%   if type_info.is_cxx %}
+{%   if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {%   endif %}
 {%   if record.is_abstract %}
@@ -81,68 +114,109 @@
     ) = "{{record.get_copy_ctor_edk_symbol_name(type_info)}}";
 {%   endif %}
 {%  endif %}
-{%  if not record.is_abstract %}
+{## Custom Constructors #####################################################}
+{%  if type_info.is_direct and not record.is_abstract %}
 {%   for ctor in record.ctors %}
-{%    if type_info.is_direct %}
 
-{%     for comment in ctor.comments %}
-{{comment}}
-{%     endfor %}
-{%     if type_info.is_cxx %}
 /// \dfgPresetOmit
-{%     endif %}
-{{type_info.kl.name}}(
+{{type_info.kl.name}}.__ctor(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
     {% endfor %}
     ) = "{{ctor.get_edk_symbol_name(type_info)}}";
+
+{%    for comment in ctor.comments %}
+{{comment}}
+{%    endfor %}
+{%    if type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
 {%    endif %}
+{{type_info.kl.name}}(
+    {% for param in ctor.params %}
+    {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
+    {% endfor %}
+    ) {
+    this.__ctor(
+        {% for param in ctor.params %}
+        {{param.value_name.kl | indent(8)}}{{"," if not loop.last else ""}}
+        {% endfor %}
+        );
+}
 {%   endfor %}
+{%    for ctor in record.ctors_to_promote(type_info) %}
+
+{%      for comment in ctor.comments %}
+{{comment}}
+{%      endfor %}
+{% if type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
+{% endif %}
+{{type_info.kl.name}}(
+    {% for param in ctor.params %}
+    {{param.type_info.simplifier.render_param_pass_type(param.type_info)}}
+    {{param.type_info.simplifier.param_type_name_base(param.type_info)}}
+    {{param.value_name.kl}}
+    {{param.type_info.simplifier.param_type_name_suffix(param.type_info)}}
+    {{"," if not loop.last else ""}}
+    {% endfor %}
+    ) {
+    this.__ctor(
+        {% for param in ctor.params %}
+        {{param.type_info.simplifier.render_param_pre(param.type_info)}}
+        {{param.value_name.kl}}
+        {{param.type_info.simplifier.render_param_post(param.type_info)}}
+        {{"," if not loop.last else ""}}
+        {% endfor %}
+        );
+}
+{%    endfor %}
 {%  endif %}
-{%  if not record.is_abstract and type_info.kl.name.compound != 'StdString' and type_info.kl.name.compound != 'StdString_CxxConstRef' %}
+{## Special Constructors ####################################################}
+{%  if not record.is_abstract and type_info.kl.name.compound != 'CxxStdString' and type_info.kl.name.compound != 'CxxStdStringConstRef' %}
 {%   if record.has_char_const_ptr_ctor() %}
+{#######
 {%    if type_info.is_direct %}
 
-{%     if type_info.is_cxx %}
+{%     if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {%     endif %}
 {{type_info.kl.name}}(String string) {
     this = {{type_info.kl.name}}(CxxCharConstPtr(string));
 }
-{%    elif type_info.is_const_ref %}
+#######}
+{%    if type_info.is_const_ref %}
 
-{%     if type_info.is_cxx %}
 /// \dfgPresetOmit
-{%     endif %}
 {{type_info.kl.name}}(String string) {
     this.values.push({{type_info.direct_orig.kl.name}}(CxxCharConstPtr(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 {%    endif %}
 {%   elif record.has_std_string_const_ref_ctor() %}
+{#######
 {%    if type_info.is_direct %}
 
-{%     if type_info.is_cxx %}
+{%     if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {%     endif %}
 {{type_info.kl.name}}(String string) {
-    this = {{type_info.kl.name}}(StdString_CxxConstRef(StdString(string)));
+    this = {{type_info.kl.name}}(CxxStdStringConstRef(CxxStdString(string)));
 }
-{%    elif type_info.is_const_ref %}
+#######}
+{%    if type_info.is_const_ref %}
 
-{%     if type_info.is_cxx %}
 /// \dfgPresetOmit
-{%     endif %}
 {{type_info.kl.name}}(String string) {
-    this.values.push({{type_info.direct_orig.kl.name}}(StdString(string)));
+    this.values.push({{type_info.direct_orig.kl.name}}(CxxStdString(string)));
     this.ptr = {{type_info.direct.render_get_underlying_ptr('this.values[0]')}};
 }
 {%    endif %}
 {%   endif %}
 {%  endif %}
+{## Destructor ##############################################################}
 {%  if not record.is_abstract and type_info.is_direct and record.include_dtor %}
 
-{%   if type_info.is_cxx %}
+{%   if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {%   endif %}
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
@@ -163,14 +237,12 @@
 {%    for comment in method.comments %}
 {{comment}}
 {%    endfor %}
-{%    if type_info.is_cxx %}
 /// \dfgPresetOmit
-{%    endif %}
 {{method.result.render_type_kl()}}
 {%    if method.is_static %}
-{{type_info.kl.name}}_{{method.kl_name}}(
+{{type_info.kl.name}}_Cxx{{method.clean_cxx_kl_name}}(
 {%    else %}
-{{type_info.kl.name}}.{{method.kl_name}}{{method.this_access_suffix}}(
+{{type_info.kl.name}}.cxx_{{method.clean_cxx_kl_name}}{{method.this_access_suffix}}(
 {%    endif %}
     {% for param in method.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
@@ -181,9 +253,9 @@
 {%    else %}
 {
     if (Fabric_Guarded && !this.ptr)
-        throw "Call of {{type_info.kl.name}}.{{method.kl_name}} on null {{type_info.kl.name}}";
+        throw "Call of {{type_info.kl.name}}.cxx_{{method.clean_cxx_kl_name}} on null {{type_info.kl.name}}";
     {{method.result.render_return_kl()}}
-    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.{{method.kl_name}}(
+    {{type_info.direct.render_indirect_to_direct('this')}}->{ {{record.kl_global_name}} }.cxx_{{method.clean_cxx_kl_name}}(
         {% for param in method.params %}
         {{param.value_name.kl | indent(4)}}{{"," if not loop.last else ""}}
         {% endfor %}
@@ -192,6 +264,50 @@
 {%    endif %}
 {%   endif %}
 {%  endfor %}
+{%   for method in record.methods_to_promote(type_info) %}
+{%    if (method.is_static and allow_static_methods)
+    or (method.is_mutable and allow_mutable_methods)
+    or (method.is_const and allow_const_methods) %}
+
+{%     for comment in method.comments %}
+{{comment}}
+{%     endfor %}
+{% if type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
+{% endif %}
+{{method.result.type_info.simplifier.result_type_name(method.result.type_info)}}
+{%     if method.is_static %}
+{{type_info.kl.name}}_{{method.clean_kl_name}}(
+{%     else %}
+{{type_info.kl.name}}.{{method.clean_kl_name}}{{method.this_access_suffix}}(
+{%     endif %}
+    {% for param in method.params %}
+    {{param.type_info.simplifier.render_param_pass_type(param.type_info)}}
+    {{param.type_info.simplifier.param_type_name_base(param.type_info)}}
+    {{param.value_name.kl}}
+    {{param.type_info.simplifier.param_type_name_suffix(param.type_info)}}
+    {{"," if not loop.last else ""}}
+    {% endfor %}
+    )
+{   
+    {{method.result.render_return_kl()}}
+    {{method.result.type_info.simplifier.render_result_pre(method.result.type_info)}}
+    {% if method.is_static %}
+    {{type_info.kl.name}}_Cxx{{method.kl_name}}(
+    {% else %}
+    this.cxx_{{method.clean_cxx_kl_name}}(
+    {% endif %}
+        {% for param in method.params %}
+        {{param.type_info.simplifier.render_param_pre(param.type_info)}}
+        {{param.value_name.kl}}
+        {{param.type_info.simplifier.render_param_post(param.type_info)}}
+        {{"," if not loop.last else ""}}
+        {% endfor %}
+        )
+    {{method.result.type_info.simplifier.render_result_post(method.result.type_info)}};
+}
+{%    endif %}
+{%   endfor %}
 {% endif %}
 {############################################################################}
 {% if record.has_call_ops() %}
@@ -313,7 +429,7 @@
 {%   for comment in cast.comments %}
 {{comment}}
 {%   endfor %}
-{%   if type_info.is_cxx %}
+{%   if cast.this.type_info.kl.name.base.startswith('Cxx') or cast.get_param(type_info).type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {%   endif %}
 {{cast.this.type_info.kl.name}}(

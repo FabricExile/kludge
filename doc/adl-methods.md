@@ -199,7 +199,7 @@ ty.add_bin_op('==', 'bool', [Param('lhs', 'MyType const &'), Param('rhs', 'MyTyp
 is mapped to:
 
 ```
-Boolean +(MyType_CxxConstRef, MyType_CxxConstRef);
+Boolean +(CxxMyTypeConstRef, CxxMyTypeConstRef);
 ```
 
 ## `add_ass_op()`

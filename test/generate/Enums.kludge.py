@@ -14,15 +14,22 @@ ext.add_func('DescribeGlobalEnum', None, ['GlobalEnum'])
 ext.add_func('ReturnGlobalEnum', 'GlobalEnum')
 ext.add_func('SetGlobalEnum', None, ['GlobalEnum &'])
 ty.add_test("""
+CxxDescribeGlobalEnum(ValueOne);
 DescribeGlobalEnum(ValueOne);
 DescribeGlobalEnum(ValueSeventeen);
+CxxDescribeGlobalEnum(CxxReturnGlobalEnum());
 DescribeGlobalEnum(ReturnGlobalEnum());
 GlobalEnum e;
-SetGlobalEnum(Make_GlobalEnum_CxxRef(e));
+CxxSetGlobalEnum(Make_CxxGlobalEnumRef(e));
+CxxDescribeGlobalEnum(e);
+SetGlobalEnum(e);
 DescribeGlobalEnum(e);
 """, """
 DescribeGlobalEnum: e=ValueOne
+DescribeGlobalEnum: e=ValueOne
 DescribeGlobalEnum: e=ValueSeventeen
+DescribeGlobalEnum: e=ValueTwo
+DescribeGlobalEnum: e=ValueTwo
 DescribeGlobalEnum: e=ValueTwo
 DescribeGlobalEnum: e=ValueTwo
 """)

@@ -64,3 +64,25 @@ class Func(Decl):
   
   def get_template_aliases(self):
     return ['func']
+  
+  def get_promotion_data(self):
+    param_sigs = []
+    cost = 0
+    for param in self.params:
+      simplifier = param.type_info.simplifier
+      type_info = param.type_info
+      param_sigs.append("%s %s%s" % (
+        simplifier.render_param_pass_type(type_info),
+        simplifier.param_type_name_base(type_info),
+        simplifier.param_type_name_suffix(type_info),
+        ))
+      this_cost = simplifier.param_cost(type_info)
+      if this_cost > cost:
+        cost = this_cost
+    sig = "%s(%s)" % (self.kl_global_name, ','.join(param_sigs))
+    return (sig, cost)
+
+  @property
+  def should_promote(self):
+    promotion_sig, _ = self.get_promotion_data()
+    return self.ext.func_promotions[promotion_sig][0] is self

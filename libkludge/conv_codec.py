@@ -24,6 +24,10 @@ class ConvCodec:
         )
   
   @property
+  def will_promote(self):
+    return self.type_info.will_promote
+
+  @property
   def base_type_info(self):
     return self.type_info.base_type_info
   

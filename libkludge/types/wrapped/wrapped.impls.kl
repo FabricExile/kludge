@@ -4,4 +4,12 @@
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 {{decl.render_method_impls('kl')}}
+
+/// \dfgPresetOmit
+{{decl.wrapped_type_info.kl.name.compound}}({{decl.raw_type_info.kl.name.base}} raw{{decl.raw_type_info.kl.name.suffix}})
+  = "{{decl.rawToWrapped_edk_symbol_name()}}";
+
+/// \dfgPresetOmit
+{{decl.raw_type_info.kl.name.compound}}({{decl.wrapped_type_info.kl.name.base}} wrapped{{decl.wrapped_type_info.kl.name.suffix}})
+  = "{{decl.wrappedToRaw_edk_symbol_name()}}";
 {% endblock body %}

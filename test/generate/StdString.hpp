@@ -37,6 +37,13 @@ public:
     return m_s;
   }
 
+  void someMethod(char const *) {
+    std::cout << "MyType::someMethod(const char *)\n" << std::flush;
+  }
+  void someMethod(std::string const &) {
+    std::cout << "MyType::someMethod(std::string const &*)\n" << std::flush;
+  }
+
 private:
 
   std::string m_s;
@@ -46,4 +53,12 @@ inline MyType const &GetStaticMyType()
 {
   static MyType my_type("staticMyType");
   return my_type;
+}
+
+inline void GlobalFuncWithPromotionClash(char const *) {
+  std::cout << "GlobalFuncWithPromotionClash(char const *)\n" << std::flush;
+}
+
+inline void GlobalFuncWithPromotionClash(std::string const &) {
+  std::cout << "GlobalFuncWithPromotionClash(std::string const &)\n" << std::flush;
 }

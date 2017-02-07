@@ -37,6 +37,7 @@ class Decl(object):
 
   def add_test(self, kl, out):
     self.ext.add_test(kl, out, test_name=self.get_test_name())
+    return self
 
   @abc.abstractmethod
   def get_desc(self):

@@ -7,7 +7,7 @@
 {% for comment in decl.type_info.record.comments %}
 {{comment}}
 {% endfor %}
-{% if decl.type_info.is_cxx %}
+{% if decl.type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {% endif %}
 struct {{decl.type_info.kl.name}}

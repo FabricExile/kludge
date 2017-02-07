@@ -25,7 +25,7 @@ class DirQual:
   @property
   def is_const_ptr(self):
     return self.direction == directions.Pointer and qualifiers.is_const(self.qualifier)
-  
+
   @property
   def is_mutable_ref(self):
     return self.direction == directions.Reference and qualifiers.is_mutable(self.qualifier)

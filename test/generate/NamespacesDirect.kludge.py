@@ -20,7 +20,7 @@ report(x);
 scl.add_method('typedefedMethod', None, ['Typedefed const &'])\
   .add_test("""
 NameSpace_Class_SubClass scl(6);
-scl.typedefedMethod(Make_StdString_CxxConstRef("hello"));
+scl.typedefedMethod(Make_CxxStdStringConstRef("hello"));
 report("here");
 """, """
 here

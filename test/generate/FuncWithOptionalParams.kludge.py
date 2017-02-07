@@ -9,9 +9,13 @@ ext.add_func(
   ['int'],
   ['float'],
 ).add_test("""
+CxxFuncWithOptionalParams(56);
 FuncWithOptionalParams(56);
+CxxFuncWithOptionalParams(-7, 5.12);
 FuncWithOptionalParams(-7, 5.12);
 """, """
 FuncWithOptionalParams a=56 b=4.65
+FuncWithOptionalParams a=56 b=4.65
+FuncWithOptionalParams a=-7 b=5.12
 FuncWithOptionalParams a=-7 b=5.12
 """)

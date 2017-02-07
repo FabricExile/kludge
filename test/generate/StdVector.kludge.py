@@ -6,12 +6,12 @@ ext.add_cpp_quoted_include('StdVector.hpp')
 
 ext.generate_type("std::vector<int>")
 ext.add_test("""
-SInt32_StdVector vec;
+CxxSInt32StdVector vec;
 report(vec.size());
 vec.push_back(-7);
 report(vec.size());
 report(vec.cxx_getAtIndex(0));
-vec.cxx_setAtIndex(0, Make_SInt32_CxxConstRef(42));
+vec.cxx_setAtIndex(0, Make_CxxSInt32ConstRef(42));
 report(vec.cxx_getAtIndex(0));
 vec.pop_back();
 report(vec.size());
@@ -29,7 +29,7 @@ Float32 a[];
 a.push(3.14);
 a.push(5.34);
 report("a = " + a);
-report("ReturnSecond(a) = " + ReturnSecond(Float32_StdVector(a)));
+report("ReturnSecond(a) = " + ReturnSecond(CxxFloat32StdVector(a)));
 """, """
 a = [+3.14,+5.34]
 ReturnSecond(a) = +5.34
@@ -37,7 +37,7 @@ ReturnSecond(a) = +5.34
 
 ext.add_func('ReturnIntVec', 'std::vector<int>')\
   .add_test("""
-report(Make_SInt32_VariableArray(ReturnIntVec()));
+report(Make_SInt32VariableArray(ReturnIntVec()));
 """, """
 [-7,42]
 """)

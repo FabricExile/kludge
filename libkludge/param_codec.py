@@ -10,15 +10,16 @@ class ParamCodec:
   def __init__(self, dqti, name):
     self.value_name = ValueName(name)
     self.is_pointer = dqti.dir_qual.is_pointer
+    self.is_mutable_indirect = dqti.dir_qual.is_mutable_indirect
     self.conv = ConvCodec(dqti, self.value_name.cpp)
+
+  @property
+  def will_promote(self):
+    return self.conv.will_promote
 
   @property
   def type_info(self):
     return self.conv.type_info
-
-  @property
-  def is_mutable_indirect(self):
-    return self.conv.is_mutable_indirect
   
   @property
   def reference_prefix(self):

@@ -15,6 +15,39 @@ from libkludge.types import KLExtTypeAliasSelector
 from libkludge.types import WrappedSelector
 from libkludge.types import EnumSelector
 from libkludge.util import EmptyCommentContainer
+from libkludge.type_simplifier import TypeSimplifier, NullTypeSimplifier
+
+class RawTypeSimplifier(TypeSimplifier):
+
+  def __init__(self):
+    TypeSimplifier.__init__(self)
+
+  def param_cost(self, type_info):
+    return 0
+    
+  def param_type_name_base(self, type_info):
+    return type_info.kl_for_derivatives.name.base
+
+  def param_type_name_suffix(self, type_info):
+    return type_info.kl_for_derivatives.name.suffix
+
+  def render_param_pass_type(self, type_info):
+    return "in"
+
+  def render_param_pre(self, type_info):
+    return type_info.kl.name.compound + "("
+
+  def render_param_post(self, type_info):
+    return ")"
+
+  def result_type_name(self, type_info):
+    return type_info.kl_for_derivatives.name.compound
+
+  def render_result_pre(self, type_info):
+    return type_info.kl_for_derivatives.name.compound + "("
+
+  def render_result_post(self, type_info):
+    return ")"
 
 class Namespace:
 
@@ -137,6 +170,10 @@ class Namespace:
           params + opt_params[0:i],
           )
         self.ext.add_decl(func)
+        promotion_sig, promotion_cost = func.get_promotion_data()
+        if not promotion_sig in self.ext.func_promotions \
+          or self.ext.func_promotions[promotion_sig][1] > promotion_cost:
+          self.ext.func_promotions[promotion_sig] = (func, promotion_cost)
         if not result:
           result = func
       return result
@@ -176,7 +213,7 @@ class Namespace:
       const_ptr_new_cpp_type_expr = PointerTo(Const(direct_new_cpp_global_expr))
       const_ptr_old_cpp_type_expr = PointerTo(Const(direct_old_cpp_global_expr))
       self.type_mgr.add_alias(const_ptr_new_cpp_type_expr, const_ptr_old_cpp_type_expr)
-      const_ptr_new_kl_type_name = direct_new_kl_global_name + "_CxxConstPtr"
+      const_ptr_new_kl_type_name = "Cxx" + direct_new_kl_global_name + "ConstPtr"
       const_ptr_old_dqti = self.type_mgr.get_dqti(const_ptr_old_cpp_type_expr)
       const_ptr_old_kl_type_name = const_ptr_old_dqti.type_info.kl.name.compound
       const_ptr_alias = Alias(self, const_ptr_new_kl_type_name, const_ptr_old_dqti.type_info)
@@ -203,7 +240,7 @@ class Namespace:
       mutable_ptr_new_cpp_type_expr = PointerTo(direct_new_cpp_global_expr)
       mutable_ptr_old_cpp_type_expr = PointerTo(direct_old_cpp_global_expr)
       self.type_mgr.add_alias(mutable_ptr_new_cpp_type_expr, mutable_ptr_old_cpp_type_expr)
-      mutable_ptr_new_kl_type_name = direct_new_kl_global_name + "_CxxPtr"
+      mutable_ptr_new_kl_type_name = "Cxx" + direct_new_kl_global_name + "Ptr"
       mutable_ptr_old_dqti = self.type_mgr.get_dqti(mutable_ptr_old_cpp_type_expr)
       mutable_ptr_old_kl_type_name = mutable_ptr_old_dqti.type_info.kl.name.compound
       mutable_ptr_alias = Alias(self, mutable_ptr_new_kl_type_name, mutable_ptr_old_dqti.type_info)
@@ -230,7 +267,7 @@ class Namespace:
       const_ref_new_cpp_type_expr = ReferenceTo(Const(direct_new_cpp_global_expr))
       const_ref_old_cpp_type_expr = ReferenceTo(Const(direct_old_cpp_global_expr))
       self.type_mgr.add_alias(const_ref_new_cpp_type_expr, const_ref_old_cpp_type_expr)
-      const_ref_new_kl_type_name = direct_new_kl_global_name + "_CxxConstRef"
+      const_ref_new_kl_type_name = "Cxx" + direct_new_kl_global_name + "ConstRef"
       const_ref_old_dqti = self.type_mgr.get_dqti(const_ref_old_cpp_type_expr)
       const_ref_old_kl_type_name = const_ref_old_dqti.type_info.kl.name.compound
       const_ref_alias = Alias(self, const_ref_new_kl_type_name, const_ref_old_dqti.type_info)
@@ -257,7 +294,7 @@ class Namespace:
       mutable_ref_new_cpp_type_expr = ReferenceTo(direct_new_cpp_global_expr)
       mutable_ref_old_cpp_type_expr = ReferenceTo(direct_old_cpp_global_expr)
       self.type_mgr.add_alias(mutable_ref_new_cpp_type_expr, mutable_ref_old_cpp_type_expr)
-      mutable_ref_new_kl_type_name = direct_new_kl_global_name + "_CxxRef"
+      mutable_ref_new_kl_type_name = "Cxx" + direct_new_kl_global_name + "Ref"
       mutable_ref_old_dqti = self.type_mgr.get_dqti(mutable_ref_old_cpp_type_expr)
       mutable_ref_old_kl_type_name = mutable_ref_old_dqti.type_info.kl.name.compound
       mutable_ref_alias = Alias(self, mutable_ref_new_kl_type_name, mutable_ref_old_dqti.type_info)
@@ -300,12 +337,14 @@ class Namespace:
     variant='owned',
     record=None,
     forbid_copy=False,
+    dont_delete=False,
     is_abstract=False,
     lookup_wrapper=None,
     include_empty_ctor=True,
     include_copy_ctor=True,
     include_simple_ass_op=True,
     include_dtor=True,
+    simplifier=NullTypeSimplifier(),
     ):
     if not cpp_global_expr:
       assert isinstance(cpp_local_expr, Named)
@@ -337,6 +376,8 @@ class Namespace:
       extends_type_info,
       record,
       forbid_copy=forbid_copy,
+      dont_delete=dont_delete,
+      simplifier=simplifier,
       )
     self.namespace_mgr.add_type(
       self.components,
@@ -439,42 +480,52 @@ class Namespace:
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
 
-    owned_cpp_local_expr = cpp_local_expr
-    owned_kl_local_name = 'Raw_' + kl_local_name
-    owned_extends_type_info = None
+    raw_cpp_local_expr = cpp_local_expr
+    raw_kl_local_name = 'CxxRaw' + kl_local_name
+    raw_extends_type_info = None
     if extends:
-      owned_extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
-      owned_extends_dqti = self.type_mgr.maybe_get_dqti(owned_extends_cpp_type_expr)
-      if owned_extends_dqti:
-        owned_extends_type_info = owned_extends_dqti.type_info
-        owned_extends_cpp_global_expr = owned_extends_type_info.lib.expr
-    owned = self.add_type(
-      cpp_local_expr=owned_cpp_local_expr,
-      kl_local_name=owned_kl_local_name,
+      raw_extends_cpp_type_expr = self.cpp_type_expr_parser.parse(extends)
+      raw_extends_dqti = self.type_mgr.maybe_get_dqti(raw_extends_cpp_type_expr)
+      if raw_extends_dqti:
+        raw_extends_type_info = raw_extends_dqti.type_info
+        raw_extends_cpp_global_expr = raw_extends_type_info.lib.expr
+
+    raw = self.add_type(
+      cpp_local_expr=raw_cpp_local_expr,
+      kl_local_name=raw_kl_local_name,
       kl_local_name_for_derivatives=kl_local_name,
-      extends_type_info=owned_extends_type_info,
+      extends_type_info=raw_extends_type_info,
       forbid_copy=True,
+      dont_delete=True,
       is_abstract=is_abstract,
       variant='owned',
+      simplifier=RawTypeSimplifier(),
       )
-    owned_cpp_global_expr = self.type_mgr.get_dqti(owned_cpp_local_expr).type_info.lib.expr
+    raw_cpp_global_expr = self.type_mgr.get_dqti(raw_cpp_local_expr).type_info.lib.expr
 
-    wrapped_cpp_global_expr = Named([Template(cpp_wrapper_name, [owned_cpp_global_expr])])
-    wrapped_kl_local_name = 'Wrapped_' + kl_local_name
+    wrapped_cpp_local_expr = Named([Template(cpp_wrapper_name, [raw_cpp_local_expr])])
+    wrapped_cpp_global_expr = Named([Template(cpp_wrapper_name, [raw_cpp_global_expr])])
+    wrapped_kl_local_name = 'Wrapped' + kl_local_name
     wrapped_extends_type_info = None
-    if owned_extends_type_info:
-      wrapped_extends_cpp_global_expr = Named([Template(cpp_wrapper_name, [owned_extends_cpp_global_expr])])
+    if raw_extends_type_info:
+      wrapped_extends_cpp_global_expr = Named([Template(cpp_wrapper_name, [raw_extends_cpp_global_expr])])
       wrapped_extends_dqti = self.type_mgr.get_dqti(wrapped_extends_cpp_global_expr)
       wrapped_extends_type_info = wrapped_extends_dqti.type_info
-    return self.add_type(
+
+    wrapped = self.add_type(
       cpp_global_expr=wrapped_cpp_global_expr,
       kl_local_name=kl_local_name,
       kl_local_name_for_derivatives=wrapped_kl_local_name,
       extends_type_info=wrapped_extends_type_info,
       forbid_copy=forbid_copy,
       variant='wrapped',
-      record=owned,
+      record=raw,
       )
+
+    wrapped.raw_type_info = self.type_mgr.maybe_get_dqti(raw_cpp_global_expr).type_info
+    wrapped.wrapped_type_info = self.type_mgr.maybe_get_dqti(wrapped_cpp_global_expr).type_info
+
+    return wrapped
 
   def add_mirror(
     self,

@@ -16,6 +16,10 @@ class ResultCodec:
     self.conv = ConvCodec(dqti, result_cpp_value_name)
 
   @property
+  def will_promote(self):
+    return self.conv.will_promote
+  
+  @property
   def type_info(self):
     return self.conv.type_info
   

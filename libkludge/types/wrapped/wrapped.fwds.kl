@@ -3,6 +3,9 @@
 {############################################################################}
 {% extends "generate/decl/decl.fwds.kl" %}
 {% block body %}
-struct {{decl.type_info.kl.name.compound}};
 
+{% if decl.type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
+{% endif %}
+struct {{decl.type_info.kl.name.compound}};
 {% endblock body %}

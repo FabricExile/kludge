@@ -1,42 +1,42 @@
 # Pointers and References
 
-As discussed previously, Kludge will automatically wrap pointer and reference types that are used by C++ for parameter and return values.  For a given type `MyType` these take the form `MyType_CxxConstPtr`, `MyType_CxxConstRef`, `MyType_CxxPtr` and `MyType_CxxRef`.
+As discussed previously, Kludge will automatically wrap pointer and reference types that are used by C++ for parameter and return values.  For a given type `MyType` these take the form `CxxMyTypeConstPtr`, `CxxMyTypeConstRef`, `CxxMyTypePtr` and `CxxMyTypeRef`.
 
 The basic features that all of these types have are:
 
 - They do not "own" what they point to but rather have an unowned pointer to it.  As such, they are generally faster to use than copying values around; however, they can also be dangerous.
 
-- They "reflect" the methods of the underlying type.  For instance, if `MyType` has a method `MyType.foo(SInt32)`, so do `MyType_CxxConstPtr`, `MyType_CxxConstRef`, `MyType_CxxPtr` and `MyType_CxxRef`.  Note however that only `MyType_CxxPtr` and `MyType_CxxRef` will reflect the mutable (non-const in C++, `!` in KL) methods for the type.  Note also that other method-like things for types, such as constructors and casts, are not reflected in pointer and reference types.
+- They "reflect" the methods of the underlying type.  For instance, if `MyType` has a method `MyType.foo(SInt32)`, so do `CxxMyTypeConstPtr`, `CxxMyTypeConstRef`, `CxxMyTypePtr` and `CxxMyTypeRef`.  Note however that only `CxxMyTypePtr` and `CxxMyTypeRef` will reflect the mutable (non-const in C++, `!` in KL) methods for the type.  Note also that other method-like things for types, such as constructors and casts, are not reflected in pointer and reference types.
 
-- Casting from `MyType` to each pointer and reference type is *usually* implicit, but sometimes requires an explicit call to eg. `Make_MyType_CxxConstPtr()`.  This is particularly required for casts from simple, built-in types like `SInt32` and `Float32` and is due to the implicit casting rules in KL.
+- Casting from `MyType` to each pointer and reference type is *usually* implicit, but sometimes requires an explicit call to eg. `Make_CxxMyTypeConstPtr()`.  This is particularly required for casts from simple, built-in types like `SInt32` and `Float32` and is due to the implicit casting rules in KL.
 
-- Creating a value of a pointer or reference type will initially point to nothing, i.e. will be null.  Trying to use this value (eg. by calling a method on it) will throw an exception in KL.  Use `MyType_CxxConstPtr.cxxIsValid()`, or just the cast
+- Creating a value of a pointer or reference type will initially point to nothing, i.e. will be null.  Trying to use this value (eg. by calling a method on it) will throw an exception in KL.  Use `CxxMyTypeConstPtr.cxx_isValid()`, or just the cast
 
 Furthermore, each of these types expose a few extra methods to let you work with them, as described below.
 
 ## `_CxxConstPtr` Methods
 
-- `Boolean MyType_CxxConstPtr.cxxIsValid()` checks that it is not null.  We also provide the cast to `Boolean` that achieves the same thing.
+- `Boolean CxxMyTypeConstPtr.cxx_isValid()` checks that it is not null.  We also provide the cast to `Boolean` that achieves the same thing.
 
-- `MyType_CxxConstRef MyType_CxxConstPtr.cxx_getAt(Index)` returns a `MyType_CxxConstRef` to the element at a given index in the same way as the C++ indexing operator.  No bounds checking is performed (nor could be performed since C++ does not bounds check on raw pointers).
+- `CxxMyTypeConstRef CxxMyTypeConstPtr.cxx_getAt(Index)` returns a `CxxMyTypeConstRef` to the element at a given index in the same way as the C++ indexing operator.  No bounds checking is performed (nor could be performed since C++ does not bounds check on raw pointers).
 
-- `MyType_CxxConstRef MyType_CxxConstPtr.cxx_deref()` dereferences the pointer; equivalent to `MyType_CxxConstPtr.cxx_getAt(0)`
+- `CxxMyTypeConstRef CxxMyTypeConstPtr.cxx_deref()` dereferences the pointer; equivalent to `CxxMyTypeConstPtr.cxx_getAt(0)`
 
 ## `_CxxPtr` Methods
 
 `_CxxPtr` supports all the methods of `_CxxConstPtr` except that they return a `_CxxRef` rather than a `_CxxConstRef` where appropriate.  They additional support the methods:
 
-- `MyType_CxxPtr.cxx_setAt(Index, MyType)` sets the value at the given index.  Equivalent to `MyType_Cxxptr.cxx_getAt(Index).cxx_set(MyType)`.
+- `CxxMyTypePtr.cxx_setAt(Index, MyType)` sets the value at the given index.  Equivalent to `MyType_Cxxptr.cxx_getAt(Index).cxx_set(MyType)`.
 
 ## `_CxxConstRef` Methods
 
-- `MyType MyType_CxxConstRef.cxx_get()` returns a copy of the value that's referenced.  We also provide `MyType(MyType_CxxConstRef)` as an implicit call to `MyType MyType_CxxConstRef.cxx_get()`.
+- `MyType CxxMyTypeConstRef.cxx_get()` returns a copy of the value that's referenced.  We also provide `MyType(CxxMyTypeConstRef)` as an implicit call to `MyType CxxMyTypeConstRef.cxx_get()`.
 
-## `_CxxRef` Methods
+## `Cxx...Ref` Methods
 
-`_CxxRef` supports all the methods of `_CxxConstRef`, and additionally supports the methods:
+`Cxx...Ref` supports all the methods of `Cxx...ConstRef`, and additionally supports the methods:
 
-- `MyType_CxxRef.cxx_set(MyType)` sets the value of the reference value, i.e. performs a C++ assign of the value.
+- `CxxMyTypeRef.cxx_set(MyType)` sets the value of the reference value, i.e. performs a C++ assign of the value.
 
 ## The `CxxCharConstPtr` Type
 

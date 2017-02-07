@@ -27,11 +27,27 @@ report("MyType('onetwothreefour').get() = " + MyType('onetwothreefour').get());
 MyType::get()
 MyType('onetwothreefour').get() = onetwothreefour
 """)
+ty.add_mutable_method('someMethod', 'void', ['char const *'])
+ty.add_mutable_method('someMethod', 'void', ['std::string const &'])
+ty.add_test("""
+MyType mt('onetwothreefour');
+mt.someMethod("foo");
+""", """
+MyType::someMethod(const char *)
+""")
 
-ext.add_func("GetStaticMyType", "MyType const &")\
-  .add_test("""
+ext.add_func("GetStaticMyType", "MyType const &")
+ext.add_test("""
 report("GetStaticMyType().get() = " + GetStaticMyType().get());
 """, """
 MyType::get()
 GetStaticMyType().get() = staticMyType
+""")
+
+ext.add_func("GlobalFuncWithPromotionClash", "void", ["char const *"])
+ext.add_func("GlobalFuncWithPromotionClash", "void", ["std::string const &"])
+ext.add_test("""
+GlobalFuncWithPromotionClash('foo');
+""", """
+GlobalFuncWithPromotionClash(char const *)
 """)

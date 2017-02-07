@@ -6,9 +6,11 @@ ext.add_cpp_quoted_include('PtrRef.hpp')
 
 ext.add_func('GetIntCPtrCPtrCPtr', 'int const * const * const *')\
   .add_test("""
-SInt32_CxxConstPtr_CxxConstPtr_CxxConstPtr result = GetIntCPtrCPtrCPtr();
+CxxSInt32ConstPtrConstPtrConstPtr result = CxxGetIntCPtrCPtrCPtr();
 report(result.cxx_deref().cxx_get().cxx_deref().cxx_get().cxx_deref());
+report(GetIntCPtrCPtrCPtr());
 """, """
+42
 42
 """)
 

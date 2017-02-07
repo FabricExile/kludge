@@ -3,6 +3,7 @@
 #
 
 from libkludge.type_info import TypeInfo
+from libkludge.type_simplifier import NullTypeSimplifier
 from libkludge.selector import Selector
 from libkludge.cpp_type_expr_parser import dir_qual
 from libkludge.dir_qual_type_info import DirQualTypeInfo
@@ -41,6 +42,7 @@ class InPlaceTypeInfo(TypeInfo):
     record,
     is_simple,
     forbid_copy,
+    simplifier,
     ):
     TypeInfo.__init__(
       self,
@@ -53,6 +55,7 @@ class InPlaceTypeInfo(TypeInfo):
       record=record,
       is_simple=is_simple,
       forbid_copy=forbid_copy,
+      simplifier=simplifier,
       )
 
   def build_codec_lookup_rules(self):
@@ -112,6 +115,7 @@ class InPlaceSpec(object):
     is_simple=False,
     kl_type_name_for_derivatives=None,
     forbid_copy=False,
+    simplifier=NullTypeSimplifier(),
     ):
     self.kl_type_name = kl_type_name
     if not kl_type_name_for_derivatives:
@@ -122,6 +126,7 @@ class InPlaceSpec(object):
     self.extends = extends
     self.record = record
     self.forbid_copy = forbid_copy
+    self.simplifier = simplifier
 
 class InPlaceSelector(Selector):
 
@@ -187,6 +192,8 @@ class InPlaceSelector(Selector):
     extends,
     record,
     forbid_copy=False,
+    dont_delete=False,
+    simplifier=None,
     ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = InPlaceSpec(
       kl_type_name,
@@ -195,6 +202,7 @@ class InPlaceSelector(Selector):
       record,
       kl_type_name_for_derivatives=kl_type_name_for_derivatives,
       forbid_copy=forbid_copy,
+      simplifier=simplifier,
       )
   
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
@@ -209,6 +217,7 @@ class InPlaceSelector(Selector):
         extends = spec.extends
         record = spec.record
         forbid_copy = spec.forbid_copy
+        simplifier = spec.simplifier
 
         type_info_cache_key = kl_type_name
         type_info = self.type_info_cache.get(type_info_cache_key)
@@ -222,6 +231,7 @@ class InPlaceSelector(Selector):
             record=record,
             is_simple=is_simple,
             forbid_copy=forbid_copy,
+            simplifier=simplifier,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
           self.ext.add_decl(InPlaceBuiltinDecl(self.ext, is_simple, type_info))

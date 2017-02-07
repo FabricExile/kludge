@@ -5,8 +5,13 @@
 ext.add_cpp_quoted_include('WrappedType.hpp')
 
 ty = ext.add_wrapped_type('Wrapper', 'Class')
-ty.add_ctor(['float', 'char const *', 'int'])\
-  .add_test("""
+ty.add_ctor(['float', 'char const *', 'int'])
+ty.set_default_visibility(Visibility.public)
+ty.add_member('floatValue', 'float')
+ty.add_member('stringValue', 'std::string')
+ty.set_default_visibility(Visibility.private)
+ty.add_member('pri_intValue', 'int')
+ty.add_test("""
 Class c(3.14, "hello", 42);
 report("c.cxx_get_floatValue() = " + c.cxx_get_floatValue());
 report("c.cxx_get_stringValue() = " + c.cxx_get_stringValue());
@@ -21,25 +26,22 @@ Class::~Class()
 ty.add_mutable_method('publicMethod', 'std::string const &')\
   .add_test("""
 Class c(3.14, "hello", 42);
+report("c.cxx_publicMethod() = " + c.cxx_publicMethod());
 report("c.publicMethod() = " + c.publicMethod());
 """, """
 Class::Class(3.14, hello, 42)
 Wrapper::Wrapper(Ty *)
+c.cxx_publicMethod() = hello
 c.publicMethod() = hello
 Wrapper::~Wrapper()
 Class::~Class()
 """)
-ty.set_default_visibility(Visibility.public)
-ty.add_member('floatValue', 'float')
-ty.add_member('stringValue', 'std::string')
-ty.set_default_visibility(Visibility.private)
-ty.add_member('pri_intValue', 'int')
 ty.add_const_method('unwrap', 'Class const *')
-ty.add_static_method('PrintValues', None, ['Class const *'])\
-  .add_test("""
+ty.add_static_method('PrintValues', None, ['Class const *'])
+ty.add_test("""
 Class c(1.32, "hoo", 23);
-Class_CxxConstPtr ptr = c.unwrap();
-Class_PrintValues(ptr);
+CxxClassConstPtr ptr = c.cxx_unwrap();
+Class_CxxPrintValues(ptr);
 """, """
 Class::Class(1.32, hoo, 23)
 Wrapper::Wrapper(Ty *)
@@ -47,9 +49,33 @@ Wrapper::Wrapper(Ty *)
 Wrapper::~Wrapper()
 Class::~Class()
 """)
-ty.add_static_method('PrintValues', None, ['Wrapper<Class> const &'])\
-  .add_test("""
-Class_PrintValues(Make_Wrapped_Class_CxxConstRef(Class(1.32, "hoo", 23)));
+ty.add_test("""
+Class c(1.32, "hoo", 23);
+CxxRawClass ptr = c.unwrap();
+CxxRawClass_CxxPrintValues(ptr);
+""", """
+Class::Class(1.32, hoo, 23)
+Wrapper::Wrapper(Ty *)
+Wrapper::Wrapper(Ty *)
+Wrapper::Wrapper(Ty *)
+Wrapper::~Wrapper()
+Wrapper::~Wrapper()
+1.32 hoo 23
+Wrapper::~Wrapper()
+Class::~Class()
+""")
+ty.add_static_method('PrintValues', None, ['Wrapper<Class> const &'])
+ty.add_test("""
+Class_CxxPrintValues(Make_CxxWrappedClassConstRef(Class(1.32, "hoo", 23)));
+""", """
+Class::Class(1.32, hoo, 23)
+Wrapper::Wrapper(Ty *)
+1.32 hoo 23
+Wrapper::~Wrapper()
+Class::~Class()
+""")
+ty.add_test("""
+Class_PrintValues(Class(1.32, "hoo", 23));
 """, """
 Class::Class(1.32, hoo, 23)
 Wrapper::Wrapper(Ty *)
@@ -84,6 +110,25 @@ Class::~Class()
 ty = ext.add_wrapped_type('Wrapper', 'DerivedClass', extends='Class')
 ty.add_ctor(['int'])
 ty.add_const_method('newMethod', 'int')
+ty.add_test("""
+DerivedClass dc(56);
+report("dc.cxx_newMethod() = " + dc.cxx_newMethod());
+report("dc.cxx_publicMethod() = " + dc.cxx_publicMethod());
+Class c = dc;
+report("c.cxx_publicMethod() = " + c.cxx_publicMethod());
+""", """
+Class::Class(3.14, hello, 56)
+DerivedClass::DerivedClass(56)
+Wrapper::Wrapper(Ty *)
+dc.cxx_newMethod() = -9
+dc.cxx_publicMethod() = hello
+Wrapper::Wrapper(Ty *)
+c.cxx_publicMethod() = hello
+Wrapper::~Wrapper()
+Wrapper::~Wrapper()
+DerivedClass::~DerivedClass()
+Class::~Class()
+""")
 ty.add_test("""
 DerivedClass dc(56);
 report("dc.newMethod() = " + dc.newMethod());

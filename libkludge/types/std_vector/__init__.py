@@ -3,10 +3,17 @@
 #
 
 from libkludge.type_info import TypeInfo
+from libkludge.type_simplifier import NullTypeSimplifier
 from libkludge.selector import Selector
 from libkludge.generate.record import Record
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
+
+def build_derived_name(kl_type_name, suffix):
+  if kl_type_name.startswith('Cxx'):
+    return kl_type_name + suffix
+  else:
+    return 'Cxx' + kl_type_name + suffix
 
 class StdVectorSelector(Selector):
 
@@ -31,7 +38,10 @@ class StdVectorSelector(Selector):
       element_type_info_for_derivatives = element_type_info.for_derivatives()
       element_cpp_type_name_for_derivatives = element_type_info_for_derivatives.lib.name.compound
       element_kl_type_name_for_derivatives = element_type_info_for_derivatives.kl.name.compound
-      kl_type_name = element_kl_type_name + '_StdVector'
+      if element_kl_type_name.startswith('Cxx'):
+        kl_type_name = element_kl_type_name + 'StdVector'
+      else:
+        kl_type_name = 'Cxx' + element_kl_type_name + 'StdVector'
       record = Record(
         self.ext.root_namespace,
         child_namespace_component=undq_cpp_type_expr.components[0],
@@ -47,31 +57,35 @@ class StdVectorSelector(Selector):
       record.add_set_ind_op(element_cpp_type_name + ' const &')
       record.add_mutable_method('pop_back')
       record.add_kl("""
+/// \dfgPresetOmit
 {{type_name}}({{element_type_name}} array<>) {
   this = {{type_name}}(
-    {{element_type_name_for_derivatives}}_CxxConstPtr(array, 0),
-    {{element_type_name_for_derivatives}}_CxxConstPtr(array, array.size())
+    {{element_type_name_const_ptr}}(array, 0),
+    {{element_type_name_const_ptr}}(array, array.size())
     );
 }
 
+/// \dfgPresetOmit
 {{type_name}} Make_{{type_name}}({{element_type_name}} array<>) {
   return {{type_name}}(array);
 }
 
-inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_name}} vec) {
-  UInt32 size = UInt32(vec.size());
+/// \dfgPresetOmit
+inline {{element_type_name}}[] Make_{{element_type_name}}VariableArray({{type_name}} vec) {
+  UInt32 size = UInt32(vec.cxx_size());
   {{element_type_name}} result[];
   result.reserve(size);
   for (Index i = 0; i < size; ++i)  {
-    {{element_type_name_for_derivatives}}_CxxConstRef ptr = vec.cxx_getAtIndex(i);
-    result.push(ptr.cxx_get());
+    {{element_type_name_const_ref}} ref = vec.cxx_getAtIndex(i);
+    result.push(ref.cxx_get());
   }
   return result;
 }
 
+/// \dfgPresetOmit
 {{type_name}}.appendDesc(io String string) {
   string += "{{type_name}}:[";
-  UInt64 count = this.size();
+  UInt64 count = this.cxx_size();
   for (UInt64 index = 0; index < count; ++index) {
     if (index > 0 )
       string += ",";
@@ -85,7 +99,8 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
 }
 """,
   element_type_name=element_kl_type_name,
-  element_type_name_for_derivatives=element_kl_type_name_for_derivatives,
+  element_type_name_const_ptr=build_derived_name(element_kl_type_name_for_derivatives, 'ConstPtr'),
+  element_type_name_const_ref=build_derived_name(element_kl_type_name_for_derivatives, 'ConstRef'),
   )
       type_mgr.named_selectors['owned'].register(
         kl_type_name=kl_type_name,
@@ -93,5 +108,6 @@ inline {{element_type_name}}[] Make_{{element_type_name}}_VariableArray({{type_n
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
+        simplifier=NullTypeSimplifier(),
         )
       return True # restart

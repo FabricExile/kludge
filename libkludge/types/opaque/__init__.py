@@ -19,6 +19,7 @@ class OpaqueTypeInfo(TypeInfo):
     extends,
     record,
     forbid_copy,
+    simplifier,
     ):
     TypeInfo.__init__(
       self,
@@ -30,6 +31,7 @@ class OpaqueTypeInfo(TypeInfo):
       extends=extends,
       record=record,
       forbid_copy=forbid_copy,
+      simplifier=simplifier,
       )
 
   def build_codec_lookup_rules(self):
@@ -78,6 +80,7 @@ class OpaqueSpec(object):
     extends,
     record,
     forbid_copy=False,
+    simplifier=None,
     ):
     self.kl_type_name = kl_type_name
     self.kl_type_name_for_derivatives = kl_type_name_for_derivatives
@@ -85,6 +88,7 @@ class OpaqueSpec(object):
     self.extends = extends
     self.record = record
     self.forbid_copy = forbid_copy
+    self.simplifier = simplifier
 
 class OpaqueSelector(Selector):
 
@@ -101,6 +105,8 @@ class OpaqueSelector(Selector):
     extends,
     record,
     forbid_copy=False,
+    dont_delete=False,
+    simplifier=None,
     ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = OpaqueSpec(
       kl_type_name,
@@ -108,7 +114,8 @@ class OpaqueSelector(Selector):
       cpp_type_expr,
       extends,
       record,
-      forbid_copy,
+      forbid_copy=forbid_copy,
+      simplifier=simplifier,
       )
 
   def get_desc(self):
@@ -125,6 +132,7 @@ class OpaqueSelector(Selector):
         extends = spec.extends
         record = spec.record
         forbid_copy = spec.forbid_copy
+        simplifier = spec.simplifier
 
         type_info_cache_key = kl_type_name
         type_info = self.type_info_cache.get(type_info_cache_key)
@@ -137,6 +145,7 @@ class OpaqueSelector(Selector):
             extends=extends,
             record=record,
             forbid_copy=forbid_copy,
+            simplifier=simplifier,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
           self.ext.add_decl(OpaqueBuiltinDecl(self.ext, type_info))

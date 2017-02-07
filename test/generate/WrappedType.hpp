@@ -26,6 +26,7 @@ private:
   Class &operator=(Class const &that)
   {
     assert( false );
+    return *this;
   }
 
 public:

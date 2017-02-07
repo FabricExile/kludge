@@ -82,9 +82,9 @@ operator entry() {
   for (SInt32 i = 0; i < 10; ++i)
     a.push(i);
   report("a = " + a);
-  SInt32_StdVector stl_a = Make_SInt32_StdVector(a);
-  SInt32_StdVector stl_ra = ReverseVector(stl_a);
-  SInt32 ra[] = Make_SInt32_VariableArray(stl_ra);
+  CxxSInt32StdVector stl_a = Make_CxxSInt32StdVector(a);
+  CxxSInt32StdVector stl_ra = ReverseVector(stl_a);
+  SInt32 ra[] = Make_SInt32VariableArray(stl_ra);
   report("ReverseVector(a) = " + ra);
 }
 ```

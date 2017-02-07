@@ -3,24 +3,29 @@
 {############################################################################}
 {% extends "generate/decl/decl.defns.kl" %}
 {% block body %}
+
 {% for comment in decl.type_info.record.comments %}
 {{comment}}
 {% endfor %}
+{% if decl.type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
+{% endif %}
 struct {{decl.type_info.kl.name}}
 {% if decl.type_info.extends %}
   : {{decl.type_info.extends.kl.name}}
   {};
 {% else %}
 {
-  private Data cpp_ptr;
+  protected Data cpp_ptr;
 };
 
+/// \dfgPresetOmit
 Data {{decl.type_info.kl.name}}.__getUnderlyingPtr() {
   return this.cpp_ptr;
 }
 {% endif %}
 
+/// \dfgPresetOmit
 UInt64 __CxxSize_{{decl.type_info.kl.name}}()
   = "__CxxSize_{{decl.type_info.edk.name}}";
-
 {% endblock body %}

@@ -27,12 +27,95 @@ builtin_kl_type_names = [
 def build_kl_name_base(kl_type_name, suffix):
   if kl_type_name.startswith('Cxx'):
     return kl_type_name + suffix
-  return kl_type_name + '_Cxx' + suffix
+  else:
+    return 'Cxx' + kl_type_name + suffix
 
 def build_edk_name(kl_type_name, suffix):
   if kl_type_name.startswith('Cxx'):
     return kl_type_name + suffix
-  return kl_type_name + '_Cxx' + suffix
+  else:
+    return 'Cxx' + kl_type_name + suffix
+
+class PtrRefTypeSimplifier(TypeSimplifier):
+
+  def __init__(self, direct_type_info):
+    TypeSimplifier.__init__(self)
+    self.direct_type_info = direct_type_info.from_derivative
+    self.direct_type_info_for_derivatives = direct_type_info
+
+  def param_cost(self, type_info):
+    return self.direct_type_info.simplifier.param_cost(self.direct_type_info)
+
+  def param_type_name_base(self, type_info):
+    return self.direct_type_info.simplifier.param_type_name_base(self.direct_type_info)
+
+  def param_type_name_suffix(self, type_info):
+    return self.direct_type_info.simplifier.param_type_name_suffix(self.direct_type_info)
+
+  def result_type_name(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxStdString':
+      return "String"
+    return self.direct_type_info.simplifier.result_type_name(self.direct_type_info)
+
+class PtrTypeSimplifier(PtrRefTypeSimplifier):
+
+  def __init__(self, direct_type_info):
+    PtrRefTypeSimplifier.__init__(self, direct_type_info)
+
+  def render_result_pre(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxStdString':
+      return "String("
+    return self.direct_type_info.simplifier.render_result_pre(self.direct_type_info) + "("
+
+  def render_result_post(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxStdString':
+      return ")"
+    return ".cxx_deref().cxx_get())" + self.direct_type_info.simplifier.render_result_post(self.direct_type_info)
+
+class RefTypeSimplifier(PtrRefTypeSimplifier):
+
+  def __init__(self, direct_type_info):
+    PtrRefTypeSimplifier.__init__(self, direct_type_info)
+
+  def render_result_pre(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxStdString':
+      return "String("
+    return self.direct_type_info.simplifier.render_result_pre(self.direct_type_info) + "("
+
+  def render_result_post(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxStdString':
+      return ")"
+    return ".cxx_get())" + self.direct_type_info.simplifier.render_result_post(self.direct_type_info)
+
+class ConstRefTypeSimplifier(RefTypeSimplifier):
+
+  def __init__(self, direct_type_info):
+    RefTypeSimplifier.__init__(self, direct_type_info)
+
+  def render_param_pre(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
+      return "Make_CxxCharConstPtrConstRef("
+    return "Make_" + build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "ConstRef") + "(" + self.direct_type_info.simplifier.render_param_pre(self.direct_type_info)
+
+  def render_param_post(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
+      return ")"
+    return self.direct_type_info.simplifier.render_param_post(self.direct_type_info) + ")"
+
+  def result_type_name(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
+      return "String"
+    return RefTypeSimplifier.result_type_name(self, type_info)
+
+  def render_result_pre(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
+      return "String("
+    return RefTypeSimplifier.render_result_pre(self, type_info)
+
+  def render_result_post(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
+      return ")"
+    return RefTypeSimplifier.render_result_post(self, type_info)
 
 class ConstRefTypeInfo(TypeInfo):
 
@@ -48,7 +131,7 @@ class ConstRefTypeInfo(TypeInfo):
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
       is_const_ref=True,
-      simplifier=TypeSimplifier(),
+      simplifier=ConstRefTypeSimplifier(undq_type_info),
       )
 
   def build_codec_lookup_rules(self):
@@ -56,6 +139,20 @@ class ConstRefTypeInfo(TypeInfo):
     tds["conv"]["*"] = "types/builtin/ptr_ref/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
     return tds
+
+class MutableRefTypeSimplifier(RefTypeSimplifier):
+
+  def __init__(self, direct_type_info):
+    RefTypeSimplifier.__init__(self, direct_type_info)
+
+  def render_param_pre(self, type_info):
+    return "Make_" + build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "Ref") + "(" + self.direct_type_info.simplifier.render_param_pre(self.direct_type_info)
+
+  def render_param_post(self, type_info):
+    return self.direct_type_info.simplifier.render_param_post(self.direct_type_info) + ")"
+
+  def render_param_pass_type(self, type_info):
+    return "io"
 
 class MutableRefTypeInfo(TypeInfo):
 
@@ -70,7 +167,7 @@ class MutableRefTypeInfo(TypeInfo):
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
-      simplifier=TypeSimplifier(),
+      simplifier=MutableRefTypeSimplifier(undq_type_info),
       )
 
   def build_codec_lookup_rules(self):
@@ -78,6 +175,46 @@ class MutableRefTypeInfo(TypeInfo):
     tds["conv"]["*"] = "types/builtin/ptr_ref/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
     return tds
+
+class ConstPtrTypeSimplifier(PtrTypeSimplifier):
+
+  def __init__(self, direct_type_info):
+    PtrTypeSimplifier.__init__(self, direct_type_info)
+
+  def param_type_name_base(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxChar':
+      return "String"
+    return PtrTypeSimplifier.param_type_name_base(self, type_info)
+
+  def param_type_name_suffix(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxChar':
+      return ""
+    return PtrTypeSimplifier.param_type_name_suffix(self, type_info)
+
+  def render_param_pre(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxChar':
+      return "CxxCharConstPtr("
+    return "Make_" + build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "ConstPtr") + "(" + self.direct_type_info.simplifier.render_param_pre(self.direct_type_info)
+
+  def render_param_post(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxChar':
+      return ")"
+    return self.direct_type_info.simplifier.render_param_post(self.direct_type_info) + ")"
+
+  def result_type_name(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxChar':
+      return "String"
+    return PtrTypeSimplifier.result_type_name(self, type_info)
+
+  def render_result_pre(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxChar':
+      return "String("
+    return PtrTypeSimplifier.render_result_pre(self, type_info)
+
+  def render_result_post(self, type_info):
+    if self.direct_type_info.kl.name.base == 'CxxChar':
+      return ")"
+    return PtrTypeSimplifier.render_result_post(self, type_info)
 
 class ConstPtrTypeInfo(TypeInfo):
 
@@ -92,7 +229,7 @@ class ConstPtrTypeInfo(TypeInfo):
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
-      simplifier=TypeSimplifier(),
+      simplifier=ConstPtrTypeSimplifier(undq_type_info),
       )
 
   def build_codec_lookup_rules(self):
@@ -101,6 +238,20 @@ class ConstPtrTypeInfo(TypeInfo):
     tds["result"]["*"] = "protocols/result/builtin/indirect"
     tds["repr"]["new_begin"] = "types/builtin/ptr_ref/ptr/repr"
     return tds
+
+class MutablePtrTypeSimplifier(PtrTypeSimplifier):
+
+  def __init__(self, direct_type_info):
+    PtrTypeSimplifier.__init__(self, direct_type_info)
+
+  def render_param_pre(self, type_info):
+    return "Make_" + build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "Ptr") + "(" + self.direct_type_info.simplifier.render_param_pre(self.direct_type_info)
+
+  def render_param_post(self, type_info):
+    return self.direct_type_info.simplifier.render_param_post(self.direct_type_info) + ")"
+
+  def render_param_pass_type(self, type_info):
+    return "io"
 
 class MutablePtrTypeInfo(TypeInfo):
 
@@ -115,7 +266,7 @@ class MutablePtrTypeInfo(TypeInfo):
       is_simple=undq_type_info.is_simple,
       direct_type_info=undq_type_info,
       direct_orig_type_info=undq_orig_type_info,
-      simplifier=TypeSimplifier(),
+      simplifier=MutablePtrTypeSimplifier(undq_type_info),
       )
 
   def build_codec_lookup_rules(self):

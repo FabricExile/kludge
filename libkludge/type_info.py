@@ -5,6 +5,7 @@
 import copy
 from symbol_helpers import replace_invalid_chars
 from libkludge.generate.record import Record
+from type_simplifier import NullTypeSimplifier
 
 class KLTypeName:
 
@@ -68,7 +69,7 @@ class TypeInfo:
     direct_orig_type_info=None,
     forbid_copy=False,
     is_const_ref=False,
-    simplifier=None,
+    simplifier=NullTypeSimplifier(),
     ):
     if kl_name_base is not None:
       if not kl_name_suffix:
@@ -97,11 +98,12 @@ class TypeInfo:
     self.forbid_copy = forbid_copy
     self.is_const_ref = is_const_ref
     self.simplifier = simplifier
+    self.from_derivative = self
     self._codec_lookup_rules = None
 
   @property
-  def is_cxx(self):
-    return self.simplifier is not None
+  def will_promote(self):
+    return self.simplifier.will_promote
 
   @property
   def is_direct(self):
@@ -110,6 +112,7 @@ class TypeInfo:
   def for_derivatives(self):
     result = copy.copy(self)
     result.kl = result.kl_for_derivatives
+    result.from_derivative = self
     return result
 
   @property

@@ -89,9 +89,9 @@ The only additional parameters is `cpp_wrapped_name`, which is the name of the C
 
 Additional notes about types wrapped with `ext.add_wrapped_type()`:
 
-- References and pointers for the type, for example `DataBlock_CxxConstPtr` using the above syntax, does not point to the wrapped value but rather the unwrapped value (i.e. the result of `operator->()`).  It is still possible to get pointers and references to wrapped values; their type is prefixed with `Wrapped_`; for example, `Wrapped_DataBlock_CxxConstPtr`.
+- References and pointers for the type, for example `CxxDataBlockConstPtr` using the above syntax, does not point to the wrapped value but rather the unwrapped value (i.e. the result of `operator->()`).  It is still possible to get pointers and references to wrapped values; their type is prefixed with `Wrapped`; for example, `CxxWrappedDataBlockConstPtr`.
 
-- Kludge does track the underlying type that is wrapped via the template, but it will not generally be needed; it is prefixed with `Raw_`; for example, `Raw_DataBlob`.
+- Kludge does track the underlying type that is wrapped via the template, but it will not generally be needed; it is prefixed with `CxxRaw`; for example, `CxxRawDataBlob`.
 
 The result of the `ext.add_owned_type()` call is a record object which can be used to add constructors, methods and so on to the type (see [Wrapping Methods and Method-Like Type Additions](adl-methods.md)).
 
@@ -121,7 +121,7 @@ V3f const *GetV3fPtr();
 would appear in KL as:
 
 ```
-V3f_CxxConstPtr GetV3fPtr();
+CxxV3fConstPtr GetV3fPtr();
 ```
 
 The result will need to be dereferenced for any of its methods to be used, for example:

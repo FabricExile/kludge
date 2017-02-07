@@ -14,7 +14,7 @@ from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
 from libkludge.dir_qual_type_info import DirQualTypeInfo
-from libkludge.util import clean_comment, EmptyCommentContainer, clean_method_name
+from libkludge.util import clean_comment, EmptyCommentContainer, clean_method_name, clean_cxx_method_name
 
 class Methodlike(object):
 
@@ -44,10 +44,19 @@ class Ctor(Methodlike):
     self,
     record,
     params,
+    dont_promote,
     ):
     Methodlike.__init__(self, record)
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
-  
+    self.dont_promote = dont_promote
+
+  @property
+  def will_promote(self):
+    for param in self.params:
+      if param.will_promote:
+        return True
+    return False
+
   def get_edk_symbol_name(self, type_info):
     return self.record.gen_edk_symbol_name('ctor', type_info, ThisAccess.mutable, self.params)
 
@@ -60,13 +69,31 @@ class Ctor(Methodlike):
   def is_empty(self):
     return len(self.params) == 0
 
-  def is_copy(self, const_ref_type_info):
-    return len(self.params) == 1 \
-      and (self.params[0].type_info.lib.expr == const_ref_type_info.lib.expr \
-        or self.params[0].type_info.lib.expr == const_ref_type_info.direct.lib.expr)
-
   def param_count(self):
     return len(self.params)
+  
+  def get_promotion_data(self, this_type_info):
+    param_sigs = []
+    cost = 0
+    for param in self.params:
+      simplifier = param.type_info.simplifier
+      type_info = param.type_info
+      param_sigs.append("%s %s%s" % (
+        simplifier.render_param_pass_type(type_info),
+        simplifier.param_type_name_base(type_info),
+        simplifier.param_type_name_suffix(type_info),
+        ))
+      this_cost = simplifier.param_cost(type_info)
+      if this_cost > cost:
+        cost = this_cost
+    sig = "%s(%s)" % (this_type_info.kl.name.compound, ','.join(param_sigs))
+    return (sig, cost)
+
+  def contribute_to_promotions(self, this_type_info, promotions):
+    promotion_sig, promotion_cost = self.get_promotion_data(this_type_info)
+    if not promotion_sig in promotions \
+      or promotions[promotion_sig][1] > promotion_cost:
+      promotions[promotion_sig] = (self, promotion_cost)
 
 class Method(Methodlike):
 
@@ -83,7 +110,9 @@ class Method(Methodlike):
     self.cpp_name = cpp_name
     if not kl_name:
       kl_name = cpp_name
-    self.kl_name = clean_method_name(kl_name)
+    self.kl_name = kl_name
+    self.clean_kl_name = clean_method_name(kl_name)
+    self.clean_cxx_kl_name = clean_cxx_method_name(kl_name)
     self.result = ResultCodec(record.resolve_dqti(returns))
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
     self.this_access = this_access
@@ -109,6 +138,29 @@ class Method(Methodlike):
   def get_this(self, type_info):
     assert self.this_access != ThisAccess.static
     return self.record.get_this(type_info, self.this_access == ThisAccess.mutable)
+  
+  def get_promotion_data(self, this_type_info):
+    param_sigs = []
+    cost = 0
+    for param in self.params:
+      simplifier = param.type_info.simplifier
+      type_info = param.type_info
+      param_sigs.append("%s %s%s" % (
+        simplifier.render_param_pass_type(type_info),
+        simplifier.param_type_name_base(type_info),
+        simplifier.param_type_name_suffix(type_info),
+        ))
+      this_cost = simplifier.param_cost(type_info)
+      if this_cost > cost:
+        cost = this_cost
+    sig = "%s.%s(%s)" % (this_type_info.kl.name.compound, self.kl_name, ','.join(param_sigs))
+    return (sig, cost)
+
+  def contribute_to_promotions(self, this_type_info, promotions):
+    promotion_sig, promotion_cost = self.get_promotion_data(this_type_info)
+    if not promotion_sig in promotions \
+      or promotions[promotion_sig][1] > promotion_cost:
+      promotions[promotion_sig] = (self, promotion_cost)
 
 class CallOp(Methodlike):
 
@@ -338,10 +390,10 @@ class Member(object):
     self.param = ParamCodec(dqti, cpp_name)
     self.getter_kl_name = getter_kl_name
     if not self.getter_kl_name is None and self.getter_kl_name == '':
-      self.getter_kl_name = 'cxx_get_' + cpp_name
+      self.getter_kl_name = 'get_' + cpp_name
     self.setter_kl_name = setter_kl_name
     if not self.setter_kl_name is None and self.setter_kl_name == '':
-      self.setter_kl_name = 'cxx_set_' + cpp_name
+      self.setter_kl_name = 'set_' + cpp_name
     self.visibility = visibility
 
   def has_getter(self):
@@ -498,7 +550,7 @@ class Record(Decl):
     except Exception as e:
       self.ext.warning("Ignoring member '%s': %s" % (cpp_name, e))
   
-  def add_ctor(self, params=[], opt_params=[]):
+  def add_ctor(self, params=[], opt_params=[], dont_promote=False):
     try:
       params = massage_params(params)
       opt_params = massage_params(opt_params)
@@ -508,7 +560,7 @@ class Record(Decl):
 
       result = None
       for i in range(0, len(opt_params)+1):
-        ctor = Ctor(self, params + opt_params[0:i])
+        ctor = Ctor(self, params + opt_params[0:i], dont_promote=dont_promote)
         self.ctors.append(ctor)
         if not result:
           result = ctor
@@ -516,6 +568,13 @@ class Record(Decl):
     except Exception as e:
       self.ext.warning("Ignoring ctor: %s" % (e))
       return EmptyCommentContainer()
+
+  def ctors_to_promote(self, this_type_info):
+    promotions = {}
+    for ctor in self.ctors:
+      if not ctor.dont_promote and ctor.will_promote:
+        ctor.contribute_to_promotions(this_type_info, promotions)
+    return [ctor_promotion[0] for _, ctor_promotion in promotions.iteritems()]
 
   def add_method(
     self,
@@ -550,6 +609,12 @@ class Record(Decl):
     except Exception as e:
       self.ext.warning("Ignoring method '%s': %s" % (name, e))
       return EmptyCommentContainer()
+
+  def methods_to_promote(self, this_type_info):
+    promotions = {}
+    for method in self.methods:
+      method.contribute_to_promotions(this_type_info, promotions)
+    return [method_promotion[0] for _, method_promotion in promotions.iteritems()]
 
   def add_const_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
     return self.add_method(name, returns, params, opt_params, ThisAccess.const, kl_name=kl_name)

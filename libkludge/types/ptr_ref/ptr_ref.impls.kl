@@ -77,13 +77,13 @@ Make_{{type_info.kl.name}}(io {{decl.type_info.direct.kl.name}} value) {
 
 /// Is valid.  Check for null pointer
 /// \dfgPresetOmit
-Boolean {{decl.type_info.const_ptr.kl.name}}.cxxIsValid() {
+Boolean {{decl.type_info.const_ptr.kl.name}}.cxx_isValid() {
   return !!this.ptr;
 }
 
 /// \dfgPresetOmit
 Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
-  this = ptr.cxxIsValid();
+  this = ptr.cxx_isValid();
 }
 
 /// Indexing operation
@@ -170,14 +170,15 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
     throw "Call of {{decl.type_info.const_ref.kl.name}}.cxx_get on null {{decl.type_info.const_ref.kl.name}}";
   return {{decl.type_info.direct.render_indirect_to_direct('this')}}->{ {{decl.type_info.direct.kl.name}} };
 }
+{% if decl.type_info.direct.kl.name.base == 'CxxStdString' %}
 
-/// Cast from {{decl.type_info.const_ref.kl.name}} to {{decl.type_info.direct.kl.name}}
+/// Convert to a string
 /// \dfgPresetOmit
-{{decl.type_info.direct.kl.name}}({{decl.type_info.const_ref.kl.name}} ref) {
-  this = ref.cxx_get();
+{{decl.type_info.const_ref.kl.name}}.appendDesc(io String string) {
+  CxxCharConstPtr ptr = this.cxx_c_str();
+  string += String(ptr);
 }
-{# Horrible Hack #}
-{% if decl.type_info.const_ref.kl.name.compound != 'StdString_CxxConstRef' %}
+{% else %}
 
 /// Convert to String
 /// \dfgPresetOmit
@@ -213,7 +214,7 @@ Boolean({{decl.type_info.const_ref.kl.name}} ref) {
 {{decl.type_info.mutable_ref.kl.name}}.appendDesc(io String s) {
   s += this.cxx_get();
 }
-{% if decl.type_info.direct.kl.name.compound == 'StdString' %}
+{% if decl.type_info.direct.kl.name.compound == 'CxxStdString' %}
 
 /// \dfgPresetOmit
 {{decl.type_info.const_ref.kl.name}}(String string) {

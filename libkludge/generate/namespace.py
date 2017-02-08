@@ -34,20 +34,14 @@ class RawTypeSimplifier(TypeSimplifier):
   def render_param_pass_type(self, type_info):
     return "in"
 
-  def render_param_pre(self, type_info):
-    return type_info.kl.name.compound + "("
+  def render_param_pre(self, ti, vn):
+    return ti.kl.name.compound + " __" + vn + "(" + vn + ");"
 
-  def render_param_post(self, type_info):
-    return ")"
+  def param_value_name(self, ti, vn):
+    return "__" + vn;
 
   def result_type_name(self, type_info):
-    return type_info.kl_for_derivatives.name.compound
-
-  def render_result_pre(self, type_info):
-    return type_info.kl_for_derivatives.name.compound + "("
-
-  def render_result_post(self, type_info):
-    return ")"
+    return type_info.kl_for_derivatives.name
 
 class Namespace:
 

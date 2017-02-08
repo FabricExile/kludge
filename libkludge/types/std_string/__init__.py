@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.
 #
 
-from libkludge.type_info import TypeInfo
+from libkludge.type_info import TypeInfo, KLTypeName
 from libkludge.type_simplifier import TypeSimplifier
 from libkludge.selector import Selector
 from libkludge.generate.record import Record
@@ -23,20 +23,17 @@ class StdStringTypeSimplifier(TypeSimplifier):
   def param_type_name_suffix(self, type_info):
     return ""
 
-  def result_type_name(self, type_info):
-    return "String"
+  def render_param_pre(self, ti, vn):
+    return "CxxStdString __" + vn + "(" + vn + ");"
 
-  def render_param_pre(self, type_info):
-    return "CxxStdString("
+  def param_value_name(self, ti, vn):
+    return "__" + vn
 
-  def render_param_post(self, type_info):
-    return ")"
+  def render_param_post(self, ti, vn):
+    return ""
 
-  def render_result_pre(self, type_info):
-    return "String("
-
-  def render_result_post(self, type_info):
-    return ")"
+  def result_type_name(self, ti):
+    return KLTypeName("String", "")
 
 class StdStringSelector(Selector):
 

@@ -2,8 +2,8 @@
 # Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.
 #
 
-from libkludge.type_info import TypeInfo
-from libkludge.type_simplifier import NullTypeSimplifier
+from libkludge.type_info import TypeInfo, KLTypeName
+from libkludge.type_simplifier import TypeSimplifier
 from libkludge.selector import Selector
 from libkludge.generate.record import Record
 from libkludge.dir_qual_type_info import DirQualTypeInfo
@@ -14,6 +14,44 @@ def build_derived_name(kl_type_name, suffix):
     return kl_type_name + suffix
   else:
     return 'Cxx' + kl_type_name + suffix
+
+class StdVectorTypeSimplifier(TypeSimplifier):
+
+  def __init__(self, etn):
+    TypeSimplifier.__init__(self)
+    self.etn = etn
+
+  def param_cost(self, type_info):
+    return 100
+
+  def param_type_name_base(self, type_info):
+    return self.etn
+
+  def param_type_name_suffix(self, type_info):
+    return "[]"
+
+  def render_param_pre(self, ti, vn):
+    return '\n'.join([
+      ti.kl.name.base + " __" + vn + ti.kl.name.suffix + ";",
+      "__" + vn + ".reserve(" + vn + ".size());",
+      "for (Index i=0; i<" + vn + ".size(); ++i)",
+      "  __" + vn + ".push_back(" + vn + "[i]);",
+      ])
+
+  def param_value_name(self, ti, vn):
+    return "__" + vn
+
+  def render_param_post(self, ti, vn):
+    return ""
+
+  def render_param_copy_back(self, ti, vn):
+    return '\n'.join([
+      "if (Fabric_Guarded && __" + vn + ".size() >= 2147483648u64)",
+      "  report('Resulting value of " + vn + " std::vector is too large for KL variable array');",
+      vn + ".resize(UInt32(__" + vn + ".size()));",
+      "for (Index i=0; i<__" + vn + ".size(); ++i)",
+      "  " + vn + "[i] = __" + vn + ".cxx_getAtIndex(i).cxx_get();",
+      ])
 
 class StdVectorSelector(Selector):
 
@@ -108,6 +146,6 @@ inline {{element_type_name}}[] Make_{{element_type_name}}VariableArray({{type_na
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
-        simplifier=NullTypeSimplifier(),
+        simplifier=StdVectorTypeSimplifier(element_kl_type_name),
         )
       return True # restart

@@ -65,3 +65,10 @@ inline void GlobalTakingStdVectorConstRef( std::vector<int> const &v )
 {
   std::cout << "GlobalTakingStdVectorConstRef: v[0] = " << v[0] << "\n" << std::flush;
 }
+
+inline void SetStdVectorFromRef(std::vector<int> &vec) {
+  vec.resize(3);
+  vec[0] = 56;
+  vec[1] = -7;
+  vec[2] = 1983;
+}

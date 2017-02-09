@@ -35,7 +35,7 @@ Cxx{{func.kl_global_name}}(
     {{func.result.type_info.simplifier.render_result_pre(func.result.type_info)}}
     Cxx{{func.kl_global_name}}(
         {% for param in func.params %}
-        {{param.type_info.simplifier.param_value_name(param.type_info, param.value_name.kl) | indent(8)}}
+        {{param.type_info.simplifier.param_cxx_value_name(param.type_info, param.value_name.kl) | indent(8)}}
         {{- "," if not loop.last else ""}}
         {% endfor %}
         );

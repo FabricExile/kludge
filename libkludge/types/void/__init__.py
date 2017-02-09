@@ -26,7 +26,7 @@ class VoidTypeSimplifier(TypeSimplifier):
   def render_param_pre(self, ti, vn):
     assert False
 
-  def param_value_name(self, ti, vn):
+  def param_cxx_value_name(self, ti, vn):
     assert False
 
   def render_param_post(self, ti, vn):

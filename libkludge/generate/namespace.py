@@ -37,7 +37,7 @@ class RawTypeSimplifier(TypeSimplifier):
   def render_param_pre(self, ti, vn):
     return ti.kl.name.compound + " __" + vn + "(" + vn + ");"
 
-  def param_value_name(self, ti, vn):
+  def param_cxx_value_name(self, ti, vn):
     return "__" + vn;
 
   def result_type_name(self, type_info):

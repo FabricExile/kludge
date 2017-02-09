@@ -26,14 +26,14 @@ class StdStringTypeSimplifier(TypeSimplifier):
   def render_param_pre(self, ti, vn):
     return "CxxStdString __" + vn + "(" + vn + ");"
 
-  def param_value_name(self, ti, vn):
+  def param_cxx_value_name(self, ti, vn):
     return "__" + vn
 
   def render_param_post(self, ti, vn):
     return ""
 
   def render_param_copy_back(self, ti, vn):
-    return vn + " = String(" + self.param_value_name(ti, vn) + ");"
+    return vn + " = String(" + self.param_cxx_value_name(ti, vn) + ");"
 
   def result_type_name(self, ti):
     return KLTypeName("String", "")

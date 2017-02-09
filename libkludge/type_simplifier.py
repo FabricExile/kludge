@@ -30,7 +30,7 @@ class TypeSimplifier:
   def render_param_pre(self, ti, vn):
     return ""
 
-  def param_value_name(self, ti, vn):
+  def param_cxx_value_name(self, ti, vn):
     return vn
 
   def render_param_post(self, ti, vn):

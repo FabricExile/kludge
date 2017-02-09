@@ -32,7 +32,7 @@ Cxx{{func.kl_global_name}}(
     {% for param in func.params %}
     {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{func.result.type_info.simplifier.render_result_pre(func.result.type_info)}}
+    {{func.result.type_info.simplifier.render_result_pre(func.result.type_info) | indent(4)}}
     Cxx{{func.kl_global_name}}(
         {% for param in func.params %}
         {{param.type_info.simplifier.param_cxx_value_name(param.type_info, param.value_name.kl) | indent(8)}}

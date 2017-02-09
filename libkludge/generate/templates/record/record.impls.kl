@@ -33,10 +33,10 @@
 {{member.type_info.simplifier.result_type_name(member.type_info)}}
 {{type_info.kl.name}}.{{member.getter_kl_name}}()
 {
-    {{member.type_info.simplifier.render_result_pre(member.type_info)}}
+    {{member.type_info.simplifier.render_result_pre(member.type_info) | indent(4)}}
     this.cxx_{{member.getter_kl_name}}();
-    {{member.type_info.simplifier.render_result_post(member.type_info)}}
-    {{member.type_info.simplifier.render_result_return(member.type_info)}}
+    {{member.type_info.simplifier.render_result_post(member.type_info) | indent(4)}}
+    {{member.type_info.simplifier.render_result_return(member.type_info) | indent(4)}}
 }
 {%    endif %}
 {## Setter ##################################################################}
@@ -294,9 +294,9 @@
     )
 {   
     {% for param in method.params %}
-    {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl)|indent(4)}}
+    {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{method.result.type_info.simplifier.render_result_pre(method.result.type_info)}}
+    {{method.result.type_info.simplifier.render_result_pre(method.result.type_info) | indent(4)}}
     {% if method.is_static %}
     {{type_info.kl.name}}_Cxx{{method.kl_name}}(
     {% else %}
@@ -308,10 +308,10 @@
         {% endfor %}
         );
     {% for param in method.params %}
-    {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl)|indent(4)}}
+    {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{method.result.type_info.simplifier.render_result_post(method.result.type_info)}}
-    {{method.result.type_info.simplifier.render_result_return(method.result.type_info)}}
+    {{method.result.type_info.simplifier.render_result_post(method.result.type_info) | indent(4)}}
+    {{method.result.type_info.simplifier.render_result_return(method.result.type_info) | indent(4)}}
 }
 {%    endif %}
 {%   endfor %}

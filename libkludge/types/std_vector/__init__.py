@@ -87,7 +87,6 @@ class StdVectorSelector(Selector):
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
-    print undq_cpp_type_expr, dq
     if dq.is_direct \
       and isinstance(undq_cpp_type_expr, Named) \
       and len(undq_cpp_type_expr.components) == 2 \

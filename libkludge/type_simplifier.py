@@ -46,17 +46,8 @@ class TypeSimplifier:
     return "__result__"
 
   def render_result_pre(self, ti):
-    tn = self.result_type_name(ti)
     vn = self.result_value_name(ti)
-    return tn.base + " " + vn + tn.suffix + " ="
-
-  def result_value_name(self, ti):
-    return "__result__"
-
-  def render_result_pre(self, ti):
-    tn = self.result_type_name(ti)
-    vn = self.result_value_name(ti)
-    return tn.base + " " + vn + tn.suffix + " ="
+    return ti.kl.name.base + " " + vn + ti.kl.name.suffix + " ="
 
   def render_result_post(self, ti):
     return ""

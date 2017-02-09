@@ -17,18 +17,18 @@ def build_derived_name(kl_type_name, suffix):
 
 class StdVectorTypeSimplifier(TypeSimplifier):
 
-  def __init__(self, etn):
+  def __init__(self, eti):
     TypeSimplifier.__init__(self)
-    self.etn = etn
+    self.eti = eti
 
   def param_cost(self, type_info):
     return 100
 
   def param_type_name_base(self, type_info):
-    return self.etn
+    return self.eti.kl.name.base
 
   def param_type_name_suffix(self, type_info):
-    return "[]"
+    return "[]" + self.eti.kl.name.suffix
 
   def render_param_pre(self, ti, vn):
     return '\n'.join([
@@ -52,6 +52,30 @@ class StdVectorTypeSimplifier(TypeSimplifier):
       "for (Index i=0; i<__" + vn + ".size(); ++i)",
       "  " + vn + "[i] = __" + vn + ".cxx_getAtIndex(i).cxx_get();",
       ])
+
+  def result_type_name(self, ti):
+    etn = self.eti.simplifier.result_type_name(self.eti)
+    return KLTypeName(etn.base, etn.suffix + '[]')
+
+  def result_value_name(self, ti):
+    return "__" + self.eti.simplifier.result_value_name(self.eti)
+
+  def render_result_post(self, ti):
+    cvn = self.eti.simplifier.result_value_name(self.eti)
+    ctn = self.eti.kl.name
+    vn = self.result_value_name(ti)
+    return '\n'.join([
+      ctn.base + " " + cvn + ctn.suffix + "[];",
+      "if (Fabric_Guarded && " + vn + ".size() >= 2147483648u64)",
+      "  report('Resulting value of " + vn + " std::vector is too large for KL variable array');",
+      cvn + ".reserve(UInt32(" + vn + ".size()));",
+      "for (Index i=0; i < " + vn + ".size(); ++i)",
+      "  " + cvn + ".push(" + vn + ".cxx_getAtIndex(i).cxx_get());",
+      self.eti.simplifier.render_result_post(self.eti),
+      ])
+
+  def render_result_return(self, ti):
+    return self.eti.simplifier.render_result_return(self.eti)
 
 class StdVectorSelector(Selector):
 
@@ -147,6 +171,6 @@ inline {{element_type_name}}[] Make_{{element_type_name}}VariableArray({{type_na
         cpp_type_expr=undq_cpp_type_expr,
         extends=None,
         record=record,
-        simplifier=StdVectorTypeSimplifier(element_kl_type_name),
+        simplifier=StdVectorTypeSimplifier(element_type_info),
         )
       return True # restart

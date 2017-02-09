@@ -111,13 +111,9 @@ class ConstRefTypeSimplifier(RefTypeSimplifier):
     RefTypeSimplifier.__init__(self, direct_type_info)
 
   def child_param_cxx_value_name(self, ti, kl_vn):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return kl_vn
     return RefTypeSimplifier.child_param_cxx_value_name(self, ti, kl_vn)
 
   def param_cxx_value_name(self, ti, kl_vn):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return "__" + kl_vn
     return RefTypeSimplifier.param_cxx_value_name(self, ti, kl_vn)
 
   def render_kl_to_cxx(self, kl_vn, cxx_tn, cxx_vn):
@@ -130,31 +126,21 @@ class ConstRefTypeSimplifier(RefTypeSimplifier):
     child_cxx_vn = self.child_param_cxx_value_name(ti, kl_vn)
     cxx_tn = ti.kl.name
     cxx_vn = self.param_cxx_value_name(ti, kl_vn)
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return self.render_decl_kl_to_cxx(child_cxx_vn, cxx_tn, cxx_vn)
     return '\n'.join([
       self.direct_type_info.simplifier.render_param_pre(self.direct_type_info, kl_vn),
       self.render_decl_kl_to_cxx(child_cxx_vn, cxx_tn, cxx_vn),
       ])
 
   def render_param_post(self, ti, vn):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return ""
     return self.direct_type_info.simplifier.render_param_post(ti, vn)
 
   def result_kl_type_name(self, ti):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return KLTypeName("String", "")
     return RefTypeSimplifier.result_kl_type_name(self, ti)
 
   def result_cxx_value_name(self, ti, kl_vn):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return TypeSimplifier.result_cxx_value_name(self, ti, kl_vn)
     return RefTypeSimplifier.result_cxx_value_name(self, ti, kl_vn)
 
   def render_result_cxx_to_kl(self, ti, kl_vn):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return TypeSimplifier.render_result_cxx_to_kl(self, ti, kl_vn)
     return RefTypeSimplifier.render_result_cxx_to_kl(self, ti, kl_vn)
 
 class ConstRefTypeInfo(TypeInfo):

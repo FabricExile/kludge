@@ -197,10 +197,6 @@ class Namespace:
       direct_new_kl_local_name = new_cpp_type_name
       direct_new_kl_global_name = '_'.join(self.nested_kl_names + [direct_new_kl_local_name])
       direct_old_dqti = self.type_mgr.get_dqti(direct_old_cpp_global_expr)
-      print "direct_old_dqti.type_info.kl.name = " + str(direct_old_dqti.type_info.kl.name)
-      print "direct_old_dqti.type_info.edk.name = " + str(direct_old_dqti.type_info.edk.name)
-      print "direct_old_dqti.type_info.lib.name = " + str(direct_old_dqti.type_info.lib.name)
-      print "direct_old_dqti.type_info.lib.expr = " + str(direct_old_dqti.type_info.lib.expr)
       direct_alias = Alias(self, direct_new_kl_global_name, direct_old_dqti.type_info)
       self.ext.add_decl(direct_alias)
 

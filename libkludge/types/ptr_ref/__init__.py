@@ -148,8 +148,10 @@ class MutableRefTypeSimplifier(RefTypeSimplifier):
   def render_param_pre(self, type_info):
     return "Make_" + build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "Ref") + "(" + self.direct_type_info.simplifier.render_param_pre(self.direct_type_info)
 
-  def render_param_post(self, type_info):
-    return self.direct_type_info.simplifier.render_param_post(self.direct_type_info) + ")"
+  def render_param_post(self, ti, vn):
+    return '\n'.join([
+      self.direct_type_info.simplifier.render_param_copy_back(self.direct_type_info, vn),
+      ])
 
   def render_param_pass_type(self, type_info):
     return "io"
@@ -247,8 +249,10 @@ class MutablePtrTypeSimplifier(PtrTypeSimplifier):
   def render_param_pre(self, type_info):
     return "Make_" + build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "Ptr") + "(" + self.direct_type_info.simplifier.render_param_pre(self.direct_type_info)
 
-  def render_param_post(self, type_info):
-    return self.direct_type_info.simplifier.render_param_post(self.direct_type_info) + ")"
+  def render_param_post(self, ti, vn):
+    return '\n'.join([
+      self.direct_type_info.simplifier.render_param_copy_back(self.direct_type_info, vn),
+      ])
 
   def render_param_pass_type(self, type_info):
     return "io"

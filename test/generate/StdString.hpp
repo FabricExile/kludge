@@ -62,3 +62,13 @@ inline void GlobalFuncWithPromotionClash(char const *) {
 inline void GlobalFuncWithPromotionClash(std::string const &) {
   std::cout << "GlobalFuncWithPromotionClash(std::string const &)\n" << std::flush;
 }
+
+inline void SetStdStringByRef(std::string &str) {
+  str = "fooByRef";
+}
+
+inline void SetStdStringByPtr(std::string *str) {
+  if ( str )
+    *str = "fooByPtr";
+}
+

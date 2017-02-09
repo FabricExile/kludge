@@ -35,8 +35,19 @@ class TypeSimplifier:
   def render_param_post(self, type_info):
     return ""
 
-  def result_type_name(self, type_info):
-    return type_info.kl.name.compound
+  def render_param_copy_back(self, ti, vn):
+    return ""
+
+  def result_type_name(self, ti):
+    return ti.kl.name
+
+  def result_value_name(self, ti):
+    return "__result__"
+
+  def render_result_pre(self, ti):
+    tn = self.result_type_name(ti)
+    vn = self.result_value_name(ti)
+    return tn.base + " " + vn + tn.suffix + " ="
 
   @abc.abstractmethod
   def render_result_pre(self, type_info):

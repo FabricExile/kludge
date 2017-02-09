@@ -35,8 +35,11 @@ class StdStringTypeSimplifier(TypeSimplifier):
   def render_result_pre(self, type_info):
     return "String("
 
-  def render_result_post(self, type_info):
-    return ")"
+  def render_param_copy_back(self, ti, vn):
+    return vn + " = String(" + self.param_value_name(ti, vn) + ");"
+
+  def result_type_name(self, ti):
+    return KLTypeName("String", "")
 
 class StdStringSelector(Selector):
 

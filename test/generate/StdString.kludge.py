@@ -51,3 +51,16 @@ GlobalFuncWithPromotionClash('foo');
 """, """
 GlobalFuncWithPromotionClash(char const *)
 """)
+
+ext.add_func("SetStdStringByRef", "void", ["std::string &"])
+ext.add_func("SetStdStringByPtr", "void", ["std::string *"])
+ext.add_test("""
+String str;
+SetStdStringByRef(str);
+report("After SetStdStringByRef(str): str=" + str);
+SetStdStringByPtr(str);
+report("After SetStdStringByPtr(str): str=" + str);
+""", """
+After SetStdStringByRef(str): str=fooByRef
+After SetStdStringByPtr(str): str=fooByPtr
+""")

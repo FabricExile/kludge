@@ -42,7 +42,7 @@ Cxx{{func.kl_global_name}}(
     {% for param in func.params %}
     {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{func.result.type_info.simplifier.render_result_cxx_to_kl(func.result.type_info, '__res') | indent(4)}}
+    {{func.result.type_info.simplifier.render_result_decl_cxx_to_kl(func.result.type_info, '__res') | indent(4)}}
     {{func.result.type_info.simplifier.render_result_return_kl(func.result.type_info, '__res') | indent(4)}}
 }
 {% endif %}

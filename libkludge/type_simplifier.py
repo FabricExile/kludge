@@ -15,6 +15,10 @@ class TypeSimplifier:
   def will_promote(self):
     return True
 
+  def render_decl_cxx_to_kl(self, ti, src_vn, dst_vn):
+    dst_tn = ti.kl.name
+    return dst_tn.base + " " + dst_vn + dst_tn.suffix + " = " + src_vn
+
   def param_cost(self, type_info):
     return 0
     
@@ -50,7 +54,7 @@ class TypeSimplifier:
     cxx_vn = self.result_cxx_value_name(ti, kl_vn)
     return cxx_tn.base + " " + cxx_vn + cxx_tn.suffix + " = "
 
-  def render_result_cxx_to_kl(self, ti, kl_vn):
+  def render_result_decl_cxx_to_kl(self, ti, kl_vn):
     return ""
 
   def render_result_return_kl(self, ti, kl_vn):

@@ -35,7 +35,7 @@
 {
     {{member.type_info.simplifier.render_result_decl_and_assign_cxx(member.type_info, '__res') | indent(4)}}
     this.cxx_{{member.getter_kl_name}}();
-    {{member.type_info.simplifier.render_result_cxx_to_kl(member.type_info, '__res') | indent(4)}}
+    {{member.type_info.simplifier.render_result_decl_cxx_to_kl(member.type_info, '__res') | indent(4)}}
     {{member.type_info.simplifier.render_result_return_kl(member.type_info, '__res') | indent(4)}}
 }
 {%    endif %}
@@ -310,7 +310,7 @@
     {% for param in method.params %}
     {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{method.result.type_info.simplifier.render_result_cxx_to_kl(method.result.type_info, '__res') | indent(4)}}
+    {{method.result.type_info.simplifier.render_result_decl_cxx_to_kl(method.result.type_info, '__res') | indent(4)}}
     {{method.result.type_info.simplifier.render_result_return_kl(method.result.type_info, '__res') | indent(4)}}
 }
 {%    endif %}

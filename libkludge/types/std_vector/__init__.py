@@ -58,24 +58,25 @@ class StdVectorTypeSimplifier(TypeSimplifier):
     return KLTypeName(etn.base, etn.suffix + '[]')
 
   def result_cxx_value_name(self, ti, kl_vn):
-    return "__" + self.eti.simplifier.result_cxx_value_name(self.eti, kl_vn)
+    return kl_vn + "__cxx"
 
-  def render_result_cxx_to_kl(self, ti, kl_vn):
-    cvn = self.eti.simplifier.result_cxx_value_name(self.eti, kl_vn)
-    ctn = self.eti.kl.name
-    vn = self.result_cxx_value_name(ti, kl_vn)
+  def render_result_decl_cxx_to_kl(self, ti, kl_vn):
+    kl_tn = self.result_kl_type_name(ti);
+    cxx_vn = self.result_cxx_value_name(ti, kl_vn)
+    cxx_tn = ti.kl.name
+    ele_kl_vn = '__ele'
     return '\n'.join([
-      ctn.base + " " + cvn + ctn.suffix + "[];",
-      "if (Fabric_Guarded && " + vn + ".size() >= 2147483648u64)",
-      "  report('Resulting value of " + vn + " std::vector is too large for KL variable array');",
-      cvn + ".reserve(UInt32(" + vn + ".size()));",
-      "for (Index i=0; i < " + vn + ".size(); ++i)",
-      "  " + cvn + ".push(" + vn + ".cxx_getAtIndex(i).cxx_get());",
-      self.eti.simplifier.render_result_cxx_to_kl(self.eti, kl_vn),
+      kl_tn.base + " " + kl_vn + kl_tn.suffix + ";",
+      "if (Fabric_Guarded && " + cxx_vn + ".size() >= 2147483648u64)",
+      "  report('Resulting value of " + cxx_tn.compound + " is too large for KL variable array');",
+      kl_vn + ".reserve(UInt32(" + cxx_vn + ".size()));",
+      "for (Index i=0; i < " + cxx_vn + ".size(); ++i) {",
+      "  " + self.eti.simplifier.render_result_decl_and_assign_cxx(self.eti, ele_kl_vn),
+      "    " + cxx_vn + ".cxx_getAtIndex(i).cxx_get();",
+      "  " + self.eti.simplifier.render_result_decl_cxx_to_kl(self.eti, ele_kl_vn),
+      "  " + kl_vn + ".push(" + ele_kl_vn + ");",
+      "}",
       ])
-
-  def render_result_return_kl(self, ti, kl_vn):
-    return self.eti.simplifier.render_result_return_kl(self.eti, kl_vn)
 
 class StdVectorSelector(Selector):
 

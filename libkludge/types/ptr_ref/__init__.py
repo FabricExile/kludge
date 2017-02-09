@@ -79,24 +79,26 @@ class PtrRefTypeSimplifier(TypeSimplifier):
   def result_cxx_value_name(self, ti, kl_vn):
     return self.direct_type_info.simplifier.result_cxx_value_name(self.direct_type_info, kl_vn) + "_cxx"
 
-  def render_result_return_kl(self, ti, kl_vn):
-    return self.direct_type_info.simplifier.render_result_return_kl(self.direct_type_info, kl_vn)
+  def render_result_decl_cxx_to_kl(self, ti, kl_vn):
+    src_vn = self.result_cxx_value_name(ti, kl_vn)
+    dst_vn = self.direct_type_info.simplifier.result_cxx_value_name(self.direct_type_info, kl_vn)
+    return '\n'.join([
+      self.render_decl_cxx_to_kl(ti, src_vn, dst_vn),
+      self.direct_type_info.simplifier.render_result_decl_cxx_to_kl(self.direct_type_info, kl_vn),
+      ])
 
 class PtrTypeSimplifier(PtrRefTypeSimplifier):
 
   def __init__(self, direct_type_info):
     PtrRefTypeSimplifier.__init__(self, direct_type_info)
 
-  def render_result_cxx_to_kl(self, ti, kl_vn):
-    cvn = self.direct_type_info.simplifier.result_cxx_value_name(self.direct_type_info, kl_vn)
-    ctn = self.direct_type_info.kl.name
-    vn = self.result_cxx_value_name(ti, kl_vn)
-    return '\n'.join(["""
-if (Fabric_Guarded && !%s.cxx_isValid())
-    throw "Call of cxx_deref() on null %s";
-%s %s%s = %s.cxx_deref().cxx_get();
-""" % (vn, self.direct_type_info.kl.name.compound, ctn.base, cvn, ctn.suffix, vn),
-      self.direct_type_info.simplifier.render_result_cxx_to_kl(self.direct_type_info, kl_vn),
+  def render_decl_cxx_to_kl(self, ti, src_vn, dst_vn):
+    dst_tn = self.direct_type_info.kl.name
+    src_tn = ti.kl.name
+    return '\n'.join([
+      "if (Fabric_Guarded && !" + src_vn + ".cxx_isValid())",
+      "  throw 'Call of cxx_deref() on null " + src_tn.compound + "';",
+      dst_tn.base + " " + dst_vn + dst_tn.suffix + " = " + src_vn + ".cxx_deref().cxx_get();",
       ])
 
 class RefTypeSimplifier(PtrRefTypeSimplifier):
@@ -104,19 +106,13 @@ class RefTypeSimplifier(PtrRefTypeSimplifier):
   def __init__(self, direct_type_info):
     PtrRefTypeSimplifier.__init__(self, direct_type_info)
 
-  def render_result_cxx_to_kl(self, ti, kl_vn):
-    cvn = self.direct_type_info.simplifier.result_cxx_value_name(self.direct_type_info, kl_vn)
-    tn = ti.kl.name
-    vn = self.result_cxx_value_name(ti, kl_vn)
-    cvn = self.direct_type_info.simplifier.result_cxx_value_name(self.direct_type_info, kl_vn)
-    ctn = self.direct_type_info.kl.name
-    vn = self.result_cxx_value_name(ti, kl_vn)
-    return '\n'.join(["""
-// if (Fabric_Guarded && !%s.cxx_isValid())
-//    throw "Call of cxx_get() on null %s";
-%s %s%s = %s.cxx_get();
-""" % (vn, self.direct_type_info.kl.name.compound, ctn.base, cvn, ctn.suffix, vn),
-      self.direct_type_info.simplifier.render_result_cxx_to_kl(self.direct_type_info, kl_vn),
+  def render_decl_cxx_to_kl(self, ti, src_vn, dst_vn):
+    dst_tn = self.direct_type_info.kl.name
+    src_tn = ti.kl.name
+    return '\n'.join([
+      "// if (Fabric_Guarded && !" + src_vn + ".cxx_isValid())",
+      "//   throw 'Call of cxx_deref() on null " + src_tn.compound + "';",
+      dst_tn.base + " " + dst_vn + dst_tn.suffix + " = " + src_vn + ".cxx_get();",
       ])
 
 class ConstRefTypeSimplifier(RefTypeSimplifier):
@@ -126,15 +122,6 @@ class ConstRefTypeSimplifier(RefTypeSimplifier):
 
   def render_param_post(self, ti, vn):
     return self.direct_type_info.simplifier.render_param_post(ti, vn)
-
-  def result_kl_type_name(self, ti):
-    return RefTypeSimplifier.result_kl_type_name(self, ti)
-
-  def result_cxx_value_name(self, ti, kl_vn):
-    return RefTypeSimplifier.result_cxx_value_name(self, ti, kl_vn)
-
-  def render_result_cxx_to_kl(self, ti, kl_vn):
-    return RefTypeSimplifier.render_result_cxx_to_kl(self, ti, kl_vn)
 
 class ConstRefTypeInfo(TypeInfo):
 
@@ -233,10 +220,10 @@ class ConstPtrTypeSimplifier(PtrTypeSimplifier):
       return TypeSimplifier.result_cxx_value_name(self, ti, kl_vn)
     return PtrTypeSimplifier.result_cxx_value_name(self, ti, kl_vn)
 
-  def render_result_cxx_to_kl(self, ti, kl_vn):
+  def render_result_decl_cxx_to_kl(self, ti, kl_vn):
     if self.direct_type_info.kl.name.base == 'CxxChar':
-      return TypeSimplifier.render_result_cxx_to_kl(self, ti, kl_vn)
-    return PtrTypeSimplifier.render_result_cxx_to_kl(self, ti, kl_vn)
+      return TypeSimplifier.render_result_decl_cxx_to_kl(self, ti, kl_vn)
+    return PtrTypeSimplifier.render_result_decl_cxx_to_kl(self, ti, kl_vn)
 
 class ConstPtrTypeInfo(TypeInfo):
 

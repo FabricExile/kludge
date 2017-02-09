@@ -4,7 +4,6 @@
 
 ext.add_cpp_quoted_include('StdVector.hpp')
 
-ext.generate_type("std::vector<int>")
 ext.add_test("""
 CxxSInt32StdVector vec;
 report(vec.size());
@@ -73,8 +72,8 @@ report(v);
 [56,-7,1983]
 """)
 
-# ext.add_func('ReturnStringArrayArray', 'std::vector< std::vector<std::string> >')\
-#   .add_test("""
+# ext.add_func('ReturnStringArrayArray', 'std::vector< std::vector<std::string> >')
+# ext.add_test("""
 # report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
 # """, """
 # ReturnStringArrayArray() = [["hello","there","my","friend"],["hello","there","my","friend"],["hello","there","my","friend"]]
@@ -82,15 +81,15 @@ report(v);
 
 # ext.add_alias('StringVector', 'std::vector< std::string >')
 
-# ext.add_func('GetStringVector', 'StringVector')\
-#   .add_test("""
+# ext.add_func('GetStringVector', 'StringVector')
+# ext.add_test("""
 # report("GetStringVector() = " + GetStringVector());
 # """, """
 # GetStringVector() = ["hello","world"]
 # """)
 
-# ext.add_func('AppendToStringVector', None, ['std::vector<std::string> &'])\
-#   .add_test("""
+# ext.add_func('AppendToStringVector', None, ['std::vector<std::string> &'])
+# ext.add_test("""
 # String s[];
 # s.push("before append");
 # AppendToStringVector(s);

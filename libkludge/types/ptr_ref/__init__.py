@@ -60,25 +60,17 @@ class PtrRefTypeSimplifier(TypeSimplifier):
     return "__" + child_cxx_vn
 
   def result_type_name(self, ti):
-    if self.direct_type_info.kl.name.base == 'CxxStdString':
-      return KLTypeName("String", "")
     return self.direct_type_info.simplifier.result_type_name(self.direct_type_info)
 
   def render_result_pre(self, ti):
-    if self.direct_type_info.kl.name.base == 'CxxStdString':
-      return TypeSimplifier.render_result_pre(self, ti)
     tn = ti.kl.name
     vn = self.result_value_name(ti)
     return tn.base + " " + vn + tn.suffix + " = "
 
   def result_value_name(self, ti):
-    if self.direct_type_info.kl.name.base == 'CxxStdString':
-      return TypeSimplifier.result_value_name(self, ti)
     return "__" + self.direct_type_info.simplifier.result_value_name(self.direct_type_info)
 
   def render_result_return(self, ti):
-    if self.direct_type_info.kl.name.base == 'CxxStdString':
-      return TypeSimplifier.render_result_return(self, ti)
     return self.direct_type_info.simplifier.render_result_return(self.direct_type_info)
 
 class PtrTypeSimplifier(PtrRefTypeSimplifier):
@@ -87,8 +79,6 @@ class PtrTypeSimplifier(PtrRefTypeSimplifier):
     PtrRefTypeSimplifier.__init__(self, direct_type_info)
 
   def render_result_post(self, ti):
-    if self.direct_type_info.kl.name.base == 'CxxStdString':
-      return ""
     cvn = self.direct_type_info.simplifier.result_value_name(self.direct_type_info)
     ctn = self.direct_type_info.kl.name
     vn = self.result_value_name(ti)
@@ -106,8 +96,6 @@ class RefTypeSimplifier(PtrRefTypeSimplifier):
     PtrRefTypeSimplifier.__init__(self, direct_type_info)
 
   def render_result_post(self, ti):
-    if self.direct_type_info.kl.name.base == 'CxxStdString':
-      return ""
     cvn = self.direct_type_info.simplifier.result_value_name(self.direct_type_info)
     tn = ti.kl.name
     vn = self.result_value_name(ti)
@@ -127,6 +115,16 @@ class ConstRefTypeSimplifier(RefTypeSimplifier):
   def __init__(self, direct_type_info):
     RefTypeSimplifier.__init__(self, direct_type_info)
 
+  def child_param_cxx_value_name(self, ti, kl_vn):
+    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
+      return kl_vn
+    return RefTypeSimplifier.child_param_cxx_value_name(self, ti, kl_vn)
+
+  def param_cxx_value_name(self, ti, kl_vn):
+    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
+      return "__" + kl_vn
+    return RefTypeSimplifier.param_cxx_value_name(self, ti, kl_vn)
+
   def render_kl_to_cxx(self, kl_vn, cxx_tn, cxx_vn):
     return cxx_vn + " = Make_" + cxx_tn.compound + "(" + kl_vn + ");"
 
@@ -143,16 +141,6 @@ class ConstRefTypeSimplifier(RefTypeSimplifier):
       self.direct_type_info.simplifier.render_param_pre(self.direct_type_info, kl_vn),
       self.render_decl_kl_to_cxx(child_cxx_vn, cxx_tn, cxx_vn),
       ])
-
-  def child_param_cxx_value_name(self, ti, kl_vn):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return kl_vn
-    return RefTypeSimplifier.child_param_cxx_value_name(self, ti, kl_vn)
-
-  def param_cxx_value_name(self, ti, kl_vn):
-    if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':
-      return "__" + kl_vn
-    return RefTypeSimplifier.param_cxx_value_name(self, ti, kl_vn)
 
   def render_param_post(self, ti, vn):
     if self.direct_type_info.kl.name.base == 'CxxCharConstPtr':

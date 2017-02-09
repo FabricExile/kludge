@@ -27,12 +27,13 @@ class TypeSimplifier:
   def render_param_pass_type(self, type_info):
     return "in"
 
-  @abc.abstractmethod
-  def render_param_pre(self, type_info):
+  def render_param_pre(self, ti, vn):
     return ""
 
-  @abc.abstractmethod
-  def render_param_post(self, type_info):
+  def param_value_name(self, ti, vn):
+    return vn
+
+  def render_param_post(self, ti, vn):
     return ""
 
   def render_param_copy_back(self, ti, vn):
@@ -49,13 +50,20 @@ class TypeSimplifier:
     vn = self.result_value_name(ti)
     return tn.base + " " + vn + tn.suffix + " ="
 
-  @abc.abstractmethod
-  def render_result_pre(self, type_info):
+  def result_value_name(self, ti):
+    return "__result__"
+
+  def render_result_pre(self, ti):
+    tn = self.result_type_name(ti)
+    vn = self.result_value_name(ti)
+    return tn.base + " " + vn + tn.suffix + " ="
+
+  def render_result_post(self, ti):
     return ""
 
-  @abc.abstractmethod
-  def render_result_post(self, type_info):
-    return ""
+  def render_result_return(self, ti):
+    vn = self.result_value_name(ti)
+    return "return " + vn + ";"
 
 class NullTypeSimplifier(TypeSimplifier):
 
@@ -65,15 +73,3 @@ class NullTypeSimplifier(TypeSimplifier):
   @property
   def will_promote(self):
     return False
-
-  def render_param_pre(self, type_info):
-    return ""
-
-  def render_param_post(self, type_info):
-    return ""
-
-  def render_result_pre(self, type_info):
-    return ""
-
-  def render_result_post(self, type_info):
-    return ""

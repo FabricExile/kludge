@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.
 #
 
-from libkludge.type_info import TypeInfo
+from libkludge.type_info import TypeInfo, KLTypeName
 from libkludge.type_simplifier import TypeSimplifier
 from libkludge.selector import Selector
 from libkludge.cpp_type_expr_parser import dir_qual
@@ -21,18 +21,24 @@ class VoidTypeSimplifier(TypeSimplifier):
     assert False
 
   def result_type_name(self, type_info):
-    return ""
+    return KLTypeName("", "")
 
-  def render_param_pre(self, type_info):
+  def render_param_pre(self, ti, vn):
     assert False
 
-  def render_param_post(self, type_info):
+  def param_value_name(self, ti, vn):
+    assert False
+
+  def render_param_post(self, ti, vn):
     assert False
 
   def render_result_pre(self, type_info):
     return ""
 
   def render_result_post(self, type_info):
+    return ""
+
+  def render_result_return(self, type_info):
     return ""
 
 class VoidTypeInfo(TypeInfo):

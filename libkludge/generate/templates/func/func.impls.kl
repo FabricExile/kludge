@@ -29,17 +29,21 @@ Cxx{{func.kl_global_name}}(
     {% endfor %}
     )
 {
-    {{func.result.render_return_kl()}}
+    {% for param in func.params %}
+    {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl) | indent(4)}}
+    {% endfor %}
     {{func.result.type_info.simplifier.render_result_pre(func.result.type_info)}}
     Cxx{{func.kl_global_name}}(
         {% for param in func.params %}
-        {{param.type_info.simplifier.render_param_pre(param.type_info)}}
-        {{param.value_name.kl}}
-        {{param.type_info.simplifier.render_param_post(param.type_info)}}
-        {{"," if not loop.last else ""}}
+        {{param.type_info.simplifier.param_value_name(param.type_info, param.value_name.kl) | indent(8)}}
+        {{- "," if not loop.last else ""}}
         {% endfor %}
-        )
-    {{func.result.type_info.simplifier.render_result_post(func.result.type_info)}};
+        );
+    {% for param in func.params %}
+    {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl) | indent(4)}}
+    {% endfor %}
+    {{func.result.type_info.simplifier.render_result_post(func.result.type_info) | indent(4)}}
+    {{func.result.type_info.simplifier.render_result_return(func.result.type_info) | indent(4)}}
 }
 {% endif %}
 {% endblock body %}

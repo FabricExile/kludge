@@ -33,11 +33,10 @@
 {{member.type_info.simplifier.result_type_name(member.type_info)}}
 {{type_info.kl.name}}.{{member.getter_kl_name}}()
 {
-    return
     {{member.type_info.simplifier.render_result_pre(member.type_info)}}
-    this.cxx_{{member.getter_kl_name}}()
+    this.cxx_{{member.getter_kl_name}}();
     {{member.type_info.simplifier.render_result_post(member.type_info)}}
-    ;
+    {{member.type_info.simplifier.render_result_return(member.type_info)}}
 }
 {%    endif %}
 {## Setter ##################################################################}
@@ -60,15 +59,15 @@
 {% endif %}
 {{type_info.kl.name}}.{{member.setter_kl_name}}!(
     {{member.type_info.simplifier.param_type_name_base(member.type_info)}}
-    value
+    {{member.param.value_name.kl}}
     {{member.type_info.simplifier.param_type_name_suffix(member.type_info)}}
    )
 {
+    {{member.type_info.simplifier.render_param_pre(member.param.type_info, member.param.value_name.kl)|indent(4)}}
     this.cxx_{{member.setter_kl_name}}(
-        {{member.type_info.simplifier.render_param_pre(member.type_info)}}
-        value
-        {{member.type_info.simplifier.render_param_post(member.type_info)}}
+        {{member.type_info.simplifier.param_value_name(member.param.type_info, member.param.value_name.kl)|indent(8)}}
         );
+    {{member.type_info.simplifier.render_param_post(member.param.type_info, member.param.value_name.kl)|indent(4)}}
 }
 {%    endif %}
 {%   endif %}
@@ -160,14 +159,18 @@
     {{"," if not loop.last else ""}}
     {% endfor %}
     ) {
+    {% for param in ctor.params %}
+    {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl)|indent(4)}}
+    {% endfor %}
     this.__ctor(
         {% for param in ctor.params %}
-        {{param.type_info.simplifier.render_param_pre(param.type_info)}}
-        {{param.value_name.kl}}
-        {{param.type_info.simplifier.render_param_post(param.type_info)}}
-        {{"," if not loop.last else ""}}
+        {{param.type_info.simplifier.param_value_name(param.type_info, param.value_name.kl)|indent(8)}}
+        {{- "," if not loop.last else ""}}
         {% endfor %}
         );
+    {% for param in ctor.params %}
+    {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl)|indent(4)}}
+    {% endfor %}
 }
 {%    endfor %}
 {%  endif %}
@@ -290,7 +293,9 @@
     {% endfor %}
     )
 {   
-    {{method.result.render_return_kl()}}
+    {% for param in method.params %}
+    {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl)|indent(4)}}
+    {% endfor %}
     {{method.result.type_info.simplifier.render_result_pre(method.result.type_info)}}
     {% if method.is_static %}
     {{type_info.kl.name}}_Cxx{{method.kl_name}}(
@@ -298,13 +303,15 @@
     this.cxx_{{method.clean_cxx_kl_name}}(
     {% endif %}
         {% for param in method.params %}
-        {{param.type_info.simplifier.render_param_pre(param.type_info)}}
-        {{param.value_name.kl}}
-        {{param.type_info.simplifier.render_param_post(param.type_info)}}
-        {{"," if not loop.last else ""}}
+        {{param.type_info.simplifier.param_value_name(param.type_info, param.value_name.kl)}}
+        {{- "," if not loop.last else ""}}
         {% endfor %}
-        )
-    {{method.result.type_info.simplifier.render_result_post(method.result.type_info)}};
+        );
+    {% for param in method.params %}
+    {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl)|indent(4)}}
+    {% endfor %}
+    {{method.result.type_info.simplifier.render_result_post(method.result.type_info)}}
+    {{method.result.type_info.simplifier.render_result_return(method.result.type_info)}}
 }
 {%    endif %}
 {%   endfor %}

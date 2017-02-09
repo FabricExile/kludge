@@ -43,6 +43,12 @@ class PtrRefTypeSimplifier(TypeSimplifier):
     self.direct_type_info = direct_type_info.from_derivative
     self.direct_type_info_for_derivatives = direct_type_info
 
+  def render_kl_to_cxx(self, ti, kl_vn, cxx_vn):
+    return cxx_vn + " = Make_" + ti.kl.name.compound + "(" + kl_vn + ");"
+
+  def render_decl_kl_to_cxx(self, ti, kl_vn, cxx_vn):
+    return ti.kl.name.compound + " " + self.render_kl_to_cxx(ti, kl_vn, cxx_vn)
+
   def param_cost(self, type_info):
     return self.direct_type_info.simplifier.param_cost(self.direct_type_info)
 
@@ -58,6 +64,14 @@ class PtrRefTypeSimplifier(TypeSimplifier):
   def param_cxx_value_name(self, ti, kl_vn):
     child_cxx_vn = self.child_param_cxx_value_name(ti, kl_vn)
     return "__" + child_cxx_vn
+
+  def render_param_pre(self, ti, kl_vn):
+    child_cxx_vn = self.child_param_cxx_value_name(ti, kl_vn)
+    cxx_vn = self.param_cxx_value_name(ti, kl_vn)
+    return '\n'.join([
+      self.direct_type_info.simplifier.render_param_pre(self.direct_type_info, kl_vn),
+      self.render_decl_kl_to_cxx(ti, child_cxx_vn, cxx_vn),
+      ])
 
   def result_kl_type_name(self, ti):
     return self.direct_type_info.simplifier.result_kl_type_name(self.direct_type_info)
@@ -110,21 +124,6 @@ class ConstRefTypeSimplifier(RefTypeSimplifier):
   def __init__(self, direct_type_info):
     RefTypeSimplifier.__init__(self, direct_type_info)
 
-  def render_kl_to_cxx(self, kl_vn, cxx_tn, cxx_vn):
-    return cxx_vn + " = Make_" + cxx_tn.compound + "(" + kl_vn + ");"
-
-  def render_decl_kl_to_cxx(self, kl_vn, cxx_tn, cxx_vn):
-    return cxx_tn.compound + " " + self.render_kl_to_cxx(kl_vn, cxx_tn, cxx_vn)
-
-  def render_param_pre(self, ti, kl_vn):
-    child_cxx_vn = self.child_param_cxx_value_name(ti, kl_vn)
-    cxx_tn = ti.kl.name
-    cxx_vn = self.param_cxx_value_name(ti, kl_vn)
-    return '\n'.join([
-      self.direct_type_info.simplifier.render_param_pre(self.direct_type_info, kl_vn),
-      self.render_decl_kl_to_cxx(child_cxx_vn, cxx_tn, cxx_vn),
-      ])
-
   def render_param_post(self, ti, vn):
     return self.direct_type_info.simplifier.render_param_post(ti, vn)
 
@@ -164,14 +163,6 @@ class MutableRefTypeSimplifier(RefTypeSimplifier):
 
   def __init__(self, direct_type_info):
     RefTypeSimplifier.__init__(self, direct_type_info)
-
-  def render_param_pre(self, ti, vn):
-    cvn = self.child_param_cxx_value_name(ti, vn)
-    tn = build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "Ref")
-    return '\n'.join([
-      self.direct_type_info.simplifier.render_param_pre(self.direct_type_info, vn),
-      tn + " __" + cvn + " = Make_" + tn + "(" + cvn + ");"
-      ])
 
   def render_param_post(self, ti, vn):
     return '\n'.join([
@@ -218,15 +209,11 @@ class ConstPtrTypeSimplifier(PtrTypeSimplifier):
       return ""
     return PtrTypeSimplifier.param_type_name_suffix(self, type_info)
 
-  def render_param_pre(self, ti, vn):
+  def render_param_pre(self, ti, kl_vn):
     if self.direct_type_info.kl.name.base == 'CxxChar':
-      return "CxxCharConstPtr __" + vn + " = CxxCharConstPtr(" + vn + ");"
-    cvn = self.child_param_cxx_value_name(ti, vn)
-    tn = build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "ConstPtr")
-    return '\n'.join([
-      self.direct_type_info.simplifier.render_param_pre(self.direct_type_info, vn),
-      tn + " __" + cvn + " = Make_" + tn + "(" + cvn + ");"
-      ])
+      cxx_vn = self.param_cxx_value_name(self, kl_vn)
+      return "CxxCharConstPtr " + cxx_vn + " = CxxCharConstPtr(" + kl_vn + ");"
+    return PtrTypeSimplifier.render_param_pre(self, ti, kl_vn)
 
   def param_cxx_value_name(self, ti, kl_vn):
     if self.direct_type_info.kl.name.base == 'CxxChar':
@@ -278,14 +265,6 @@ class MutablePtrTypeSimplifier(PtrTypeSimplifier):
 
   def __init__(self, direct_type_info):
     PtrTypeSimplifier.__init__(self, direct_type_info)
-
-  def render_param_pre(self, ti, vn):
-    cvn = self.child_param_cxx_value_name(ti, vn)
-    tn = build_kl_name_base(self.direct_type_info_for_derivatives.kl.name.compound, "Ptr")
-    return '\n'.join([
-      self.direct_type_info.simplifier.render_param_pre(self.direct_type_info, vn),
-      tn + " __" + cvn + " = Make_" + tn + "(" + cvn + ");"
-      ])
 
   def render_param_post(self, ti, vn):
     return '\n'.join([

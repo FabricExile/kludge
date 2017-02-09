@@ -30,13 +30,13 @@
 {% if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {% endif %}
-{{member.type_info.simplifier.result_type_name(member.type_info)}}
+{{member.type_info.simplifier.result_kl_type_name(member.type_info)}}
 {{type_info.kl.name}}.{{member.getter_kl_name}}()
 {
-    {{member.type_info.simplifier.render_result_pre(member.type_info) | indent(4)}}
+    {{member.type_info.simplifier.render_result_decl_and_assign_cxx(member.type_info, '__res') | indent(4)}}
     this.cxx_{{member.getter_kl_name}}();
-    {{member.type_info.simplifier.render_result_post(member.type_info) | indent(4)}}
-    {{member.type_info.simplifier.render_result_return(member.type_info) | indent(4)}}
+    {{member.type_info.simplifier.render_result_cxx_to_kl(member.type_info, '__res') | indent(4)}}
+    {{member.type_info.simplifier.render_result_return_kl(member.type_info, '__res') | indent(4)}}
 }
 {%    endif %}
 {## Setter ##################################################################}
@@ -278,7 +278,7 @@
 {% if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
 {% endif %}
-{{method.result.type_info.simplifier.result_type_name(method.result.type_info)}}
+{{method.result.type_info.simplifier.result_kl_type_name(method.result.type_info)}}
 {%     if method.is_static %}
 {{type_info.kl.name}}_{{method.clean_kl_name}}(
 {%     else %}
@@ -296,7 +296,7 @@
     {% for param in method.params %}
     {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{method.result.type_info.simplifier.render_result_pre(method.result.type_info) | indent(4)}}
+    {{method.result.type_info.simplifier.render_result_decl_and_assign_cxx(method.result.type_info, '__res') | indent(4)}}
     {% if method.is_static %}
     {{type_info.kl.name}}_Cxx{{method.kl_name}}(
     {% else %}
@@ -310,8 +310,8 @@
     {% for param in method.params %}
     {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{method.result.type_info.simplifier.render_result_post(method.result.type_info) | indent(4)}}
-    {{method.result.type_info.simplifier.render_result_return(method.result.type_info) | indent(4)}}
+    {{method.result.type_info.simplifier.render_result_cxx_to_kl(method.result.type_info, '__res') | indent(4)}}
+    {{method.result.type_info.simplifier.render_result_return_kl(method.result.type_info, '__res') | indent(4)}}
 }
 {%    endif %}
 {%   endfor %}

@@ -41,7 +41,7 @@ class RawTypeSimplifier(TypeSimplifier):
   def param_cxx_value_name(self, ti, kl_vn):
     return "__" + kl_vn
 
-  def result_type_name(self, type_info):
+  def result_kl_type_name(self, type_info):
     return type_info.kl_for_derivatives.name
 
 class Namespace:

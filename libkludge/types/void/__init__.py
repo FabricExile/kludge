@@ -20,9 +20,6 @@ class VoidTypeSimplifier(TypeSimplifier):
   def param_type_name_suffix(self, type_info):
     assert False
 
-  def result_type_name(self, type_info):
-    return KLTypeName("", "")
-
   def render_param_pre(self, ti, vn):
     assert False
 
@@ -32,13 +29,13 @@ class VoidTypeSimplifier(TypeSimplifier):
   def render_param_post(self, ti, vn):
     assert False
 
-  def render_result_pre(self, type_info):
+  def result_kl_type_name(self, type_info):
+    return KLTypeName("", "")
+
+  def render_result_decl_and_assign_cxx(self, ti, kl_vn):
     return ""
 
-  def render_result_post(self, type_info):
-    return ""
-
-  def render_result_return(self, type_info):
+  def render_result_return_kl(self, ti, kl_vn):
     return ""
 
 class VoidTypeInfo(TypeInfo):

@@ -53,17 +53,17 @@ class StdVectorTypeSimplifier(TypeSimplifier):
       "  " + vn + "[i] = __" + vn + ".cxx_getAtIndex(i).cxx_get();",
       ])
 
-  def result_type_name(self, ti):
-    etn = self.eti.simplifier.result_type_name(self.eti)
+  def result_kl_type_name(self, ti):
+    etn = self.eti.simplifier.result_kl_type_name(self.eti)
     return KLTypeName(etn.base, etn.suffix + '[]')
 
-  def result_value_name(self, ti):
-    return "__" + self.eti.simplifier.result_value_name(self.eti)
+  def result_cxx_value_name(self, ti, kl_vn):
+    return "__" + self.eti.simplifier.result_cxx_value_name(self.eti, kl_vn)
 
-  def render_result_post(self, ti):
-    cvn = self.eti.simplifier.result_value_name(self.eti)
+  def render_result_cxx_to_kl(self, ti, kl_vn):
+    cvn = self.eti.simplifier.result_cxx_value_name(self.eti, kl_vn)
     ctn = self.eti.kl.name
-    vn = self.result_value_name(ti)
+    vn = self.result_cxx_value_name(ti, kl_vn)
     return '\n'.join([
       ctn.base + " " + cvn + ctn.suffix + "[];",
       "if (Fabric_Guarded && " + vn + ".size() >= 2147483648u64)",
@@ -71,11 +71,11 @@ class StdVectorTypeSimplifier(TypeSimplifier):
       cvn + ".reserve(UInt32(" + vn + ".size()));",
       "for (Index i=0; i < " + vn + ".size(); ++i)",
       "  " + cvn + ".push(" + vn + ".cxx_getAtIndex(i).cxx_get());",
-      self.eti.simplifier.render_result_post(self.eti),
+      self.eti.simplifier.render_result_cxx_to_kl(self.eti, kl_vn),
       ])
 
-  def render_result_return(self, ti):
-    return self.eti.simplifier.render_result_return(self.eti)
+  def render_result_return_kl(self, ti, kl_vn):
+    return self.eti.simplifier.render_result_return_kl(self.eti, kl_vn)
 
 class StdVectorSelector(Selector):
 

@@ -18,7 +18,7 @@ Cxx{{func.kl_global_name}}(
 {%  for comment in func.comments %}
 {{comment}}
 {%  endfor %}
-{{func.result.type_info.simplifier.result_type_name(func.result.type_info)}}
+{{func.result.type_info.simplifier.result_kl_type_name(func.result.type_info)}}
 {{func.kl_global_name}}(
     {% for param in func.params %}
     {{param.type_info.simplifier.render_param_pass_type(param.type_info)}}
@@ -32,7 +32,7 @@ Cxx{{func.kl_global_name}}(
     {% for param in func.params %}
     {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{func.result.type_info.simplifier.render_result_pre(func.result.type_info) | indent(4)}}
+    {{func.result.type_info.simplifier.render_result_decl_and_assign_cxx(func.result.type_info, '__res') | indent(4)}}
     Cxx{{func.kl_global_name}}(
         {% for param in func.params %}
         {{param.type_info.simplifier.param_cxx_value_name(param.type_info, param.value_name.kl) | indent(8)}}
@@ -42,8 +42,8 @@ Cxx{{func.kl_global_name}}(
     {% for param in func.params %}
     {{param.type_info.simplifier.render_param_post(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}
-    {{func.result.type_info.simplifier.render_result_post(func.result.type_info) | indent(4)}}
-    {{func.result.type_info.simplifier.render_result_return(func.result.type_info) | indent(4)}}
+    {{func.result.type_info.simplifier.render_result_cxx_to_kl(func.result.type_info, '__res') | indent(4)}}
+    {{func.result.type_info.simplifier.render_result_return_kl(func.result.type_info, '__res') | indent(4)}}
 }
 {% endif %}
 {% endblock body %}

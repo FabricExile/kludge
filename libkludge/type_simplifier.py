@@ -39,22 +39,22 @@ class TypeSimplifier:
   def render_param_copy_back(self, ti, vn):
     return ""
 
-  def result_type_name(self, ti):
+  def result_kl_type_name(self, ti):
     return ti.kl.name
 
-  def result_value_name(self, ti):
-    return "__result__"
+  def result_cxx_value_name(self, ti, kl_vn):
+    return kl_vn
 
-  def render_result_pre(self, ti):
-    vn = self.result_value_name(ti)
-    return ti.kl.name.base + " " + vn + ti.kl.name.suffix + " ="
+  def render_result_decl_and_assign_cxx(self, ti, kl_vn):
+    cxx_tn = ti.kl.name
+    cxx_vn = self.result_cxx_value_name(ti, kl_vn)
+    return cxx_tn.base + " " + cxx_vn + cxx_tn.suffix + " = "
 
-  def render_result_post(self, ti):
+  def render_result_cxx_to_kl(self, ti, kl_vn):
     return ""
 
-  def render_result_return(self, ti):
-    vn = self.result_value_name(ti)
-    return "return " + vn + ";"
+  def render_result_return_kl(self, ti, kl_vn):
+    return "return " + kl_vn + ";"
 
 class NullTypeSimplifier(TypeSimplifier):
 

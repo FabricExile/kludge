@@ -64,15 +64,16 @@ class StdVectorTypeSimplifier(TypeSimplifier):
     kl_tn = self.result_kl_type_name(ti);
     cxx_vn = self.result_cxx_value_name(ti, kl_vn)
     cxx_tn = ti.kl.name
-    ele_kl_vn = '__ele'
+    ind_vn = cxx_vn + '__ind'
+    ele_kl_vn = cxx_vn + '__ele'
     return '\n'.join([
       kl_tn.base + " " + kl_vn + kl_tn.suffix + ";",
       "if (Fabric_Guarded && " + cxx_vn + ".size() >= 2147483648u64)",
       "  report('Resulting value of " + cxx_tn.compound + " is too large for KL variable array');",
       kl_vn + ".reserve(UInt32(" + cxx_vn + ".size()));",
-      "for (Index i=0; i < " + cxx_vn + ".size(); ++i) {",
+      "for (Index " + ind_vn + "=0; " + ind_vn + " < " + cxx_vn + ".size(); ++" + ind_vn + ") {",
       "  " + self.eti.simplifier.render_result_decl_and_assign_cxx(self.eti, ele_kl_vn),
-      "    " + cxx_vn + ".cxx_getAtIndex(i).cxx_get();",
+      "    " + cxx_vn + ".cxx_getAtIndex(" + ind_vn + ").cxx_get();",
       "  " + self.eti.simplifier.render_result_decl_cxx_to_kl(self.eti, ele_kl_vn),
       "  " + kl_vn + ".push(" + ele_kl_vn + ");",
       "}",

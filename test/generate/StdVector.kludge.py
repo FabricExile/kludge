@@ -76,21 +76,21 @@ report(v);
 [56,-7,1983]
 """)
 
-# ext.add_func('ReturnStringArrayArray', 'std::vector< std::vector<std::string> >')
-# ext.add_test("""
-# report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
-# """, """
-# ReturnStringArrayArray() = [["hello","there","my","friend"],["hello","there","my","friend"],["hello","there","my","friend"]]
-# """)
+ext.add_func('ReturnStringArrayArray', 'std::vector< std::vector<std::string> >')
+ext.add_test("""
+report("ReturnStringArrayArray() = " + ReturnStringArrayArray());
+""", """
+ReturnStringArrayArray() = [["hello","there","my","friend"],["hello","there","my","friend"],["hello","there","my","friend"]]
+""")
 
-# ext.add_alias('StringVector', 'std::vector< std::string >')
+ext.add_alias('StringVector', 'std::vector< std::string >')
 
-# ext.add_func('GetStringVector', 'StringVector')
-# ext.add_test("""
-# report("GetStringVector() = " + GetStringVector());
-# """, """
-# GetStringVector() = ["hello","world"]
-# """)
+ext.add_func('GetStringVector', 'StringVector')
+ext.add_test("""
+report("GetStringVector() = " + GetStringVector());
+""", """
+GetStringVector() = ["hello","world"]
+""")
 
 # ext.add_func('AppendToStringVector', None, ['std::vector<std::string> &'])
 # ext.add_test("""

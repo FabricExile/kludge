@@ -38,8 +38,8 @@ class StdVectorTypeSimplifier(TypeSimplifier):
       "  __" + vn + ".push_back(" + vn + "[i]);",
       ])
 
-  def param_cxx_value_name(self, ti, vn):
-    return "__" + vn
+  def param_cxx_value_name(self, ti, kl_vn):
+    return "__" + kl_vn
 
   def render_param_post(self, ti, vn):
     return ""

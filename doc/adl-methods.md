@@ -156,7 +156,7 @@ The `add_uni_op()` method wraps a C++ unary operator `++` or `--`.  Its paramete
     ):
 ```
 
-The `op` parameter is the name of the operator, either `++` or `--`.  The `returns` parameter is the C++ type name of the return value of the operator.  By default, the operator will be mapped as a KL method `cxxInc` or `cxxDec`, but this can be controlled with the `kl_method_name` parameter.  The result of `add_uni_op()` supports `add_comment(comment)` and `add_test(kl, out)`.
+The `op` parameter is the name of the operator, either `++` or `--`.  The `returns` parameter is the C++ type name of the return value of the operator.  By default, the operator will be mapped as a KL method `cxx_inc` or `cxx_dec`, but this can be controlled with the `kl_method_name` parameter.  The result of `add_uni_op()` supports `add_comment(comment)` and `add_test(kl, out)`.
 
 Note that, currently, Kludge only supports overloads of **prefix** `++` and `--`.
 
@@ -169,7 +169,7 @@ ty.add_uni_op('++', 'int');
 Results in:
 
 ```
-SInt32 MyType.cxxInc!();
+SInt32 MyType.cxx_inc!();
 ```
 
 ## `add_bin_op()`

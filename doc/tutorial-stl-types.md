@@ -31,8 +31,8 @@ std::vector<Ty> ReverseVector( std::vector<Ty> const &v )
 Discover, generate and compile the extension:
 
 ```
-path/to/kludge discover STLUser STLUser.hpp
-path/to/kludge generate STLUser STLUser.kludge.py
+kludge discover STLUser STLUser.hpp
+kludge generate STLUser STLUser.kludge.py
 scons -f STLUser.SConstruct
 ```
 

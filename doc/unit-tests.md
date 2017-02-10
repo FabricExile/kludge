@@ -35,7 +35,7 @@ inline int Fact( int n ) {
 Run it through `kludge discover`:
 
 ```
-path/to/kludge discover Fact Fact.hpp
+kludge discover Fact Fact.hpp
 ```
 
 Edit the resulting `Fact.kludge.py` file and add the following to the end:
@@ -57,7 +57,7 @@ Fact(5) = 120
 Generate and compile the extension:
 
 ```
-path/to/kludge generate Fact Fact.kludge.py
+kludge generate Fact Fact.kludge.py
 scons -f Fact.SConstruct
 ```
 

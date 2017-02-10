@@ -30,7 +30,7 @@ g++ -fPIC -shared Tutorial.cpp -o libTutorial.so
 Now, use Kludge's discover tool to build an API description of the library:
 
 ```
-path/to/kludge discover Tutorial Tutorial.hpp
+kludge discover Tutorial Tutorial.hpp
 ```
 
 It will create three files: `Tutorial.decls.kludge.py` which consist of type declarations; `Tutorial.defns.kludge.py` which consists of member and method definitions; and `Tutorial.kludge.py` which specifies header files that must be included and incldues the other two files.  Take a look at each of these files.  `Tutorial.decls.kludge.py` should be empty (or rather, contain only comments); `Tutorial.defns.kludge.py` contains one non-comment line that describes the function:
@@ -44,7 +44,7 @@ The description is meant to be human-readable because in more complex cases you 
 We will now produce the actual KL extension.  Use the `kludge generate` tool to generate the extension code:
 
 ```
-path/to/kludge generate Tutorial Tutorial.kludge.py
+kludge generate Tutorial Tutorial.kludge.py
 ```
 
 This command will process the input files and produce several output files. They are:
@@ -109,7 +109,7 @@ This is one of the reasons that `kludge discover` and `kludge generate` are sepa
 Regenerate and rebuild the extension, and then run KL again:
 
 ```
-path/to/kludge generate Tutorial Tutorial.kludge.py
+kludge generate Tutorial Tutorial.kludge.py
 scons -f Tutorial.SConstruct
 FABRIC_EXTS_PATH=. kl test.kl
 ```

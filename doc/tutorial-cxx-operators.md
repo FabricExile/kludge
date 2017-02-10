@@ -40,8 +40,8 @@ private:
 Use Kludge's discover tool to build an API description of the header, then generate and compile the extension:
 
 ```
-path/to/kludge discover MyInt MyInt.hpp
-path/to/kludge generate MyInt MyInt.kludge.py
+kludge discover MyInt MyInt.hpp
+kludge generate MyInt MyInt.kludge.py
 scons -f MyInt.SConstruct
 ```
 
@@ -55,8 +55,8 @@ operator entry() {
   report("a = " + SInt32(a));
   report("b = " + SInt32(b));
   report("a + b = " + SInt32(a+b));
-  a.cxxInc();
-  report("after a.cxxInc():");
+  a.cxx_inc();
+  report("after a.cxx_inc():");
   report("a = " + SInt32(a));
   report("b = " + SInt32(b));
   report("a + b = " + SInt32(a+b));
@@ -81,7 +81,7 @@ initially:
 a = 7
 b = 5
 a + b = 12
-after a.cxxInc():
+after a.cxx_inc():
 a = 8
 b = 5
 a + b = 13
@@ -99,10 +99,10 @@ So how exactly are the operators mapped to KL?
 
 - The line `report("a + b = " + SInt32(a+b));` uses the `operator +` of `MyInt` to add two values of the type
 
-- The line `a.cxxInc();` calls the `operator ++` of `MyInt`.  We need this special syntax because there's currently no way to overload `++` (and `--`) in KL
+- The line `a.cxx_inc();` calls the `operator ++` of `MyInt`.  We need this special syntax because there's currently no way to overload `++` (and `--`) in KL
 
 - The line `a += b;` calls the `operator +=` of `MyInt`.
 
-As you can see, in all cases but the increment operator the mapping from C++ to KL is direct: we use exactly the same syntax in KL as we do in C++.  In the case of increment, we use the special `cxxInc` method to perform the increment.  This is a pattern you will see often in Kludge: when there is no direct KL analog for something in C++ it will be available through a method or type that includes `cxx` or `Cxx` in the name.  More information on how operators are wrapped can be found in [Wrapping Methods and Method-Like Type Additions](adl-methods.md).
+As you can see, in all cases but the increment operator the mapping from C++ to KL is direct: we use exactly the same syntax in KL as we do in C++.  In the case of increment, we use the special `cxx_inc` method to perform the increment.  This is a pattern you will see often in Kludge: when there is no direct KL analog for something in C++ it will be available through a method or type that includes `cxx` or `Cxx` in the name.  More information on how operators are wrapped can be found in [Wrapping Methods and Method-Like Type Additions](adl-methods.md).
 
 Next: [Tutorial: STL Types and Instantiating Templates](tutorial-stl-types.md)

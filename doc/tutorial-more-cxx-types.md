@@ -53,8 +53,8 @@ inline std::string const &LongestString( std::vector<std::string> const &vs )
 Build as before:
 
 ```
-path/to/kludge discover RefEx RefEx.hpp
-path/to/kludge generate RefEx RefEx.kludge.py
+kludge discover RefEx RefEx.hpp
+kludge generate RefEx RefEx.kludge.py
 scons -f RefEx.SConstruct
 ```
 

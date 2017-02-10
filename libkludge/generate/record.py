@@ -653,8 +653,8 @@ class Record(Decl):
       return EmptyCommentContainer()
   
   kl_method_name = {
-    '++': 'cxxInc',
-    '--': 'cxxDec',
+    '++': 'cxx_inc',
+    '--': 'cxx_dec',
     }
 
   def add_uni_op(

@@ -30,7 +30,7 @@ Since the class is entirely self-contained, we do not need a corresponding `Coun
 Use Kludge's discover tool to build an API description of the header:
 
 ```
-path/to/kludge discover Counter Counter.hpp
+kludge discover Counter Counter.hpp
 ```
 
 Take a look at the resulting `Counter.decls.kludge.py`.  The line
@@ -65,7 +65,7 @@ More information on these description language methods can be found in [Wrapping
 Now, use `kludge generate` to generate the extension:
 
 ```
-path/to/kludge generate Counter Counter.kludge.py
+kludge generate Counter Counter.kludge.py
 ```
 
 Feel free to take a look at `Counter.kl` and `Counter.cpp`; they are more complicated than before but still understandable.  For now, we will just go ahead use the extension.  First, compile it:

@@ -52,11 +52,8 @@ class PtrRefTypeSimplifier(TypeSimplifier):
   def param_cost(self, type_info):
     return self.direct_type_info.simplifier.param_cost(self.direct_type_info)
 
-  def param_type_name_base(self, type_info):
-    return self.direct_type_info.simplifier.param_type_name_base(self.direct_type_info)
-
-  def param_type_name_suffix(self, type_info):
-    return self.direct_type_info.simplifier.param_type_name_suffix(self.direct_type_info)
+  def param_type_name(self, type_info):
+    return self.direct_type_info.simplifier.param_type_name(self.direct_type_info)
 
   def child_param_cxx_value_name(self, ti, kl_vn):
     return self.direct_type_info.simplifier.param_cxx_value_name(self.direct_type_info, kl_vn)
@@ -186,15 +183,10 @@ class ConstPtrTypeSimplifier(PtrTypeSimplifier):
   def __init__(self, direct_type_info):
     PtrTypeSimplifier.__init__(self, direct_type_info)
 
-  def param_type_name_base(self, type_info):
+  def param_type_name(self, ti):
     if self.direct_type_info.kl.name.base == 'CxxChar':
-      return "String"
-    return PtrTypeSimplifier.param_type_name_base(self, type_info)
-
-  def param_type_name_suffix(self, type_info):
-    if self.direct_type_info.kl.name.base == 'CxxChar':
-      return ""
-    return PtrTypeSimplifier.param_type_name_suffix(self, type_info)
+      return KLTypeName("String", "")
+    return PtrTypeSimplifier.param_type_name(self, ti)
 
   def render_param_pre(self, ti, kl_vn):
     if self.direct_type_info.kl.name.base == 'CxxChar':

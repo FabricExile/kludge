@@ -71,10 +71,9 @@ class Func(Decl):
     for param in self.params:
       simplifier = param.type_info.simplifier
       type_info = param.type_info
-      param_sigs.append("%s %s%s" % (
+      param_sigs.append("%s %s" % (
         simplifier.render_param_pass_type(type_info),
-        simplifier.param_type_name_base(type_info),
-        simplifier.param_type_name_suffix(type_info),
+        simplifier.param_type_name(type_info).compound,
         ))
       this_cost = simplifier.param_cost(type_info)
       if this_cost > cost:

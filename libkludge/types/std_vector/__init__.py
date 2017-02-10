@@ -24,11 +24,9 @@ class StdVectorTypeSimplifier(TypeSimplifier):
   def param_cost(self, type_info):
     return 100
 
-  def param_type_name_base(self, type_info):
-    return self.eti.kl.name.base
-
-  def param_type_name_suffix(self, type_info):
-    return "[]" + self.eti.kl.name.suffix
+  def param_type_name(self, type_info):
+    ele_tn = self.eti.simplifier.param_type_name(self.eti)
+    return KLTypeName(ele_tn.base, ele_tn.suffix + "[]")
 
   def render_param_pre(self, ti, vn):
     return '\n'.join([

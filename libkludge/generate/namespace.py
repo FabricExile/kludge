@@ -22,16 +22,13 @@ class RawTypeSimplifier(TypeSimplifier):
   def __init__(self):
     TypeSimplifier.__init__(self)
 
-  def param_cost(self, type_info):
+  def param_cost(self, ti):
     return 0
     
-  def param_type_name_base(self, type_info):
-    return type_info.kl_for_derivatives.name.base
+  def param_type_name(self, ti):
+    return ti.kl_for_derivatives.name
 
-  def param_type_name_suffix(self, type_info):
-    return type_info.kl_for_derivatives.name.suffix
-
-  def render_param_pass_type(self, type_info):
+  def render_param_pass_type(self, ti):
     return "in"
 
   def render_param_pre(self, ti, kl_vn):
@@ -41,8 +38,8 @@ class RawTypeSimplifier(TypeSimplifier):
   def param_cxx_value_name(self, ti, kl_vn):
     return "__" + kl_vn
 
-  def result_kl_type_name(self, type_info):
-    return type_info.kl_for_derivatives.name
+  def result_kl_type_name(self, ti):
+    return ti.kl_for_derivatives.name
 
 class Namespace:
 

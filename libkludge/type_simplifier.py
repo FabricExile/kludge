@@ -19,16 +19,19 @@ class TypeSimplifier:
     dst_tn = ti.kl.name
     return dst_tn.base + " " + dst_vn + dst_tn.suffix + " = " + src_vn
 
-  def param_cost(self, type_info):
+  def param_cost(self, ti):
     return 0
+
+  def param_type_name(self, ti):
+    return ti.kl.name
     
-  def param_type_name_base(self, type_info):
-    return type_info.kl.name.base
+  def param_type_name_base(self, ti):
+    return self.param_type_name(ti).base
 
-  def param_type_name_suffix(self, type_info):
-    return type_info.kl.name.suffix
+  def param_type_name_suffix(self, ti):
+    return self.param_type_name(ti).suffix
 
-  def render_param_pass_type(self, type_info):
+  def render_param_pass_type(self, ti):
     return "in"
 
   def render_param_pre(self, ti, vn):

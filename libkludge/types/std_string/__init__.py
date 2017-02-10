@@ -17,11 +17,8 @@ class StdStringTypeSimplifier(TypeSimplifier):
   def param_cost(self, type_info):
     return 100
 
-  def param_type_name_base(self, type_info):
-    return "String"
-
-  def param_type_name_suffix(self, type_info):
-    return ""
+  def param_type_name(self, ti):
+    return KLTypeName("String", "")
 
   def render_param_pre(self, ti, vn):
     return "CxxStdString __" + vn + "(" + vn + ");"

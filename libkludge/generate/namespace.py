@@ -36,7 +36,7 @@ class RawTypeSimplifier(TypeSimplifier):
     return ti.kl.name.compound + " " + cxx_vn + "(" + kl_vn + ");"
 
   def param_cxx_value_name(self, ti, kl_vn):
-    return "__" + kl_vn
+    return kl_vn + "__cxx"
 
   def result_kl_type_name(self, ti):
     return ti.kl_for_derivatives.name

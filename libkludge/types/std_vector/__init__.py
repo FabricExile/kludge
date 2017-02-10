@@ -28,27 +28,30 @@ class StdVectorTypeSimplifier(TypeSimplifier):
     ele_tn = self.eti.simplifier.param_type_name(self.eti)
     return KLTypeName(ele_tn.base, ele_tn.suffix + "[]")
 
-  def render_param_pre(self, ti, vn):
+  def render_param_pre(self, ti, kl_vn):
+    cxx_vn = self.param_cxx_value_name(ti, kl_vn)
     return '\n'.join([
-      ti.kl.name.base + " __" + vn + ti.kl.name.suffix + ";",
-      "__" + vn + ".reserve(" + vn + ".size());",
-      "for (Index i=0; i<" + vn + ".size(); ++i)",
-      "  __" + vn + ".push_back(" + vn + "[i]);",
+      ti.kl.name.base + " " + cxx_vn + ti.kl.name.suffix + ";",
+      cxx_vn + ".reserve(" + kl_vn + ".size());",
+      "for (Index i=0; i<" + kl_vn + ".size(); ++i)",
+      "  " + cxx_vn + ".push_back(" + kl_vn + "[i]);",
       ])
 
   def param_cxx_value_name(self, ti, kl_vn):
-    return "__" + kl_vn
+    return kl_vn + "__cxx"
 
   def render_param_post(self, ti, vn):
     return ""
 
-  def render_param_copy_back(self, ti, vn):
+  def render_param_copy_back(self, ti, kl_vn):
+    cxx_vn = self.param_cxx_value_name(ti, kl_vn)
+    cxx_tn = ti.kl.name
     return '\n'.join([
-      "if (Fabric_Guarded && __" + vn + ".size() >= 2147483648u64)",
-      "  report('Resulting value of " + vn + " std::vector is too large for KL variable array');",
-      vn + ".resize(UInt32(__" + vn + ".size()));",
-      "for (Index i=0; i<__" + vn + ".size(); ++i)",
-      "  " + vn + "[i] = __" + vn + ".cxx_getAtIndex(i).cxx_get();",
+      "if (Fabric_Guarded && " + cxx_vn + ".size() >= 2147483648u64)",
+      "  report('Resulting value of " + cxx_tn.compound + " " + cxx_vn + " is too large for KL variable array');",
+      kl_vn + ".resize(UInt32(" + cxx_vn + ".size()));",
+      "for (Index i=0; i<" + cxx_vn + ".size(); ++i)",
+      "  " + kl_vn + "[i] = " + cxx_vn + ".cxx_getAtIndex(i).cxx_get();",
       ])
 
   def result_kl_type_name(self, ti):

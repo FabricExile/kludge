@@ -60,7 +60,7 @@ class PtrRefTypeSimplifier(TypeSimplifier):
 
   def param_cxx_value_name(self, ti, kl_vn):
     child_cxx_vn = self.child_param_cxx_value_name(ti, kl_vn)
-    return "__" + child_cxx_vn
+    return child_cxx_vn + "__cxx"
 
   def render_param_pre(self, ti, kl_vn):
     child_cxx_vn = self.child_param_cxx_value_name(ti, kl_vn)
@@ -196,7 +196,7 @@ class ConstPtrTypeSimplifier(PtrTypeSimplifier):
 
   def param_cxx_value_name(self, ti, kl_vn):
     if self.direct_type_info.kl.name.base == 'CxxChar':
-      return "__" + kl_vn
+      return kl_vn + "__cxx"
     return PtrTypeSimplifier.param_cxx_value_name(self, ti, kl_vn)
 
   def render_param_post(self, ti, vn):

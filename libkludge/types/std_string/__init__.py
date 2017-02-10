@@ -20,11 +20,12 @@ class StdStringTypeSimplifier(TypeSimplifier):
   def param_type_name(self, ti):
     return KLTypeName("String", "")
 
-  def render_param_pre(self, ti, vn):
-    return "CxxStdString __" + vn + "(" + vn + ");"
+  def render_param_pre(self, ti, kl_vn):
+    cxx_vn = self.param_cxx_value_name(ti, kl_vn)
+    return "CxxStdString " + cxx_vn + "(" + kl_vn + ");"
 
   def param_cxx_value_name(self, ti, kl_vn):
-    return "__" + kl_vn
+    return kl_vn + "__cxx"
 
   def render_param_post(self, ti, vn):
     return ""

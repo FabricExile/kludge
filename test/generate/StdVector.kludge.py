@@ -92,13 +92,13 @@ report("GetStringVector() = " + GetStringVector());
 GetStringVector() = ["hello","world"]
 """)
 
-# ext.add_func('AppendToStringVector', None, ['std::vector<std::string> &'])
-# ext.add_test("""
-# String s[];
-# s.push("before append");
-# AppendToStringVector(s);
-# report(s);
-# """, """
-# ["before append","appended string"]
-# """)
+ext.add_func('AppendToStringVector', None, ['std::vector<std::string> &'])
+ext.add_test("""
+String s[];
+s.push("before append");
+AppendToStringVector(s);
+report(s);
+""", """
+["before append","appended string"]
+""")
 

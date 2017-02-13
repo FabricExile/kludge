@@ -18,6 +18,7 @@ Cxx{{func.kl_global_name}}(
 {%  for comment in func.comments %}
 {{comment}}
 {%  endfor %}
+{{"/// \\dfgPresetOmit" if not func.dfg_preset_omit}}
 {{func.result.type_info.simplifier.result_kl_type_name(func.result.type_info)}}
 {{func.kl_global_name}}(
     {% for param in func.params %}

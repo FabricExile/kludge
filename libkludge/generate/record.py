@@ -50,10 +50,12 @@ class Ctor(Methodlike):
     record,
     params,
     dont_promote,
+    dfg_preset_omit=False,
     ):
     Methodlike.__init__(self, record)
     self.params = [param.gen_codec(index, record.resolve_dqti) for index, param in enumerate(params)]
     self.dont_promote = dont_promote
+    self.dfg_preset_omit = dfg_preset_omit
 
   @property
   def will_promote(self):
@@ -110,6 +112,7 @@ class Method(Methodlike):
     this_access,
     kl_name=None,
     promotion_prolog=None,
+    dfg_preset_omit=False,
     ):
     Methodlike.__init__(self, record)
     self.cpp_name = cpp_name
@@ -125,6 +128,7 @@ class Method(Methodlike):
     self.is_mutable = self.this_access == ThisAccess.mutable
     self.is_static = self.this_access == ThisAccess.static
     self.promotion_prolog = promotion_prolog
+    self.dfg_preset_omit = dfg_preset_omit
 
   @property
   def this_access_suffix(self):
@@ -555,7 +559,13 @@ class Record(Decl):
     except Exception as e:
       self.ext.warning("Ignoring member '%s': %s" % (cpp_name, e))
   
-  def add_ctor(self, params=[], opt_params=[], dont_promote=False):
+  def add_ctor(
+    self,
+    params=[],
+    opt_params=[],
+    dont_promote=False,
+    dfg_preset_omit=False,
+    ):
     try:
       params = massage_params(params)
       opt_params = massage_params(opt_params)
@@ -565,7 +575,12 @@ class Record(Decl):
 
       result = None
       for i in range(0, len(opt_params)+1):
-        ctor = Ctor(self, params + opt_params[0:i], dont_promote=dont_promote)
+        ctor = Ctor(
+          self,
+          params + opt_params[0:i],
+          dont_promote=dont_promote,
+          dfg_preset_omit=dfg_preset_omit,
+          )
         self.ctors.append(ctor)
         if not result:
           result = ctor
@@ -590,6 +605,7 @@ class Record(Decl):
     this_access=ThisAccess.const,
     kl_name=None,
     promotion_prolog=None,
+    dfg_preset_omit=False,
     ):
     try:
       assert isinstance(name, basestring)
@@ -608,6 +624,7 @@ class Record(Decl):
           this_access=this_access,
           kl_name=kl_name,
           promotion_prolog=promotion_prolog,
+          dfg_preset_omit=dfg_preset_omit,
           )
         self.methods.append(method)
         if not result:

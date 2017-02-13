@@ -139,6 +139,7 @@ class Namespace:
     opt_params=[],
     kl_name=None,
     promotion_prolog=None,
+    dfg_preset_omit=False,
     ):
     cpp_local_name = cpp_name
     try:
@@ -162,6 +163,7 @@ class Namespace:
           returns,
           params + opt_params[0:i],
           promotion_prolog=promotion_prolog,
+          dfg_preset_omit=dfg_preset_omit,
           )
         self.ext.add_decl(func)
         promotion_sig, promotion_cost = func.get_promotion_data()

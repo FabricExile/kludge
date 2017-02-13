@@ -128,7 +128,7 @@
 {{comment}}
 {%    endfor %}
 {%    if type_info.kl.name.base.startswith('Cxx') %}
-/// \dfgPresetOmit
+{{"/// \\dfgPresetOmit" if not ctor.dfg_preset_omit}}
 {%    endif %}
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
@@ -276,7 +276,7 @@
 {{comment}}
 {%     endfor %}
 {% if type_info.kl.name.base.startswith('Cxx') %}
-/// \dfgPresetOmit
+{{"/// \\dfgPresetOmit" if not method.dfg_preset_omit}}
 {% endif %}
 {{method.result.type_info.simplifier.result_kl_type_name(method.result.type_info)}}
 {%     if method.is_static %}

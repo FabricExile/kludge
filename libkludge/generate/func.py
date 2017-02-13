@@ -19,6 +19,7 @@ class Func(Decl):
     returns_cpp_type_expr,
     params,
     promotion_prolog=None,
+    dfg_preset_omit=False,
     ):
     Decl.__init__(
       self,
@@ -42,6 +43,7 @@ class Func(Decl):
       self.params.append(param_codec)
     self.comments = []
     self.promotion_prolog = promotion_prolog
+    self.dfg_preset_omit = dfg_preset_omit
   
   def get_edk_symbol_name(self):
     base_edk_symbol_name = self.kl_global_name

@@ -96,11 +96,9 @@
 {%   endif %}
 {%  endif %}
 {## Copy Constructor ########################################################}
-{%  if type_info.is_direct and record.include_copy_ctor %}
+{%  if type_info.is_direct and record.should_include_automatic_copy_ctor(type_info) %}
 
-{%   if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
-{%   endif %}
 {%   if record.is_abstract %}
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
@@ -127,7 +125,7 @@
 {%    for comment in ctor.comments %}
 {{comment}}
 {%    endfor %}
-/// \\dfgPresetOmit
+/// \dfgPresetOmit
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
@@ -145,8 +143,8 @@
 {%      for comment in ctor.comments %}
 {{comment}}
 {%      endfor %}
-{% if type_info.kl.name.base.startswith('Cxx') %}
-{{"/// \\dfgPresetOmit" if not ctor.dfg_preset_omit}}
+{% if ctor.dfg_preset_omit or type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
 {% endif %}
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
@@ -273,8 +271,8 @@
 {%     for comment in method.comments %}
 {{comment}}
 {%     endfor %}
-{% if type_info.kl.name.base.startswith('Cxx') %}
-{{"/// \\dfgPresetOmit" if not method.dfg_preset_omit}}
+{% if method.dfg_preset_omit or type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
 {% endif %}
 {{method.result.type_info.simplifier.result_kl_type_name(method.result.type_info)}}
 {%     if method.is_static %}

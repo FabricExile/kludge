@@ -497,6 +497,15 @@ class Record(Decl):
     self.get_ind_op_params = None
     self.set_ind_op_params = None
 
+  def should_include_automatic_copy_ctor(self, type_info):
+    if not self.include_copy_ctor:
+      return False
+    for ctor in self.ctors:
+      if len(ctor.params) == 1 \
+        and ctor.params[0].type_info.lib.expr == ReferenceTo(Const(type_info.lib.expr)):
+        return False
+    return True
+
   def get_nested_records(self):
     result = []
     record = self
@@ -570,7 +579,7 @@ class Record(Decl):
       params = massage_params(params)
       opt_params = massage_params(opt_params)
 
-      if len(params) == 0:
+      if len(params) == 0 and len(opt_params) == 0:
         self.include_empty_ctor = False
 
       result = None

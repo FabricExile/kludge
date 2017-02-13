@@ -69,7 +69,7 @@ FABRIC_EXT_EXPORT void
     {{record.get_mutable_this(type_info).render_empty_ctor() | indent(4)}}
 }
 {% endif %}
-{% if record.include_copy_ctor %}
+{% if record.should_include_automatic_copy_ctor(type_info) %}
 
 FABRIC_EXT_EXPORT void
 {{record.get_copy_ctor_edk_symbol_name(type_info)}}(

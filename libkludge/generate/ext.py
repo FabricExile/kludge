@@ -61,6 +61,8 @@ class Ext:
     self.kl_requires = []
     self.kl_prologs = []
     self.kl_epilogs = []
+    self.dfg_preset_dir = None,
+    self.dfg_preset_path = None,
     self.decls = []
     self.tests = []
     self.cpp_type_expr_to_record = {}
@@ -177,3 +179,8 @@ class Ext:
   def add_kl_require(self, kl_ext_name):
     self.debug("Extension: Adding KL require '%s'" % kl_ext_name)
     self.kl_requires.append(kl_ext_name)
+
+  def add_dfg_presets_spec(self, preset_path, dir_="DFG"):
+    self.debug("Extension: Adding DFG presets spec %s:%s/" % (preset_path, dir_))
+    self.dfg_preset_path = preset_path
+    self.dfg_preset_dir = dir_

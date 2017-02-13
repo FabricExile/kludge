@@ -54,4 +54,9 @@ Adds verbatim KL code near the top of the generated extension KL file, right aft
 
 Adds verbatim KL code at the end of the generated extension KL file.
 
+## `add_dfg_presets_spec(preset_path, dir="DFG")`
+
+Adds a DFG preset spec to the generated `<ExtName>.fpm.json` file.  Note that this does not
+actually generate the presets; instead, use kl2dfg to generate the presets or create them manually.
+
 Next: [Pointers and References](ptrs_refs.md)

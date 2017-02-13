@@ -5,5 +5,9 @@
   "libs": "{{ext.name}}",
   "code": [
     "{{ext.name}}.kl"
-    ]
+    ]{% if ext.dfg_preset_path %},
+  "dfgPresets": {
+    "dir": "{{ext.dfg_preset_dir}}",
+    "preset_path": "{{ext.dfg_preset_path}}"
+    }{% endif %}
   }

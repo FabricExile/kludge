@@ -26,7 +26,7 @@ FABRIC_EXT_EXPORT
     {{record.get_const_this(type_info).render_param_edk() | indent(4)}}
     )
 {
-    {{record.get_const_this(type_info).render_validate_edk()}}
+    {{record.get_const_this(type_info).render_validate_edk() | indent(4)}}
     {{member.result.render_indirect_init_edk() | indent(4)}}
     {{member.result.render_decl_and_assign_lib_begin() | indent(4)}}
         {{record.get_const_this(type_info).render_member_ref(member.cpp_name) | indent(8)}}
@@ -43,7 +43,7 @@ FABRIC_EXT_EXPORT void
     {{member.param.render_edk() | indent(4)}}
     )
 {
-    {{record.get_mutable_this(type_info).render_validate_edk()}}
+    {{record.get_mutable_this(type_info).render_validate_edk() | indent(4)}}
     {{member.param.render_edk_to_lib_decl() | indent(4)}}
     {{record.get_mutable_this(type_info).render_member_ref(member.cpp_name)}} =
         {{member.param.render_lib()}};
@@ -125,9 +125,7 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {% endif %}
     )
 {
-{% if method.is_static %}
-    {{record.get_mutable_this(type_info).render_validate_edk() | indent(4)}}
-{% else %}
+{% if not method.is_static %}
     {{method.get_this(type_info).render_validate_edk() | indent(4)}}
 {% endif %}
     {{macros.cpp_call_pre(method.result, method.params) | indent(4)}}
@@ -208,8 +206,6 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
     {{macros.edk_param_list(bin_op.result, None, bin_op.params) | indent(4)}}
     )
 {
-    {{bin_op.params[0].render_validate_edk() | indent(4)}}
-    {{bin_op.params[1].render_validate_edk() | indent(4)}}
     {{macros.cpp_call_pre(bin_op.result, bin_op.params) | indent(4)}}
         {{macros.cpp_call_args([bin_op.params[0]]) | indent(8)}} {{bin_op.op}}
             {{macros.cpp_call_args([bin_op.params[1]]) | indent(12)}}
@@ -247,7 +243,6 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, ass_op.get_this(type_info), ass_op.params) | indent(4)}}
     )
 {
-    {{ass_op.get_this(type_info).render_validate_edk()}}
     {{macros.cpp_call_pre(None, ass_op.params) | indent(4)}}
     {{ass_op.get_this(type_info).render_ref()}} {{ass_op.op}}
         {{macros.cpp_call_args(ass_op.params) | indent(8)}}

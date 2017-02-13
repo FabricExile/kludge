@@ -12,6 +12,7 @@ report("FunctionTakingVoidPtr(x.data()) = " + FunctionTakingVoidPtr(x.data()));
 FunctionTakingVoidPtr(x.data()) = <Opaque>
 """)
 ty = ext.add_owned_type('Class')
+ty.add_ctor([])
 ty.add_cast('void *', this_access=ThisAccess.mutable)
 ty.add_cast('void const *', this_access=ThisAccess.const)
 ty.add_test("""

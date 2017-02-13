@@ -15,6 +15,7 @@ report(GetIntCPtrCPtrCPtr());
 """)
 
 ty = ext.add_owned_type('Class')
+ty.add_ctor([])
 ty.add_cast('char const *', ThisAccess.const)
 ty.add_test("""
 Class class;

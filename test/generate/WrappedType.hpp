@@ -91,6 +91,10 @@ private:
   int pri_intValue;
 };
 
+inline int GlobalGetIntValue( Class const &klass ) {
+  return klass.getIntValue();
+}
+
 class DerivedClass : public Class
 {
 public:

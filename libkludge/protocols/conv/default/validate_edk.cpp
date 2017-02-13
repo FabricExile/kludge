@@ -1,10 +1,4 @@
 {############################################################################}
 {# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
 {############################################################################}
-{% for test in ext.tests %}
-KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}: Begin
-{{ test.render('out') }}
-{% if not test.skip_epilog %}
-KLUDGE_TEST_{{ loop.index }}__{{ test.name_kl }}: End
-{% endif %}
-{% endfor %}
+{# empty #}

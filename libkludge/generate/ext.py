@@ -112,10 +112,16 @@ class Ext:
   def add_decl(self, decl):
     self.decls.append(decl)
 
-  def add_test(self, kl, out, test_name=None):
+  def add_test(self, kl, out, test_name=None, skip_epilog=False):
     if not test_name:
       test_name = "TEST_%d" % len(self.tests)
-    self.tests.append(Test(test_name, self.jinjenv, kl, out))
+    self.tests.append(Test(
+      test_name,
+      self.jinjenv,
+      kl,
+      out,
+      skip_epilog=skip_epilog,
+      ))
 
   def write(self):
     for lang in [

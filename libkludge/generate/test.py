@@ -4,8 +4,9 @@
 
 class Test(object):
 
-  def __init__(self, name_kl, jinjenv, kl, out):
+  def __init__(self, name_kl, jinjenv, kl, out, skip_epilog=False):
     self.name_kl = name_kl
+    self.skip_epilog = skip_epilog
     self._templates = {
       'kl': jinjenv.from_string(kl),
       'out': jinjenv.from_string(out),

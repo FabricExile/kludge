@@ -64,11 +64,17 @@ class ConvCodec:
       "conv": self,
       })
 
+  def render_validate_edk(self):
+    return self._render("validate_edk")
+
   def render_edk_to_lib(self):
     return self._render("edk_to_lib")
 
   def render_edk_to_lib_decl(self):
-    return self._render("edk_to_lib_decl")
+    return '\n'.join([
+      self.render_validate_edk(),
+      self._render("edk_to_lib_decl"),
+      ])
 
   def render_lib_to_edk(self):
     return self._render("lib_to_edk")

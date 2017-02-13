@@ -23,7 +23,7 @@ def debug(opts, string):
 class EmptyCommentContainer(object):
   def add_comment(self, comment):
     pass
-  def add_test(kl, out, test_name=''):
+  def add_test(kl, out, test_name='', skip_epilog=False):
     pass
 
 def is_kl_keyword(name):

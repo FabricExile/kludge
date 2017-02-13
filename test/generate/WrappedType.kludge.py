@@ -149,6 +149,16 @@ DerivedClass::~DerivedClass()
 Class::~Class()
 """)
 
+ext.add_func("GlobalGetIntValue", "int", ["Class const &"])
+#  !!!! THIS WILL THROW EXCEPTION, MUST BE LAST !!!!
+ext.add_test("""
+Class klass;
+report(GlobalGetIntValue(klass));
+""", """
+Error: WrappedType: dereferenced null Class const & pointer
+KL stack trace:
+""", skip_epilog=True)
+
 #   Class() {}
 #   Class(
 #     float _floatValue,

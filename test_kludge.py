@@ -78,6 +78,10 @@ def test_generate(basename):
       ],
     env = kl_env,
     ).splitlines()
+  actual_kl_output = filter(
+    lambda line: not line.startswith('[ST] '),
+    actual_kl_output
+    )
   difflines = difflib.unified_diff(expected_kl_output, actual_kl_output)
   diffline_count = 0
   for diffline in difflines:

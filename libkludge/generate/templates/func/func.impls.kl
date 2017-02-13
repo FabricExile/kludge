@@ -29,6 +29,9 @@ Cxx{{func.kl_global_name}}(
     {% endfor %}
     )
 {
+    {% if func.promotion_prolog %}
+    {{func.promotion_prolog | indent(4)}}
+    {% endif %}
     {% for param in func.params %}
     {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}

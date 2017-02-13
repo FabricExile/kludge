@@ -293,6 +293,9 @@
     {% endfor %}
     )
 {   
+    {% if method.promotion_prolog %}
+    {{method.promotion_prolog | indent(4)}}
+    {% endif %}
     {% for param in method.params %}
     {{param.type_info.simplifier.render_param_pre(param.type_info, param.value_name.kl) | indent(4)}}
     {% endfor %}

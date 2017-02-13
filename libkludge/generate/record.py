@@ -109,6 +109,7 @@ class Method(Methodlike):
     params,
     this_access,
     kl_name=None,
+    promotion_prolog=None,
     ):
     Methodlike.__init__(self, record)
     self.cpp_name = cpp_name
@@ -123,6 +124,7 @@ class Method(Methodlike):
     self.is_const = self.this_access == ThisAccess.const
     self.is_mutable = self.this_access == ThisAccess.mutable
     self.is_static = self.this_access == ThisAccess.static
+    self.promotion_prolog = promotion_prolog
 
   @property
   def this_access_suffix(self):
@@ -587,6 +589,7 @@ class Record(Decl):
     opt_params=[],
     this_access=ThisAccess.const,
     kl_name=None,
+    promotion_prolog=None,
     ):
     try:
       assert isinstance(name, basestring)
@@ -604,6 +607,7 @@ class Record(Decl):
           params + opt_params[0:i],
           this_access=this_access,
           kl_name=kl_name,
+          promotion_prolog=promotion_prolog,
           )
         self.methods.append(method)
         if not result:
@@ -619,14 +623,14 @@ class Record(Decl):
       method.contribute_to_promotions(this_type_info, promotions)
     return [method_promotion[0] for _, method_promotion in promotions.iteritems()]
 
-  def add_const_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.const, kl_name=kl_name)
+  def add_const_method(self, name, returns=None, params=[], opt_params=[], kl_name=None, promotion_prolog=None):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.const, kl_name=kl_name, promotion_prolog=promotion_prolog)
 
-  def add_mutable_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.mutable, kl_name=kl_name)
+  def add_mutable_method(self, name, returns=None, params=[], opt_params=[], kl_name=None, promotion_prolog=None):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.mutable, kl_name=kl_name, promotion_prolog=promotion_prolog)
 
-  def add_static_method(self, name, returns=None, params=[], opt_params=[], kl_name=None):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.static, kl_name=kl_name)
+  def add_static_method(self, name, returns=None, params=[], opt_params=[], kl_name=None, promotion_prolog=None):
+    return self.add_method(name, returns, params, opt_params, ThisAccess.static, kl_name=kl_name, promotion_prolog=promotion_prolog)
 
   def add_call_op(
     self,

@@ -138,6 +138,7 @@ class Namespace:
     params=[],
     opt_params=[],
     kl_name=None,
+    promotion_prolog=None,
     ):
     cpp_local_name = cpp_name
     try:
@@ -160,6 +161,7 @@ class Namespace:
           kl_global_name,
           returns,
           params + opt_params[0:i],
+          promotion_prolog=promotion_prolog,
           )
         self.ext.add_decl(func)
         promotion_sig, promotion_cost = func.get_promotion_data()

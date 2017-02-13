@@ -18,6 +18,7 @@ class Func(Decl):
     kl_global_name,
     returns_cpp_type_expr,
     params,
+    promotion_prolog=None,
     ):
     Decl.__init__(
       self,
@@ -40,6 +41,7 @@ class Func(Decl):
         raise Exception("cannot parse type for parameter %d" % (param_index + 1))
       self.params.append(param_codec)
     self.comments = []
+    self.promotion_prolog = promotion_prolog
   
   def get_edk_symbol_name(self):
     base_edk_symbol_name = self.kl_global_name

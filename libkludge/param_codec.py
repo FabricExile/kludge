@@ -38,6 +38,9 @@ class ParamCodec:
       "param": self,
       })
 
+  def render_validate_edk(self):
+    return self.conv.render_validate_edk()
+
   def render_edk(self):
     return self._render("edk", "cpp")
 

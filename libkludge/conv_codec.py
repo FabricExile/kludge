@@ -65,7 +65,10 @@ class ConvCodec:
       })
 
   def render_validate_edk(self):
-    return self._render("validate_edk")
+    return self.type_info._render("repr", "validate_edk", "cpp", {
+      "type_info": self.type_info,
+      "value_name": self.value_name,
+      })
 
   def render_edk_to_lib(self):
     return self._render("edk_to_lib")

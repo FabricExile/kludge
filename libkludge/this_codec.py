@@ -19,6 +19,12 @@ class ThisCodec:
   @property
   def base_type_info(self):
     return self.type_info.base_type_info
+
+  def render_validate_edk(self):
+    return self.type_info._render("repr", "validate_edk", "cpp", {
+      "value_name": self.value_name,
+      "type_info": self.type_info,
+      })
   
   def render_param_edk(self):
     return self.type_info._render("self", "param_edk", "cpp", {

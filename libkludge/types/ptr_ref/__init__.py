@@ -141,6 +141,7 @@ class ConstRefTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/ptr_ref/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["new_begin"] = "types/builtin/ptr_ref/ref/repr"
     tds["repr"]["validate_edk"] = "types/builtin/ptr_ref/ref/repr"
     return tds
 
@@ -177,6 +178,7 @@ class MutableRefTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "types/builtin/ptr_ref/ref/conv"
     tds["result"]["*"] = "protocols/result/builtin/indirect"
+    tds["repr"]["new_begin"] = "types/builtin/ptr_ref/ref/repr"
     tds["repr"]["validate_edk"] = "types/builtin/ptr_ref/ref/repr"
     return tds
 

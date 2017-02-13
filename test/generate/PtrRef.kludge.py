@@ -14,13 +14,23 @@ report(GetIntCPtrCPtrCPtr());
 42
 """)
 
+ty = ext.add_owned_type('OtherClass')
+ty.add_ctor([])
+
 ty = ext.add_owned_type('Class')
 ty.add_ctor([])
 ty.add_cast('char const *', ThisAccess.const)
+ty.add_cast('OtherClass const &', ThisAccess.const)
 ty.add_test("""
 Class class;
 report(CxxCharConstPtr(class));
 """, """
 hello
+""")
+ty.add_test("""
+Class class;
+report(CxxOtherClassConstRef(class));
+""", """
+OtherClass:{}
 """)
 ty.add_method('func', None, ['void **'])

@@ -12,6 +12,13 @@ inline int const * const * const *GetIntCPtrCPtrCPtr()
   return &fooCPtrCPtr;
 }
 
+class OtherClass
+{
+public:
+
+  OtherClass() {}
+};
+
 
 class Class
 {
@@ -22,4 +29,10 @@ class Class
     operator char const *() const { return "hello"; }
 
     void func( void ** ) const {}
+
+    operator OtherClass const &() const { return m_foo; }
+
+  private:
+
+    OtherClass m_foo;
 };

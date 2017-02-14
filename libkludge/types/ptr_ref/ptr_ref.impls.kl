@@ -30,7 +30,7 @@
 
 /// \dfgPresetOmit
 {{type_info.kl.name}}({{decl.type_info.direct.kl.name}} array<>, Index index) {
-  this.ptr = array.data().offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}());
+  this.ptr = array.data().offset(index * {{decl.type_info.direct.cxx_size_func_name}}());
 }
 {%  if decl.type_info.direct.is_simple or decl.type_info.direct.kl.name.compound == 'Data' %}
 
@@ -91,7 +91,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 {{decl.type_info.const_ref.kl.name}} {{decl.type_info.const_ptr.kl.name}}.cxx_getAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.const_ptr.kl.name}}.cxx_getAt on null {{decl.type_info.const_ptr.kl.name}}";
-  return {{decl.type_info.const_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
+  return {{decl.type_info.const_ref.kl.name}}(this.ptr.offset(index * {{decl.type_info.direct.cxx_size_func_name}}()));
 }
 
 /// Deref the pointer
@@ -134,7 +134,7 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 {{decl.type_info.mutable_ref.kl.name}} {{decl.type_info.mutable_ptr.kl.name}}.cxx_getAt(Index index) {
   if (Fabric_Guarded && !this.ptr)
     throw "Call of {{decl.type_info.mutable_ptr.kl.name}}.cxx_getAt on null {{decl.type_info.mutable_ptr.kl.name}}";
-  return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(index * __CxxSize_{{decl.type_info.direct.kl.name}}()));
+  return {{decl.type_info.mutable_ref.kl.name}}(this.ptr.offset(index * {{decl.type_info.direct.cxx_size_func_name}}()));
 }
 
 /// Same as for {{decl.type_info.const_ptr.kl.name}}, but returning a non-const ref

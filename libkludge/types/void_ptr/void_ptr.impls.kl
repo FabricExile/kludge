@@ -3,8 +3,8 @@
 {############################################################################}
 {% extends "generate/decl/decl.fwds.kl" %}
 {% block body %}
-UInt64 __CxxSize_Data() {
+
+inline UInt64 __CxxSize_Fabric_EDK_KL_Data() {
   return Data().dataSize();
 }
-
 {% endblock body %}

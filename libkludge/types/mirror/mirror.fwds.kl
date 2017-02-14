@@ -9,9 +9,9 @@ require {{decl.type_info.existing_kl_ext_name}};
 {% for comment in decl.type_info.record.comments %}
 {{comment}}
 {% endfor %}
-alias {{decl.type_info.existing_kl_global_name}} {{decl.type_info.kl.name}};
+alias {{decl.type_info.existing_kl_global_name}} {{decl.type_info.kl_for_derivatives.name}};
 
-UInt64 __CxxSize_{{decl.type_info.kl.name}}() {
+inline UInt64 {{decl.type_info.cxx_size_func_name}}() {
   return {{decl.type_info.kl.name}}().dataSize();
 }
 

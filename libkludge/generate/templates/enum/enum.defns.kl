@@ -18,7 +18,7 @@ const Integer {{'_'.join(enum.namespace.nested_kl_names + [value[0]])}} = {{valu
 {% endfor %}
 
 {% if enum.type_info %}
-inline UInt64 __CxxSize_{{enum.type_info.kl.name}}() {
+inline UInt64 {{enum.type_info.cxx_size_func_name}}() {
   return Integer().dataSize();
 }
 

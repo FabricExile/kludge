@@ -10,7 +10,7 @@ struct {{decl.type_info.const_ptr.kl.name}} permits {{decl.type_info.const_ref.k
 };
 
 /// \dfgPresetOmit
-inline UInt64 __CxxSize_{{decl.type_info.const_ptr.kl.name}}() {
+inline UInt64 {{decl.type_info.const_ptr.cxx_size_func_name}}() {
   return Data().dataSize();
 }
 
@@ -19,7 +19,7 @@ struct {{decl.type_info.mutable_ptr.kl.name}} : {{decl.type_info.const_ptr.kl.na
 };
 
 /// \dfgPresetOmit
-inline UInt64 __CxxSize_{{decl.type_info.mutable_ptr.kl.name}}() {
+inline UInt64 {{decl.type_info.mutable_ptr.cxx_size_func_name}}() {
   return Data().dataSize();
 }
 
@@ -30,7 +30,7 @@ struct {{decl.type_info.const_ref.kl.name}} {
 };
 
 /// \dfgPresetOmit
-inline UInt64 __CxxSize_{{decl.type_info.const_ref.kl.name}}() {
+inline UInt64 {{decl.type_info.const_ref.cxx_size_func_name}}() {
   return Data().dataSize();
 }
 
@@ -39,7 +39,7 @@ struct {{decl.type_info.mutable_ref.kl.name}} : {{decl.type_info.const_ref.kl.na
 };
 
 /// \dfgPresetOmit
-inline UInt64 __CxxSize_{{decl.type_info.mutable_ref.kl.name}}() {
+inline UInt64 {{decl.type_info.mutable_ref.cxx_size_func_name}}() {
   return Data().dataSize();
 }
 {% endblock body %}

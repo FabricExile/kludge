@@ -5,7 +5,7 @@
 {% block body %}
 {{decl.render_method_impls('cpp')}}
 FABRIC_EXT_EXPORT Fabric::EDK::KL::UInt64
-__CxxSize_{{decl.type_info.edk.name}}()
+{{decl.type_info.cxx_size_func_name}}()
 {
   return sizeof({{decl.type_info.lib.name}});
 }

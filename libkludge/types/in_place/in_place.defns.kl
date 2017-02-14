@@ -20,7 +20,7 @@ struct {{decl.type_info.kl.name}}
 {% endif %}
 
 /// \dfgPresetOmit
-inline UInt64 __CxxSize_{{decl.type_info.kl.name}}() {
+inline UInt64 {{decl.type_info.cxx_size_func_name}}() {
   return {{decl.type_info.kl.name}}().dataSize();
 }
 {% endblock body %}

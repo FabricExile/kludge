@@ -26,6 +26,6 @@ Data {{decl.type_info.kl.name}}.__getUnderlyingPtr() {
 {% endif %}
 
 /// \dfgPresetOmit
-UInt64 __CxxSize_{{decl.type_info.kl.name}}()
-  = "__CxxSize_{{decl.type_info.edk.name}}";
+UInt64 {{decl.type_info.cxx_size_func_name}}()
+  = "{{decl.type_info.cxx_size_func_name}}";
 {% endblock body %}

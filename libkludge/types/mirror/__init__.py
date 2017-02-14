@@ -15,6 +15,7 @@ class MirrorTypeInfo(TypeInfo):
     self,
     jinjenv,
     kl_global_name,
+    kl_global_name_for_derivatives,
     cpp_global_expr,
     existing_kl_global_name,
     existing_kl_ext_name,
@@ -24,7 +25,7 @@ class MirrorTypeInfo(TypeInfo):
       self,
       jinjenv,
       kl_name_base=kl_global_name,
-      kl_name_base_for_derivatives=kl_global_name,
+      kl_name_base_for_derivatives=kl_global_name_for_derivatives,
       edk_name="Fabric_EDK_KL_" + kl_global_name,
       lib_expr=cpp_global_expr,
       record=record,
@@ -115,6 +116,7 @@ class MirrorSelector(Selector):
         if not type_info:
           type_info = MirrorTypeInfo(
             self.jinjenv,
+            existing_kl_global_name,
             kl_global_name,
             cpp_global_expr,
             existing_kl_global_name,

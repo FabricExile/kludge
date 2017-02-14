@@ -85,6 +85,7 @@ class TypeInfo:
       self.kl_for_derivatives = KLTypeInfo(kl_name_base_for_derivatives, kl_name_suffix_for_derivatives)
     if edk_name:
       self.edk = EDKTypeInfo(edk_name)
+      self.cxx_size_func_name = "__CxxSize_" + edk_name.replace("::", "_")
     self.lib = LibTypeInfo(lib_expr)
     self.jinjenv = jinjenv
     self.child_dqtis = child_dqtis

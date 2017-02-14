@@ -44,6 +44,8 @@ public:
       m_ptr->retain();
   }
 
+  bool operator!() const
+    { return !m_ptr; }
   Ty *operator->()
     { return m_ptr; }
   Ty const *operator->() const

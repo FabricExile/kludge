@@ -69,7 +69,7 @@ The result of the `ext.add_opaque_type()` call is a record object that can be us
 
 ## `ext.add_wrapped_type()`
 
-The *wrapped* mechanism for wrapping types is used to hold a value that is contained by a C++ template; the most common use case of this is when the value is owned by some sort of shared pointer template, but it is not limited to only this case; it will generally work with any template which exposes the C++ `operator->()` to access the value the template owns.
+The *wrapped* mechanism for wrapping types is used to hold a value that is contained by a C++ template; the most common use case of this is when the value is owned by some sort of shared pointer template, but it is not limited to only this case; it will generally work with any template which exposes the two C++ operators `operator->()`, to access the value the template owns, and `bool operator !`, to assess if the template points to a NULL value.
 
 The parameters for `.add_wrapped_type()` are:
 

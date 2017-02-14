@@ -149,6 +149,21 @@ DerivedClass::~DerivedClass()
 Class::~Class()
 """)
 
+ext.add_func("GetWrappedClass", "Wrapper<Class>", [])
+ext.add_test("""
+report(GetWrappedClass());
+""", """
+Class::Class(6.72, asjdbf, -54)
+Wrapper::Wrapper(Ty *)
+Wrapper::Wrapper(Wrapper const &)
+Wrapper::~Wrapper()
+Wrapper::Wrapper(Ty *)
+Wrapper::~Wrapper()
+{cpp_ptr:<Opaque>}
+Wrapper::~Wrapper()
+Class::~Class()
+""")
+
 ext.add_func("GlobalGetIntValue", "int", ["Class const &"])
 #  !!!! THIS WILL THROW EXCEPTION, MUST BE LAST !!!!
 ext.add_test("""

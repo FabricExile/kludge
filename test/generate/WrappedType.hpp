@@ -95,6 +95,10 @@ inline int GlobalGetIntValue( Class const &klass ) {
   return klass.getIntValue();
 }
 
+inline Wrapper<Class> GetWrappedClass() {
+  return Wrapper<Class>( new Class( 6.72, "asjdbf", -54 ) );
+}
+
 class DerivedClass : public Class
 {
 public:

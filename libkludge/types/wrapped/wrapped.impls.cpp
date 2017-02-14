@@ -33,7 +33,7 @@ FABRIC_EXT_EXPORT void
   ::Fabric::EDK::KL::Traits< {{decl.type_info.edk.name}} >::INParam wrapped
   )
 {
-  if ( wrapped.cpp_ptr )
+  if ( wrapped.cpp_ptr && !wrapped.cpp_ptr->operator!() )
     raw.cpp_ptr = wrapped.cpp_ptr->operator->();
   else
     raw.cpp_ptr = NULL;

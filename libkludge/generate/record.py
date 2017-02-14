@@ -649,14 +649,68 @@ class Record(Decl):
       method.contribute_to_promotions(this_type_info, promotions)
     return [method_promotion[0] for _, method_promotion in promotions.iteritems()]
 
-  def add_const_method(self, name, returns=None, params=[], opt_params=[], kl_name=None, promotion_prolog=None):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.const, kl_name=kl_name, promotion_prolog=promotion_prolog)
+  def add_const_method(
+    self,
+    name,
+    returns=None,
+    params=[],
+    opt_params=[],
+    kl_name=None,
+    promotion_prolog=None,
+    dfg_preset_omit=False,
+    ):
+    return self.add_method(
+      name,
+      returns,
+      params,
+      opt_params,
+      ThisAccess.const,
+      kl_name=kl_name,
+      promotion_prolog=promotion_prolog,
+      dfg_preset_omit=dfg_preset_omit,
+      )
 
-  def add_mutable_method(self, name, returns=None, params=[], opt_params=[], kl_name=None, promotion_prolog=None):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.mutable, kl_name=kl_name, promotion_prolog=promotion_prolog)
+  def add_mutable_method(
+    self,
+    name,
+    returns=None,
+    params=[],
+    opt_params=[],
+    kl_name=None,
+    promotion_prolog=None,
+    dfg_preset_omit=False,
+    ):
+    return self.add_method(
+      name,
+      returns,
+      params,
+      opt_params,
+      ThisAccess.mutable,
+      kl_name=kl_name,
+      promotion_prolog=promotion_prolog,
+      dfg_preset_omit=dfg_preset_omit,
+      )
 
-  def add_static_method(self, name, returns=None, params=[], opt_params=[], kl_name=None, promotion_prolog=None):
-    return self.add_method(name, returns, params, opt_params, ThisAccess.static, kl_name=kl_name, promotion_prolog=promotion_prolog)
+  def add_static_method(
+    self,
+    name,
+    returns=None,
+    params=[],
+    opt_params=[],
+    kl_name=None,
+    promotion_prolog=None,
+    dfg_preset_omit=False,
+    ):
+    return self.add_method(
+      name,
+      returns,
+      params,
+      opt_params,
+      ThisAccess.static,
+      kl_name=kl_name,
+      promotion_prolog=promotion_prolog,
+      dfg_preset_omit=dfg_preset_omit,
+      )
 
   def add_call_op(
     self,

@@ -42,6 +42,7 @@ public:
     m_ptr = that.m_ptr;
     if ( m_ptr )
       m_ptr->retain();
+    return *this;
   }
 
   bool operator!() const

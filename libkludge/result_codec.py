@@ -59,6 +59,9 @@ class ResultCodec:
   def render_indirect_init_edk(self):
     return self._render("indirect_init_edk", "cpp")
 
+  def render_decl_lib(self):
+    return self._render("decl_lib", "cpp")
+
   def render_decl_and_assign_lib_begin(self):
     return self._render("decl_and_assign_lib_begin", "cpp")
 

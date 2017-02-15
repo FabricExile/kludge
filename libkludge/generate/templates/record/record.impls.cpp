@@ -26,13 +26,13 @@ FABRIC_EXT_EXPORT
     {{record.get_const_this(type_info).render_param_edk() | indent(4)}}
     )
 {
-    {{record.get_const_this(type_info).render_validate_edk() | indent(4)}}
+    {{member.get_this(type_info).render_validate_edk() | indent(4)}}
     {{member.result.render_indirect_init_edk() | indent(4)}}
     {{member.result.render_decl_and_assign_lib_begin() | indent(4)}}
-        {{record.get_const_this(type_info).render_member_ref(member.cpp_name) | indent(8)}}
-        {{member.result.render_decl_and_assign_lib_end() | indent(4)}}
-    {{member.result.render_indirect_lib_to_edk() | indent(4)}}
-    {{member.result.render_direct_return_edk() | indent(4)}}
+        {{member.get_this(type_info).render_member_ref(member.cpp_name)}}
+        {{member.result.render_decl_and_assign_lib_end() | indent(8)}}
+    {{member.result.render_indirect_lib_to_edk()}}
+    {{member.result.render_direct_return_edk()}}
 }
 {% endif %}
 {% if member.has_setter() and allow_mutable_methods %}
@@ -43,10 +43,9 @@ FABRIC_EXT_EXPORT void
     {{member.param.render_edk() | indent(4)}}
     )
 {
-    {{record.get_mutable_this(type_info).render_validate_edk() | indent(4)}}
-    {{member.param.render_edk_to_lib_decl() | indent(4)}}
-    {{record.get_mutable_this(type_info).render_member_ref(member.cpp_name)}} =
-        {{member.param.render_lib()}};
+    {{member.get_this(type_info).render_validate_edk() | indent(4)}}
+    {{member.param.type_info.lib.name.base}} (&{{member.param.value_name.lib}}){{member.param.type_info.lib.name.suffix}} = {{member.get_this(type_info).render_member_ref(member.cpp_name)}};
+    {{member.param.conv.render_edk_to_lib() | indent(4)}}
 }
 {% endif %}
 {% endif %}

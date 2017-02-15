@@ -23,6 +23,9 @@ class FixedArrayTypeInfo(TypeInfo):
   def build_codec_lookup_rules(self):
     rules = TypeInfo.build_codec_lookup_rules(self)
     rules["conv"]["*"] = "types/builtin/fixed_array/conv"
+    rules["result"]["decl_and_assign_lib_begin"] = "types/builtin/fixed_array/result"
+    rules["result"]["decl_and_assign_lib_end"] = "types/builtin/fixed_array/result"
+    rules["repr"]["assign_lib"] = "types/builtin/fixed_array/repr"
     return rules
 
 class FixedArraySelector(Selector):

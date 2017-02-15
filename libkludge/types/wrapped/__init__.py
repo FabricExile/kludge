@@ -40,6 +40,8 @@ class WrappedTypeInfo(TypeInfo):
     rules["conv"]["*"] = "types/builtin/wrapped/conv"
     rules["result"]["*"] = "types/builtin/wrapped/result"
     rules["repr"]["*"] = "types/builtin/wrapped/repr"
+    rules["repr"]["assign_lib"] = "protocols/repr/builtin/in_place"
+    rules["repr"]["assign_edk"] = "protocols/repr/builtin/in_place"
     return rules
 
 class WrappedBuiltinDecl(BuiltinDecl):

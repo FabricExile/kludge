@@ -405,6 +405,9 @@ class Member(object):
       self.setter_kl_name = 'set_' + cpp_name
     self.visibility = visibility
 
+  def get_this(self, type_info):
+    return self.record.get_mutable_this(type_info)
+
   def has_getter(self):
     return self.getter_kl_name is not None
 

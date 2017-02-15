@@ -46,7 +46,7 @@ def test_generate(basename):
     [
       'python', kludge, 'generate',
       '-o', test_tmp_dir,
-      # '--debug-type-templates',
+      '--debug-type-templates',
       basename,
       os.path.join(test_generate_dir, basename + '.kludge.py'),
       ],
@@ -124,7 +124,7 @@ def test_discover(basename):
 
   generate_args = [
     'python', kludge, 'generate',
-    # '--debug-type-templates',
+    '--debug-type-templates',
     basename,
     basename + '.kludge.py',
     ]

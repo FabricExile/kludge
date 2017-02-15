@@ -42,6 +42,8 @@ class OwnedTypeInfo(TypeInfo):
     rules["conv"]["*"] = "types/builtin/owned/conv"
     rules["result"]["*"] = "types/builtin/owned/result"
     rules["repr"]["*"] = "types/builtin/owned/repr"
+    rules["repr"]["assign_lib"] = "protocols/repr/builtin/in_place"
+    rules["repr"]["assign_edk"] = "protocols/repr/builtin/in_place"
     return rules
 
 class OwnedBuiltinDecl(BuiltinDecl):

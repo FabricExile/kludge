@@ -160,15 +160,21 @@ class Ext:
   def add_cpp_angled_include(self, filepath):
     self.debug("Extension: Adding C++ angled include '%s'" % filepath)
     self.cpp_includes.append(self.CPPInclude(filepath, is_angled=True))
+  
+  class CPPVerbatim:
+    def __init__(self, text):
+      self.text = text
+    def render(self):
+      return self.text
 
   def add_cpp_topmost(self, cpp_topmost):
-    self.cpp_topmosts.append(cpp_topmost)
-  
+    self.cpp_topmosts.append(CPPVerbatim(cpp_topmost))
+
   def add_cpp_prolog(self, cpp_prolog):
-    self.cpp_prologs.append(cpp_prolog)
+    self.cpp_prologs.append(CPPVerbatim(cpp_prolog))
   
   def add_cpp_epilog(self, cpp_epilog):
-    self.cpp_epilogs.append(cpp_epilog)
+    self.cpp_epilogs.append(CPPVerbatim(cpp_epilog))
   
   def add_kl_prolog(self, kl_prolog):
     self.kl_prologs.append(kl_prolog)

@@ -91,6 +91,9 @@ public:
   Class &operator ++()
     { ++pri_intValue; return *this; }
 
+  bool operator !()
+    { return pri_intValue == 0; }
+
   int const &operator*() const
     { return pri_intValue; }
   

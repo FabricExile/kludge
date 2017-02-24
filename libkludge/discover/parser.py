@@ -449,6 +449,7 @@ class Parser(object):
       'operator*',
       'operator/',
       'operator%',
+      'operator^',
       ]:
       defns.write("# %s\n%s.add_bin_op('%s', '%s', %s)%s\n\n" % (
         self.location_desc(cursor.location),

@@ -12,6 +12,12 @@ from param import Param
 from test import Test
 from libkludge import util
 
+class CPPVerbatim:
+  def __init__(self, text):
+    self.text = text
+  def render(self):
+    return self.text
+
 class Ext:
 
   def __init__(self, name, opts):
@@ -161,12 +167,6 @@ class Ext:
     self.debug("Extension: Adding C++ angled include '%s'" % filepath)
     self.cpp_includes.append(self.CPPInclude(filepath, is_angled=True))
   
-  class CPPVerbatim:
-    def __init__(self, text):
-      self.text = text
-    def render(self):
-      return self.text
-
   def add_cpp_topmost(self, cpp_topmost):
     self.cpp_topmosts.append(CPPVerbatim(cpp_topmost))
 

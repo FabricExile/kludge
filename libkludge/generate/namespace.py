@@ -69,8 +69,6 @@ class Namespace:
       ]:
       setattr(self, method_name, getattr(ext, method_name))
 
-    self.typesToIgnore = []
-
   @property
   def nested_cpp_names(self):
     return [str(component) for component in self.components]
@@ -321,10 +319,6 @@ class Namespace:
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_local_name)
     self.type_mgr.get_dqti(cpp_local_expr)
 
-  def add_ignored_type(self, cpp_type_name):
-    cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
-    self.typesToIgnore.append(cpp_local_expr)
-
   def add_type(
     self,
     cpp_local_expr=None,
@@ -344,10 +338,6 @@ class Namespace:
     include_dtor=True,
     simplifier=NullTypeSimplifier(),
     ):
-
-    if cpp_local_expr in self.typesToIgnore:
-      return None
-
     if not cpp_global_expr:
       assert isinstance(cpp_local_expr, Named)
       cpp_global_expr = cpp_local_expr.prefix(self.components)

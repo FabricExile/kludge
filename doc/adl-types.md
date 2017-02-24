@@ -186,14 +186,4 @@ The `ext.add_alias()` method creates a simple KL type alias.  It takes the param
 
 It can general be used to represent C++ `typedef` and `using <type name> =` declarations.
 
-## `ext.add_ignored_type()`
-
-The `ext.add_ignored_type()` method can be used to define a type which should be ignored during the generation. If the specified C++ type is added later through any of the `ext.add_type` methods, it will simply be ignored.
-
-```
-  def add_ignored_type(self, cpp_type_name):
-```
-
-This is useful if you want to rely on the discover step to generate the kludge files but also need to ensure to skip certain types since they might cause issues.
-
 Next: [Wrapping Namespaces](adl-namespaces.md)

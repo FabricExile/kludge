@@ -195,3 +195,41 @@ Class::~Class()
 #   result.push_back( Class( -14, -3.45 ) );
 #   return result;
 # }
+
+for (basetype, suffix) in [
+  ('int', 'Int'),
+  ('unsigned int', 'UInt'),
+  ('long', 'Long'),
+  ('unsigned long', 'ULong'),
+  ('long long', 'LongLong'),
+  ('unsigned long long', 'ULongLong'),
+  ('uint8_t', 'UInt8T'),
+  ('uint16_t', 'UInt16T'),
+  ('uint32_t', 'UInt32T'),
+  ('size_t', 'SizeT'),
+]:
+  ty = ext.add_in_place_type('InPlaceTypeTester{0}'.format(suffix))
+  ty.add_ctor()
+  ty.add_ctor([basetype]).add_test("""
+InPlaceTypeTester{0} c(12);
+report("c.value = " + c.value);
+""".format(suffix), """
+c.value = 12
+""")
+
+  ty.add_member('value', basetype)
+  ty.add_const_method('get', basetype).add_test("""
+InPlaceTypeTester{0} c(12);
+report("c.get() = " + c.get());
+""".format(suffix), """
+c.get() = 12
+""")
+  ty.add_mutable_method('set', None, [basetype]).add_test("""
+InPlaceTypeTester{0} c(12);
+report("c.get() = " + c.get());
+c.set(13);
+report("c.get() = " + c.get());
+""".format(suffix), """
+c.get() = 12
+c.get() = 13
+""")

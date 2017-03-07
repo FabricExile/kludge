@@ -132,3 +132,28 @@ public:
 
   short shortValue;
 };
+
+template<typename Ty>
+class InPlaceTypeTester
+{
+public:
+  Ty value;
+
+  InPlaceTypeTester() : value( 0 ) {}
+  InPlaceTypeTester( Ty m ) : value( m ) {}
+  
+  Ty get() const { return value; }
+  void set( Ty m ) { value = m; }
+};
+
+typedef InPlaceTypeTester< char > InPlaceTypeTesterChar;
+typedef InPlaceTypeTester< int > InPlaceTypeTesterInt;
+typedef InPlaceTypeTester< long > InPlaceTypeTesterLong;
+typedef InPlaceTypeTester< unsigned int > InPlaceTypeTesterUInt;
+typedef InPlaceTypeTester< unsigned long > InPlaceTypeTesterULong;
+typedef InPlaceTypeTester< long long > InPlaceTypeTesterLongLong;
+typedef InPlaceTypeTester< unsigned long long > InPlaceTypeTesterULongLong;
+typedef InPlaceTypeTester< uint8_t > InPlaceTypeTesterUInt8T;
+typedef InPlaceTypeTester< uint16_t > InPlaceTypeTesterUInt16T;
+typedef InPlaceTypeTester< uint32_t > InPlaceTypeTesterUInt32T;
+typedef InPlaceTypeTester< size_t > InPlaceTypeTesterSizeT;

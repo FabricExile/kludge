@@ -148,9 +148,7 @@ public:
 
 typedef InPlaceTypeTester< char > InPlaceTypeTesterChar;
 typedef InPlaceTypeTester< int > InPlaceTypeTesterInt;
-typedef InPlaceTypeTester< long > InPlaceTypeTesterLong;
 typedef InPlaceTypeTester< unsigned int > InPlaceTypeTesterUInt;
-typedef InPlaceTypeTester< unsigned long > InPlaceTypeTesterULong;
 typedef InPlaceTypeTester< long long > InPlaceTypeTesterLongLong;
 typedef InPlaceTypeTester< unsigned long long > InPlaceTypeTesterULongLong;
 typedef InPlaceTypeTester< uint8_t > InPlaceTypeTesterUInt8T;

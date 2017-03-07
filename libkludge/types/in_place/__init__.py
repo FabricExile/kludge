@@ -76,7 +76,13 @@ class InPlaceTypeInfo(TypeInfo):
 
 class InPlaceBuiltinDecl(BuiltinDecl):
 
-  def __init__(self, ext, is_simple, type_info):
+  def __init__(
+    self,
+    ext,
+    is_simple,
+    is_initial_kl_type_inst,
+    type_info,
+    ):
     BuiltinDecl.__init__(
       self,
       ext.root_namespace,
@@ -85,6 +91,7 @@ class InPlaceBuiltinDecl(BuiltinDecl):
       test_name="InPlace_%s" % (type_info.kl.name),
       )
     self.is_simple = is_simple
+    self.is_initial_kl_type_inst = is_initial_kl_type_inst
     self.type_info = type_info
 
   def render_method_impls(self, lang):
@@ -165,6 +172,7 @@ class InPlaceSelector(Selector):
       }
 
     self.type_info_cache = {}
+    self.instantiated_kl_types_names = {}
 
   def get_desc(self):
     return "InPlace"
@@ -204,9 +212,14 @@ class InPlaceSelector(Selector):
         forbid_copy = spec.forbid_copy
         simplifier = spec.simplifier
 
-        type_info_cache_key = kl_type_name
+        type_info_cache_key = str(undq_cpp_type_expr)
         type_info = self.type_info_cache.get(type_info_cache_key)
         if not type_info:
+          if not self.instantiated_kl_types_names.get(kl_type_name):
+            self.instantiated_kl_types_names.setdefault(kl_type_name, True)
+            is_initial_kl_type_inst = True
+          else:
+            is_initial_kl_type_inst = False
           type_info = InPlaceTypeInfo(
             self.jinjenv,
             kl_type_name,
@@ -219,6 +232,13 @@ class InPlaceSelector(Selector):
             simplifier=simplifier,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
-          self.ext.add_decl(InPlaceBuiltinDecl(self.ext, is_simple, type_info))
+          self.ext.add_decl(
+            InPlaceBuiltinDecl(
+              self.ext,
+              is_simple=is_simple,
+              is_initial_kl_type_inst=is_initial_kl_type_inst,
+              type_info=type_info,
+              )
+            )
 
         return DirQualTypeInfo(dq, type_info)

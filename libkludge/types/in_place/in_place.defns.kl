@@ -18,9 +18,11 @@ struct {{decl.type_info.kl.name}}
 {% endfor %}
 };
 {% endif %}
+{% if decl.is_initial_kl_type_inst %}
 
 /// \dfgPresetOmit
 inline UInt64 {{decl.type_info.cxx_size_func_name}}() {
   return {{decl.type_info.kl.name}}().dataSize();
 }
+{% endif %}
 {% endblock body %}

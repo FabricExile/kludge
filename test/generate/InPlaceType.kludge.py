@@ -199,8 +199,6 @@ Class::~Class()
 for (basetype, suffix) in [
   ('int', 'Int'),
   ('unsigned int', 'UInt'),
-  ('long', 'Long'),
-  ('unsigned long', 'ULong'),
   ('long long', 'LongLong'),
   ('unsigned long long', 'ULongLong'),
   ('uint8_t', 'UInt8T'),

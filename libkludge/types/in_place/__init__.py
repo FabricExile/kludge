@@ -133,49 +133,34 @@ class InPlaceSelector(Selector):
   def __init__(self, ext):
     Selector.__init__(self, ext)
 
-    boolean_spec = InPlaceSpec("Boolean", Bool(), None, None, True)
-    char_spec = InPlaceSpec("CxxChar", Char(), None, None, True)
-    sint8_spec = InPlaceSpec("SInt8", SimpleNamed("int8_t"), None, None, True)
-    uint8_spec = InPlaceSpec("UInt8", SimpleNamed("uint8_t"), None, None, True)
-    sint16_spec = InPlaceSpec("SInt16", SimpleNamed("int16_t"), None, None, True)
-    uint16_spec = InPlaceSpec("UInt16", SimpleNamed("uint16_t"), None, None, True)
-    sint32_spec = InPlaceSpec("SInt32", SimpleNamed("int32_t"), None, None, True)
-    uint32_spec = InPlaceSpec("UInt32", SimpleNamed("uint32_t"), None, None, True)
-    sint64_spec = InPlaceSpec("SInt64", SimpleNamed("int64_t"), None, None, True)
-    uint64_spec = InPlaceSpec("UInt64", SimpleNamed("uint64_t"), None, None, True)
-    float32_spec = InPlaceSpec("Float32", Float(), None, None, True)
-    float64_spec = InPlaceSpec("Float64", Double(), None, None, True)
-    long_spec = InPlaceSpec("SInt64", Long(), None, None, True)
-    ulong_spec = InPlaceSpec("UInt64", Unsigned(Long()), None, None, True)
-
     self.cpp_type_expr_to_spec = {
-      Bool(): boolean_spec,
-      Char(): char_spec,
-      SimpleNamed("int8_t"): sint8_spec,
-      Unsigned(Char()): uint8_spec,
-      SimpleNamed("uint8_t"): uint8_spec,
-      Short(): sint16_spec,
-      SimpleNamed("int16_t"): sint16_spec,
-      Unsigned(Short()): uint16_spec,
-      SimpleNamed("uint16_t"): uint16_spec,
-      Int(): sint32_spec,
-      SimpleNamed("int32_t"): sint32_spec,
-      Unsigned(Int()): uint32_spec,
-      SimpleNamed("uint32_t"): uint32_spec,
-      LongLong(): sint64_spec,
-      SimpleNamed("int64_t"): sint64_spec,
-      Unsigned(LongLong()): uint64_spec,
-      SimpleNamed("uint64_t"): uint64_spec,
-      SimpleNamed("size_t"): uint64_spec,
-      SimpleNamed("ptrdiff_t"): uint64_spec,
-      SimpleNamed("intptr_t"): uint64_spec,
-      Float(): float32_spec,
-      Double(): float64_spec,
+      Bool(): InPlaceSpec("Boolean", Bool(), None, None, True),
+      Char(): InPlaceSpec("CxxChar", Char(), None, None, True),
+      SimpleNamed("int8_t"): InPlaceSpec("SInt8", SimpleNamed("int8_t"), None, None, True),
+      Unsigned(Char()): InPlaceSpec("UInt8", SimpleNamed("uint8_t"), None, None, True),
+      SimpleNamed("uint8_t"): InPlaceSpec("UInt8", SimpleNamed("uint8_t"), None, None, True),
+      Short(): InPlaceSpec("SInt16", SimpleNamed("int16_t"), None, None, True),
+      SimpleNamed("int16_t"): InPlaceSpec("SInt16", SimpleNamed("int16_t"), None, None, True),
+      Unsigned(Short()): InPlaceSpec("UInt16", SimpleNamed("uint16_t"), None, None, True),
+      SimpleNamed("uint16_t"): InPlaceSpec("UInt16", SimpleNamed("uint16_t"), None, None, True),
+      Int(): InPlaceSpec("SInt32", SimpleNamed("int32_t"), None, None, True),
+      SimpleNamed("int32_t"): InPlaceSpec("SInt32", SimpleNamed("int32_t"), None, None, True),
+      Unsigned(Int()): InPlaceSpec("UInt32", SimpleNamed("uint32_t"), None, None, True),
+      SimpleNamed("uint32_t"): InPlaceSpec("UInt32", SimpleNamed("uint32_t"), None, None, True),
+      LongLong(): InPlaceSpec("SInt64", LongLong(), None, None, True),
+      SimpleNamed("int64_t"): InPlaceSpec("SInt64", SimpleNamed("int64_t"), None, None, True),
+      Unsigned(LongLong()): InPlaceSpec("UInt64", Unsigned(LongLong()), None, None, True),
+      SimpleNamed("uint64_t"): InPlaceSpec("UInt64", SimpleNamed("uint64_t"), None, None, True),
+      SimpleNamed("size_t"): InPlaceSpec("UInt64", SimpleNamed("size_t"), None, None, True),
+      SimpleNamed("ptrdiff_t"): InPlaceSpec("UInt64", SimpleNamed("ptrdiff_t"), None, None, True),
+      SimpleNamed("intptr_t"): InPlaceSpec("UInt64", SimpleNamed("intptr_t"), None, None, True),
+      Float(): InPlaceSpec("Float32", Float(), None, None, True),
+      Double(): InPlaceSpec("Float64", Double(), None, None, True),
       #######################################################################
       # Warning: Linux + OS X ONLY
       # On Windows, these are 64-bit.  Not sure what to do about this.
-      Long(): long_spec,           
-      Unsigned(Long()): ulong_spec,
+      Long(): InPlaceSpec("SInt64", Long(), None, None, True),           
+      Unsigned(Long()): InPlaceSpec("UInt64", Unsigned(Long()), None, None, True),
       #######################################################################
       }
 

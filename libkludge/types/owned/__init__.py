@@ -48,13 +48,19 @@ class OwnedTypeInfo(TypeInfo):
 
 class OwnedBuiltinDecl(BuiltinDecl):
 
-  def __init__(self, ext, type_info):
+  def __init__(
+    self,
+    ext,
+    type_info,
+    is_kludge_ext,
+    ):
     BuiltinDecl.__init__(
       self,
       ext.root_namespace,
       desc="Owned %s" % (type_info),
       template_path="types/builtin/owned/owned",
       test_name="Owned_%s" % (type_info.kl.name),
+      is_kludge_ext=is_kludge_ext,
       )
     self.type_info = type_info
 
@@ -87,6 +93,7 @@ class OwnedSpec(object):
     forbid_copy=False,
     dont_delete=False,
     simplifier=None,
+    is_kludge_ext=False,
     ):
     self.kl_type_name = kl_type_name
     self.kl_type_name_for_derivatives = kl_type_name_for_derivatives
@@ -96,6 +103,7 @@ class OwnedSpec(object):
     self.forbid_copy = forbid_copy
     self.dont_delete = dont_delete
     self.simplifier = simplifier
+    self.is_kludge_ext = is_kludge_ext
 
 class OwnedSelector(Selector):
 
@@ -114,6 +122,7 @@ class OwnedSelector(Selector):
     forbid_copy=False,
     dont_delete=False,
     simplifier=NullTypeSimplifier(),
+    is_kludge_ext=False,
     ):
     self.cpp_type_expr_to_spec[cpp_type_expr] = OwnedSpec(
       kl_type_name,
@@ -124,6 +133,7 @@ class OwnedSelector(Selector):
       forbid_copy=forbid_copy,
       dont_delete=dont_delete,
       simplifier=simplifier,
+      is_kludge_ext=is_kludge_ext,
       )
 
   def get_desc(self):
@@ -157,6 +167,10 @@ class OwnedSelector(Selector):
             simplifier=spec.simplifier,
             )
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
-          self.ext.add_decl(OwnedBuiltinDecl(self.ext, type_info))
+          self.ext.add_decl(OwnedBuiltinDecl(
+            self.ext,
+            type_info,
+            is_kludge_ext=spec.is_kludge_ext,
+            ))
 
         return DirQualTypeInfo(dq, type_info)

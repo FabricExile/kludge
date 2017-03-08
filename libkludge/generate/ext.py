@@ -11,6 +11,7 @@ from this_access import ThisAccess
 from param import Param
 from test import Test
 from libkludge import util
+from libkludge.cpp_type_expr_parser import *
 
 class CPPVerbatim:
   def __init__(self, text):
@@ -72,8 +73,8 @@ class Ext:
     self.kl_requires = []
     self.kl_prologs = []
     self.kl_epilogs = []
-    self.dfg_preset_dir = None,
-    self.dfg_preset_path = None,
+    self.dfg_preset_dir = None
+    self.dfg_preset_path = None
     self.decls = []
     self.tests = []
     self.cpp_type_expr_to_record = {}
@@ -85,6 +86,56 @@ class Ext:
       predicate = inspect.ismethod,
       ):
       setattr(self, root_namespace_method[0], root_namespace_method[1])
+
+    tys = [
+      'bool',
+      'char',
+      'int8_t',
+      'unsigned char',
+      'uint8_t',
+      'short',
+      'int16_t',
+      'unsigned short',
+      'uint16_t',
+      'int',
+      'int32_t',
+      'unsigned',
+      'uint32_t',
+      'long long',
+      'int64_t',
+      'unsigned long long',
+      'uint64_t',
+      'size_t',
+      'ptrdiff_t',
+      'intptr_t',
+      'float',
+      'double',
+      'std::string',
+      'char const *',
+      ]
+
+    tys_d = []
+    for ty in tys:
+      tys_d.append(ty)
+      tys_d.append('std::vector< ' + ty + ' >')
+
+    tys_d_d = []
+    for ty in tys_d:
+      tys_d_d.append(ty)
+      tys_d_d.append(ty + ' *')
+      tys_d_d.append(ty + ' &')
+      tys_d_d.append(ty + ' const *')
+      tys_d_d.append(ty + ' const &')
+
+    cpp_type_expr_parser = self.cpp_type_expr_parser
+    self.kludge_ext_cpp_type_exprs = []
+    for ty in tys_d_d:
+      self.kludge_ext_cpp_type_exprs.append(cpp_type_expr_parser.parse(ty))
+
+  def is_kludge_ext_cpp_type_expr(self, cpp_type_expr):
+    result = cpp_type_expr in self.kludge_ext_cpp_type_exprs
+    # print "is_kludge_ext_cpp_type_expr(" + str(cpp_type_expr) + ") = " + str(result)
+    return result
 
   @property
   def cpp_type_expr_parser(self):
@@ -102,23 +153,33 @@ class Ext:
   def debug(self, string):
     util.debug(self.opts, string)
 
-  def process(self, filename):
+  def process_glbls(self):
     glbls = {
       'ext': self,
       'Param': Param,
       'ThisAccess': ThisAccess,
       'Visibility': Visibility,
       }
+    def process(filename, file_or_string):
+      self.info("Processing %s" % filename)
+      try:
+        exec file_or_string in glbls
+      except:
+        self.error("Caught exception processing %s:" % filename)
+        raise
+    glbls['process'] = process
     def include(filename):
       with open(filename, "r") as file:
-        self.info("Processing %s" % filename)
-        try:
-          exec file in glbls
-        except:
-          self.error("Caught exception processing %s:" % filename)
-          raise
+        process(filename, file)
     glbls['include'] = include
-    include(filename)
+    return glbls
+
+  def process(self, filename, file_or_string_or_none=None):
+    glbls = self.process_glbls()
+    if file_or_string_or_none:
+      glbls['process'](filename, file_or_string_or_none)
+    else:
+      glbls['include'](filename)
 
   def add_decl(self, decl):
     self.decls.append(decl)
@@ -201,3 +262,6 @@ class Ext:
     self.debug("Extension: Adding DFG presets spec %s:%s/" % (preset_path, dir_))
     self.dfg_preset_path = preset_path
     self.dfg_preset_dir = dir_
+
+  def instantiate_cpp_type_expr(self, cpp_type_expr):
+    self.type_mgr.get_dqti(cpp_type_expr)

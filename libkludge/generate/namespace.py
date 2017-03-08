@@ -66,6 +66,7 @@ class Namespace:
       'warning',
       'info',
       'debug',
+      'is_kludge_ext_cpp_type_expr',
       ]:
       setattr(self, method_name, getattr(ext, method_name))
 

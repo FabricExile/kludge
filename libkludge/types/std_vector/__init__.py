@@ -107,10 +107,12 @@ class StdVectorSelector(Selector):
         kl_type_name = element_kl_type_name + 'StdVector'
       else:
         kl_type_name = 'Cxx' + element_kl_type_name + 'StdVector'
+      is_kludge_ext = self.is_kludge_ext_cpp_type_expr(undq_cpp_type_expr)
       record = Record(
         self.ext.root_namespace,
         child_namespace_component=undq_cpp_type_expr.components[0],
         child_namespace_kl_name=kl_type_name,
+        is_kludge_ext=is_kludge_ext,
         )
       record.add_ctor([])
       record.add_ctor(['size_t'])
@@ -174,5 +176,6 @@ inline {{element_type_name}}[] Make_{{element_type_name}}VariableArray({{type_na
         extends=None,
         record=record,
         simplifier=StdVectorTypeSimplifier(element_type_info),
+        is_kludge_ext=is_kludge_ext,
         )
       return True # restart

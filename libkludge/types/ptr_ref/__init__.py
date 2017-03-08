@@ -289,13 +289,19 @@ type_info_class_map = {
 
 class PtrRefBuiltinDecl(BuiltinDecl):
 
-  def __init__(self, ext, ti_set):
+  def __init__(
+    self,
+    ext,
+    ti_set,
+    is_kludge_ext,
+    ):
     BuiltinDecl.__init__(
       self,
       ext.root_namespace,
       desc="PtrRef %s" % (ti_set.direct),
       template_path="types/builtin/ptr_ref/ptr_ref",
       test_name="PtrRef_%s" % (ti_set.direct.kl.name),
+      is_kludge_ext=is_kludge_ext,
       )
     self.type_info = ti_set
 
@@ -367,7 +373,11 @@ class PtrRefSelector(Selector):
             undq_type_info,
             )
           self.ti_set_cache.setdefault(ti_set_cache_key, ti_set)
-          self.ext.add_decl(PtrRefBuiltinDecl(self.ext, ti_set))
+          self.ext.add_decl(PtrRefBuiltinDecl(
+            self.ext,
+            ti_set,
+            is_kludge_ext=self.is_kludge_ext_cpp_type_expr(cpp_type_expr),
+            ))
 
         ti = getattr(ti_set, dq.get_desc())
         return DirQualTypeInfo(DirQual(directions.Direct, qualifiers.Unqualified), ti)

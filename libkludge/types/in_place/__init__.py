@@ -89,6 +89,7 @@ class InPlaceBuiltinDecl(BuiltinDecl):
       desc="InPlace %s" % (type_info),
       template_path="types/builtin/in_place/in_place",
       test_name="InPlace_%s" % (type_info.kl.name),
+      is_kludge_ext=is_simple,
       )
     self.is_simple = is_simple
     self.is_initial_kl_type_inst = is_initial_kl_type_inst

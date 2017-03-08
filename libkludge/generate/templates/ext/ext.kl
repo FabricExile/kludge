@@ -21,6 +21,9 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
+{% if not ext.opts.is_building_kludge_ext %}
+require Kludge;
+{% endif %}
 {% if ext.kl_requires %}
 {%  for kl_require in ext.kl_requires %}
 require {{ kl_require }};

@@ -53,6 +53,7 @@ class StdStringSelector(Selector):
         self.ext.root_namespace,
         child_namespace_component=undq_cpp_type_expr.components[0],
         child_namespace_kl_name=kl_type_name,
+        is_kludge_ext=True,
         )
       record.add_ctor([])
       record.add_ctor(['char const *'], dont_promote=True)
@@ -92,5 +93,6 @@ inline {{type_name}} Make_{{type_name}}(String string) {
         extends=None,
         record=record,
         simplifier=StdStringTypeSimplifier(),
+        is_kludge_ext=True,
         )
       return True # restart

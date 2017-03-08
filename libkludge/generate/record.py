@@ -450,8 +450,9 @@ class Record(Decl):
     child_namespace_component=None,
     child_namespace_kl_name=None,
     is_abstract=False,
+    is_kludge_ext=False,
     ):
-    Decl.__init__(self, parent_namespace)
+    Decl.__init__(self, parent_namespace, is_kludge_ext=is_kludge_ext)
 
     if child_namespace_component:
       assert isinstance(child_namespace_kl_name, basestring)

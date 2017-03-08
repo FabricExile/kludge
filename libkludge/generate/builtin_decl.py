@@ -14,11 +14,14 @@ class BuiltinDecl(Decl):
     test_name,
     is_kludge_ext = False,
     ):
-    Decl.__init__(self, parent_namespace)
+    Decl.__init__(
+      self,
+      parent_namespace,
+      is_kludge_ext=is_kludge_ext,
+      )
     self.desc = desc
     self.template_path = template_path
     self.test_name = test_name
-    self.is_kludge_ext = is_kludge_ext
 
     for method_name in [
       'error',

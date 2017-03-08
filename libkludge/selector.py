@@ -11,6 +11,9 @@ class Selector(object):
   def __init__(self, ext):
     self.ext = ext
 
+  def is_kludge_ext_cpp_type_expr(self, cpp_type_expr):
+    return self.ext.is_kludge_ext_cpp_type_expr(cpp_type_expr)
+
   @property
   def jinjenv(self):
     return self.ext.jinjenv

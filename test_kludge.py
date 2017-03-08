@@ -68,7 +68,7 @@ def test_generate(basename):
     ) == 0
 
   kl_env = os.environ.copy()
-  kl_env['FABRIC_EXTS_PATH'] = test_tmp_dir
+  kl_env['FABRIC_EXTS_PATH'] = os.pathsep.join([test_tmp_dir, os.environ['FABRIC_EXTS_PATH']])
   with open(os.path.join(test_tmp_dir, basename + '.test.out')) as expected_kl_output_file:
     expected_kl_output = expected_kl_output_file.read().splitlines()
   actual_kl_output = subprocess.check_output(

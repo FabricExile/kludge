@@ -8,8 +8,10 @@ class Decl(object):
   def __init__(
     self,
     parent_namespace,
+    is_kludge_ext=False,
     ):
     self.parent_namespace = parent_namespace
+    self.is_kludge_ext = is_kludge_ext
 
     for method_name in [
       'error',

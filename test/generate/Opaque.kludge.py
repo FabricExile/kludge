@@ -8,6 +8,7 @@ ty = ext.add_opaque_type('MyOpaque')
 ty = ext.add_opaque_type('MyOpaqueDer', extends='MyOpaque')
 
 ext.add_func('MyOpaque_New', 'MyOpaque *', ['int'])
+ext.add_func('MyOpaque_New_Alt', None, ['int', 'MyOpaque **'])
 ext.add_func('MyOpaque_GetX', 'int', ['MyOpaque *'])
 ext.add_func('MyOpaque_SetX', None, ['MyOpaque *', 'int'])
 ext.add_func('MyOpaque_Delete', None, ['MyOpaque *'])

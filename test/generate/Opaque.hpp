@@ -31,6 +31,11 @@ inline MyOpaque *MyOpaque_New( int x )
   return reinterpret_cast<MyOpaque *>( r );
 }
 
+inline void MyOpaque_New_Alt( int x, MyOpaque **result )
+{
+  *result = MyOpaque_New( x );
+}
+
 inline int MyOpaque_GetX( MyOpaque const *_r )
 {
   MyOpaque_Real const *r = reinterpret_cast<MyOpaque_Real const *>( _r );

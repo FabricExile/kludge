@@ -20,9 +20,14 @@ class CPPVerbatim:
 
 class Ext:
 
-  def __init__(self, name, opts):
+  def __init__(
+    self,
+    name,
+    opts,
+    ):
     self.name = name
     self.opts = opts
+
     self.jinjenv = jinja2.Environment(
       trim_blocks = True,
       lstrip_blocks = True,

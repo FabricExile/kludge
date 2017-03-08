@@ -43,6 +43,13 @@ def main(prog, args):
     dest='debug_templates',
     help="Include type template debug information in output",
     )
+  opt_parser.add_option(
+    '-k', '--build-kludge-ext',
+    action='store_true',
+    default=False,
+    dest='is_building_kludge_ext',
+    help="Build the Kludge extension that other Kludge-built extensions require",
+    )
   (opts, args) = opt_parser.parse_args(args=args)
   if len(args) < 1:
     util.error(opts, "Missing extension name")

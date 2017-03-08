@@ -42,3 +42,18 @@ MyOpaqueDer:OPAQUE
 MyOpaque:OPAQUE (null)
 MyOpaque:OPAQUE
 """)
+ext.add_test("""
+MyOpaque o;
+report(o);
+MyOpaque_New_Alt(17, o);
+report(o);
+report(MyOpaque_GetX(o));
+MyOpaque_SetX(o, 42);
+report(MyOpaque_GetX(o));
+MyOpaque_Delete(o);
+""", """
+MyOpaque:OPAQUE (null)
+MyOpaque:OPAQUE
+17
+42
+""")

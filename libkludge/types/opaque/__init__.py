@@ -122,7 +122,6 @@ class OpaqueSelector(Selector):
     return "Opaque"
 
   def maybe_create_dqti(self, type_mgr, cpp_type_expr):
-    print "maybe_create_dqti " + str(cpp_type_expr)
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
     if dq.is_pointer:
       spec = self.cpp_type_expr_to_spec.get(undq_cpp_type_expr)

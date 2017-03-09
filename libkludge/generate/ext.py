@@ -65,6 +65,7 @@ class Ext:
     self.cpp_defines = []
     self.cpp_include_dirs = []
     self.cpp_includes = []
+    self.cpp_source_files = []
     self.cpp_topmosts = []
     self.cpp_prologs = []
     self.cpp_epilogs = []
@@ -234,6 +235,10 @@ class Ext:
   def add_cpp_angled_include(self, filepath):
     self.debug("Extension: Adding C++ angled include '%s'" % filepath)
     self.cpp_includes.append(self.CPPInclude(filepath, is_angled=True))
+
+  def add_cpp_source_file(self, filepath):
+    self.debug("Extension: Adding C++ source file '%s'" % filepath)
+    self.cpp_source_files.append(filepath)
   
   def add_cpp_topmost(self, cpp_topmost):
     self.cpp_topmosts.append(CPPVerbatim(cpp_topmost))

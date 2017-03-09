@@ -35,7 +35,9 @@ fabricBuildEnv.Append(CPPFLAGS = ['{{ cpp_flag }}'])
 fabricBuildEnv.Append(CPPDEFINES = ['{{ cpp_define }}'])
 {% endfor %}
 if os.environ.get('CPPPATH'):
-  fabricBuildEnv.Append(CPPPATH = [os.environ.get('CPPPATH')])
+  fabricBuildEnv.Append(CPPPATH = os.environ.get('CPPPATH').split(os.pathsep))
+if os.environ.get('LIBPATH'):
+  fabricBuildEnv.Append(LIBPATH = os.environ.get('LIBPATH').split(os.pathsep))
 {% for cpp_include_dir in ext.cpp_include_dirs %}
 fabricBuildEnv.Append(CPPPATH = ['{{ cpp_include_dir }}'])
 {% endfor %}
@@ -48,5 +50,10 @@ fabricBuildEnv.Append(LIBS = ['{{ lib }}'])
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),
-  [basename + '.cpp']
+  [
+    basename + '.cpp',
+{% for cppfile in ext.cpp_source_files %}
+    '{{ cppfile }}',
+{% endfor %}
+  ]
   )

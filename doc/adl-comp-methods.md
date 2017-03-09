@@ -59,4 +59,4 @@ Adds verbatim KL code at the end of the generated extension KL file.
 Adds a DFG preset spec to the generated `<ExtName>.fpm.json` file.  Note that this does not
 actually generate the presets; instead, use kl2dfg to generate the presets or create them manually.
 
-Next: [Pointers and References](ptrs_refs.md)
+Next: [Exception Handling](adl-exception-handling.md)

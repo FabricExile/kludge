@@ -10,11 +10,17 @@ FABRIC_EXT_EXPORT
     {{macros.edk_param_list(func.result, None, func.params) | indent(4)}}
     )
 {
+{% if func.ext.exception_prolog %}
+    {{func.ext.exception_prolog | indent(2)}}
+{% endif %}
     {{macros.cpp_call_pre(func.result, func.params) | indent(4)}}
     {{func.cpp_global_name | indent(4)}}(
         {{macros.cpp_call_args(func.params)}}
         )
     {{macros.cpp_call_post(func.result, func.params) | indent(4)}}
+{% if func.ext.exception_epilog %}
+    {{func.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 
 {% endblock body %}

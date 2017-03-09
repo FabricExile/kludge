@@ -124,6 +124,9 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {% endif %}
     )
 {
+{% if record.ext.exception_prolog %}
+    {{record.ext.exception_prolog | indent(2)}}
+{% endif %}
 {% if not method.is_static %}
     {{method.get_this(type_info).render_validate_edk() | indent(4)}}
 {% endif %}
@@ -136,6 +139,9 @@ FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
         {{macros.cpp_call_args(method.params) | indent(8)}}
         )
     {{macros.cpp_call_post(method.result, method.params) | indent(4)}}
+{% if record.ext.exception_epilog %}
+    {{record.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 {% endif %}
 {% endfor %}
@@ -160,12 +166,18 @@ FABRIC_EXT_EXPORT {{call_op.result.render_direct_type_edk()}}
 {% endif %}
     )
 {
+{% if record.ext.exception_prolog %}
+    {{record.ext.exception_prolog | indent(2)}}
+{% endif %}
     {{call_op.get_this(type_info).render_validate_edk() | indent(4)}}
     {{macros.cpp_call_pre(call_op.result, call_op.params) | indent(4)}}
     {{call_op.get_this(type_info).render_ref()}}(
         {{macros.cpp_call_args(call_op.params) | indent(8)}}
         )
     {{macros.cpp_call_post(call_op.result, call_op.params) | indent(4)}}
+{% if record.ext.exception_epilog %}
+    {{record.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 {% endif %}
 {% endfor %}
@@ -184,10 +196,16 @@ FABRIC_EXT_EXPORT {{uni_op.result.render_direct_type_edk()}}
     {{macros.edk_param_list(uni_op.result, uni_op.get_this(type_info), None) | indent(4)}}
     )
 {
+{% if record.ext.exception_prolog %}
+    {{record.ext.exception_prolog | indent(2)}}
+{% endif %}
     {{uni_op.get_this(type_info).render_validate_edk() | indent(4)}}
     {{macros.cpp_call_pre(uni_op.result, None) | indent(4)}}
         {{uni_op.op}}{{uni_op.get_this(type_info).render_ref()}}
     {{macros.cpp_call_post(uni_op.result, None) | indent(4)}}
+{% if record.ext.exception_epilog %}
+    {{record.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 {% endfor %}
 {% endif %}
@@ -205,10 +223,16 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
     {{macros.edk_param_list(bin_op.result, None, bin_op.params) | indent(4)}}
     )
 {
+{% if record.ext.exception_prolog %}
+    {{record.ext.exception_prolog | indent(2)}}
+{% endif %}
     {{macros.cpp_call_pre(bin_op.result, bin_op.params) | indent(4)}}
         {{macros.cpp_call_args([bin_op.params[0]]) | indent(8)}} {{bin_op.op}}
             {{macros.cpp_call_args([bin_op.params[1]]) | indent(12)}}
     {{macros.cpp_call_post(bin_op.result, bin_op.params) | indent(4)}}
+{% if record.ext.exception_epilog %}
+    {{record.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 {% endfor %}
 {% endif %}
@@ -242,10 +266,16 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, ass_op.get_this(type_info), ass_op.params) | indent(4)}}
     )
 {
+{% if record.ext.exception_prolog %}
+    {{record.ext.exception_prolog | indent(2)}}
+{% endif %}
     {{macros.cpp_call_pre(None, ass_op.params) | indent(4)}}
     {{ass_op.get_this(type_info).render_ref()}} {{ass_op.op}}
         {{macros.cpp_call_args(ass_op.params) | indent(8)}}
     {{macros.cpp_call_post(None, ass_op.params) | indent(4)}}
+{% if record.ext.exception_epilog %}
+    {{record.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 {% endfor %}
 {% endif %}
@@ -320,11 +350,17 @@ FABRIC_EXT_EXPORT {{record.get_ind_op_result.render_direct_type_edk()}}
     {{macros.edk_param_list(record.get_ind_op_result, record.get_get_ind_op_this(type_info), record.get_ind_op_params) | indent(4)}}
     )
 {
+{% if record.ext.exception_prolog %}
+    {{record.ext.exception_prolog | indent(2)}}
+{% endif %}
     {{macros.cpp_call_pre(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
         {{record.get_get_ind_op_this(type_info).render_ref() | indent(8)}}[
             {{record.get_ind_op_params[0].render_lib() | indent(12)}}
             ]
     {{macros.cpp_call_post(record.get_ind_op_result, record.get_ind_op_params) | indent(4)}}
+{% if record.ext.exception_epilog %}
+    {{record.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 {% endif %}
 {############################################################################}
@@ -340,11 +376,17 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, record.get_set_ind_op_this(type_info), record.set_ind_op_params) | indent(4)}}
     )
 {
+{% if record.ext.exception_prolog %}
+    {{record.ext.exception_prolog | indent(2)}}
+{% endif %}
     {{macros.cpp_call_pre(None, record.set_ind_op_params) | indent(4)}}
     {{record.get_set_ind_op_this(type_info).render_ref() | indent(4)}}[
         {{record.set_ind_op_params[0].render_lib() | indent(8)}}
         ] = {{record.set_ind_op_params[1].render_lib() | indent(8)}}
     {{macros.cpp_call_post(None, record.set_ind_op_params) | indent(4)}}
+{% if record.ext.exception_epilog %}
+    {{record.ext.exception_epilog | indent(2)}}
+{% endif %}
 }
 {% endif %}
 {############################################################################}

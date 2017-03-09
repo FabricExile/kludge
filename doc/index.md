@@ -15,6 +15,7 @@
  - [Wrapping Namespaces](adl-namespaces.md)
  - [Wrapping Methods and Method-Like Type Additions](adl-methods.md)
  - [Methods Affecting Compilation](adl-comp-methods.md)
+ - [Exception Handling](adl-exception-handling.md)
 - Advanced Kludge
  - [Pointers and References](ptrs_refs.md)
  - [Unit Tests](unit-tests.md)

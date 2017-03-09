@@ -68,6 +68,8 @@ class Ext:
     self.cpp_topmosts = []
     self.cpp_prologs = []
     self.cpp_epilogs = []
+    self.exception_prolog = None
+    self.exception_epilog = None
     self.lib_dirs = []
     self.libs = []
     self.kl_requires = []
@@ -247,7 +249,13 @@ class Ext:
   
   def add_kl_epilog(self, kl_epilog):
     self.kl_epilogs.append(kl_epilog)
-  
+
+  def set_cpp_exception_prolog(self, exception_prolog):
+    self.exception_prolog = exception_prolog
+
+  def set_cpp_exception_epilog(self, exception_epilog):
+    self.exception_epilog = exception_epilog
+
   def add_lib_dir(self, lib_dir):
     self.lib_dirs.append(os.path.expandvars(lib_dir))
 

@@ -7,7 +7,6 @@ To handle exception coming from the source API you can use the so called `except
     self,
     exception_prolog
     )
-    )
 ```
 
 `exception_prolog` is the C++ code to place prior to the function / method invocation.
@@ -16,7 +15,6 @@ To handle exception coming from the source API you can use the so called `except
   ext.set_cpp_exception_epilog(
     self,
     exception_epilog
-    )
     )
 ```
 

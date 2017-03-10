@@ -6,10 +6,16 @@ Kludge ships with Fabric Engine version 2.5.0.  However, additional Python modul
 
 1. Download and unpack Fabric Engine from [](http://dist.fabric-engine.com/FabricEngine/)
 
-2. Install pre-requisite Python modules:
+2. Install pre-requisite Python modules.  On all platforms, install these modules:
 
   ```
-  pip install jinja2 pyparsing scons pytest pytest-xdist subprocess difflib
+  pip install jinja2 pyparsing scons pytest pytest-xdist
+  ```
+
+  Additionally, Linux and OS X require that you install a few more modules that are built-in on Windows:
+
+  ```
+  pip install subprocess difflib
   ```
 
 ## Running Kludge

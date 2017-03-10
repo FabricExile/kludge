@@ -389,6 +389,7 @@ class Namespace:
     kl_type_name=None,
     extends=None,
     forbid_copy=False,
+    dont_delete=False,
     is_abstract=False,
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
@@ -404,6 +405,7 @@ class Namespace:
       kl_local_name=kl_local_name,
       extends_type_info=extends_type_info,
       forbid_copy=forbid_copy,
+      dont_delete=dont_delete,
       is_abstract=is_abstract,
       variant='owned',
       )

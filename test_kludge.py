@@ -89,8 +89,8 @@ def test_generate(basename):
     diffline_count += 1
   assert diffline_count == 0
 
-test_discover_dir = os.path.join(root_dir, 'test', 'discover')
-test_discover_tmp_dir_base = os.path.join(root_dir, 'test', 'tmp', 'discover')
+test_discover_dir = os.path.join('test', 'discover')
+test_discover_tmp_dir_base = os.path.join('test', 'tmp', 'discover')
 
 def collect_test_discover_basenames():
   result = []

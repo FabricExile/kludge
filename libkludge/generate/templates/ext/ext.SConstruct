@@ -31,6 +31,9 @@ if os.environ.get('CXX'):
 {% for cpp_flag in ext.cpp_flags %}
 fabricBuildEnv.Append(CPPFLAGS = ['{{ cpp_flag }}'])
 {% endfor %}
+{% for linker_flag in ext.linker_flags %}
+fabricBuildEnv.Append(LINKFLAGS = ['{{ linker_flag }}'])
+{% endfor %}
 {% for cpp_define in ext.cpp_defines %}
 fabricBuildEnv.Append(CPPDEFINES = ['{{ cpp_define }}'])
 {% endfor %}

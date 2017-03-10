@@ -62,6 +62,7 @@ class Ext:
     self.namespace_mgr = NamespaceMgr(self.type_mgr)
 
     self.cpp_flags = []
+    self.linker_flags = []
     self.cpp_defines = []
     self.cpp_include_dirs = []
     self.cpp_includes = []
@@ -215,6 +216,9 @@ class Ext:
 
   def add_cpp_flag(self, cpp_flag):
     self.cpp_flags.append(os.path.expandvars(cpp_flag))
+
+  def add_linker_flag(self, linker_flag):
+    self.linker_flags.append(os.path.expandvars(linker_flag))
 
   def add_cpp_define(self, cpp_define):
     self.cpp_defines.append(os.path.expandvars(cpp_define))

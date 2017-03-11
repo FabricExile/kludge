@@ -37,6 +37,12 @@ from libkludge import util
 from libkludge.visibility import Visibility
 from libkludge import cpp_type_expr_parser
 
+def fixpath(path):
+  if platform.system() == 'Windows':
+    return path.replace('\\', '\\\\').replace('/', '\\\\')
+  else:
+    return path
+
 class Parser(object):
 
   def __init__(self, name, opts):
@@ -569,14 +575,14 @@ class Parser(object):
     self.info("Generated temporary inclusion header:")
     print "  +-" + ("-" * 78)
     for include in includes:
-      print '  | #include "%s"' % include.replace('\\', '\\\\')
+      print '  | #include "%s"' % fixpath(include)
     print "  +-" + ("-" * 78)
 
     include_abspaths = [os.path.abspath(include) for include in includes]
 
     with tempfile.NamedTemporaryFile(prefix='kludge_', suffix='.h', mode='w', dir=os.getcwd()) as includer:
       for include in includes:
-        print >>includer, '#include "%s"' % include.replace('\\', '\\\\')
+        print >>includer, '#include "%s"' % fixpath(include)
       includer.flush()
 
       self.info("Parsing temporary inclusion header with Clang")
@@ -670,7 +676,7 @@ class Parser(object):
             print >>master
             if len(includes) > 0:
               for include in includes:
-                print >>master, "ext.add_cpp_quoted_include('%s')" % include
+                print >>master, "ext.add_cpp_quoted_include('%s')" % fixpath(include)
               print >>master
             print >>master, "include('%s')" % decls_basename
             print >>master, "include('%s')" % defns_basename

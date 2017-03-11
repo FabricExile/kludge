@@ -94,10 +94,20 @@ test_discover_tmp_dir_base = os.path.join('test', 'tmp', 'discover')
 
 def collect_test_discover_basenames():
   result = []
+
+  # hmathee: only run discover tests on linux for now
+  if platform.system() != 'Linux':
+      return result
+
+  # discover can only run on python versions at least 2.7.13
+  if sys.version_info < (2, 7, 13):
+      return result 
+
   for dirpath, _subdirs, filenames in os.walk(test_discover_dir):
       for filename in filenames:
           basename, fileext = os.path.splitext(filename)
           if fileext == '.hpp':
+            print basename
             result.append(basename)
   return result
 

@@ -569,14 +569,14 @@ class Parser(object):
     self.info("Generated temporary inclusion header:")
     print "  +-" + ("-" * 78)
     for include in includes:
-      print '  | #include "%s"' % include
+      print '  | #include "%s"' % include.replace('\\', '\\\\')
     print "  +-" + ("-" * 78)
 
     include_abspaths = [os.path.abspath(include) for include in includes]
 
     with tempfile.NamedTemporaryFile(prefix='kludge_', suffix='.h', mode='w', dir=os.getcwd()) as includer:
       for include in includes:
-        print >>includer, '#include "%s"' % include
+        print >>includer, '#include "%s"' % include.replace('\\', '\\\\')
       includer.flush()
 
       self.info("Parsing temporary inclusion header with Clang")

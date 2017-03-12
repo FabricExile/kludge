@@ -123,19 +123,19 @@ def test_discover(basename):
   print 'RUN: ' + ' '.join(discover_args)
   assert subprocess.call(discover_args) == 0
 
-  if not os.path.isfile(os.path.join(test_discover_dir, basename + '.skip-generate')):
-    generate_args = [
-      'python', kludge, 'generate',
-      '--debug-type-templates',
-      basename,
-      basename + '.kludge.py',
-      ]
-    print 'RUN: ' + ' '.join(generate_args)
-    assert subprocess.call(
-      generate_args,
-      cwd = test_tmp_dir,
-      ) == 0
+  generate_args = [
+    'python', kludge, 'generate',
+    '--debug-type-templates',
+    basename,
+    basename + '.kludge.py',
+    ]
+  print 'RUN: ' + ' '.join(generate_args)
+  assert subprocess.call(
+    generate_args,
+    cwd = test_tmp_dir,
+    ) == 0
 
+  if not os.path.isfile(os.path.join(test_discover_dir, basename + '.skip-build')):
     scons_env = os.environ.copy()
     scons_env['CPPPATH'] = root_dir
     if platform.system() == 'Windows':

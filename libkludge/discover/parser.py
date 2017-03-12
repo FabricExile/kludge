@@ -20,17 +20,8 @@ try:
     else:
       Config.set_library_path(os.path.join(fabric_dir, 'lib'))
 except:
-  kludge_llvm_root = os.environ.get('KLUDGE_LLVM_ROOT')
-  if not kludge_llvm_root:
-    print "Cannot find libclang Python module; exiting."
-    sys.exit(1)
-  sys.path.insert(0, os.path.join(kludge_llvm_root, 'lib', 'python'))
-  import clang
-  from clang.cindex import Config
-  if platform.system() == 'Windows':
-    Config.set_library_path(os.path.join(kludge_llvm_root, 'bin'))
-  else:
-    Config.set_library_path(os.path.join(kludge_llvm_root, 'lib'))
+  print "FABRIC_DIR is not set; exiting."
+  sys.exit(1)
 from clang.cindex import AccessSpecifier, CursorKind, TypeKind, TokenKind
 
 from libkludge import util
@@ -52,13 +43,10 @@ class Parser(object):
     fabric_dir = os.environ.get('FABRIC_DIR')
     if fabric_dir:
       clang_root = os.path.join(fabric_dir, 'Tools', 'Kludge', 'clang')
+      glibc_root = os.path.join(fabric_dir, 'Tools', 'Kludge', 'glibc')
     else:
-      kludge_llvm_root = os.environ.get('KLUDGE_LLVM_ROOT')
-      if kludge_llvm_root:
-        clang_root = kludge_llvm_root
-      else:
-        print "Cannot find libclang headers; exiting."
-        sys.exit(1)
+      print "FABRIC_DIR is not set; exiting."
+      sys.exit(1)
 
     self.opts.dirs_to_ignore = [self.expand_envvars(dir) for dir in self.opts.dirs_to_ignore]
     self.clang_opts = ['-x', 'c++', '-target', 'x86_64-gnu-linux']
@@ -68,8 +56,7 @@ class Parser(object):
       for cppdir in self.opts.cpppath:
           self.clang_opts.extend(["-I", self.expand_envvars(cppdir)])
     self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'include', 'c++', 'v1'))])
-    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'include', 'glibc-headers'))])
-    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'include', 'kernel-headers'))])
+    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(glibc_root, 'include'))])
     self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'lib', 'clang', '3.9.0', 'include'))])
     if self.opts.cppdefines:
       for cppdefine in self.opts.cppdefines:

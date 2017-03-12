@@ -94,14 +94,12 @@ test_discover_tmp_dir_base = os.path.join(root_dir, 'test', 'tmp', 'discover')
 
 def collect_test_discover_basenames():
   result = []
-  # [pz 20170311] discover only runs on Linux at the moment
-  if platform.system() == 'Linux':
-    for dirpath, _subdirs, filenames in os.walk(test_discover_dir):
-      for filename in filenames:
-        basename, fileext = os.path.splitext(filename)
-        if fileext == '.hpp':
-          print basename
-          result.append(basename)
+  for dirpath, _subdirs, filenames in os.walk(test_discover_dir):
+    for filename in filenames:
+      basename, fileext = os.path.splitext(filename)
+      if fileext == '.hpp':
+        print basename
+        result.append(basename)
   return result
 
 @pytest.mark.parametrize("basename", collect_test_discover_basenames())

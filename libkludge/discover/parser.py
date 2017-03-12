@@ -61,13 +61,15 @@ class Parser(object):
         sys.exit(1)
 
     self.opts.dirs_to_ignore = [self.expand_envvars(dir) for dir in self.opts.dirs_to_ignore]
-    self.clang_opts = ['-x', 'c++']
+    self.clang_opts = ['-x', 'c++', '-target', 'x86_64-gnu-linux']
     if self.opts.clang_opts:
       self.clang_opts.extend(self.opts.clang_opts)
     if self.opts.cpppath:
       for cppdir in self.opts.cpppath:
           self.clang_opts.extend(["-I", self.expand_envvars(cppdir)])
     self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'include', 'c++', 'v1'))])
+    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'include', 'glibc-headers'))])
+    self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'include', 'kernel-headers'))])
     self.clang_opts.extend(["-isystem", self.expand_envvars(os.path.join(clang_root, 'lib', 'clang', '3.9.0', 'include'))])
     if self.opts.cppdefines:
       for cppdefine in self.opts.cppdefines:

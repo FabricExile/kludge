@@ -98,7 +98,6 @@ def collect_test_discover_basenames():
     for filename in filenames:
       basename, fileext = os.path.splitext(filename)
       if fileext == '.hpp':
-        print basename
         result.append(basename)
   return result
 

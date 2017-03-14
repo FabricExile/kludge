@@ -5,3 +5,4 @@
 #pragma once
 
 extern int *__errno_location (void) __attribute__ ((__const__));
+__attribute__ ((pure)) extern int __some_other_func (void);

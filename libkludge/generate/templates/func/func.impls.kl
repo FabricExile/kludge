@@ -9,6 +9,7 @@
 {{comment}}
 {% endfor %}
 /// \dfgPresetOmit
+/// \internal
 {{func.result.render_type_kl()}}
 Cxx{{func.kl_global_name}}(
     {{macros.kl_param_list(func.params) | indent(4)}}

@@ -4,6 +4,8 @@
 {% extends "generate/decl/decl.impls.kl" %}
 {% block body %}
 {{decl.render_method_impls('kl')}}
+/// \dfgPresetOmit
+/// \internal
 {{decl.type_info.kl.name}}.appendDesc(io String string) {
   string += "{{decl.type_info.kl.name}}:OPAQUE";
   if (!this.cpp_ptr)

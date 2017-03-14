@@ -69,18 +69,21 @@ class StdStringSelector(Selector):
       record.add_mutable_method('push_back', None, ['char'])
       record.add_kl("""
 /// \dfgPresetOmit
+/// \internal
 inline {{type_name}}(String string) {
   CxxChar array<>(string.data(), string.length());
   this = {{type_name}}(CxxCharConstPtr(array, 0), CxxCharConstPtr(array, string.length()));
 }
 
 /// \dfgPresetOmit
+/// \internal
 inline {{type_name}} Make_{{type_name}}(String string) {
   return {{type_name}}(string);
 }
 
 /// Convert to a string
 /// \dfgPresetOmit
+/// \internal
 {{type_name}}.appendDesc(io String string) {
   CxxCharConstPtr ptr = this.cxx_c_str();
   string += String(ptr);

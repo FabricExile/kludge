@@ -20,12 +20,14 @@ struct {{decl.type_info.kl.name}}
 };
 
 /// \dfgPresetOmit
+/// \internal
 Data {{decl.type_info.kl.name}}.__getUnderlyingPtr() {
   return this.cpp_ptr;
 }
 {% endif %}
 
 /// \dfgPresetOmit
+/// \internal
 UInt64 {{decl.type_info.cxx_size_func_name}}()
   = "{{decl.type_info.cxx_size_func_name}}";
 {% endblock body %}

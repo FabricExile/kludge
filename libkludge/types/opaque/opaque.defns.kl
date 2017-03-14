@@ -17,6 +17,7 @@ struct {{decl.type_info.kl.name}}
 {% endif %}
 
 /// \dfgPresetOmit
+/// \internal
 UInt64 {{decl.type_info.cxx_size_func_name}}() {
   Data d;
   return d.dataSize();

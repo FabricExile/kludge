@@ -5,40 +5,48 @@
 {% block body %}
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.const_ptr.kl.name}} permits {{decl.type_info.const_ref.kl.name}} {
   protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
 };
 
 /// \dfgPresetOmit
+/// \internal
 inline UInt64 {{decl.type_info.const_ptr.cxx_size_func_name}}() {
   return Data().dataSize();
 }
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.mutable_ptr.kl.name}} : {{decl.type_info.const_ptr.kl.name}} {
 };
 
 /// \dfgPresetOmit
+/// \internal
 inline UInt64 {{decl.type_info.mutable_ptr.cxx_size_func_name}}() {
   return Data().dataSize();
 }
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.const_ref.kl.name}} {
   protected Data ptr; // actual {{decl.type_info.mutable_ptr.kl.name}}
   protected {{decl.type_info.direct.kl.name}} values[];
 };
 
 /// \dfgPresetOmit
+/// \internal
 inline UInt64 {{decl.type_info.const_ref.cxx_size_func_name}}() {
   return Data().dataSize();
 }
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.mutable_ref.kl.name}} : {{decl.type_info.const_ref.kl.name}} {
 };
 
 /// \dfgPresetOmit
+/// \internal
 inline UInt64 {{decl.type_info.mutable_ref.cxx_size_func_name}}() {
   return Data().dataSize();
 }

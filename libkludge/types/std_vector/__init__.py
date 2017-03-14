@@ -125,6 +125,7 @@ class StdVectorSelector(Selector):
       record.add_mutable_method('pop_back')
       record.add_kl("""
 /// \dfgPresetOmit
+/// \internal
 {{type_name}}({{element_type_name}} array<>) {
   this = {{type_name}}(
     {{element_type_name_const_ptr}}(array, 0),
@@ -133,11 +134,13 @@ class StdVectorSelector(Selector):
 }
 
 /// \dfgPresetOmit
+/// \internal
 {{type_name}} Make_{{type_name}}({{element_type_name}} array<>) {
   return {{type_name}}(array);
 }
 
 /// \dfgPresetOmit
+/// \internal
 inline {{element_type_name}}[] Make_{{element_type_name}}VariableArray({{type_name}} vec) {
   UInt32 size = UInt32(vec.cxx_size());
   {{element_type_name}} result[];
@@ -150,6 +153,7 @@ inline {{element_type_name}}[] Make_{{element_type_name}}VariableArray({{type_na
 }
 
 /// \dfgPresetOmit
+/// \internal
 {{type_name}}.appendDesc(io String string) {
   string += "{{type_name}}:[";
   UInt64 count = this.cxx_size();

@@ -16,6 +16,7 @@
 {%    if member.has_getter() %}
 
 /// \dfgPresetOmit
+/// \internal
 {{member.type_info.kl.name}} {{type_info.kl.name}}.cxx_{{member.getter_kl_name}}()
 {%     if type_info.is_direct %}
   = "{{member.get_getter_edk_symbol_name(type_info)}}";
@@ -29,6 +30,7 @@
 
 {% if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {% endif %}
 {{member.type_info.simplifier.result_kl_type_name(member.type_info)}}
 {{type_info.kl.name}}.{{member.getter_kl_name}}()
@@ -43,6 +45,7 @@
 {%    if member.has_setter() and allow_mutable_methods %}
 
 /// \dfgPresetOmit
+/// \internal
 {{type_info.kl.name}}.cxx_{{member.setter_kl_name}}!({{member.type_info.kl.name.base}} value{{member.type_info.kl.name.suffix}})
 {%     if type_info.is_direct %}
   = "{{member.get_setter_edk_symbol_name(type_info)}}";
@@ -56,6 +59,7 @@
 
 {% if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {% endif %}
 {{type_info.kl.name}}.{{member.setter_kl_name}}!(
     {{member.type_info.simplifier.param_type_name_base(member.type_info)}}
@@ -86,6 +90,7 @@
 
 {%   if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {%   endif %}
 {%   if record.is_abstract %}
 {{type_info.kl.name}}() {
@@ -99,6 +104,9 @@
 {%  if type_info.is_direct and record.should_include_automatic_copy_ctor(type_info) %}
 
 /// \dfgPresetOmit
+{% if type_info.kl.name.base.startswith('Cxx') %}
+/// \internal
+{% endif %}
 {%   if record.is_abstract %}
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
@@ -116,6 +124,7 @@
 {%   for ctor in record.ctors %}
 
 /// \dfgPresetOmit
+/// \internal
 {{type_info.kl.name}}.__ctor(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
@@ -126,6 +135,9 @@
 {{comment}}
 {%    endfor %}
 /// \dfgPresetOmit
+{% if type_info.kl.name.base.startswith('Cxx') %}
+/// \internal
+{% endif %}
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
     {{param.render_kl() | indent(4)}}{{"," if not loop.last else ""}}
@@ -145,6 +157,7 @@
 {%      endfor %}
 {% if ctor.dfg_preset_omit or type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {% endif %}
 {{type_info.kl.name}}(
     {% for param in ctor.params %}
@@ -178,6 +191,7 @@
 
 {%     if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {%     endif %}
 {{type_info.kl.name}}(String string) {
     this = {{type_info.kl.name}}(CxxCharConstPtr(string));
@@ -197,6 +211,7 @@
 
 {%     if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {%     endif %}
 {{type_info.kl.name}}(String string) {
     this = {{type_info.kl.name}}(CxxStdStringConstRef(CxxStdString(string)));
@@ -217,6 +232,7 @@
 
 {%   if type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {%   endif %}
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
 {%  endif %}
@@ -237,6 +253,7 @@
 {{comment}}
 {%    endfor %}
 /// \dfgPresetOmit
+/// \internal
 {{method.result.render_type_kl()}}
 {%    if method.is_static %}
 {{type_info.kl.name}}_Cxx{{method.clean_cxx_kl_name}}(
@@ -273,6 +290,7 @@
 {%     endfor %}
 {% if method.dfg_preset_omit or type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {% endif %}
 {{method.result.type_info.simplifier.result_kl_type_name(method.result.type_info)}}
 {%     if method.is_static %}
@@ -330,6 +348,7 @@
 {{comment}}
 {%    endfor %}
 /// \dfgPresetOmit
+/// \internal
 {{call_op.result.render_type_kl()}}
 {{type_info.kl.name}}.cxx_call{{call_op.this_access_suffix}}(
     {% for param in call_op.params %}
@@ -437,6 +456,7 @@
 {%   endfor %}
 {%   if cast.this.type_info.kl.name.base.startswith('Cxx') or cast.get_param(type_info).type_info.kl.name.base.startswith('Cxx') %}
 /// \dfgPresetOmit
+/// \internal
 {%   endif %}
 {{cast.this.type_info.kl.name}}(
     {{cast.get_param(type_info).render_kl() | indent(4)}}

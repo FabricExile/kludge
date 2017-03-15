@@ -21,3 +21,12 @@ report(Data(class));
 """, """
 <Opaque>
 """)
+ty.add_mutable_method('setVoidPtr', None, ['void*&'])
+ty.add_test("""
+Class class;
+Data ptr;
+class.setVoidPtr(ptr);
+report(ptr);
+""", """
+<Opaque>
+""")

@@ -116,6 +116,7 @@ class Ext:
       'double',
       'std::string',
       'char const *',
+      'void *',
       ]
 
     tys_d = []

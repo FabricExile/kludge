@@ -3,9 +3,10 @@
 {############################################################################}
 {% extends "generate/decl/decl.fwds.kl" %}
 {% block body %}
-
+{% if decl.ext.name == "Kludge" %}
 /// \internal
 inline UInt64 __CxxSize_Fabric_EDK_KL_Data() {
   return Data().dataSize();
 }
+{% endif %}
 {% endblock body %}

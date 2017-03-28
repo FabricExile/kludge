@@ -7,6 +7,8 @@ There are multiple ways of wrapping types in Kludge; which way should be used de
 
 The way in which a type is wrapped is dictated by the method used to create the type in the API description language.  So far we have only seen ``ext.add_owned_type(...)``; below, we enumerate all of the ways types can be wrapped.
 
+If you want to learn more about which method to choose please refer to the :ref:`KludgeTutorialWhichTypeToChoose` in the tutorial section of this document.
+
 ``ext.add_owned_type()``
 ---------------------------------------
 

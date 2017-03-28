@@ -4,6 +4,7 @@
 {% extends "generate/decl/decl.fwds.kl" %}
 {% block body %}
 
+/// \internal
 inline UInt64 __CxxSize_Fabric_EDK_KL_Data() {
   return Data().dataSize();
 }

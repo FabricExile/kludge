@@ -58,6 +58,7 @@ class VoidPtrDecl(BuiltinDecl):
       desc="VoidPtr",
       template_path="types/builtin/void_ptr/void_ptr",
       test_name="VoidPtr",
+      is_kludge_ext=True,
       )
 
   def render_method_impls(self, lang):

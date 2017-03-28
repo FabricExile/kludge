@@ -212,10 +212,14 @@ class Namespace:
       const_ptr_alias = Alias(self, const_ptr_new_kl_type_name, const_ptr_old_dqti.type_info)
       self.ext.add_decl(const_ptr_alias)
       self.ext.add_kl_epilog("""
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
 
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(io %s value) {
   return Make_%s(value);
 }
@@ -239,10 +243,14 @@ class Namespace:
       mutable_ptr_alias = Alias(self, mutable_ptr_new_kl_type_name, mutable_ptr_old_dqti.type_info)
       self.ext.add_decl(mutable_ptr_alias)
       self.ext.add_kl_epilog("""
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
 
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(io %s value) {
   return Make_%s(value);
 }
@@ -266,10 +274,14 @@ class Namespace:
       const_ref_alias = Alias(self, const_ref_new_kl_type_name, const_ref_old_dqti.type_info)
       self.ext.add_decl(const_ref_alias)
       self.ext.add_kl_epilog("""
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
 
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(io %s value) {
   return Make_%s(value);
 }
@@ -293,10 +305,14 @@ class Namespace:
       mutable_ref_alias = Alias(self, mutable_ref_new_kl_type_name, mutable_ref_old_dqti.type_info)
       self.ext.add_decl(mutable_ref_alias)
       self.ext.add_kl_epilog("""
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(%s value) {
   return Make_%s(value);
 }
 
+/// \dfgPresetOmit
+/// \internal
 %s Make_%s(io %s value) {
   return Make_%s(value);
 }

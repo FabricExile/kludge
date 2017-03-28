@@ -158,6 +158,7 @@ class Parser(object):
         CursorKind.TYPE_REF,
         CursorKind.NAMESPACE_REF,
         CursorKind.TEMPLATE_REF,
+        CursorKind.PURE_ATTR,
         CursorKind.CONST_ATTR,
         CursorKind.VISIBILITY_ATTR,
         ]:

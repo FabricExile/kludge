@@ -5,14 +5,18 @@
 {% block body %}
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.const_ptr.kl.name}};
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.mutable_ptr.kl.name}};
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.const_ref.kl.name}};
 
 /// \dfgPresetOmit
+/// \internal
 struct {{decl.type_info.mutable_ref.kl.name}};
 {% endblock body %}

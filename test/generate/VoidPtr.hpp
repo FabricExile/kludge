@@ -14,4 +14,7 @@ class Class
 
     operator void const *() const { return this; }
     operator void *() { return this; }
+
+    void setVoidPtr( void *&ptr )
+      { ptr = this; }
 };

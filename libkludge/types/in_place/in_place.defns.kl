@@ -21,6 +21,7 @@ struct {{decl.type_info.kl.name}}
 {% if decl.is_initial_kl_type_inst %}
 
 /// \dfgPresetOmit
+/// \internal
 inline UInt64 {{decl.type_info.cxx_size_func_name}}() {
   return {{decl.type_info.kl.name}}().dataSize();
 }

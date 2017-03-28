@@ -11,6 +11,7 @@ require {{decl.type_info.existing_kl_ext_name}};
 {% endfor %}
 alias {{decl.type_info.existing_kl_global_name}} {{decl.type_info.kl_for_derivatives.name}};
 
+/// \internal
 inline UInt64 {{decl.type_info.cxx_size_func_name}}() {
   return {{decl.type_info.kl.name}}().dataSize();
 }

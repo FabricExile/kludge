@@ -8,6 +8,7 @@
   and not decl.type_info.kl.name.compound.endswith("StdVector") %}
 
 /// \dfgPresetOmit
+/// \internal
 {{decl.type_info.kl.name}}.appendDesc(io String string) {
   string += "{{decl.type_info.kl.name}}:";
   if (!this.cpp_ptr)

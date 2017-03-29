@@ -11,6 +11,7 @@ ext.add_func('MyOpaque_New', 'MyOpaque *', ['int'])
 ext.add_func('MyOpaque_New_Alt', None, ['int', 'MyOpaque **'])
 ext.add_func('MyOpaque_GetX', 'int', ['MyOpaque *'])
 ext.add_func('MyOpaque_SetX', None, ['MyOpaque *', 'int'])
+ext.add_func('MyOpaque_ReturnConstPtr', 'MyOpaque const *', ['MyOpaque const *'])
 ext.add_func('MyOpaque_Delete', None, ['MyOpaque *'])
 ext.add_func('MyOpaqueDer_New', 'MyOpaqueDer *', ['int', 'float'])
 ext.add_func('MyOpaqueDer_GetY', 'float', ['MyOpaqueDer *'])
@@ -27,6 +28,7 @@ report(MyOpaque_GetX(o));
 report(MyOpaqueDer_GetY(o));
 MyOpaqueDer_SetY(o, 1.24);
 report(MyOpaqueDer_GetY(o));
+report(MyOpaque_ReturnConstPtr(o));
 MyOpaque oo;
 report(oo);
 oo = o;
@@ -39,6 +41,7 @@ MyOpaqueDer:OPAQUE
 42
 +3.14
 +1.24
+MyOpaque:OPAQUE
 MyOpaque:OPAQUE (null)
 MyOpaque:OPAQUE
 """)

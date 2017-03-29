@@ -48,6 +48,11 @@ inline void MyOpaque_SetX( MyOpaque *_r, int x )
   r->x = x;
 }
 
+inline MyOpaque const * MyOpaque_ReturnConstPtr( MyOpaque const *_r )
+{
+  return _r;
+}
+
 inline void MyOpaque_Delete( MyOpaque *_r )
 {
   MyOpaque_Real *r = reinterpret_cast<MyOpaque_Real *>( _r );

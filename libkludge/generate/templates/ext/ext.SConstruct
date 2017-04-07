@@ -42,13 +42,13 @@ if os.environ.get('CPPPATH'):
 if os.environ.get('LIBPATH'):
   fabricBuildEnv.Append(LIBPATH = os.environ.get('LIBPATH').split(os.pathsep))
 {% for cpp_include_dir in ext.cpp_include_dirs %}
-fabricBuildEnv.Append(CPPPATH = ['{{ cpp_include_dir }}'])
+fabricBuildEnv.Append(CPPPATH = [r'{{ cpp_include_dir }}'])
 {% endfor %}
 {% for lib_dir in ext.lib_dirs %}
-fabricBuildEnv.Append(LIBPATH = ['{{ lib_dir }}'])
+fabricBuildEnv.Append(LIBPATH = [r'{{ lib_dir }}'])
 {% endfor %}
 {% for lib in ext.libs %}
-fabricBuildEnv.Append(LIBS = ['{{ lib }}'])
+fabricBuildEnv.Append(LIBS = [r'{{ lib }}'])
 {% endfor %}
 
 fabricBuildEnv.SharedLibrary(

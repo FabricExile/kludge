@@ -8,6 +8,7 @@ from libkludge.type_mgr import TypeMgr
 from namespace import Namespace
 from libkludge.visibility import Visibility
 from this_access import ThisAccess
+from virtuality import Virtuality
 from param import Param
 from test import Test
 from libkludge import util
@@ -164,6 +165,7 @@ class Ext:
       'Param': Param,
       'ThisAccess': ThisAccess,
       'Visibility': Visibility,
+      'Virtuality': Virtuality,
       }
     def process(filename, file_or_string):
       self.info("Processing %s" % filename)

@@ -248,7 +248,7 @@
 {%   if ((method.is_static and allow_static_methods)
     or (method.is_mutable and allow_mutable_methods)
     or (method.is_const and allow_const_methods))
-    and not (method.is_pure_virtual and not is_direct) %}
+    and method.is_local_or_virtual_for_owner(type_info) %}
 
 {%    for comment in method.comments %}
 {{comment}}
@@ -285,7 +285,7 @@
 {%    if ((method.is_static and allow_static_methods)
     or (method.is_mutable and allow_mutable_methods)
     or (method.is_const and allow_const_methods))
-    and not (method.is_pure_virtual and not is_direct) %}
+    and method.is_local_or_virtual_for_owner(type_info) %}
 
 {%     for comment in method.comments %}
 {{comment}}

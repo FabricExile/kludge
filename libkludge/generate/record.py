@@ -7,6 +7,7 @@ from decl import Decl
 from test import Test
 from libkludge.visibility import Visibility
 from this_access import ThisAccess
+from virtuality import Virtuality
 from massage import *
 from libkludge.cpp_type_expr_parser import *
 from libkludge.value_name import this_cpp_value_name
@@ -113,7 +114,7 @@ class Method(Methodlike):
     kl_name=None,
     promotion_prolog=None,
     dfg_preset_omit=False,
-    is_pure_virtual=False,
+    virtuality=Virtuality.local,
     ):
     Methodlike.__init__(self, record)
     self.cpp_name = cpp_name
@@ -130,7 +131,7 @@ class Method(Methodlike):
     self.is_static = self.this_access == ThisAccess.static
     self.promotion_prolog = promotion_prolog
     self.dfg_preset_omit = dfg_preset_omit
-    self.is_pure_virtual = is_pure_virtual
+    self.virtuality = virtuality
 
   @property
   def this_access_suffix(self):
@@ -172,6 +173,16 @@ class Method(Methodlike):
     if not promotion_sig in promotions \
       or promotions[promotion_sig][1] > promotion_cost:
       promotions[promotion_sig] = (self, promotion_cost)
+
+  def is_local_or_virtual_for_owner(self, type_info):
+    if self.virtuality == Virtuality.local:
+      return True
+
+    record_kl_name = self.record.kl_global_name
+    typeinfo_kl_name = type_info.kl.name
+
+    # we need to convert to strings to compare these two
+    return str(record_kl_name) == str(typeinfo_kl_name)
 
 class CallOp(Methodlike):
 
@@ -621,7 +632,7 @@ class Record(Decl):
     kl_name=None,
     promotion_prolog=None,
     dfg_preset_omit=False,
-    is_pure_virtual=False,
+    virtuality=Virtuality.local,
     ):
     try:
       assert isinstance(name, basestring)
@@ -641,7 +652,7 @@ class Record(Decl):
           kl_name=kl_name,
           promotion_prolog=promotion_prolog,
           dfg_preset_omit=dfg_preset_omit,
-          is_pure_virtual=is_pure_virtual,
+          virtuality=virtuality,
           )
         self.methods.append(method)
         if not result:

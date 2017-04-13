@@ -207,7 +207,9 @@ class Parser(object):
     cursor,
     ):
     if cursor.is_pure_virtual_method():
-      return ", is_pure_virtual=True"      
+      return ", virtuality=Virtuality.pure_virtual"
+    elif cursor.is_virtual_method():
+      return ", virtuality=Virtuality.virtual"
     return ""
 
   def parse_record_decl(

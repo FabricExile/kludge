@@ -11,6 +11,11 @@ namespace ccl
   public:
 
     virtual CloneMethodClass *clone() const = 0;
+
+    virtual bool equals(const CloneMethodClass & other) const
+    {
+      return true;
+    }
   };
 
   class CloneMethodSpecialized : public CloneMethodClass
@@ -24,6 +29,11 @@ namespace ccl
 
     void CopyFrom(CloneMethodSpecialized *)
     {
+    }
+
+    virtual bool equals(const CloneMethodClass & other) const
+    {
+      return true;
     }
   };
 };

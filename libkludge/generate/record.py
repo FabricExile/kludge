@@ -642,6 +642,15 @@ class Record(Decl):
         self.methods.append(method)
         if not result:
           result = method
+
+      # ensure to disable getters + setters
+      # if they are overriden by special methods
+      for m in self.members:
+        if m.getter_kl_name == name:
+          m.getter_kl_name = None
+        if m.setter_kl_name == name:
+          m.setter_kl_name = None
+
       return result
     except Exception as e:
       self.ext.warning("Ignoring method '%s': %s" % (name, e))

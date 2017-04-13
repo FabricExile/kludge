@@ -151,3 +151,14 @@ def test_discover(basename):
       cwd = test_tmp_dir,
       env = scons_env,
       ) == 0
+
+    # also run the kl test file - at the minimum this will require the extension
+    kl_env = os.environ.copy()
+    kl_env['FABRIC_EXTS_PATH'] = os.pathsep.join([test_tmp_dir, os.environ['FABRIC_EXTS_PATH']])
+    subprocess.check_output(
+      [
+        'kl',
+        os.path.join(test_tmp_dir, basename + '.test.kl'),
+        ],
+      env = kl_env,
+      ).splitlines()

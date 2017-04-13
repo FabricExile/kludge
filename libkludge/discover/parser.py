@@ -201,6 +201,15 @@ class Parser(object):
     else:
       return "this_access=ThisAccess.mutable"
 
+  def parse_method_virtualness(
+    self,
+    ast_logger,
+    cursor,
+    ):
+    if cursor.is_pure_virtual_method():
+      return ", is_pure_virtual=True"      
+    return ""
+
   def parse_record_decl(
     self,
     ast_logger,
@@ -390,13 +399,14 @@ class Parser(object):
               )
           else:
             methods.append(
-              "# %s\n%s.add_method('%s', '%s', %s, %s)%s" % (
+              "# %s\n%s.add_method('%s', '%s', %s, %s%s)%s" % (
                 self.location_desc(child_cursor.location),
                 child_obj,
                 child_cursor.spelling,
                 child_cursor.result_type.spelling,
                 self.parse_params(child_ast_logger, child_cursor),
                 self.parse_method_access(child_ast_logger, child_cursor),
+                self.parse_method_virtualness(child_ast_logger, child_cursor),
                 self.parse_comment(child_ast_logger, child_cursor),
                 )
               )

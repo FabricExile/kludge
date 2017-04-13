@@ -245,9 +245,10 @@
 // Methods
 //////////////////////////////////////////////////////////////////////////////
 {%  for method in record.methods %}
-{%   if (method.is_static and allow_static_methods)
+{%   if ((method.is_static and allow_static_methods)
     or (method.is_mutable and allow_mutable_methods)
-    or (method.is_const and allow_const_methods) %}
+    or (method.is_const and allow_const_methods))
+    and not (method.is_pure_virtual and not is_direct) %}
 
 {%    for comment in method.comments %}
 {{comment}}
@@ -281,9 +282,10 @@
 {%   endif %}
 {%  endfor %}
 {%   for method in record.methods_to_promote(type_info) %}
-{%    if (method.is_static and allow_static_methods)
+{%    if ((method.is_static and allow_static_methods)
     or (method.is_mutable and allow_mutable_methods)
-    or (method.is_const and allow_const_methods) %}
+    or (method.is_const and allow_const_methods))
+    and not (method.is_pure_virtual and not is_direct) %}
 
 {%     for comment in method.comments %}
 {{comment}}

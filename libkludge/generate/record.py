@@ -113,6 +113,7 @@ class Method(Methodlike):
     kl_name=None,
     promotion_prolog=None,
     dfg_preset_omit=False,
+    is_pure_virtual=False,
     ):
     Methodlike.__init__(self, record)
     self.cpp_name = cpp_name
@@ -129,6 +130,7 @@ class Method(Methodlike):
     self.is_static = self.this_access == ThisAccess.static
     self.promotion_prolog = promotion_prolog
     self.dfg_preset_omit = dfg_preset_omit
+    self.is_pure_virtual = is_pure_virtual
 
   @property
   def this_access_suffix(self):
@@ -619,6 +621,7 @@ class Record(Decl):
     kl_name=None,
     promotion_prolog=None,
     dfg_preset_omit=False,
+    is_pure_virtual=False,
     ):
     try:
       assert isinstance(name, basestring)
@@ -638,6 +641,7 @@ class Record(Decl):
           kl_name=kl_name,
           promotion_prolog=promotion_prolog,
           dfg_preset_omit=dfg_preset_omit,
+          is_pure_virtual=is_pure_virtual,
           )
         self.methods.append(method)
         if not result:

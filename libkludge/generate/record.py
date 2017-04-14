@@ -456,6 +456,7 @@ class Record(Decl):
     extends=None,
     include_empty_ctor=True,
     include_copy_ctor=True,
+    include_custom_ctors=True,
     include_simple_ass_op=True,
     include_getters_setters=True,
     include_dtor=True,
@@ -505,6 +506,7 @@ class Record(Decl):
     self.default_visibility = Visibility.public
     self.include_empty_ctor = include_empty_ctor
     self.include_copy_ctor = include_copy_ctor
+    self.include_custom_ctors = include_custom_ctors
     self.include_simple_ass_op = include_simple_ass_op
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
@@ -521,6 +523,11 @@ class Record(Decl):
       if len(ctor.params) == 1 \
         and ctor.params[0].type_info.lib.expr == ReferenceTo(Const(type_info.lib.expr)):
         return False
+    return True
+
+  def should_include_custom_ctors(self, type_info):
+    if not self.include_custom_ctors:
+      return False
     return True
 
   def get_nested_records(self):

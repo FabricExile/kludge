@@ -120,7 +120,7 @@
 {%   endif %}
 {%  endif %}
 {## Custom Constructors #####################################################}
-{%  if type_info.is_direct and not record.is_abstract %}
+{%  if type_info.is_direct and not record.is_abstract and record.should_include_custom_ctors(type_info) %}
 {%   for ctor in record.ctors %}
 
 /// \dfgPresetOmit

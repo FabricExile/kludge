@@ -351,6 +351,7 @@ class Namespace:
     lookup_wrapper=None,
     include_empty_ctor=True,
     include_copy_ctor=True,
+    include_custom_ctors=True,
     include_simple_ass_op=True,
     include_dtor=True,
     simplifier=NullTypeSimplifier(),
@@ -374,6 +375,7 @@ class Namespace:
         is_abstract=is_abstract,
         include_empty_ctor=include_empty_ctor,
         include_copy_ctor=include_copy_ctor,
+        include_custom_ctors=include_custom_ctors,
         include_simple_ass_op=include_simple_ass_op,
         include_dtor=include_dtor,
         )
@@ -407,6 +409,8 @@ class Namespace:
     forbid_copy=False,
     dont_delete=False,
     is_abstract=False,
+    include_copy_ctor=True,
+    include_simple_ass_op=True,
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
@@ -423,6 +427,8 @@ class Namespace:
       forbid_copy=forbid_copy,
       dont_delete=dont_delete,
       is_abstract=is_abstract,
+      include_copy_ctor=include_copy_ctor,
+      include_simple_ass_op=include_simple_ass_op,
       variant='owned',
       )
 
@@ -450,6 +456,7 @@ class Namespace:
       lookup_wrapper=PointerTo,
       include_empty_ctor=False,
       include_copy_ctor=False,
+      include_custom_ctors=False,
       include_simple_ass_op=False,
       include_dtor=False,
       )

@@ -78,7 +78,8 @@ FABRIC_EXT_EXPORT void
     {{record.get_mutable_this(type_info).render_copy_ctor(record.get_copy_param(type_info)) | indent(4)}}
 }
 {% endif %}
-{% for ctor in record.ctors %}
+{% if record.should_include_custom_ctors(type_info) %}
+{%   for ctor in record.ctors %}
 
 FABRIC_EXT_EXPORT void
 {{ctor.get_edk_symbol_name(type_info)}}(
@@ -91,7 +92,8 @@ FABRIC_EXT_EXPORT void
         {{record.get_mutable_this(type_info).render_new_end() | indent(8)}}
     {{macros.cpp_call_post(None, ctor.params) | indent(4)}}
 }
-{% endfor %}
+{%   endfor %}
+{% endif %}
 {% if record.include_dtor %}
 
 FABRIC_EXT_EXPORT void

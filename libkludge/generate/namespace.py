@@ -470,7 +470,9 @@ class Namespace:
     kl_type_name=None,
     extends=None,
     is_abstract=False,
-    include_delete=True
+    include_empty_ctor=True,
+    include_custom_ctors=True,
+    include_delete=True,
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
@@ -488,9 +490,9 @@ class Namespace:
       is_abstract=is_abstract,
       variant='managed',
       lookup_wrapper=PointerTo,
-      include_empty_ctor=True,
+      include_empty_ctor=include_empty_ctor,
       include_copy_ctor=True,
-      include_custom_ctors=True,
+      include_custom_ctors=include_custom_ctors,
       include_simple_ass_op=True,
       include_dtor=False,
       include_delete=include_delete,

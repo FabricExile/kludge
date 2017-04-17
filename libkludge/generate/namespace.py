@@ -468,6 +468,8 @@ class Namespace:
     cpp_type_name,
     kl_type_name=None,
     extends=None,
+    is_abstract=False,
+    include_delete=True
     ):
     cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
     kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
@@ -481,8 +483,8 @@ class Namespace:
       cpp_local_expr=cpp_local_expr,
       kl_local_name=kl_local_name,
       extends_type_info=extends_type_info,
-      forbid_copy=False,
-      is_abstract=False,
+      forbid_copy=True,
+      is_abstract=is_abstract,
       variant='managed',
       lookup_wrapper=PointerTo,
       include_empty_ctor=True,
@@ -490,7 +492,7 @@ class Namespace:
       include_custom_ctors=True,
       include_simple_ass_op=False,
       include_dtor=False,
-      include_delete=True,
+      include_delete=include_delete,
       )
 
   def add_in_place_type(

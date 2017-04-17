@@ -12,6 +12,11 @@ Use this method for types which are owned by the extension and not by the C++ li
 
 .. note:: add_owned_type is the default method used in Kludge, so please adapt and change the resulting kludge files if this is not the right method in your particular case.
 
+add_managed_type
+-------------------
+
+Use this method for types which are managed by another class. Managed here refers to lifetime management. Managed types are types which you need to construct manually and which are destroyed by another class. For example in the case of a library you can have a library class and a book class. The book class can be constructed manually. After inserting the book into the library the library becomes responsible for managing the lifetime of the book. Thus the library manages the book. In this example the library is a owned type, while the book is a managed type.
+
 add_opaque_type
 ----------------------
 

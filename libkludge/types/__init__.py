@@ -10,6 +10,7 @@ from std_vector import StdVectorSelector
 from std_set import StdSetSelector
 from in_place import InPlaceSelector
 from owned import OwnedSelector
+from managed import ManagedSelector
 from opaque import OpaqueSelector
 from wrapped import WrappedSelector
 from kl_ext_type_alias import KLExtTypeAliasSelector

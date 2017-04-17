@@ -105,8 +105,19 @@ FABRIC_EXT_EXPORT void
 }
 {% endif %}
 {% endif %}
+{% if not record.is_abstract and type_info.is_direct and record.include_delete %}
+
+FABRIC_EXT_EXPORT void
+{{record.get_delete_edk_symbol_name(type_info)}}(
+    {{record.get_mutable_this(type_info).render_param_edk()}}
+    )
+{
+    {{record.get_mutable_this(type_info).render_delete()}}
+}
+{% endif %}
+
 {############################################################################}
-{% if record.has_methods %}
+{% if record.has_methods() %}
 
 //////////////////////////////////////////////////////////////////////////////
 // {{type_info}}

@@ -35,6 +35,30 @@ The ``forbid_copy`` parameter prevents users from copying values of this type; t
 
 The result of the ``ext.add_owned_type()`` call is a record object which can be used to add constructors, methods and so on to the type (see :ref:`KludgeADLMethods`).
 
+``ext.add_managed_type()``
+---------------------------------------
+
+The *managed* mechanism of wrapping types is is used for types which are constructed manually but destructed automatically by another class. This is useful where a book class is added to a storage inside of a library class for example, and the library is responsible for destroying all of the books. Since the library class manages the lifetime of the book class we call the type wrapping *managed*.
+
+The actual parameters of ``.add_managed_type()`` are
+
+.. code-block:: python
+
+  def add_managed_type(
+    self,
+    cpp_type_name,
+    kl_type_name=None,
+    extends=None,
+    ):
+
+The only required parameter is ``cpp_type_name``, which is the C++ type that is being wrapped.  By default the type will have the same name in KL, but this can be overridden with the ``kl_type_name`` parameter.
+
+The ``extends`` parameter indicates C++ inheritance; in practice, it means that this type will have all the (public) methods of the type that it extends.
+
+The result of the ``ext.add_managed_type()`` call is a record object which can be used to add constructors, methods and so on to the type (see :ref:`KludgeADLMethods`).
+
+Managed types will also receive a special method in KL called *cxx_delete* which you can use to manually delete it.
+
 ``ext.add_in_place_type()``
 -------------------------------------
 

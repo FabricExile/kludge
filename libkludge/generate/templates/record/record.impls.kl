@@ -237,6 +237,15 @@
 ~{{type_info.kl.name}}() = "{{record.get_dtor_edk_symbol_name(type_info)}}";
 {%  endif %}
 {% endif %}
+{## Delete Function #############################################################}
+{% if not record.is_abstract and type_info.is_direct and record.include_delete %}
+
+{%   if type_info.kl.name.base.startswith('Cxx') %}
+/// \dfgPresetOmit
+/// \internal
+{%   endif %}
+{{type_info.kl.name}}.cxx_delete() = "{{record.get_delete_edk_symbol_name(type_info)}}";
+{% endif %}
 {############################################################################}
 {% if record.has_methods() %}
 

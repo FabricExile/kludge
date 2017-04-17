@@ -1,0 +1,25 @@
+{############################################################################}
+{# Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.        #}
+{############################################################################}
+{% extends "generate/decl/decl.defns.kl" %}
+{% block body %}
+{% for comment in decl.type_info.record.comments %}
+{{comment}}
+{% endfor %}
+struct {{decl.type_info.kl.name}}
+{% if decl.type_info.extends %}
+  : {{decl.type_info.extends.kl.name}}
+  {};
+{% else %}
+{
+  protected Data cpp_ptr;
+};
+{% endif %}
+
+/// \dfgPresetOmit
+/// \internal
+UInt64 {{decl.type_info.cxx_size_func_name}}() {
+  Data d;
+  return d.dataSize();
+}
+{% endblock body %}

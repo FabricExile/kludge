@@ -1,0 +1,72 @@
+//
+// Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
+//
+
+#pragma once
+
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <vector>
+
+class Book
+{
+public:
+  Book(const char * title)
+  : m_title(title)
+  {
+    std::cout << "Book::Book(" << m_title << ")\n" << std::flush;
+  }
+
+  ~Book()
+  {
+    std::cout << "Book::~Book(" << m_title << ")\n" << std::flush;
+  }
+
+  const char * getTitle()
+  {
+    return m_title.c_str();
+  }
+
+private:
+  std::string m_title;
+};
+
+class Library
+{
+public:
+  Library()
+  {
+    std::cout << "Library::Library()\n" << std::flush;
+  }
+
+  ~Library()
+  {
+    for(size_t i=0;i<m_books.size();i++)
+    {
+      delete(m_books[i]);
+    }
+    m_books.clear();
+
+    std::cout << "Library::~Library()\n" << std::flush;
+  }
+
+  void addBook(Book * book)
+  {
+    m_books.push_back(book);
+  }
+
+  size_t getNumBooks() const
+  {
+    return m_books.size();
+  }
+
+  const Book * getBook(size_t index) const
+  {
+    return (const Book *)m_books[index];
+  }
+
+private:
+
+  std::vector<Book*> m_books;
+};

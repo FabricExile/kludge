@@ -460,6 +460,7 @@ class Record(Decl):
     include_simple_ass_op=True,
     include_getters_setters=True,
     include_dtor=True,
+    include_delete=False,
     forbid_copy=False,
     child_namespace_component=None,
     child_namespace_kl_name=None,
@@ -510,6 +511,7 @@ class Record(Decl):
     self.include_simple_ass_op = include_simple_ass_op
     self.include_getters_setters = include_getters_setters
     self.include_dtor = include_dtor
+    self.include_delete = include_delete
     self.forbid_copy = forbid_copy
     self.is_abstract = is_abstract
     self.get_ind_op_result = None
@@ -989,6 +991,9 @@ class Record(Decl):
   
   def get_dtor_edk_symbol_name(self, type_info):
     return self.gen_edk_symbol_name('dtor', type_info, ThisAccess.mutable)
+
+  def get_delete_edk_symbol_name(self, type_info):
+    return self.gen_edk_symbol_name('delete', type_info, ThisAccess.mutable)
 
   def get_test_name(self):
     return self.kl_global_name

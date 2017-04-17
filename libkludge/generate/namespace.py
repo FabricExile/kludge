@@ -354,6 +354,7 @@ class Namespace:
     include_custom_ctors=True,
     include_simple_ass_op=True,
     include_dtor=True,
+    include_delete=False,
     simplifier=NullTypeSimplifier(),
     ):
     if not cpp_global_expr:
@@ -378,6 +379,7 @@ class Namespace:
         include_custom_ctors=include_custom_ctors,
         include_simple_ass_op=include_simple_ass_op,
         include_dtor=include_dtor,
+        include_delete=include_delete,
         )
     selector = self.type_mgr.named_selectors[variant]
     selector.register(
@@ -459,6 +461,36 @@ class Namespace:
       include_custom_ctors=False,
       include_simple_ass_op=False,
       include_dtor=False,
+      )
+
+  def add_managed_type(
+    self,
+    cpp_type_name,
+    kl_type_name=None,
+    extends=None,
+    ):
+    cpp_local_expr = self.cpp_type_expr_parser.parse(cpp_type_name)
+    kl_local_name = self.maybe_generate_kl_local_name(kl_type_name, cpp_local_expr)
+    extends_type_info = None
+    if extends:
+      extends_cpp_type_expr = PointerTo(self.cpp_type_expr_parser.parse(extends))
+      extends_dqti = self.type_mgr.maybe_get_dqti(extends_cpp_type_expr)
+      if extends_dqti:
+        extends_type_info = extends_dqti.type_info
+    return self.add_type(
+      cpp_local_expr=cpp_local_expr,
+      kl_local_name=kl_local_name,
+      extends_type_info=extends_type_info,
+      forbid_copy=False,
+      is_abstract=False,
+      variant='managed',
+      lookup_wrapper=PointerTo,
+      include_empty_ctor=True,
+      include_copy_ctor=False,
+      include_custom_ctors=True,
+      include_simple_ass_op=False,
+      include_dtor=False,
+      include_delete=True,
       )
 
   def add_in_place_type(

@@ -466,6 +466,7 @@ class Record(Decl):
     child_namespace_kl_name=None,
     is_abstract=False,
     is_kludge_ext=False,
+    variant="owned",
     ):
     Decl.__init__(self, parent_namespace, is_kludge_ext=is_kludge_ext)
 
@@ -517,6 +518,7 @@ class Record(Decl):
     self.get_ind_op_result = None
     self.get_ind_op_params = None
     self.set_ind_op_params = None
+    self.variant = variant
 
   def should_include_automatic_copy_ctor(self, type_info):
     if not self.include_copy_ctor:

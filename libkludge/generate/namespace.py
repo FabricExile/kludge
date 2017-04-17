@@ -380,6 +380,7 @@ class Namespace:
         include_simple_ass_op=include_simple_ass_op,
         include_dtor=include_dtor,
         include_delete=include_delete,
+        variant=variant,
         )
     selector = self.type_mgr.named_selectors[variant]
     selector.register(
@@ -483,14 +484,14 @@ class Namespace:
       cpp_local_expr=cpp_local_expr,
       kl_local_name=kl_local_name,
       extends_type_info=extends_type_info,
-      forbid_copy=True,
+      forbid_copy=False,
       is_abstract=is_abstract,
       variant='managed',
       lookup_wrapper=PointerTo,
       include_empty_ctor=True,
-      include_copy_ctor=False,
+      include_copy_ctor=True,
       include_custom_ctors=True,
-      include_simple_ass_op=False,
+      include_simple_ass_op=True,
       include_dtor=False,
       include_delete=include_delete,
       )

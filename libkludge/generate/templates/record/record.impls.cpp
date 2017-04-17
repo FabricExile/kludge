@@ -105,7 +105,7 @@ FABRIC_EXT_EXPORT void
 }
 {% endif %}
 {% endif %}
-{% if not record.is_abstract and type_info.is_direct and record.include_delete %}
+{% if type_info.is_direct and record.include_delete %}
 
 FABRIC_EXT_EXPORT void
 {{record.get_delete_edk_symbol_name(type_info)}}(
@@ -250,7 +250,7 @@ FABRIC_EXT_EXPORT {{bin_op.result.render_direct_type_edk()}}
 {% endfor %}
 {% endif %}
 {############################################################################}
-{% if not record.is_abstract and record.include_simple_ass_op %}
+{% if (not record.is_abstract  or record.variant in ["managed"]) and record.include_simple_ass_op %}
 
 //////////////////////////////////////////////////////////////////////////////
 // {{type_info}}

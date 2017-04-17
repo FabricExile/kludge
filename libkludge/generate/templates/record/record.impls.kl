@@ -438,7 +438,7 @@
 {%   endfor %}
 {%  endif %}
 {%  if record.include_simple_ass_op %}
-{%   if record.is_abstract %}
+{%   if record.is_abstract and not record.variant in ["managed"] %}
 
 {{type_info.kl.name}}.=(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}

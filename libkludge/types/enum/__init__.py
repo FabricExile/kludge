@@ -19,6 +19,7 @@ class EnumTypeInfo(TypeInfo):
     tds = TypeInfo.build_codec_lookup_rules(self)
     tds["conv"]["*"] = "protocols/conv/builtin/none"
     tds["conv"]["edk_to_lib_decl"] = "types/builtin/enum/conv"
+    tds["conv"]["lib_to_edk_decl"] = "types/builtin/enum/conv"
     tds["result"]["*"] = "protocols/result/builtin/direct"
     tds["repr"]["new_begin"] = "types/builtin/enum/repr"
     tds["repr"]["new_end"] = "types/builtin/enum/repr"

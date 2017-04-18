@@ -290,7 +290,13 @@ class Parser(object):
             )
       elif child_cursor.kind == CursorKind.CXX_METHOD:
         if child_cursor.access_specifier == AccessSpecifier.PUBLIC:
-          if child_cursor.spelling == "operator=":
+          if child_cursor.spelling in [
+            "operator=",
+            "operator new",
+            "operator delete",
+            "operator new[]",
+            "operator delete[]",
+            ]:
             pass
           elif child_cursor.spelling == "operator[]":
             if child_cursor.is_const_method():

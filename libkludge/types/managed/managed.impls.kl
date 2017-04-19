@@ -8,8 +8,10 @@
 /// \internal
 {{decl.type_info.kl.name}}.appendDesc(io String string) {
   string += "{{decl.type_info.kl.name}}:MANAGED";
+{% if not decl.type_info.extends %}
   if (!this.cpp_ptr)
     string += " (null)";
+{% endif %}
 }
 
 {% endblock body %}

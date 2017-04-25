@@ -52,6 +52,9 @@ class ThisCodec:
       "param": param,
       })
 
+  def render_abstract_copy_ctor_kl(self):
+    return self.type_info._render("repr", "abstract_copy_ctor", "kl", {})
+
   def render_class_name_cpp(self):
     return self.type_info._render("repr", "class_name", "cpp", {
       "this": self,

@@ -14,6 +14,13 @@ struct {{decl.type_info.kl.name}}
 {
   protected Data cpp_ptr;
 };
+
+/// Is valid.  Check for null pointer
+/// \dfgPresetOmit
+/// \internal
+Boolean {{decl.type_info.kl.name}}.cxx_isValid() {
+  return !!this.cpp_ptr;
+}
 {% endif %}
 
 /// \dfgPresetOmit

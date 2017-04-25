@@ -244,6 +244,8 @@
 /// \dfgPresetOmit
 /// \internal
 {%   endif %}
+{% endif %}
+{% if type_info.is_direct and record.include_delete %}
 {{type_info.kl.name}}.cxx_delete() = "{{record.get_delete_edk_symbol_name(type_info)}}";
 {% endif %}
 {############################################################################}

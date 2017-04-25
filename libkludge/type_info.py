@@ -69,6 +69,7 @@ class TypeInfo:
     direct_orig_type_info=None,
     forbid_copy=False,
     is_const_ref=False,
+    is_shallow=False,
     simplifier=NullTypeSimplifier(),
     ):
     if kl_name_base is not None:
@@ -94,6 +95,7 @@ class TypeInfo:
     assert record is None or isinstance(record, Record)
     self.record = record
     self.is_simple = is_simple
+    self.is_shallow = is_shallow
     self.direct = direct_type_info
     self.direct_orig = direct_orig_type_info
     self.forbid_copy = forbid_copy

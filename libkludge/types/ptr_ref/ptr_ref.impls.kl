@@ -35,7 +35,7 @@
 {{type_info.kl.name}}({{decl.type_info.direct.kl.name}} array<>, Index index) {
   this.ptr = array.data().offset(index * {{decl.type_info.direct.cxx_size_func_name}}());
 }
-{%  if decl.type_info.direct.is_simple or decl.type_info.direct.kl.name.compound == 'Data' %}
+{%  if decl.type_info.direct.is_simple or decl.type_info.direct.is_shallow or decl.type_info.direct.kl.name.compound == 'Data' %}
 
 /// \dfgPresetOmit
 /// \internal
@@ -212,18 +212,11 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 {% endif %}
 {% if decl.type_info.direct.is_simple and decl.type_info.direct.kl.name.base != 'Boolean' %}
 
-/// Is valid.  Check for null pointer
-/// \dfgPresetOmit
-/// \internal
-Boolean {{decl.type_info.const_ref.kl.name}}.cxx_isValid() {
-  return !!this.ptr;
-}
-
 /// Convert to Boolean
 /// \dfgPresetOmit
 /// \internal
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
-  this = ref.cxx_isValid();
+  this = Boolean(ref.cxx_get());
 }
 {% endif %}
 

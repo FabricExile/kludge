@@ -94,7 +94,7 @@
 {%   endif %}
 {%   if record.is_abstract %}
 {{type_info.kl.name}}() {
-    throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
+    // throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
 }
 {%   else %}
 {{type_info.kl.name}}() = "{{record.get_empty_ctor_edk_symbol_name(type_info)}}";
@@ -111,7 +111,7 @@
 {{type_info.kl.name}}(
     {{record.get_copy_param(type_info).render_kl() | indent(4)}}
     ) {
-    throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
+    // throw "Cannot create instance of abstract type {{type_info.kl.name}}()";
 }
 {%   else %}
 {{type_info.kl.name}}(

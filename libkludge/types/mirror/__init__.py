@@ -29,6 +29,7 @@ class MirrorTypeInfo(TypeInfo):
       edk_name="Fabric_EDK_KL_" + kl_global_name,
       lib_expr=cpp_global_expr,
       record=record,
+      is_simple=True,
       )
     self.existing_kl_global_name = existing_kl_global_name
     self.existing_kl_ext_name = existing_kl_ext_name

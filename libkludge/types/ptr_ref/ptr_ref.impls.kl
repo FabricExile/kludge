@@ -47,8 +47,8 @@ struct Make_{{type_info.kl.name}} permits {{type_info.kl.name}} {
 /// \dfgPresetOmit
 /// \internal
 Make_{{type_info.kl.name}}({{decl.type_info.direct.kl.name}} value) {
-  this.ptr = this.value.data();
   this.value = value;
+  this.ptr = this.value.data();
 }
 
 /// \dfgPresetOmit
@@ -212,11 +212,18 @@ Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {
 {% endif %}
 {% if decl.type_info.direct.is_simple and decl.type_info.direct.kl.name.base != 'Boolean' %}
 
+/// Is valid.  Check for null pointer
+/// \dfgPresetOmit
+/// \internal
+Boolean {{decl.type_info.const_ref.kl.name}}.cxx_isValid() {
+  return !!this.ptr;
+}
+
 /// Convert to Boolean
 /// \dfgPresetOmit
 /// \internal
 Boolean({{decl.type_info.const_ref.kl.name}} ref) {
-  this = Boolean(ref.cxx_get());
+  this = ref.cxx_isValid();
 }
 {% endif %}
 

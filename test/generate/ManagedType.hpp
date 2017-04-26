@@ -23,7 +23,7 @@ public:
     std::cout << "Book::~Book(" << m_title << ")\n" << std::flush;
   }
 
-  const char * getTitle()
+  const char * getTitle() const
   {
     return m_title.c_str();
   }
@@ -56,6 +56,17 @@ public:
     m_books.push_back(book);
   }
 
+  bool hasBook(Book & book) const
+  {
+    std::string title = book.getTitle();
+    for(size_t i=0;i<m_books.size();i++)
+    {
+      if(title == m_books[i]->getTitle())
+        return true;
+    }
+    return false;
+  }
+
   size_t getNumBooks() const
   {
     return m_books.size();
@@ -64,6 +75,11 @@ public:
   const Book * getBook(size_t index) const
   {
     return (const Book *)m_books[index];
+  }
+
+  const Book & getBookRef(size_t index) const
+  {
+    return *m_books[index];
   }
 
 private:

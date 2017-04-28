@@ -283,5 +283,10 @@ class Ext:
     self.dfg_preset_path = preset_path
     self.dfg_preset_dir = dir_
 
+  def add_ext_version_spec(self, major=0, minor=0, revision=0):
+    self.debug("Extension: Adding version specification number %s.%s.%s" % (major, minor, revision))
+    if (major + minor + revision) > 0:
+      self.ext_version = "%s.%s.%s" % (major, minor, revision)
+
   def instantiate_cpp_type_expr(self, cpp_type_expr):
     self.type_mgr.get_dqti(cpp_type_expr)

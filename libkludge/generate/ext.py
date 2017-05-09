@@ -84,6 +84,7 @@ class Ext:
     self.tests = []
     self.cpp_type_expr_to_record = {}
     self.func_promotions = {}
+    self.ext_version = "%s.%s.%s" % (1, 0, 0)
 
     self.root_namespace = Namespace(self, None, [], None)
     for root_namespace_method in inspect.getmembers(

@@ -180,32 +180,3 @@ class ManagedSelector(Selector):
           self.type_info_cache.setdefault(type_info_cache_key, type_info)
 
         return DirQualTypeInfo(dir_qual.direct, type_info)
-
-    if dq.is_direct:
-      spec = self.cpp_type_expr_to_spec.get(undq_cpp_type_expr)
-      if spec:
-        kl_type_name = spec.kl_type_name
-        kl_type_name_for_derivatives = spec.kl_type_name_for_derivatives
-        undq_cpp_type_expr = Indirect(spec.cpp_type_expr)
-        extends = spec.extends
-        record = spec.record
-        forbid_copy = spec.forbid_copy
-        simplifier = spec.simplifier
-
-        type_info_cache_key = kl_type_name + '_ptr'
-        type_info = self.type_info_cache.get(type_info_cache_key)
-        if not type_info:
-          type_info = ManagedTypeInfo(
-            self.jinjenv,
-            kl_type_name,
-            kl_type_name_for_derivatives,
-            undq_cpp_type_expr,
-            extends=extends,
-            record=record,
-            forbid_copy=forbid_copy,
-            simplifier=simplifier,
-            )
-          self.type_info_cache.setdefault(type_info_cache_key, type_info)
-          self.ext.add_decl(ManagedBuiltinDecl(self.ext, type_info))
-
-        return DirQualTypeInfo(dir_qual.direct, type_info)

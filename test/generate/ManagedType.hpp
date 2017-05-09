@@ -18,6 +18,11 @@ public:
     std::cout << "Book::Book(" << m_title << ")\n" << std::flush;
   }
 
+  Book(const Book & other)
+  {
+    m_title = other.m_title;
+  }
+
   ~Book()
   {
     std::cout << "Book::~Book(" << m_title << ")\n" << std::flush;
@@ -54,6 +59,11 @@ public:
   void addBook(Book * book)
   {
     m_books.push_back(book);
+  }
+
+  void addBook2(Book book)
+  {
+    m_books.push_back(new Book(book));
   }
 
   bool hasBook(Book & book) const

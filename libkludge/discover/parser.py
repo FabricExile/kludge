@@ -229,6 +229,10 @@ class Parser(object):
     methods = []
     child_record_cursors = []
 
+    # filter out forward declarations
+    if not cursor.get_definition() or cursor.get_definition() != cursor:
+      return
+
     has_child = False
     child_ast_logger = ast_logger.indent()
     for child_cursor in cursor.get_children():

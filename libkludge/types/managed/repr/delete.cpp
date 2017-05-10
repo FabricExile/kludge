@@ -3,6 +3,6 @@
 {############################################################################}
 if({{this.value_name.edk}}.cpp_ptr != NULL)
 {
-  delete({{this.value_name.edk}}.cpp_ptr);
+  delete(reinterpret_cast< ::{{this.type_info.lib.name.base}} >({{this.value_name.edk}}.cpp_ptr));
   {{this.value_name.edk}}.cpp_ptr = NULL;
 }

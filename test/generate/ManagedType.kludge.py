@@ -4,10 +4,16 @@
 
 ext.add_cpp_quoted_include('ManagedType.hpp')
 
-book = ext.add_managed_type('Book')
+entry = ext.add_managed_type('Entry')
+entry.add_ctor([])
+
+book = ext.add_managed_type('Book', extends="Entry")
 book.add_ctor(['const char *'])
 book.add_ctor(['const Book &'])
 book.add_const_method('getTitle', 'const char *', [])
+
+book.add_cast('Entry *')
+entry.add_cast('Book *')
 
 library = ext.add_owned_type('Library')
 library.add_ctor([])

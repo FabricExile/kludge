@@ -9,11 +9,19 @@
 #include <string>
 #include <vector>
 
-class Book
+class Entry
+{
+  public:
+    Entry(){}
+    ~Entry(){}
+};
+
+class Book : public Entry
 {
 public:
   Book(const char * title)
-  : m_title(title)
+  : Entry()
+  , m_title(title)
   {
     std::cout << "Book::Book(" << m_title << ")\n" << std::flush;
   }

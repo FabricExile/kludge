@@ -324,11 +324,17 @@ FABRIC_EXT_EXPORT void
     {{macros.edk_param_list(None, cast.this, cast.get_params(type_info)) | indent(4)}}
     )
 {
+{% if record.variant == 'managed' %}
+    {{macros.cpp_call_pre(None, cast.get_params(type_info)) | indent(4)}}
+        {{record.get_mutable_this(cast.this.type_info).render_simple_ass_op(cast.get_param(type_info)) | indent(4)}}
+    {{macros.cpp_call_post(None, cast.get_params(type_info)) | indent(4)}}
+{% else %}
     {{macros.cpp_call_pre(None, cast.get_params(type_info)) | indent(4)}}
     {{cast.this.render_new_begin() | indent(4)}}
         {{macros.cpp_call_args(cast.get_params(type_info)) | indent(8)}}
         {{cast.this.render_new_end() | indent(8)}}
     {{macros.cpp_call_post(None, cast.get_params(type_info)) | indent(4)}}
+{% endif %}
 }
 {% endfor %}
 {% endif %}

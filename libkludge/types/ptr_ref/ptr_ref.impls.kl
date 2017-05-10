@@ -91,6 +91,13 @@ Boolean {{decl.type_info.const_ptr.kl.name}}.cxx_isValid() {
   return !!this.ptr;
 }
 
+/// Access to the underlying pointer
+/// \dfgPresetOmit
+/// \internal
+Data {{decl.type_info.const_ptr.kl.name}}.__getUnderlyingPtr() {
+  return this.ptr;
+}
+
 /// \dfgPresetOmit
 /// \internal
 Boolean({{decl.type_info.const_ptr.kl.name}} ptr) {

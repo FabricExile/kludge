@@ -32,3 +32,5 @@ report(DoubleCxxVec2(ReturnCxxVec2()));
 """, """
 {x:-13.4,y:+8.4}
 """)
+
+ext.add_mirror('CxxOtherVec2', 'KLVec2')

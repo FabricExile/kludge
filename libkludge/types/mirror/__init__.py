@@ -21,12 +21,15 @@ class MirrorTypeInfo(TypeInfo):
     existing_kl_ext_name,
     record,
     ):
+
+    simpleCppName = ''.join(ch for ch in str(cpp_global_expr) if ch.isalnum())
+
     TypeInfo.__init__(
       self,
       jinjenv,
       kl_name_base=kl_global_name,
       kl_name_base_for_derivatives=kl_global_name_for_derivatives,
-      edk_name="Fabric_EDK_KL_" + kl_global_name,
+      edk_name="Fabric_EDK_KL_" + kl_global_name + '_' + simpleCppName,
       lib_expr=cpp_global_expr,
       record=record,
       is_shallow=True,

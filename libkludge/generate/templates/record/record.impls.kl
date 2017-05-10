@@ -81,7 +81,7 @@
 {
     {{member.type_info.simplifier.render_param_pre(member.param.type_info, member.param.value_name.kl)|indent(4)}}
     this.cxx_{{member.setter_kl_name}}(
-        {{member.type_info.simplifier.param_cxx_value_name(member.param.type_info, member.param.value_name.kl)|indent(8)}}
+        {{member.param.value_name.kl|indent(8)}}
         );
     {{member.type_info.simplifier.render_param_post(member.param.type_info, member.param.value_name.kl)|indent(4)}}
 }

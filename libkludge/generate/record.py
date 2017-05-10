@@ -15,7 +15,7 @@ from libkludge.this_codec import ThisCodec
 from libkludge.result_codec import ResultCodec
 from libkludge.param_codec import ParamCodec
 from libkludge.dir_qual_type_info import DirQualTypeInfo
-from libkludge.util import clean_comment, EmptyCommentContainer, clean_method_name, clean_cxx_method_name
+from libkludge.util import clean_comment, EmptyCommentContainer, clean_method_name, clean_cxx_method_name, clean_param_name
 
 class Methodlike(object):
 

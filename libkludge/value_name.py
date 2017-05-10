@@ -2,6 +2,8 @@
 # Copyright (c) 2010-2017 Fabric Software Inc. All rights reserved.
 #
 
+from util import clean_param_name
+
 class CPPValueName:
 
   def __init__(self, name, edk=None, lib=None):
@@ -24,7 +26,7 @@ class CPPValueName:
 class ValueName:
 
   def __init__(self, name):
-    self.kl = name
+    self.kl = clean_param_name(name)
     self.cpp = CPPValueName(name)
 
   @property

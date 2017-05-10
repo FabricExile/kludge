@@ -50,6 +50,7 @@ def is_kl_keyword(name):
     "default",
     "do",
     "else",
+    "entry",
     "__export",
     "EXT_VER_ENDIF",
     "EXT_VER_IF",
@@ -87,6 +88,27 @@ def is_kl_keyword(name):
     "while",
     ]
 
+def is_builtin_type_name(type_name):
+  return type_name in [
+    'Boolean',
+    'SInt8',
+    'UInt8',
+    'SInt16',
+    'UInt16',
+    'SInt32',
+    'UInt32',
+    'SInt64',
+    'UInt64',
+    'Float32',
+    'Float64',
+    'Byte',
+    'Index',
+    'Size',
+    'String',
+    'Data',
+    'Type',
+    ]
+
 def is_builtin_method_name(method_name):
     return method_name in [
         'data',
@@ -97,7 +119,8 @@ def is_builtin_method_name(method_name):
 
 def clean_method_name(method_name):
     if is_kl_keyword(method_name) \
-        or is_builtin_method_name(method_name):
+        or is_builtin_method_name(method_name) \
+        or is_builtin_type_name(method_name):
             return method_name + '_'
     return method_name
 
@@ -116,8 +139,9 @@ def clean_cxx_method_name(method_name):
     return method_name
 
 def clean_param_name(param_name):
-    if is_kl_keyword(param_name):
-        return param_name + '_'
+    if is_kl_keyword(param_name) \
+        or is_builtin_type_name(param_name):
+          return param_name + '_'
     return param_name
 
 def clean_comment(comment):

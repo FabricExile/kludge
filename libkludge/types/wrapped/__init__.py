@@ -92,6 +92,7 @@ class WrappedBuiltinDecl(BuiltinDecl):
         'allow_mutable_methods': True,
         'allow_const_methods': True,
         'is_ptr': False,
+        'ThisAccess': ThisAccess,
         })
     return result
 

@@ -403,6 +403,7 @@ class Member(object):
     getter_kl_name,
     setter_kl_name,
     visibility,
+    this_access,
     ):
     self.record = record
     self.cpp_name = cpp_name
@@ -417,6 +418,7 @@ class Member(object):
     if not self.setter_kl_name is None and self.setter_kl_name == '':
       self.setter_kl_name = 'set_' + cpp_name
     self.visibility = visibility
+    self.this_access = this_access
 
   def get_this(self, type_info):
     return self.record.get_mutable_this(type_info)
@@ -577,6 +579,7 @@ class Record(Decl):
     getter='',
     setter='',
     visibility=None,
+    this_access=ThisAccess.mutable
     ):
     try:
       if visibility is None:
@@ -590,6 +593,7 @@ class Record(Decl):
         getter,
         setter,
         visibility=visibility,
+        this_access=this_access,
         )
       self.members.append(member)
       return self
@@ -1039,6 +1043,13 @@ class Record(Decl):
     for record in self.get_nested_records():
       result.extend(record.public_members())
     return result
+
+  def get_member(self, cpp_name):
+    members = self.nested_public_members()
+    for member in members:
+      if member.cpp_name == cpp_name:
+        return member
+    return None
 
   def has_char_const_ptr_ctor(self):
     for ctor in self.ctors:

@@ -112,6 +112,7 @@ public:
 
   float floatValue;
   std::string stringValue;
+  static int classIndex;
 
 private:
 
@@ -122,6 +123,8 @@ private:
 Class ReturnClass() {
   return Class( 5.61, "foo", -43 );
 }
+
+int Class::classIndex = 0;
 
 /// Another function comment
 std::vector<Class> ReturnClassVec() {

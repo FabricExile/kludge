@@ -15,7 +15,24 @@
 {% for member in record.members %}
 {% if member.is_public() %}
 {% if member.has_getter() %}
-
+{% if member.this_access == ThisAccess.static %}
+FABRIC_EXT_EXPORT
+{{member.result.render_direct_type_edk()}}
+{{member.get_getter_edk_symbol_name(type_info)}}(
+    {% set indirect_param_edk = member.result.render_indirect_param_edk() %}
+    {% if indirect_param_edk %}
+      {{indirect_param_edk | indent(4)}}
+    {% endif %}
+  )
+{
+    {{member.result.render_indirect_init_edk() | indent(4)}}
+    {{member.result.render_decl_and_assign_lib_begin() | indent(4)}}
+        {{member.get_this(type_info).render_member_ref(member.cpp_name)}}
+        {{member.result.render_decl_and_assign_lib_end() | indent(8)}}
+    {{member.result.render_indirect_lib_to_edk()}}
+    {{member.result.render_direct_return_edk()}}
+}
+{% else %}
 FABRIC_EXT_EXPORT
 {{member.result.render_direct_type_edk()}}
 {{member.get_getter_edk_symbol_name(type_info)}}(
@@ -34,6 +51,7 @@ FABRIC_EXT_EXPORT
     {{member.result.render_indirect_lib_to_edk()}}
     {{member.result.render_direct_return_edk()}}
 }
+{% endif %}
 {% endif %}
 {% if member.has_setter() and allow_mutable_methods %}
 

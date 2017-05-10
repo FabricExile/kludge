@@ -16,11 +16,13 @@
   else {
     string += "{";
 {%  for member in decl.type_info.record.nested_public_members() %}
+{%  if not member.this_access == ThisAccess.static %}
 {%   if not loop.first %}
     string += ",";
 {%   endif %}
     string += "{{member.kl_name}}:";
     string += this.cxx_get_{{member.kl_name}}();
+{% endif %}
 {%  endfor %}
     string += "}";
   }

@@ -4,6 +4,7 @@
 
 from conv_codec import ConvCodec
 from value_name import this_cpp_value_name
+from generate.this_access import ThisAccess
 
 class ThisCodec:
 
@@ -80,9 +81,11 @@ class ThisCodec:
     return self.type_info._render("repr", "member_ref", "cpp", {
       "this": self,
       "cpp_member_name": cpp_member_name,
+      "member": self.type_info.record.get_member(cpp_member_name),
+      "ThisAccess": ThisAccess
       })
 
   def render_delete(self):
     return self.type_info._render("repr", "delete", "cpp", {
-      "this": self,
+      "this": self
       })

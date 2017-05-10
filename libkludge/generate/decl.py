@@ -3,6 +3,7 @@
 #
 
 import os, abc, jinja2
+from this_access import ThisAccess
 
 class Decl(object):
   def __init__(
@@ -64,6 +65,7 @@ class Decl(object):
   def render(self, context, lang, extras={}):
     path = self.get_template_path()
     template_vars = {'decl': self}
+    template_vars['ThisAccess'] = ThisAccess
     for template_alias in self.get_template_aliases():
       template_vars.setdefault(template_alias, self)
     for k, v in extras.iteritems():

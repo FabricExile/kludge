@@ -194,7 +194,9 @@ class Parser(object):
     ast_logger,
     cursor,
     ):
-    if cursor.is_const_method():
+    if cursor.kind == CursorKind.VAR_DECL:
+      return "this_access=ThisAccess.static"
+    elif cursor.is_const_method():
       return "this_access=ThisAccess.const"
     elif cursor.is_static_method():
       return "this_access=ThisAccess.static"
@@ -244,10 +246,12 @@ class Parser(object):
         extends = child_cursor.type.spelling
       elif child_cursor.kind == CursorKind.CXX_ACCESS_SPEC_DECL:
         pass
-      elif child_cursor.kind == CursorKind.FIELD_DECL:
+      elif child_cursor.kind == CursorKind.FIELD_DECL \
+        or child_cursor.kind == CursorKind.VAR_DECL:
         try:
           cpp_type_expr = self.cpp_type_expr_parser.parse(child_cursor.type.spelling)
           is_const = cpp_type_expr.is_const \
+            or child_cursor.kind == CursorKind.VAR_DECL \
             or ( isinstance(cpp_type_expr, cpp_type_expr_parser.ReferenceTo) \
               and cpp_type_expr.pointee.is_const )
           if is_const:
@@ -255,13 +259,14 @@ class Parser(object):
           else:
             setter_clause = ""
           members.append(
-            "# %s\n%s.add_member('%s', '%s', visibility=%s%s)" % (
+            "# %s\n%s.add_member('%s', '%s', visibility=%s, %s%s)" % (
               self.location_desc(child_cursor.location),
               child_obj,
               child_cursor.spelling,
               child_cursor.type.spelling,
               self.access_specifier_descs[child_cursor.access_specifier],
-              setter_clause,
+              self.parse_method_access(child_ast_logger, child_cursor),
+              setter_clause
               )
             )
         except Exception as e:

@@ -8,6 +8,7 @@ from libkludge.selector import Selector
 from libkludge.dir_qual_type_info import DirQualTypeInfo
 from libkludge.cpp_type_expr_parser import *
 from libkludge.generate.builtin_decl import BuiltinDecl
+from libkludge.generate.this_access import ThisAccess
 
 class OwnedTypeInfo(TypeInfo):
 
@@ -78,6 +79,7 @@ class OwnedBuiltinDecl(BuiltinDecl):
         'allow_mutable_methods': True,
         'allow_const_methods': True,
         'is_ptr': False,
+        'ThisAccess': ThisAccess,
         })
     return result
 

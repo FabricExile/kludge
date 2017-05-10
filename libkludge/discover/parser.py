@@ -409,6 +409,12 @@ class Parser(object):
                 self.parse_comment(child_ast_logger, child_cursor),
                 )
               )
+          elif child_cursor.spelling in [
+            "operator&&",
+            "operator||",
+            ]:
+            methods.append(
+              "# %s: Ignoring %s, not supported by KL." % (self.location_desc(child_cursor.location), child_cursor.spelling))
           else:
             methods.append(
               "# %s\n%s.add_method('%s', '%s', %s, %s%s)%s" % (

@@ -107,6 +107,21 @@ def is_builtin_type_name(type_name):
     'String',
     'Data',
     'Type',
+
+    'Vec2',
+    'Vec3',
+    'Vec4',
+    'Quat',
+    'RotationOrder',
+    'Euler',
+    'Color',
+    'Xfo',
+    'Mat22',
+    'Mat33',
+    'Mat44',
+    'Box2',
+    'Box3',
+    'Box4',
     ]
 
 def is_builtin_method_name(method_name):

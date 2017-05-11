@@ -105,11 +105,20 @@ Adds verbatim KL code near the top of the generated extension KL file, right aft
 
 Adds verbatim KL code at the end of the generated extension KL file.
 
+Methods that Affect the Generated Extension
+#####################################################
+
+``add_ext_version_spec(self, major=0, minor=0, revision=0)``
+-------------------------------------------------------------
+
+If present, sets the KL extension version for the generated extension.
+
+
 Canvas-Related Methods
 #####################################################
 
 ``add_dfg_presets_spec(preset_path, dir="DFG")``
------------------------------------------
+------------------------------------------------------
 
 Adds a Canvas preset spec to the generated :file:``<ExtName>.fpm.json`` file.  Note that this does not
 actually generate the presets; instead, use the ``kl2dfg`` tool to generate the presets or create them manually.

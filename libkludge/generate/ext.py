@@ -118,6 +118,7 @@ class Ext:
       'double',
       'std::string',
       'char const *',
+      'char *',
       'void *',
       ]
 

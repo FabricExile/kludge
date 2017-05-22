@@ -50,6 +50,9 @@ fabricBuildEnv.Append(LIBPATH = [r'{{ lib_dir }}'])
 {% for lib in ext.libs %}
 fabricBuildEnv.Append(LIBS = [r'{{ lib }}'])
 {% endfor %}
+{% for framework in ext.frameworks %}
+fabricBuildEnv.Append(FRAMEWORKS = [r'{{ framework }}'])
+{% endfor %}
 
 fabricBuildEnv.SharedLibrary(
   '-'.join([extname, fabricBuildEnv['FABRIC_BUILD_OS'], fabricBuildEnv['FABRIC_BUILD_ARCH']]),

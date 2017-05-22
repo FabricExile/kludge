@@ -75,6 +75,7 @@ class Ext:
     self.exception_epilog = None
     self.lib_dirs = []
     self.libs = []
+    self.frameworks = []
     self.kl_requires = []
     self.kl_prologs = []
     self.kl_epilogs = []
@@ -275,6 +276,9 @@ class Ext:
 
   def add_lib(self, lib):
     self.libs.append(os.path.expandvars(lib))
+
+  def add_osx_framework(self, framework):
+    self.frameworks.append(framework)
 
   def add_kl_require(self, kl_ext_name):
     self.debug("Extension: Adding KL require '%s'" % kl_ext_name)

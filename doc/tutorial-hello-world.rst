@@ -38,7 +38,7 @@ Now, use Kludge's discover tool to build an API description of the library:
 
   $ kludge discover Tutorial Tutorial.hpp
 
-It will create three files: :file:`Tutorial.decls.kludge.py` which consist of type declarations; :file:`Tutorial.defns.kludge.py` which consists of member and method definitions; and :file:`Tutorial.kludge.py` which specifies header files that must be included and incldues the other two files.  Take a look at each of these files.  :file:`Tutorial.decls.kludge.py` should be empty (or rather, contain only comments); :file:`Tutorial.defns.kludge.py` contains one non-comment line that describes the function:
+It will create three files: :file:`Tutorial.decls.kludge.py` which consist of type declarations; :file:`Tutorial.defns.kludge.py` which consists of member and method definitions; and :file:`Tutorial.kludge.py` which specifies header files that must be included and includes the other two files.  Take a look at each of these files.  :file:`Tutorial.decls.kludge.py` should be empty (or rather, contain only comments); :file:`Tutorial.defns.kludge.py` contains one non-comment line that describes the function:
 
 .. code-block:: python
 

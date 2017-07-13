@@ -32,6 +32,8 @@ class Class
 
     operator OtherClass const &() const { return m_foo; }
 
+    void emptyArrayFunc( int x[] ) { x[0] = 42; }
+
   private:
 
     OtherClass m_foo;

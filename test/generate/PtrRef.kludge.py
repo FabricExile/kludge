@@ -34,3 +34,12 @@ report(CxxOtherClassConstRef(class));
 OtherClass:{}
 """)
 ty.add_method('func', None, ['void **'])
+ty.add_mutable_method('emptyArrayFunc', None, ['int[]'])
+ty.add_test("""
+SInt32 x;
+Class class;
+class.emptyArrayFunc(x);
+report(x);
+""", """
+42
+""")

@@ -139,6 +139,7 @@ class Parser:
       (self.key_volatile.setParseAction(lambda s,l,t: make_volatile) + self.ty_post_qualified_NO_LEFT_REC),
       (self.tok_ast.setParseAction(lambda s,l,t: make_pointer) + self.ty_post_qualified_NO_LEFT_REC),
       (self.tok_amp.setParseAction(lambda s,l,t: make_reference) + self.ty_post_qualified_NO_LEFT_REC),
+      ((self.tok_lparen + self.tok_rparen).setParseAction(lambda s,l,t: make_pointer) + self.ty_post_qualified_NO_LEFT_REC),
       ((self.tok_lparen + self.number + self.tok_rparen).setParseAction(lambda s,l,t: make_fixed_array_of(t[0])) + self.ty_post_qualified_NO_LEFT_REC),
       Empty(),
       ])

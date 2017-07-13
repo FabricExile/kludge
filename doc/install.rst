@@ -43,6 +43,6 @@ Running Kludge
 
   .. code-block:: console
   
-    $ py.test -n8 "$FABRIC_DIR/Test/Kludge"
+    $ py.test -n8 "$FABRIC_DIR/Tests/Kludge"
 
   You should see no test failures.

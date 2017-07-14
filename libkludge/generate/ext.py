@@ -220,11 +220,17 @@ class Ext:
       with open(filename, 'w') as file:
         self.jinjenv.get_template("generate/ext/ext." + lang).stream(ext=self).dump(file)
 
-  def add_cpp_flag(self, cpp_flag):
-    self.cpp_flags.append(os.path.expandvars(cpp_flag))
+  def add_cpp_flag(self, cpp_flag, expandvars=True):
+    flag = cpp_flag
+    if expandvars:
+      flag = os.path.expandvars(flag)
+    self.cpp_flags.append(flag)
 
-  def add_linker_flag(self, linker_flag):
-    self.linker_flags.append(os.path.expandvars(linker_flag))
+  def add_linker_flag(self, linker_flag, expandvars=True):
+    flag = linker_flag
+    if expandvars:
+      flag = os.path.expandvars(flag)
+    self.linker_flags.append(flag)
 
   def add_cpp_define(self, cpp_define):
     self.cpp_defines.append(os.path.expandvars(cpp_define))

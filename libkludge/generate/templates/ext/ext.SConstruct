@@ -37,6 +37,10 @@ fabricBuildEnv.Append(LINKFLAGS = ['{{ linker_flag }}'])
 {% for cpp_define in ext.cpp_defines %}
 fabricBuildEnv.Append(CPPDEFINES = ['{{ cpp_define }}'])
 {% endfor %}
+
+if fabricBuildEnv['FABRIC_BUILD_OS'] in ['Darwin', 'Linux']:
+  fabricBuildEnv.Append(RPATH = fabricBuildEnv.Literal(os.path.join('\\$$ORIGIN')))
+
 if os.environ.get('CPPPATH'):
   fabricBuildEnv.Append(CPPPATH = os.environ.get('CPPPATH').split(os.pathsep))
 if os.environ.get('LIBPATH'):

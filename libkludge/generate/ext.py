@@ -136,9 +136,18 @@ class Ext:
       tys_d_d.append(ty + ' const *')
       tys_d_d.append(ty + ' const &')
 
+    tys_d_d_d = []
+    for ty in tys_d_d:
+      tys_d_d_d.append(ty)
+      if not ty.endswith('&'):
+        tys_d_d_d.append(ty + ' *')
+        tys_d_d_d.append(ty + ' &')
+        tys_d_d_d.append(ty + ' const *')
+        tys_d_d_d.append(ty + ' const &')
+
     cpp_type_expr_parser = self.cpp_type_expr_parser
     self.kludge_ext_cpp_type_exprs = []
-    for ty in tys_d_d:
+    for ty in tys_d_d_d:
       self.kludge_ext_cpp_type_exprs.append(cpp_type_expr_parser.parse(ty))
 
   def is_kludge_ext_cpp_type_expr(self, cpp_type_expr):

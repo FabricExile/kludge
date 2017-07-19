@@ -493,6 +493,7 @@ class Record(Decl):
     self.members = []
     self.ctors = []
     self.methods = []
+    self.methodToHash = {}
     self.call_ops = []
     self.uni_ops = []
     self.bin_ops = []
@@ -685,6 +686,13 @@ class Record(Decl):
     except Exception as e:
       self.ext.warning("Ignoring method '%s': %s" % (name, e))
       return EmptyCommentContainer()
+
+  def shouldRenderCppMethod(self, type_info, method):
+    hashkey = method.get_edk_symbol_name(type_info)
+    if self.methodToHash.get(hashkey, None) is None:
+      self.methodToHash[hashkey] = method
+      return True
+    return self.methodToHash[hashkey] == method:
 
   def methods_to_promote(self, this_type_info):
     promotions = {}

@@ -125,6 +125,7 @@ class ManagedSelector(Selector):
 
     undq_cpp_type_expr, dq = cpp_type_expr.get_undq()
     if dq.is_pointer:
+
       spec = self.cpp_type_expr_to_spec.get(undq_cpp_type_expr)
       if spec:
         kl_type_name = spec.kl_type_name

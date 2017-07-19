@@ -142,9 +142,10 @@ FABRIC_EXT_EXPORT void
 // Methods
 //////////////////////////////////////////////////////////////////////////////
 {% for method in record.methods %}
-{% if (method.is_static and allow_static_methods)
-    or (method.is_mutable and allow_mutable_methods)
-    or (method.is_const and allow_const_methods) %}
+{% if record.shouldRenderCppMethod(type_info, method)
+    and ((method.is_static and allow_static_methods)
+    or   (method.is_mutable and allow_mutable_methods)
+    or   (method.is_const and allow_const_methods)) %}
 
 FABRIC_EXT_EXPORT {{method.result.render_direct_type_edk()}}
 {{method.get_edk_symbol_name(type_info)}}(

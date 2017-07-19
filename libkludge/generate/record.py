@@ -692,7 +692,7 @@ class Record(Decl):
     if self.methodToHash.get(hashkey, None) is None:
       self.methodToHash[hashkey] = method
       return True
-    return self.methodToHash[hashkey] == method:
+    return self.methodToHash[hashkey] == method
 
   def methods_to_promote(self, this_type_info):
     promotions = {}

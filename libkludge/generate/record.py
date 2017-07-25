@@ -133,8 +133,8 @@ class Method(Methodlike):
     self.dfg_preset_omit = dfg_preset_omit
     self.virtuality = virtuality
 
-  def matchesNotation(self, method):
-    if not(self.clean_cxx_kl_name == method.clean_cxx_kl_name):
+  def matches_notation(self, method):
+    if not(self.cpp_name == method.cpp_name):
       return False
     if not(self.this_access == method.this_access):
       return False
@@ -196,9 +196,12 @@ class Method(Methodlike):
     if self.virtuality == Virtuality.local:
 
       #check if a parent record holds matching method
-      if str(record_kl_name) != str(typeinfo_kl_name) and \
-        self.record.inheritsMatchingMethod(self):
-          return False
+      if str(record_kl_name) == str(typeinfo_kl_name):
+        return True
+
+      if type_info.record.inherits_matching_method(self):
+        return False
+
       return True
 
     # we need to convert to strings to compare these two
@@ -557,13 +560,16 @@ class Record(Decl):
       return False
     return True
 
-  def inheritsMatchingMethod(self, method):
+  def inherits_matching_method(self, method):
     if not self.extends:
       return False
+    return self.extends.has_matching_method(method)
 
-    methods = self.extends.methods
-    for m in methods:
-      if m.matchesNotation(method):
+  def has_matching_method(self, method):
+    for i in range(len(self.methods)):
+      if self.methods[i] is method:
+        continue
+      if self.methods[i].matches_notation(method):
         return True
     return False
 

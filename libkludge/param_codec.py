@@ -13,6 +13,17 @@ class ParamCodec:
     self.is_mutable_indirect = dqti.dir_qual.is_mutable_indirect
     self.conv = ConvCodec(dqti, self.value_name.cpp)
 
+  def __eq__(self, other):
+    if not(self.value_name == other.value_name):
+      return False
+    if not(self.is_pointer == other.is_pointer):
+      return False
+    if not(self.is_mutable_indirect == other.is_mutable_indirect):
+      return False
+    if not(self.conv == other.conv):
+      return False
+    return True
+    
   @property
   def will_promote(self):
     return self.conv.will_promote

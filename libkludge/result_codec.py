@@ -15,6 +15,21 @@ class ResultCodec:
     self.is_mutable_ptr = dqti.dir_qual.is_mutable_ptr
     self.conv = ConvCodec(dqti, result_cpp_value_name)
 
+  def __eq__(self, other):
+    if not(self.value_name == other.value_name):
+      return False
+    if not(self.is_pointer == other.is_pointer):
+      return False
+    if not(self.is_reference == other.is_reference):
+      return False
+    if not(self.is_mutable_ref == other.is_mutable_ref):
+      return False
+    if not(self.is_mutable_ptr == other.is_mutable_ptr):
+      return False
+    if not(self.conv == other.conv):
+      return False
+    return True
+
   @property
   def will_promote(self):
     return self.conv.will_promote

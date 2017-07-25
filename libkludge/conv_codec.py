@@ -22,7 +22,27 @@ class ConvCodec:
           cpp_value_name.child(i)
           )
         )
-  
+
+  def __eq__(self, other):
+    if not(self.value_name == other.value_name):
+      return False
+    if not(self.is_mutable_indirect == other.is_mutable_indirect):
+      return False
+    if not(self.is_pointer == other.is_pointer):
+      return False
+    if not(self.is_reference == other.is_reference):
+      return False
+    if not(self.is_mutable_ref == other.is_mutable_ref):
+      return False
+    if not(self.is_mutable_ptr == other.is_mutable_ptr):
+      return False
+    if not(len(self.child) == len(other.child)):
+      return False
+    for i in range(len(self.child)):
+      if not(self.child[i] == other.child[i]):
+        return False
+    return True
+
   @property
   def will_promote(self):
     return self.type_info.will_promote

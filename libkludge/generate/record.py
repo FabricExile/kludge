@@ -133,6 +133,20 @@ class Method(Methodlike):
     self.dfg_preset_omit = dfg_preset_omit
     self.virtuality = virtuality
 
+  def matchesNotation(self, method):
+    if not(self.clean_cxx_kl_name == method.clean_cxx_kl_name):
+      return False
+    if not(self.this_access == method.this_access):
+      return False
+    if not(self.result == method.result):
+      return False
+    if not(len(self.params) == len(method.params)):
+      return False
+    for i in range(len(self.params)):
+      if not(self.params[i] == method.params[i]):
+        return False
+    return True
+
   @property
   def this_access_suffix(self):
     if self.this_access == ThisAccess.const:
@@ -175,11 +189,17 @@ class Method(Methodlike):
       promotions[promotion_sig] = (self, promotion_cost)
 
   def is_local_or_virtual_for_owner(self, type_info):
-    if self.virtuality == Virtuality.local:
-      return True
 
     record_kl_name = self.record.kl_global_name
     typeinfo_kl_name = type_info.kl.name
+
+    if self.virtuality == Virtuality.local:
+
+      #check if a parent record holds matching method
+      if str(record_kl_name) != str(typeinfo_kl_name) and \
+        self.record.inheritsMatchingMethod(self):
+          return False
+      return True
 
     # we need to convert to strings to compare these two
     return str(record_kl_name) == str(typeinfo_kl_name)
@@ -536,6 +556,16 @@ class Record(Decl):
     if not self.include_custom_ctors:
       return False
     return True
+
+  def inheritsMatchingMethod(self, method):
+    if not self.extends:
+      return False
+
+    methods = self.extends.methods
+    for m in methods:
+      if m.matchesNotation(method):
+        return True
+    return False
 
   def get_nested_records(self):
     result = []

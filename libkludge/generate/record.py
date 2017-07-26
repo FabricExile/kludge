@@ -563,7 +563,9 @@ class Record(Decl):
   def inherits_matching_method(self, method):
     if not self.extends:
       return False
-    return self.extends.has_matching_method(method)
+    if self.extends.has_matching_method(method):
+      return True
+    return self.extends.inherits_matching_method(method)
 
   def has_matching_method(self, method):
     for i in range(len(self.methods)):

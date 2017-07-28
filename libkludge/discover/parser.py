@@ -170,6 +170,18 @@ class Parser(object):
       result = "%s, [%s]" % (result, ', '.join(["Param('%s', '%s')" % opt_param for opt_param in opt_params]))
     return result
 
+  def parse_first_param_returntype(
+    self,
+    ast_logger,
+    cursor,
+    ):
+    child_ast_logger = ast_logger.indent()
+    for child_cursor in cursor.get_children():
+      child_ast_logger.log_cursor(child_cursor)
+      if child_cursor.kind == CursorKind.PARM_DECL:
+        return child_cursor.type.spelling
+    return None
+
   def parse_comment(
     self,
     ast_logger,
@@ -310,19 +322,21 @@ class Parser(object):
           elif child_cursor.spelling == "operator[]":
             if child_cursor.is_const_method():
               methods.append(
-                "# %s\n%s.add_get_ind_op('%s')%s" % (
+                "# %s\n%s.add_get_ind_op('%s', '%s')%s" % (
                   self.location_desc(child_cursor.location),
                   child_obj,
                   child_cursor.result_type.spelling,
+                  self.parse_first_param_returntype(child_ast_logger, child_cursor),
                   self.parse_comment(child_ast_logger, child_cursor),
                   )
                 )
             else:
               methods.append(
-                "# %s\n%s.add_set_ind_op('%s')%s" % (
+                "# %s\n%s.add_set_ind_op('%s', '%s')%s" % (
                   self.location_desc(child_cursor.location),
                   child_obj,
                   child_cursor.result_type.spelling,
+                  self.parse_first_param_returntype(child_ast_logger, child_cursor),
                   self.parse_comment(child_ast_logger, child_cursor),
                   )
                 )

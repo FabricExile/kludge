@@ -2,7 +2,7 @@
 # Copyright (c) 2010-2016, Fabric Software Inc. All rights reserved.
 #
 
-ext.add_cpp_quoted_include('OverLoadsDifferingTypes.hpp')
+ext.add_cpp_quoted_include('OverloadsDifferingTypes.hpp')
 
 ext_MyClass = ext.add_managed_type('MyClass')
 ext_MyClass.add_ctor(['const char *'])

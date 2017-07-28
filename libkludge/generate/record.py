@@ -926,6 +926,7 @@ class Record(Decl):
   def add_get_ind_op(
     self,
     value_cpp_type_name,
+    param_cpp_type_name = 'size_t',
     this_access = ThisAccess.const
     ):
     self.get_ind_op_result = ResultCodec(
@@ -936,7 +937,7 @@ class Record(Decl):
     self.get_ind_op_params = [
       ParamCodec(
         self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr('size_t')
+          self.resolve_cpp_type_expr(param_cpp_type_name)
           ),
         'index'
         ),
@@ -950,12 +951,13 @@ class Record(Decl):
   def add_set_ind_op(
     self,
     value_cpp_type_name,
+    param_cpp_type_name = 'size_t',
     this_access = ThisAccess.mutable
     ):
     self.set_ind_op_params = [
       ParamCodec(
         self.ext.type_mgr.get_dqti(
-          self.resolve_cpp_type_expr('size_t')
+          self.resolve_cpp_type_expr(param_cpp_type_name)
           ),
         'index'
         ),

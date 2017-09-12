@@ -72,7 +72,7 @@ def main(prog, args):
     action='append',
     dest='libs',
     metavar='LIB',
-    help="Add libary for link",
+    help="Add library for link",
     )
   opt_parser.add_option(
     '-C', '--clang-opt',

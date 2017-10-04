@@ -53,5 +53,5 @@ The add_mirror method is a specialized version of the add_in_place_type. The KL 
 add_wrapped_type
 -------------------
 
-The add_wrapped_type method can be used to wrap a type to KL which already is making use a templated wrapper class in C++. The template wrapper class has to provide the two C++ operators ``operator->()``, to access the value the template owns, and ``bool operator !``, to assess if the template points to a NULL value. If these two exist Kludge can wrap the type with the add_wrapped_type method. The memory management is then left to the templated wrapper class and KL simply invokes the given operators.
+The add_wrapped_type method can be used to wrap a type to KL which already is making use of a templated wrapper class in C++. The template wrapper class has to provide the two C++ operators ``operator->()``, to access the value the template owns, and ``bool operator !``, to assess if the template points to a NULL value. If these two exist Kludge can wrap the type with the add_wrapped_type method. The memory management is then left to the templated wrapper class and KL simply invokes the given operators.
 
